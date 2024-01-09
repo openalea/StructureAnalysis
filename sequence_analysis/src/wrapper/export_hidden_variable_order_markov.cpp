@@ -4,7 +4,7 @@
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
- *        File author(s): Yann Guedon <yann.guedon@cirad.fr>
+ *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
  *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
@@ -21,8 +21,18 @@
 
 #include "wrapper_util.h"
 
+#include "tool/config.h"
+
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
+#include "sequence_analysis/sequences.h"
+#include "sequence_analysis/variable_order_markov.h"
 #include "sequence_analysis/hidden_variable_order_markov.h"
 #include "sequence_analysis/sequence_label.h"
 
@@ -55,7 +65,7 @@ public:
 
     HiddenVariableOrderMarkov *hvom = NULL;
 
-    hvom = HiddenVariableOrderMarkov::ascii_read(error, filename, length,
+    hvom = hidden_variable_order_markov_ascii_read(error, filename, length,
         cumul_threshold);
 
     return boost::shared_ptr<HiddenVariableOrderMarkov>(hvom);
@@ -214,10 +224,10 @@ void class_hidden_variable_order_markov() {
 
 		 double likelihood_computation(const MarkovianSequences &seq ,double *posterior_probability = 0 ,  int index = I_DEFAULT) const;
 
-          bool state_profile_write(StatError &error , std::ostream &os , const MarkovianSequences &iseq ,int identifier = I_DEFAULT , output_format format = ASCII ,int state_sequence = GENERALIZED_VITERBI ,            int nb_state_sequence = NB_STATE_SEQUENCE) const;
-          bool state_profile_write(StatError &error , const char *path , const MarkovianSequences &iseq ,int identifier = I_DEFAULT , output_format format = ASCII ,int state_sequence = GENERALIZED_VITERBI ,int nb_state_sequence = NB_STATE_SEQUENCE) const;
+          bool state_profile_write(StatError &error , std::ostream &os , const MarkovianSequences &iseq ,int identifier = I_DEFAULT , char format = 'a' ,int state_sequence = GENERALIZED_VITERBI ,            int nb_state_sequence = NB_STATE_SEQUENCE) const;
+          bool state_profile_write(StatError &error , const char *path , const MarkovianSequences &iseq ,int identifier = I_DEFAULT , char format = 'a' ,int state_sequence = GENERALIZED_VITERBI ,int nb_state_sequence = NB_STATE_SEQUENCE) const;
           bool state_profile_ascii_write(StatError &error , std::ostream &os , int identifier ,int state_sequence = GENERALIZED_VITERBI ,int nb_state_sequence = NB_STATE_SEQUENCE) const;
-          bool state_profile_write(StatError &error , const char *path ,int identifier = I_DEFAULT , output_format format = ASCII ,int state_sequence = GENERALIZED_VITERBI ,    int nb_state_sequence = NB_STATE_SEQUENCE) const;
+          bool state_profile_write(StatError &error , const char *path ,int identifier = I_DEFAULT , char format = 'a' ,int state_sequence = GENERALIZED_VITERBI ,    int nb_state_sequence = NB_STATE_SEQUENCE) const;
           bool state_profile_plot_write(StatError &error , const char *prefix ,  const MarkovianSequences &iseq ,    int identifier , const char *title = 0) const;
           bool state_profile_plot_write(StatError &error , const char *prefix ,   int identifier , const char *title = 0) const;
 

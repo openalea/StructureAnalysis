@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: chain_algorithms.cpp 17974 2015-04-23 06:33:49Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -39,6 +39,7 @@
 #include <math.h>
 #include <sstream>
 
+#include "stat_tools.h"
 #include "markovian.h"
 #include "stat_label.h"
 
@@ -49,19 +50,19 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Initialization of Markov chain parameters.
+/*--------------------------------------------------------------*
  *
- *  \param[in] left_right      flag on the Markov chain structure,
- *  \param[in] self_transition self-transition probability.
- */
-/*--------------------------------------------------------------*/
+ *  Initialisation des parametres d'une chaine de Markov
+ *
+ *  arguments : flag sur la nature de la chaine de Markov,
+ *              probabilite de rester dans un etat.
+ *
+ *--------------------------------------------------------------*/
 
 void Chain::init(bool left_right , double self_transition)
 
 {
-  int i , j;
+  register int i , j;
 
 
   accessibility = new bool*[nb_state];
@@ -69,11 +70,48 @@ void Chain::init(bool left_right , double self_transition)
     accessibility[i] = new bool[nb_state];
   }
 
-  stype = new state_type[nb_state];
+  state_type = new char[nb_state];
 
-  // case left-right Markov chain
+  switch (left_right) {
 
-  if (left_right) {
+  // cas chaine de Markov ou toutes les transitions sont possibles
+
+  case false : {
+    nb_component = 1;
+    component_nb_state = new int[nb_component];
+    component_nb_state[0] = nb_state;
+    component = new int*[nb_component];
+    component[0] = new int[component_nb_state[0]];
+
+    for (i = 0;i < nb_state;i++) {
+      for (j = 0;j < nb_state;j++) {
+        accessibility[i][j] = true;
+      }
+
+      component[0][i] = i;
+      state_type[i] = 'r';
+    }
+
+    for (i = 0;i < nb_state;i++) {
+      initial[i] = 1. / (double)nb_state;
+    }
+
+    for (i = 0;i < nb_state;i++) {
+      for (j = 0;j < i;j++) {
+        transition[i][j] = (1. - self_transition) / (nb_state - 1);
+      }
+      transition[i][i] = self_transition;
+      for (j = i + 1;j < nb_state;j++) {
+        transition[i][j] = (1. - self_transition) / (nb_state - 1);
+      }
+    }
+
+    break;
+  }
+
+  // cas chaine de Markov gauche-droite
+
+  case true : {
     nb_component = nb_state;
     component_nb_state = new int[nb_component];
     component = new int*[nb_component];
@@ -91,10 +129,10 @@ void Chain::init(bool left_right , double self_transition)
       component[i][0] = i;
 
       if (i < nb_state - 1) {
-        stype[i] = TRANSIENT;
+        state_type[i] = 't';
       }
       else {
-        stype[i] = ABSORBING;
+        state_type[i] = 'a';
       }
     }
 
@@ -119,58 +157,28 @@ void Chain::init(bool left_right , double self_transition)
         transition[i][i] = 1.;
       }
     }
+
+    break;
   }
-
-  // case ergodic Markov chain such that all the transitions are possible
-
-  else {
-    nb_component = 1;
-    component_nb_state = new int[nb_component];
-    component_nb_state[0] = nb_state;
-    component = new int*[nb_component];
-    component[0] = new int[component_nb_state[0]];
-
-    for (i = 0;i < nb_state;i++) {
-      for (j = 0;j < nb_state;j++) {
-        accessibility[i][j] = true;
-      }
-
-      component[0][i] = i;
-      stype[i] = RECURRENT;
-    }
-
-    for (i = 0;i < nb_state;i++) {
-      initial[i] = 1. / (double)nb_state;
-    }
-
-    for (i = 0;i < nb_state;i++) {
-      for (j = 0;j < i;j++) {
-        transition[i][j] = (1. - self_transition) / (nb_state - 1);
-      }
-      transition[i][i] = self_transition;
-      for (j = i + 1;j < nb_state;j++) {
-        transition[i][j] = (1. - self_transition) / (nb_state - 1);
-      }
-    }
   }
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of the matrix of possible transitions between states
- *         (adjacency matrix of the graph of possible transitions).
+/*--------------------------------------------------------------*
  *
- *  \return matrix of possible transitions.
- */
-/*--------------------------------------------------------------*/
+ *  Construction de la matrice des transitions possibles entre etats
+ *  d'une chaine de Markov d'ordre 1.
+ *
+ *--------------------------------------------------------------*/
 
 bool** Chain::logic_transition_computation() const
 
 {
   bool **logic_transition;
-  int i , j;
+  register int i , j;
 
+
+  // calcul de la matrice des transitions possibles entre etats
 
   logic_transition = new bool*[nb_state];
 
@@ -191,22 +199,20 @@ bool** Chain::logic_transition_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Determination of the strongly connected components of a Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error             reference on a StatError object,
- *  \param[in] ilogic_transition matrix of possible transitions between states.
+ *  Recherche d'une composante connexe dans une chaine de Markov.
  *
- *  \return                      error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError,
+ *              matrice des transitions possibles entre etats.
+ *
+ *--------------------------------------------------------------*/
 
-bool Chain::strongly_connected_component_research(StatError &error , bool **ilogic_transition) const
+bool Chain::connex_component_research(StatError &error , bool **ilogic_transition) const
 
 {
   bool status = true , **logic_transition;
-  int i , j;
+  register int i , j;
   int state , test_state , nb_used_state , *state_transition , *used_transition ,
       *predecessor , *state_order;
 
@@ -217,14 +223,14 @@ bool Chain::strongly_connected_component_research(StatError &error , bool **ilog
 
   else {
 
-    // construction of the matrix of possible transitions between states
+    // construction de la matrice des transitions possibles entre etats
 
     logic_transition = logic_transition_computation();
   }
 
-  // test possible initial states
+  // test etats initiaux tels que probabilite initiale > 0
 
-  if (type == ORDINARY) {
+  if (type == 'o') {
     for (i = 0;i < nb_state;i++) {
       for (j = 0;j < nb_state;j++) {
         if (logic_transition[j][i]) {
@@ -242,7 +248,7 @@ bool Chain::strongly_connected_component_research(StatError &error , bool **ilog
     }
   }
 
-  // connexity computation (Tarjan algorithm): initializations
+  // calcul de connexite (algorithme de Tarjan) : initialisations
 
   state_transition = new int[nb_state];
 
@@ -279,7 +285,7 @@ bool Chain::strongly_connected_component_research(StatError &error , bool **ilog
       used_transition[state]++;
       i = 0;
 
-      // determination of the next state
+      // recherche du prochain etat
 
       for (j = 0;j < nb_state;j++) {
         if ((logic_transition[state][j]) || (logic_transition[j][state])) {
@@ -321,25 +327,25 @@ bool Chain::strongly_connected_component_research(StatError &error , bool **ilog
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the accessibility of Markov chain states (graph-based approach).
+/*--------------------------------------------------------------*
  *
- *  \param[in] ilogic_transition matrix of possible transitions between states.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de l'accessibilite des etats d'une chaine de Markov.
+ *
+ *  argument : matrice des transitions possibles entre etats.
+ *
+ *--------------------------------------------------------------*/
 
 void Chain::graph_accessibility_computation(bool **ilogic_transition)
 
 {
   if (!accessibility) {
     bool **logic_transition;
-    int i , j , k;
+    register int i , j , k;
     int state , test_state , nb_used_state , *state_transition , *used_transition ,
         *predecessor , *state_order;
 
 
-    // construction of the accessibility matrix
+    // creation de la matrice d'accessibilite
 
     accessibility = new bool*[nb_state];
     for (i = 0;i < nb_state;i++) {
@@ -359,12 +365,12 @@ void Chain::graph_accessibility_computation(bool **ilogic_transition)
 
     else {
 
-      // construction of the matrix of possible transitions between states
+      // construction de la matrice des transitions possibles entre etats
 
       logic_transition = logic_transition_computation();
     }
 
-    // connexity computation (Tarjan algorithm): initializations
+    // calcul de connexite (algorithme de Tarjan): initialisations
 
     state_transition = new int[nb_state];
 
@@ -402,7 +408,7 @@ void Chain::graph_accessibility_computation(bool **ilogic_transition)
           used_transition[state]++;
           j = 0;
 
-          // determination of the next state
+          // recherche du prochain etat
 
           for (k = 0;k < nb_state;k++) {
             if (logic_transition[state][k]) {
@@ -451,24 +457,24 @@ void Chain::graph_accessibility_computation(bool **ilogic_transition)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the accessibility of Markov chain states (probabilistic approach).
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de l'accessibilite des etats d'une chaine de Markov d'ordre 1.
+ *
+ *--------------------------------------------------------------*/
 
 void Chain::probability_accessibility_computation()
 
 {
   if (!accessibility) {
     bool stop;
-    int i , j , k;
+    register int i , j , k;
     int length;
     double sum , *state_seq , *pstate_seq , *states , *pstates ,
            **ptransition , **uniform_transition;
 
 
-    // construction of the accessibility matrix
+    // creation de la matrice d'accessibilite
 
     accessibility = new bool*[nb_state];
     for (i = 0;i < nb_state;i++) {
@@ -482,13 +488,13 @@ void Chain::probability_accessibility_computation()
       }
     }
 
-    // computation of the matrix of possible transitions between states
+    // calcul de la matrice des transitions possibles entre etats
 
     uniform_transition = new double*[nb_state];
     for (i = 0;i < nb_state;i++) {
       uniform_transition[i] = new double[nb_state];
 
-      // case non-absorbing state
+      // cas etat non-absorbant
 
       if (transition[i][i] < 1.) {
         for (j = 0;j < i;j++) {
@@ -500,7 +506,7 @@ void Chain::probability_accessibility_computation()
         }
       }
 
-      // case absorbing state
+      // cas etat absorbant
 
       else {
         for (j = 0;j < nb_state;j++) {
@@ -509,7 +515,7 @@ void Chain::probability_accessibility_computation()
       }
     }
 
-    // computation of state accessibility
+    // calcul accessibilite
 
     state_seq = new double[nb_state];
     pstate_seq = new double[nb_state];
@@ -527,7 +533,7 @@ void Chain::probability_accessibility_computation()
 
         do {
 
-          // computation of state sequence probabilities
+          // calcul des probabilites des sequences d'etats
 
           states = state_seq;
           sum = 0.;
@@ -598,29 +604,29 @@ void Chain::probability_accessibility_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of the Markov chain classes (transient/recurrent/absorbing)
- *         from state accessibility.
+/*--------------------------------------------------------------*
  *
- *  \param[in] ilogic_transition matrix of possible transitions between states.
- */
-/*--------------------------------------------------------------*/
+ *  Extraction des classes d'une chaine de Markov a partir
+ *  de l'accessibilite des etats.
+ *
+ *  argument : matrice des transitions possibles entre etats.
+ *
+ *--------------------------------------------------------------*/
 
 void Chain::component_computation(bool **ilogic_transition)
 
 {
   if (nb_component == 0) {
     bool *used_state;
-    int i , j , k;
+    register int i , j , k;
     int nb_used_state = 0 , state , *bcomponent_nb_state , **bcomponent;
 
 
-    // computation of state accessibility
+    // calcul de l'accessibilite des etats
 
     graph_accessibility_computation(ilogic_transition);
 
-    // extraction of classes
+    // extraction des classes
 
     nb_component = 0;
     bcomponent_nb_state = new int[nb_state];
@@ -660,7 +666,7 @@ void Chain::component_computation(bool **ilogic_transition)
       nb_component++;
     }
 
-    // copy of classes
+    // copie des classes
 
     component_nb_state = new int[nb_component];
     component = new int*[nb_component];
@@ -680,19 +686,19 @@ void Chain::component_computation(bool **ilogic_transition)
     delete [] bcomponent;
     delete [] used_state;
 
-    // extraction of state types
+    // extraction des types des etats
 
-    stype = new state_type[nb_state];
+    state_type = new char[nb_state];
 
     for (i = 0;i < nb_component;i++) {
       state = component[i][0];
-      stype[state] = RECURRENT;
+      state_type[state] = 'r';
 
       for (j = 0;j < nb_component;j++) {
         if (j != i) {
           for (k = 0;k < component_nb_state[j];k++) {
             if (accessibility[state][component[j][k]]) {
-              stype[state] = TRANSIENT;
+              state_type[state] = 't';
               break;
             }
           }
@@ -702,69 +708,31 @@ void Chain::component_computation(bool **ilogic_transition)
         }
       }
 
-      if ((stype[state] == RECURRENT) && (component_nb_state[i] == 1)) {
-        stype[state] = ABSORBING;
+      if ((state_type[state] == 'r') && (component_nb_state[i] == 1)) {
+        state_type[state] = 'a';
       }
 
       for (j = 1;j < component_nb_state[i];j++) {
-        stype[component[i][j]] = stype[state];
+        state_type[component[i][j]] = state_type[state];
       }
     }
   }
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the number of initial states in parallel (clustering structure).
- */
-/*--------------------------------------------------------------*/
-
-bool Chain::parallel_initial_state() const
-
-{
-  int i , j;
-  int nb_initial_state;
-
-
-  nb_initial_state = 0;
-
-  for (i = 0;i < nb_state;i++) {
-    if (initial[i] > 0.) {
-      for (j = 0;j < nb_state;j++) {
-        if ((j != i) && (accessibility[j][i])) {
-          break;
-        }
-      }
-
-      if (j == nb_state) {
-        nb_initial_state++;
-      }
-    }
-  }
-
-# ifdef MESSAGE
-  cout << "\nN.o. initial states in parallel: " << nb_initial_state << endl;
-# endif
-
-  return (nb_initial_state > 1 ? true : false);
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Application of a threshold on the Markov chain parameters.
+/*--------------------------------------------------------------*
  *
- *  \param[in] min_probability minimum probability,
- *  \param[in] semi_markov     flag semi-Markov chain.
- */
-/*--------------------------------------------------------------*/
+ *  Application d'un seuil sur les parametres d'une chaine de Markov.
+ *
+ *  arguments : probabilite minimum, flag semi-Markov.
+ *
+ *--------------------------------------------------------------*/
 
 void Chain::thresholding(double min_probability , bool semi_markov)
 
 {
   bool stop;
-  int i , j;
+  register int i , j;
   int nb_correction;
   double norm;
 
@@ -773,7 +741,7 @@ void Chain::thresholding(double min_probability , bool semi_markov)
     min_probability = THRESHOLDING_FACTOR / (double)nb_state;
   }
 
-  if (type == ORDINARY) {
+  if (type == 'o') {
     do {
       stop = true;
       nb_correction = 0;
@@ -856,22 +824,19 @@ void Chain::thresholding(double min_probability , bool semi_markov)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the log-likelihood of a Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] chain_data   reference on a ChainData object,
- *  \param[in] initial_flag flag inclusion or not of the initial distribution in
- *                          the log-likelihood computation.
+ *  Calcul de la vraisemblance des etats initiaux et des transitions
+ *  pour une chaine de Markov.
  *
- *  \return                 log-likelihood.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet ChainData, prise en compte ou non loi initiale.
+ *
+ *--------------------------------------------------------------*/
 
 double Chain::likelihood_computation(const ChainData &chain_data , bool initial_flag) const
 
 {
-  int i , j;
+  register int i , j;
   double likelihood;
 
 
@@ -921,20 +886,18 @@ double Chain::likelihood_computation(const ChainData &chain_data , bool initial_
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the number of free transition probabilities.
+/*--------------------------------------------------------------*
  *
- *  \param[in] min_probability minimum probability.
+ *  Calcul du nombre de probabilites de transitions independantes.
  *
- *  \return                    number of free transition probabilities.
- */
-/*--------------------------------------------------------------*/
+ *  argument : probabilite minimum.
+ *
+ *--------------------------------------------------------------*/
 
 int Chain::nb_parameter_computation(double min_probability) const
 
 {
-  int i , j;
+  register int i , j;
   int nb_parameter = 0;
 
 
@@ -951,20 +914,18 @@ int Chain::nb_parameter_computation(double min_probability) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the chi2 value for a Markov chain (goodness of fit test).
+/*--------------------------------------------------------------*
  *
- *  \param[in] chain_data reference on a ChainData object.
+ *  Calcul de la valeur du chi2 pour une chaine de Markov.
  *
- *  \return               chi2 value.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet ChainData.
+ *
+ *--------------------------------------------------------------*/
 
 double Chain::chi2_value_computation(const ChainData &chain_data) const
 
 {
-  int i , j;
+  register int i , j;
   int sum;
   double value , var1 , var2;
 
@@ -1004,14 +965,13 @@ double Chain::chi2_value_computation(const ChainData &chain_data) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Chi2 goodness of fit test for a Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] chain_data reference on a ChainData object,
- *  \param[in] test       reference on a Test object.
- */
-/*--------------------------------------------------------------*/
+ *  Mesure de l'ajustement d'une chaine de Markov a des sequences.
+ *
+ *  arguments : reference sur un objet ChainData et sur un objet Test.
+ *
+ *--------------------------------------------------------------*/
 
 void Chain::chi2_fit(const ChainData &chain_data , Test &test) const
 
@@ -1026,25 +986,25 @@ void Chain::chi2_fit(const ChainData &chain_data , Test &test) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of first-order Markov chain parameters on the basis of
- *         initial state and transition frequencies.
+/*--------------------------------------------------------------*
  *
- *  \param[in] chain reference on a Chain object.
- */
-/*--------------------------------------------------------------*/
+ *  Estimation des parametres d'une chaine de Markov d'ordre 1 a partir
+ *  des etats initiaux et des transitions.
+ *
+ *  argument : reference sur un objet Chain.
+ *
+ *--------------------------------------------------------------*/
 
 void ChainData::estimation(Chain &chain) const
 
 {
-  int i , j;
+  register int i , j;
   int sum;
 
 
-  // estimation of initial probabilities
+  // estimation des probabilites initiales
 
-  if (chain.type == ORDINARY) {
+  if (chain.type == 'o') {
     sum = 0;
     for (i = 0;i < nb_state;i++) {
       sum += initial[i];
@@ -1055,7 +1015,7 @@ void ChainData::estimation(Chain &chain) const
     }
   }
 
-  // estimation of transition probabilities
+  // estimation des probabilites de transition
 
   for (i = 0;i < nb_state;i++) {
     sum = 0;
@@ -1082,18 +1042,16 @@ void ChainData::estimation(Chain &chain) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the number of free transition probabilities.
+/*--------------------------------------------------------------*
  *
- *  \return number of free transition probabilities.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul du nombre de probabilites de transitions independantes.
+ *
+ *--------------------------------------------------------------*/
 
 int ChainData::nb_parameter_computation() const
 
 {
-  int i , j;
+  register int i , j;
   int sum , nb_parameter = 0;
 
 

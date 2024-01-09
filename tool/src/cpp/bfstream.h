@@ -8,7 +8,7 @@
  *       File author(s): Ch. Nouguier (christophe.nouguier@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: bfstream.h 15675 2014-02-04 18:55:21Z pradal $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
@@ -254,10 +254,10 @@ public:
   const std::ofstream& getStream() const { return __stream; }
 
   /// Returns true if \e stream  is valid.
-  operator bool( ) const { return (bool)(__stream); }
+  operator bool( ) const { return (__stream); }
 
   /// Returns true if \e stream  is not valid.
-  bool operator!( ) const { return !(bool)(__stream); }
+  bool operator!( ) const { return (!__stream); }
 
   /// Returns true if \e stream  is at the end.
   bool eof( ) const { return __stream.eof(); }
@@ -407,10 +407,10 @@ public:
   const std::ifstream& getStream() const { return __stream; }
 
   /// Returns true if \e stream  is valid.
-  operator bool( ) const { return (bool)(__stream); }
+  operator bool( ) const { return (__stream); }
 
   /// Returns true if \e stream  is not valid.
-  bool operator!( ) const { return !(bool)(__stream); }
+  bool operator!( ) const { return (!__stream); }
 
   /// Returns true if \e stream  is at the end.
   bool eof( ) const { return __stream.eof(); }

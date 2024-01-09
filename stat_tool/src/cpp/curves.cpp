@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: curves.cpp 17987 2015-04-23 06:43:48Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -38,6 +38,9 @@
 
 #include <iomanip>
 
+#include "tool/config.h"
+
+#include "stat_tools.h"
 #include "curves.h"
 #include "stat_label.h"
 
@@ -48,11 +51,11 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Default constructor of the Curves class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par defaut de la classe Curves.
+ *
+ *--------------------------------------------------------------*/
 
 Curves::Curves()
 
@@ -66,23 +69,20 @@ Curves::Curves()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Curves class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_curve            number of curves,
- *  \param[in] ilength              curve length,
- *  \param[in] frequency_flag       flag on the frequencies,
- *  \param[in] index_parameter_flag flag on the index parameters,
- *  \param[in] init_flag            flag initialization.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Curves.
+ *
+ *  arguments : nombre de courbes, longueur des courbes, flag sur les frequences,
+ *              flag sur les parametres d'index, flag initialisation.
+ *
+ *--------------------------------------------------------------*/
 
 Curves::Curves(int inb_curve , int ilength , bool frequency_flag ,
                bool index_parameter_flag , bool init_flag)
 
 {
-  int i , j;
+  register int i , j;
 
 
   nb_curve = inb_curve;
@@ -123,18 +123,18 @@ Curves::Curves(int inb_curve , int ilength , bool frequency_flag ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a Curves object from a Distribution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist reference on a Distribution object.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet Curves a partir d'un objet Distribution.
+ *
+ *  argument : reference sur un objet Distribution.
+ *
+ *--------------------------------------------------------------*/
 
 Curves::Curves(const Distribution &dist)
 
 {
-  int i;
+  register int i;
   double norm , *pcumul;
 
 
@@ -173,18 +173,18 @@ Curves::Curves(const Distribution &dist)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a Curves object from a FrequencyDistribution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo reference on a FrequencyDistribution object.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet Curves a partir d'un objet FrequencyDistribution.
+ *
+ *  argument : reference sur un objet FrequencyDistribution.
+ *
+ *--------------------------------------------------------------*/
 
 Curves::Curves(const FrequencyDistribution &histo)
 
 {
-  int i;
+  register int i;
   int norm;
 
 
@@ -210,18 +210,18 @@ Curves::Curves(const FrequencyDistribution &histo)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Curves object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] curves reference on a Curves object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Curves.
+ *
+ *  argument : reference sur un objet Curves.
+ *
+ *--------------------------------------------------------------*/
 
 void Curves::copy(const Curves &curves)
 
 {
-  int i , j;
+  register int i , j;
 
 
   nb_curve = curves.nb_curve;
@@ -263,19 +263,19 @@ void Curves::copy(const Curves &curves)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Curves object with curve smoothing.
+/*--------------------------------------------------------------*
  *
- *  \param[in] curves        reference on a Curves object,
- *  \param[in] max_frequency threshold on the frequencies for the smoothing.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Curves avec lissage.
+ *
+ *  arguments : reference sur un objet Curves,
+ *              seuil sur les frequences pour le lissage.
+ *
+ *--------------------------------------------------------------*/
 
 void Curves::smooth(const Curves &curves , int max_frequency)
 
 {
-  int i , j , k;
+  register int i , j , k;
   int range , buff , min , max , total;
   double sum;
 
@@ -355,25 +355,25 @@ void Curves::smooth(const Curves &curves , int max_frequency)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor by copy of the Curves class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] curves        reference on a Curves object,
- *  \param[in] transform     type of transform (CURVE_COPY/SMOOTHING),
- *  \param[in] max_frequency threshold on the frequencies for the smoothing.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur par copie de la classe Curves.
+ *
+ *  arguments : reference sur un objet Curves,
+ *              type de transformation ('c' : copie , 's' : lissage),
+ *              seuil sur les frequences pour le lissage.
+ *
+ *--------------------------------------------------------------*/
 
-Curves::Curves(const Curves &curves , curve_transformation transform , int max_frequency)
+Curves::Curves(const Curves &curves , char transform , int max_frequency)
 
 {
   if (!(curves.frequency)) {
-    transform = CURVE_COPY;
+    transform = 'c';
   }
 
   switch (transform) {
-  case SMOOTHING :
+  case 's' :
     smooth(curves , max_frequency);
     break;
   default :
@@ -383,11 +383,11 @@ Curves::Curves(const Curves &curves , curve_transformation transform , int max_f
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of data members of a Curves object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet Curves.
+ *
+ *--------------------------------------------------------------*/
 
 void Curves::remove()
 
@@ -396,7 +396,7 @@ void Curves::remove()
   delete [] frequency;
 
   if (point) {
-    int i;
+    register int i;
 
     for (i = 0;i < nb_curve;i++) {
       delete [] point[i];
@@ -406,11 +406,11 @@ void Curves::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the Curves class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe Curves.
+ *
+ *--------------------------------------------------------------*/
 
 Curves::~Curves()
 
@@ -419,15 +419,13 @@ Curves::~Curves()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the Curves class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] curves reference on a Curves object.
+ *  Operateur d'assignement de la classe Curves.
  *
- *  \return           Curves object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet Curves.
+ *
+ *--------------------------------------------------------------*/
 
 Curves& Curves::operator=(const Curves &curves)
 
@@ -441,27 +439,25 @@ Curves& Curves::operator=(const Curves &curves)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of 2 families of curves of the same length.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os        stream,
- *  \param[in]     file_flag flag file,
- *  \param[in]     curves    pointer on a Curves object.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture de 2 familles de courbes de meme longueur.
+ *
+ *  arguments : stream, flag fichier, pointeurs sur un objet Curves.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Curves::ascii_print(ostream &os , bool file_flag , const Curves *curves) const
 
 {
-  int i , j , k;
+  register int i , j , k;
   int nb_column = nb_curve + 1 , *width;
-  ios_base::fmtflags format_flags;
+  long old_adjust;
 
 
-  format_flags = os.setf(ios::right , ios::adjustfield);
+  old_adjust = os.setf(ios::right , ios::adjustfield);
 
-  // computation of the column width
+  // calcul des largeurs des colonnes
 
   if (frequency) {
     nb_column++;
@@ -497,7 +493,7 @@ ostream& Curves::ascii_print(ostream &os , bool file_flag , const Curves *curves
     width[i] = column_width(frequency[offset]) + ASCII_SPACE;
   }
 
-  // writing of curves
+  // ecriture des points
 
   for (i = offset;i < length;i++) {
     if (file_flag) {
@@ -529,25 +525,24 @@ ostream& Curves::ascii_print(ostream &os , bool file_flag , const Curves *curves
 
   delete [] width;
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of 2 families of curves of the same length at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os     stream,
- *  \param[in]     curves pointer on a Curves object.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture de 2 familles de courbes de meme longueur au format tableur.
+ *
+ *  arguments : stream, pointeurs sur un objet Curves.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Curves::spreadsheet_print(ostream &os , const Curves *curves) const
 
 {
-  int i , j;
+  register int i , j;
 
 
   for (i = offset;i < length;i++) {
@@ -578,13 +573,11 @@ ostream& Curves::spreadsheet_print(ostream &os , const Curves *curves) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the curve length to be plotted (Gnuplot output).
+/*--------------------------------------------------------------*
  *
- *  \return curve length.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la longueur des courbes a afficher (sortie Gnuplot).
+ *
+ *--------------------------------------------------------------*/
 
 int Curves::plot_length_computation() const
 
@@ -605,25 +598,20 @@ int Curves::plot_length_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of 2 families of curves at the Gnuplot format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] path     file path,
- *  \param[in] ilength  curve length,
- *  \param[in] curves_0 pointer on a Curves object,
- *  \param[in] curves_1 pointer on a Curves object.
+ *  Ecriture de 2 familles de courbes au format Gnuplot.
  *
- *  \return             error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : path, longueur des courbes, pointeur sur 2 objets Curves.
+ *
+ *--------------------------------------------------------------*/
 
 bool Curves::plot_print(const char *path , int ilength ,
                         const Curves *curves_0 , const Curves *curves_1) const
 
 {
   bool status = false;
-  int i , j;
+  register int i , j;
   ofstream out_file(path);
 
 
@@ -662,19 +650,18 @@ bool Curves::plot_print(const char *path , int ilength ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a curve.
+/*--------------------------------------------------------------*
  *
- *  \param[in] index curve index,
- *  \param[in] plot  reference on a SinglePlot object.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'une courbe.
+ *
+ *  arguments : indice de la courbe, reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
 
 void Curves::plotable_write(int index , SinglePlot &plot) const
 
 {
-  int i;
+  register int i;
 
 
   if (index_parameter) {
@@ -691,18 +678,18 @@ void Curves::plotable_write(int index , SinglePlot &plot) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the curve family.
+/*--------------------------------------------------------------*
  *
- *  \param[in] plot reference on a MultiPlot object.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'une famille de courbes.
+ *
+ *  argument : reference sur un objet MultiPlot.
+ *
+ *--------------------------------------------------------------*/
 
 void Curves::plotable_write(MultiPlot &plot) const
 
 {
-  int i , j;
+  register int i , j;
 
 
   if (index_parameter) {
@@ -723,18 +710,18 @@ void Curves::plotable_write(MultiPlot &plot) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of frequencies.
+/*--------------------------------------------------------------*
  *
- *  \param[in] plot reference on a SinglePlot object.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des frequences.
+ *
+ *  argument : reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
 
 void Curves::plotable_frequency_write(SinglePlot &plot) const
 
 {
-  int i;
+  register int i;
 
 
   if (index_parameter) {
@@ -751,23 +738,21 @@ void Curves::plotable_frequency_write(SinglePlot &plot) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Display of a Curves object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os     stream,
- *  \param[in]     curves reference on a Curves object.
- */
-/*--------------------------------------------------------------*/
+ *  Visualisation d'un objet Curves.
+ *
+ *  arguments : stream, reference sur un objet Curves.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& operator<<(ostream &os , const Curves &curves)
 
 {
-  int i , j;
-  streamsize nb_digits;
+  register int i , j;
 
 
-  nb_digits = os.precision(4);
+  os.precision(4);
 
   os << endl;
   if (curves.nb_curve == 1) {
@@ -791,19 +776,17 @@ ostream& operator<<(ostream &os , const Curves &curves)
   }
   os << endl;
 
-  os.precision(nb_digits);
+  os.precision(6);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the maximum frequency of a Curves object.
+/*--------------------------------------------------------------*
  *
- *  \return maximum frequency.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de l'effectif maximum d'un objet Curves
+ *
+ *--------------------------------------------------------------*/
 
 int Curves::max_frequency_computation() const
 
@@ -812,7 +795,7 @@ int Curves::max_frequency_computation() const
 
 
   if (frequency) {
-    int i;
+    register int i;
 
 
     max_frequency = 0;
@@ -827,13 +810,11 @@ int Curves::max_frequency_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the cumulative frequency of a Curves object.
+/*--------------------------------------------------------------*
  *
- *  \return cumulative frequency.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de l'effectif total d'un objet Curves
+ *
+ *--------------------------------------------------------------*/
 
 int Curves::nb_element_computation() const
 
@@ -842,7 +823,7 @@ int Curves::nb_element_computation() const
 
 
   if (frequency) {
-    int i;
+    register int i;
 
 
     nb_element = 0;
@@ -855,20 +836,18 @@ int Curves::nb_element_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the curve mean.
+/*--------------------------------------------------------------*
  *
- *  \param[in] index curve index.
+ *  Calcul de la moyenne d'une courbe.
  *
- *  \return          mean.
- */
-/*--------------------------------------------------------------*/
+ *  argument : indice de la courbe.
+ *
+ *--------------------------------------------------------------*/
 
 double Curves::mean_computation(int index) const
 
 {
-  int i;
+  register int i;
   int nb_element;
   double mean;
 
@@ -887,21 +866,18 @@ double Curves::mean_computation(int index) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the total variation for a curve.
+/*--------------------------------------------------------------*
  *
- *  \param[in] index curve index,
- *  \param[in] mean  mean.
+ *  Calcul de la variation totale.
  *
- *  \return          total variation.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : indice de la courbe, moyenne.
+ *
+ *--------------------------------------------------------------*/
 
 double Curves::total_square_sum_computation(int index , double mean) const
 
 {
-  int i;
+  register int i;
   double total_square_sum , diff;
 
 
@@ -914,45 +890,6 @@ double Curves::total_square_sum_computation(int index , double mean) const
   }
 
   return total_square_sum;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a curve and the corresponding standardized residuals at the Gnuplot format.
- *
- *  \param[in] path              file path,
- *  \param[in] standard_residual pointer on the standardized residuals.
- *
- *  \return                      error status.
- */
-/*--------------------------------------------------------------*/
-
-bool Curves::plot_print_standard_residual(const char *path , double *standard_residual) const
-
-{
-  bool status = false;
-  int i;
-  ofstream out_file(path);
-
-
-  if (out_file) {
-    status = true;
-
-    // writing of observed responses and standardized residuals
-
-    for (i = 0;i < length;i++) {
-      if (frequency[i] > 0) {
-        out_file << i << " " << point[0][i];
-        if (standard_residual) {
-          out_file << " " << standard_residual[i];
-        }
-        out_file << " " << frequency[i] << endl;
-      }
-    }
-  }
-
-  return status;
 }
 
 

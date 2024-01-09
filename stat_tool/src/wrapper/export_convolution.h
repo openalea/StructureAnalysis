@@ -15,7 +15,7 @@
  *                                                                              
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
  *       
- *        $Id$
+ *        $Id: export_convolution.h 5235 2008-07-11 10:39:32Z dufourko $
  *                                                                       
  *-----------------------------------------------------------------------------*/
 

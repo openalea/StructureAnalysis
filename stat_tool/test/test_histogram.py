@@ -1,5 +1,5 @@
 """histogram tests"""
-__version__ = "$Id$"
+__version__ = "$Id: test_histogram.py 9397 2010-08-10 10:50:07Z cokelaer $"
 
 from openalea.stat_tool.distribution import ToHistogram, Binomial
 from openalea.stat_tool.distribution import ToDistribution
@@ -18,7 +18,7 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           str(get_shared_data("peup1.his")),
+                           get_shared_data("peup1.his"),
                            Histogram)
 
     def build_data(self):
@@ -81,7 +81,7 @@ class Test(interface):
 
     def test_extract_data(self):
         """todo : check if this test makes sense"""
-        h = Histogram(str(get_shared_data("meri1.his")))
+        h = Histogram(get_shared_data("meri1.his"))
 
         e = h.estimate_nonparametric()
 
@@ -94,7 +94,7 @@ class Test(interface):
 
     def test_container(self):
         """ container / iterator"""
-        h = Histogram(str(get_shared_data("meri1.his")))
+        h = Histogram(get_shared_data("meri1.his"))
 
         assert h[0] == 0
         assert h[10] == 1

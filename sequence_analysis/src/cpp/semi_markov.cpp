@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: semi_markov.cpp 18067 2015-04-23 10:51:22Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -36,21 +36,27 @@
 
 
 
-#include <string>
 #include <sstream>
 #include <iomanip>
 
-#include <boost/tokenizer.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/classification.hpp>
+#include "tool/rw_tokenizer.h"
+#include "tool/rw_cstring.h"
+#include "tool/rw_locale.h"
+#include "tool/config.h"
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
+#include "sequences.h"
 #include "semi_markov.h"
 #include "sequence_label.h"
 
 using namespace std;
-using namespace boost;
 using namespace stat_tool;
 
 
@@ -58,57 +64,55 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Default constructor of the SemiMarkovChain class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par defaut de la classe SemiMarkovChain.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovChain::SemiMarkovChain()
 
 {
-  sojourn_type = NULL;
+  state_subtype = NULL;
   state_process = NULL;
   forward = NULL;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the SemiMarkovChain class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] itype     process type (ORDINARY/EQUILIBRIUM),
- *  \param[in] inb_state number of states.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe SemiMarkovChain.
+ *
+ *  arguments : type, nombre d'etats.
+ *
+ *--------------------------------------------------------------*/
 
-SemiMarkovChain::SemiMarkovChain(process_type itype , int inb_state)
+SemiMarkovChain::SemiMarkovChain(char itype , int inb_state)
 :Chain(itype , inb_state)
 
 {
-  sojourn_type = NULL;
+  state_subtype = NULL;
   state_process = new CategoricalSequenceProcess(nb_state , nb_state , false);
   forward = NULL;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the SemiMarkovChain class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] pchain     pointer on a Chain object,
- *  \param[in] poccupancy pointer on a CategoricalSequenceProcess object.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe SemiMarkovChain.
+ *
+ *  arguments : pointeur sur un objet Chain et sur un objet CategoricalSequenceProcess.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovChain::SemiMarkovChain(const Chain *pchain , const CategoricalSequenceProcess *poccupancy)
 :Chain(*pchain)
 
 {
-  int i;
+  register int i;
 
 
-  sojourn_type = new state_sojourn_type[nb_state];
+  state_subtype = new int[nb_state];
 
   state_process = new CategoricalSequenceProcess(*poccupancy);
   for (i = 0;i < nb_state;i++) {
@@ -123,9 +127,9 @@ SemiMarkovChain::SemiMarkovChain(const Chain *pchain , const CategoricalSequence
   forward = new Forward*[nb_state];
 
   for (i = 0;i < nb_state;i++) {
-    sojourn_type[i] = (state_process->sojourn_time[i] ? SEMI_MARKOVIAN : MARKOVIAN);
+    state_subtype[i] = (state_process->sojourn_time[i] ? SEMI_MARKOVIAN : MARKOVIAN);
 
-    if ((sojourn_type[i] == SEMI_MARKOVIAN) && (stype[i] == RECURRENT)) {
+    if ((state_subtype[i] == SEMI_MARKOVIAN) && (state_type[i] == 'r')) {
       forward[i] = new Forward(*(state_process->sojourn_time[i]));
     }
     else {
@@ -133,7 +137,7 @@ SemiMarkovChain::SemiMarkovChain(const Chain *pchain , const CategoricalSequence
     }
   }
 
-  if (type == EQUILIBRIUM) {
+  if (type == 'e') {
     for (i = 0;i < nb_state;i++) {
       initial[i] = 1. / (double)nb_state;
     }
@@ -142,24 +146,25 @@ SemiMarkovChain::SemiMarkovChain(const Chain *pchain , const CategoricalSequence
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a SemiMarkovChain object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] smarkov reference on a SemiMarkovChain object,
- *  \param[in] param   parameter (if > 0: number of allocated values for the state occupancy distributions).
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet SemiMarkovChain.
+ *
+ *  arguments : reference sur un objet SemiMarkovChain,
+ *              parametre (si strictement positif :
+ *              nombre de valeurs allouees pour les lois d'occupation des etats).
+ *
+ *--------------------------------------------------------------*/
 
 void SemiMarkovChain::copy(const SemiMarkovChain &smarkov , int param)
 
 {
-  int i;
+  register int i;
 
 
-  sojourn_type = new state_sojourn_type[nb_state];
+  state_subtype = new int[nb_state];
   for (i = 0;i < nb_state;i++) {
-    sojourn_type[i] = smarkov.sojourn_type[i];
+    state_subtype[i] = smarkov.state_subtype[i];
   }
 
   forward = new Forward*[nb_state];
@@ -178,28 +183,28 @@ void SemiMarkovChain::copy(const SemiMarkovChain &smarkov , int param)
     state_process = new CategoricalSequenceProcess(*(smarkov.state_process));
     break;
   case 0 :
-    state_process = new CategoricalSequenceProcess(*(smarkov.state_process) , INIT_OCCUPANCY , I_DEFAULT);
+    state_process = new CategoricalSequenceProcess(*(smarkov.state_process) , 'o' , I_DEFAULT);
     break;
   default :
-    state_process = new CategoricalSequenceProcess(*(smarkov.state_process) , INIT_OCCUPANCY , param);
+    state_process = new CategoricalSequenceProcess(*(smarkov.state_process) , 'o' , param);
     break;
   }
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the data members of a SemiMarkovChain object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet SemiMarkovChain.
+ *
+ *--------------------------------------------------------------*/
 
 void SemiMarkovChain::remove()
 
 {
-  int i;
+  register int i;
 
 
-  delete [] sojourn_type;
+  delete [] state_subtype;
 
   delete state_process;
 
@@ -212,11 +217,11 @@ void SemiMarkovChain::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the SemiMarkovChain class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe SemiMarkovChain.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovChain::~SemiMarkovChain()
 
@@ -225,15 +230,13 @@ SemiMarkovChain::~SemiMarkovChain()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the SemiMarkovChain class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] smarkov reference on a SemiMarkovChain object.
+ *  Operateur d'assignement de la classe SemiMarkovChain.
  *
- *  \return            SemiMarkovChain object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet SemiMarkovChain.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovChain& SemiMarkovChain::operator=(const SemiMarkovChain &smarkov)
 
@@ -250,25 +253,23 @@ SemiMarkovChain& SemiMarkovChain::operator=(const SemiMarkovChain &smarkov)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the number of parameters of a SemiMarkovChain object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] min_probability minimum probability.
+ *  Calcul du nombre de parametres independants d'un objet SemiMarkovChain.
  *
- *  \return                    number of parameters.
- */
-/*--------------------------------------------------------------*/
+ *  argument : probabilite minimum.
+ *
+ *--------------------------------------------------------------*/
 
 int SemiMarkovChain::nb_parameter_computation(double min_probability) const
 
 {
-  int i;
+  register int i;
   int nb_parameter = Chain::nb_parameter_computation(min_probability);
 
 
   for (i = 0;i < nb_state;i++) {
-    if (sojourn_type[i] == SEMI_MARKOVIAN) {
+    if (state_subtype[i] == SEMI_MARKOVIAN) {
       nb_parameter += state_process->sojourn_time[i]->nb_parameter_computation();
       if (state_process->sojourn_time[i]->inf_bound == 1) {
         nb_parameter--;
@@ -280,11 +281,11 @@ int SemiMarkovChain::nb_parameter_computation(double min_probability) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Default constructor of the SemiMarkov class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par defaut de la classe SemiMarkov.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkov::SemiMarkov()
 
@@ -299,22 +300,20 @@ SemiMarkov::SemiMarkov()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the SemiMarkov class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] itype              process type (ORDINARY/EQUILIBRIUM),
- *  \param[in] inb_state          number of states,
- *  \param[in] inb_output_process number of observation processes,
- *  \param[in] nb_value           number of observed values for each observation process.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe SemiMarkov.
+ *
+ *  arguments : type, nombre d'etats, nombre de processus d'observation,
+ *              nombre de valeurs observees par processus.
+ *
+ *--------------------------------------------------------------*/
 
-SemiMarkov::SemiMarkov(process_type itype , int inb_state , int inb_output_process , int *nb_value)
+SemiMarkov::SemiMarkov(char itype , int inb_state , int inb_output_process , int *nb_value)
 :SemiMarkovChain(itype , inb_state)
 
 {
-  int i;
+  register int i;
 
 
   nb_iterator = 0;
@@ -348,17 +347,15 @@ SemiMarkov::SemiMarkov(process_type itype , int inb_state , int inb_output_proce
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the SemiMarkov class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] pchain        pointer on a Chain object,
- *  \param[in] poccupancy    pointer on a CategoricalSequenceProcess object,
- *  \param[in] pobservation  pointer on a CategoricalProcess object,
- *  \param[in] length        sequence length,
- *  \param[in] counting_flag flag on the computation of the counting distributions.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe SemiMarkov.
+ *
+ *  arguments : pointeur sur un objet Chain, sur un objet CategoricalSequenceProcess et
+ *              sur un objet CategoricalProcess, longueur des sequences,
+ *              flag sur le calcul des lois de comptage.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
                        const CategoricalProcess *pobservation ,
@@ -366,7 +363,7 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
 :SemiMarkovChain(pchain , poccupancy)
 
 {
-  int i;
+  register int i;
 
 
   nb_iterator = 0;
@@ -392,20 +389,19 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a SemiMarkov object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] smarkov   reference on a SemiMarkov object,
- *  \param[in] data_flag flag copy of the included SemiMarkovData object,
- *  \param[in] param     parameter.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet SemiMarkov.
+ *
+ *  arguments : reference sur un objet SemiMarkov,
+ *              flag copie de l'objet SemiMarkovData, parametre.
+ *
+ *--------------------------------------------------------------*/
 
 void SemiMarkov::copy(const SemiMarkov &smarkov , bool data_flag , int param)
 
 {
-  int i;
+  register int i;
 
 
   nb_iterator = 0;
@@ -440,7 +436,7 @@ void SemiMarkov::copy(const SemiMarkov &smarkov , bool data_flag , int param)
       for (i = 0;i < nb_output_process;i++) {
         if (smarkov.categorical_process[i]) {
           categorical_process[i] = new CategoricalSequenceProcess(*(smarkov.categorical_process[i]) ,
-                                                                  CATEGORICAL_SEQUENCE_PROCESS_COPY , false);
+                                                                  'c' , false);
         }
         else {
           categorical_process[i] = NULL;
@@ -491,16 +487,16 @@ void SemiMarkov::copy(const SemiMarkov &smarkov , bool data_flag , int param)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the data members of a SemiMarkov object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet SemiMarkov.
+ *
+ *--------------------------------------------------------------*/
 
 void SemiMarkov::remove()
 
 {
-  int i;
+  register int i;
 
 
   delete semi_markov_data;
@@ -528,11 +524,11 @@ void SemiMarkov::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the SemiMarkov class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe SemiMarkov.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkov::~SemiMarkov()
 
@@ -541,12 +537,12 @@ SemiMarkov::~SemiMarkov()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of a SemiMarkov object taking account of
- *         the number of iterators pointing to it.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction d'un objet SemiMarkov en tenant compte du nombre
+ *  d'iterateurs pointant dessus.
+ *
+ *--------------------------------------------------------------*/
 
 void SemiMarkov::conditional_delete()
 
@@ -557,15 +553,13 @@ void SemiMarkov::conditional_delete()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the SemiMarkov class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] smarkov reference on a SemiMarkov object.
+ *  Operateur d'assignement de la classe SemiMarkov.
  *
- *  \return            SemiMarkov object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet SemiMarkov.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkov& SemiMarkov::operator=(const SemiMarkov &smarkov)
 
@@ -584,20 +578,16 @@ SemiMarkov& SemiMarkov::operator=(const SemiMarkov &smarkov)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of a distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] dist_type distribution type,
- *  \param[in] variable  variable index,
- *  \param[in] value     state or observation.
+ *  Extraction d'une loi.
  *
- *  \return              DiscreteParametricModel object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, type de loi,
+ *              variable, etat ou observation.
+ *
+ *--------------------------------------------------------------*/
 
-DiscreteParametricModel* SemiMarkov::extract(StatError &error , process_distribution dist_type ,
+DiscreteParametricModel* SemiMarkov::extract(StatError &error , int type ,
                                              int variable , int value) const
 
 {
@@ -616,7 +606,7 @@ DiscreteParametricModel* SemiMarkov::extract(StatError &error , process_distribu
   pdist = NULL;
   pparam = NULL;
 
-  if (dist_type == OBSERVATION) {
+  if (type == OBSERVATION) {
     if ((variable < 1) || (variable > nb_output_process)) {
       status = false;
       error.update(STAT_error[STATR_OUTPUT_PROCESS_INDEX]);
@@ -681,7 +671,7 @@ DiscreteParametricModel* SemiMarkov::extract(StatError &error , process_distribu
       }
 
       if (status) {
-        switch (dist_type) {
+        switch (type) {
         case FIRST_OCCURRENCE :
           pdist = process->first_occurrence[value];
           break;
@@ -721,7 +711,7 @@ DiscreteParametricModel* SemiMarkov::extract(StatError &error , process_distribu
       }
 
       if (hvariable >= 0) {
-        switch (dist_type) {
+        switch (type) {
 
         case OBSERVATION : {
           if ((semi_markov_data->observation_distribution) &&
@@ -775,20 +765,17 @@ DiscreteParametricModel* SemiMarkov::extract(StatError &error , process_distribu
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of a forward recurrence time distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] state      state,
- *  \param[in] histo_type type of associated frequency distribution.
+ *  Extraction d'une loi de l'intervalle de temps residuel.
  *
- *  \return               DiscreteParametricModel object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, etat,
+ *              type de loi empirique associe.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametricModel* SemiMarkov::extract(StatError &error , int state ,
-                                             process_distribution histo_type) const
+                                             int frequency_distribution_type) const
 
 {
   bool status = true;
@@ -822,7 +809,7 @@ DiscreteParametricModel* SemiMarkov::extract(StatError &error , int state ,
       phisto = NULL;
 
       if ((semi_markov_data) && (semi_markov_data->type[0] == STATE)) {
-        switch (histo_type) {
+        switch (frequency_distribution_type) {
 
         case INITIAL_RUN : {
           if ((semi_markov_data->characteristics[0]->initial_run) &&
@@ -849,15 +836,13 @@ DiscreteParametricModel* SemiMarkov::extract(StatError &error , int state ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of the SemiMarkovData object included in a SemiMarkov object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Extraction de la partie "donnees" d'un objet SemiMarkov.
  *
- *  \return          SemiMarkovData object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovData* SemiMarkov::extract_data(StatError &error) const
 
@@ -887,20 +872,18 @@ SemiMarkovData* SemiMarkov::extract_data(StatError &error) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Application of a threshold on the probability parameters of a semi-Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] min_probability minimum probability.
+ *  Application d'un seuil sur les parametres d'une semi-chaine de Markov.
  *
- *  \return                    SemiMarkov object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : probabilite minimum.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkov* SemiMarkov::thresholding(double min_probability) const
 
 {
-  int i;
+  register int i;
   SemiMarkov *smarkov;
 
 
@@ -917,37 +900,31 @@ SemiMarkov* SemiMarkov::thresholding(double min_probability) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a SemiMarkov object from a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error           reference on a StatError object,
- *  \param[in] path            file path,
- *  \param[in] length          sequence length,
- *  \param[in] counting_flag   flag on the computation of the counting distributions,
- *  \param[in] cumul_threshold threshold on the state occupancy cumulative distribution functions.
+ *  Construction d'un objet SemiMarkov a partir d'un fichier.
  *
- *  \return                    SemiMarkov object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              longueur des sequences, flag sur le calcul des lois de comptage,
+ *              seuil sur les fonctions de repartition des lois d'occupation des etats.
+ *
+ *--------------------------------------------------------------*/
 
-SemiMarkov* SemiMarkov::ascii_read(StatError &error , const string path , int length ,
+SemiMarkov* semi_markov_ascii_read(StatError &error , const char *path , int length ,
                                    bool counting_flag , double cumul_threshold)
 
 {
-  string buffer;
+  RWCString buffer , token;
   size_t position;
-  typedef tokenizer<char_separator<char>> tokenizer;
-  char_separator<char> separator(" \t");
-  process_type type = DEFAULT_TYPE;
+  char type = 'v';
   bool status;
-  int i;
+  register int i;
   int line;
   const Chain *chain;
   const CategoricalSequenceProcess *occupancy;
   const CategoricalProcess *observation;
   SemiMarkov *smarkov;
-  ifstream in_file(path.c_str());
+  ifstream in_file(path);
 
 
   smarkov = NULL;
@@ -970,38 +947,38 @@ SemiMarkov* SemiMarkov::ascii_read(StatError &error , const string path , int le
       error.update(SEQ_error[SEQR_LONG_SEQUENCE_LENGTH]);
     }
 
-    while (getline(in_file , buffer)) {
+    while (buffer.readLine(in_file , false)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.find('#');
-      if (position != string::npos) {
-        buffer.erase(position);
+      position = buffer.first('#');
+      if (position != RW_NPOS) {
+        buffer.remove(position);
       }
       i = 0;
 
-      tokenizer tok_buffer(buffer , separator);
+      RWCTokenizer next(buffer);
 
-      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+      while (!((token = next()).isNull())) {
 
-        // test (EQUILIBRIUM_)SEMI-MARKOV_CHAIN keyword
+        // test mot cle (EQUILIBRIUM) SEMI-MARKOV_CHAIN
 
         if (i == 0) {
-          if (*token == SEQ_word[SEQW_SEMI_MARKOV_CHAIN]) {
-            type = ORDINARY;
+          if (token == SEQ_word[SEQW_SEMI_MARKOV_CHAIN]) {
+            type = 'o';
           }
-          else if (*token == SEQ_word[SEQW_EQUILIBRIUM_SEMI_MARKOV_CHAIN]) {
-            type = EQUILIBRIUM;
+          else if (token == SEQ_word[SEQW_EQUILIBRIUM_SEMI_MARKOV_CHAIN]) {
+            type = 'e';
           }
           else {
             status = false;
             ostringstream correction_message;
             correction_message << SEQ_word[SEQW_SEMI_MARKOV_CHAIN] << " or "
                                << SEQ_word[SEQW_EQUILIBRIUM_SEMI_MARKOV_CHAIN];
-            error.correction_update(STAT_parsing[STATP_KEYWORD] ,
+            error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
                                     (correction_message.str()).c_str() , line);
           }
         }
@@ -1018,53 +995,50 @@ SemiMarkov* SemiMarkov::ascii_read(StatError &error , const string path , int le
       }
     }
 
-    if (type != DEFAULT_TYPE) {
+    if (type != 'v') {
+      // analyse du format et lecture de la chaine de Markov
 
-      // analysis of the format and reading of the Markov chain
-
-      chain = Chain::parsing(error , in_file , line , type);
+      chain = chain_parsing(error , in_file , line , type);
 
       if (chain) {
 
-        // analysis of the format and reading of the state occupancy distributions
+        // analyse du format et lecture des lois d'occupation de etats
 
-        occupancy = CategoricalSequenceProcess::occupancy_parsing(error , in_file , line ,
-                                                                  *chain , cumul_threshold);
+        occupancy = occupancy_parsing(error , in_file , line , *chain , cumul_threshold);
         if (!occupancy) {
           status = false;
         }
-
-        // analysis of the format and reading of the categorical observation distributions
+        // analyse du format et lecture des lois d'observation
 
         observation = NULL;
 
-        while (getline(in_file , buffer)) {
+        while (buffer.readLine(in_file , false)) {
           line++;
 
 #         ifdef DEBUG
           cout << line << "  " << buffer << endl;
 #         endif
 
-          position = buffer.find('#');
-          if (position != string::npos) {
-            buffer.erase(position);
+          position = buffer.first('#');
+          if (position != RW_NPOS) {
+            buffer.remove(position);
           }
           i = 0;
 
-          tokenizer tok_buffer(buffer , separator);
+          RWCTokenizer next(buffer);
 
-          for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+          while (!((token = next()).isNull())) {
 
-            // test OUTPUT_PROCESS keyword
+            // test mot cle OUTPUT_PROCESS
 
             if (i == 0) {
-              if (*token != STAT_word[STATW_OUTPUT_PROCESS]) {
+              if (token != STAT_word[STATW_OUTPUT_PROCESS]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OUTPUT_PROCESS] , line);
+                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_OUTPUT_PROCESS] , line);
               }
             }
-
             i++;
+
           }
 
           if (i > 0) {
@@ -1072,29 +1046,28 @@ SemiMarkov* SemiMarkov::ascii_read(StatError &error , const string path , int le
               status = false;
               error.update(STAT_parsing[STATP_FORMAT] , line);
             }
+            // analyse du format et lecture des lois d'observation
 
-            observation = CategoricalProcess::parsing(error , in_file , line , chain->nb_state ,
-                                                      HIDDEN_MARKOV , false);
+            observation = categorical_observation_parsing(error , in_file , line , chain->nb_state ,
+                                                          HIDDEN_MARKOV , false);
             if (!observation) {
               status = false;
             }
-
             break;
           }
         }
 
-        while (getline(in_file , buffer)) {
+        while (buffer.readLine(in_file , false)) {
           line++;
-
 #         ifdef DEBUG
           cout << line << "  " << buffer << endl;
 #         endif
 
-          position = buffer.find('#');
-          if (position != string::npos) {
-            buffer.erase(position);
+          position = buffer.first('#');
+          if (position != RW_NPOS) {
+            buffer.remove(position);
           }
-          if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
+          if (!(buffer.isNull())) {
             status = false;
             error.update(STAT_parsing[STATP_FORMAT] , line);
           }
@@ -1115,13 +1088,13 @@ SemiMarkov* SemiMarkov::ascii_read(StatError &error , const string path , int le
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing on a single line of a SemiMarkov object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture sur une ligne d'un objet SemiMarkov.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& SemiMarkov::line_write(ostream &os) const
 
@@ -1132,60 +1105,62 @@ ostream& SemiMarkov::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a SemiMarkov object and the associated data structure.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     seq        pointer on a SemiMarkovData object,
- *  \param[in]     exhaustive flag detail level,
- *  \param[in]     file_flag  flag file,
- *  \param[in]     hidden     flag hidden model.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet SemiMarkov et de la structure de donnees associee.
+ *
+ *  arguments : stream, pointeur sur un objet SemiMarkovData,
+ *              flag niveau de detail, flag fichier, flag semi-Markov cache.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
                                  bool exhaustive , bool file_flag , bool hidden) const
 
 {
-  int i , j , k;
+  register int i , j , k;
   int buff , width , variable;
   double **distance;
   FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
   Histogram *marginal_histo = NULL , **observation_histo = NULL;
   SequenceCharacteristics *characteristics = NULL;
-  ios_base::fmtflags format_flags;
+  long old_adjust;
 
 
-  format_flags = os.setf(ios::left , ios::adjustfield);
+  old_adjust = os.setf(ios::left , ios::adjustfield);
 
-  if (hidden) {
+  switch (hidden) {
+
+  case false : {
     switch (type) {
-    case ORDINARY :
-      os << SEQ_word[SEQW_HIDDEN_SEMI_MARKOV_CHAIN] << endl;
-      break;
-    case EQUILIBRIUM :
-      os << SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_SEMI_MARKOV_CHAIN] << endl;
-      break;
-    }
-  }
-
-  else {
-    switch (type) {
-    case ORDINARY :
+    case 'o' :
       os << SEQ_word[SEQW_SEMI_MARKOV_CHAIN] << endl;
       break;
-    case EQUILIBRIUM :
+    case 'e' :
       os << SEQ_word[SEQW_EQUILIBRIUM_SEMI_MARKOV_CHAIN] << endl;
       break;
     }
+    break;
   }
 
-  // writing of the Markov chain parameters
+  case true : {
+    switch (type) {
+    case 'o' :
+      os << SEQ_word[SEQW_HIDDEN_SEMI_MARKOV_CHAIN] << endl;
+      break;
+    case 'e' :
+      os << SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_SEMI_MARKOV_CHAIN] << endl;
+      break;
+    }
+    break;
+  }
+  }
+
+  // ecriture des parametres de la chaine de Markov
 
   ascii_print(os , file_flag);
 
-  // writing of the state occupancy distributions
+  // ecriture des lois d'occupation des etats
 
   if ((seq) && (seq->type[0] == STATE)) {
     characteristics = seq->characteristics[0];
@@ -1290,7 +1265,7 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
        << STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES] << endl;
   }
 
-  // writing of the distributions associated with each observation process
+  // ecriture des lois associees a chaque processus d'observation
 
   if (hidden) {
     distance = new double*[nb_state];
@@ -1316,9 +1291,7 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
       }
     }
     os << endl;
-
-    if ((continuous_parametric_process[i]) && ((continuous_parametric_process[i]->ident == LINEAR_MODEL) ||
-         (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL))) {
+    if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == LINEAR_MODEL)) {
       for (j = 0;j < nb_state;j++) {
         os << "\n" << STAT_word[STATW_STATE] << " " << j << " "
            << STAT_word[STATW_OBSERVATION_MODEL] << endl;
@@ -1326,24 +1299,17 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
       }
     }
 
-    if (seq) {
-      switch (seq->type[0]) {
-      case STATE :
-        variable = i + 1;
-        break;
-      default :
-        variable = i;
-        break;
-      }
-
-      if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL)) {
-        if (seq->type[0] == STATE) {
-          seq->autoregressive_model_ascii_print(os , variable , continuous_parametric_process[i] , file_flag);
+    else {
+      if (seq) {
+        switch (seq->type[0]) {
+        case STATE :
+          variable = i + 1;
+          break;
+        default :
+          variable = i;
+          break;
         }
-      }
 
-      else if ((categorical_process[i]) || (discrete_parametric_process[i]) ||
-               ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
         if (seq->observation_distribution) {
           observation_dist = seq->observation_distribution[variable];
         }
@@ -1356,109 +1322,106 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
 
         characteristics = seq->characteristics[variable];
       }
-    }
 
-    if (categorical_process[i]) {
-      categorical_process[i]->ascii_print(os , i + 1 , observation_dist , marginal_dist ,
-                                          characteristics , exhaustive , file_flag);
+      if (categorical_process[i]) {
+        categorical_process[i]->ascii_print(os , i + 1 , observation_dist , marginal_dist ,
+                                            characteristics , exhaustive , file_flag);
 
-      if (hidden) {
-        for (j = 0;j < nb_state;j++) {
-          distance[j][j] = 0.;
+        if (hidden) {
+          for (j = 0;j < nb_state;j++) {
+            distance[j][j] = 0.;
 
-          for (k = j + 1;k < nb_state;k++) {
-            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-              distance[j][k] = categorical_process[i]->observation[j]->overlap_distance_computation(*(categorical_process[i]->observation[k]));
+            for (k = j + 1;k < nb_state;k++) {
+              if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+                distance[j][k] = categorical_process[i]->observation[j]->overlap_distance_computation(*(categorical_process[i]->observation[k]));
+              }
+              else {
+                distance[j][k] = 1.;
+              }
+
+              distance[k][j] = distance[j][k];
             }
-            else {
-              distance[j][k] = 1.;
-            }
-
-            distance[k][j] = distance[j][k];
           }
         }
       }
-    }
 
-    else if (discrete_parametric_process[i]) {
-      discrete_parametric_process[i]->ascii_print(os , observation_dist , marginal_dist ,
-                                                  exhaustive , file_flag);
-
-      if (hidden) {
-        for (j = 0;j < nb_state;j++) {
-          distance[j][j] = 0.;
-
-          for (k = j + 1;k < nb_state;k++) {
-            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-              distance[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
-            }
-            else {
-              distance[j][k] = 1.;
-            }
-
-            distance[k][j] = distance[j][k];
-          }
-        }
-      }
-    }
-
-    else if ((continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
-             (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)) {
-      continuous_parametric_process[i]->ascii_print(os , observation_histo , observation_dist ,
-                                                    marginal_histo , marginal_dist ,
+      else if (discrete_parametric_process[i]) {
+        discrete_parametric_process[i]->ascii_print(os , observation_dist , marginal_dist ,
                                                     exhaustive , file_flag);
 
-      if (hidden) {
-        for (j = 0;j < nb_state;j++) {
-          distance[j][j] = 0.;
+        if (hidden) {
+          for (j = 0;j < nb_state;j++) {
+            distance[j][j] = 0.;
 
-          for (k = j + 1;k < nb_state;k++) {
-            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-              distance[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
-            }
-            else {
-              distance[j][k] = 1.;
-            }
+            for (k = j + 1;k < nb_state;k++) {
+              if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+                distance[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
+              }
+              else {
+                distance[j][k] = 1.;
+              }
 
-            distance[k][j] = distance[j][k];
+              distance[k][j] = distance[j][k];
+            }
           }
         }
       }
-    }
 
-    if ((hidden) && ((categorical_process[i]) || (discrete_parametric_process[i]) ||
-         ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
-          (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)))) {
-      width = column_width(nb_state , distance[0]);
-      for (j = 1;j < nb_state;j++) {
-        buff = column_width(nb_state , distance[j]);
-        if (buff > width) {
-          width = buff;
+      else {
+        continuous_parametric_process[i]->ascii_print(os , observation_histo , observation_dist ,
+                                                      marginal_histo , marginal_dist ,
+                                                      exhaustive , file_flag);
+
+        if (hidden) {
+          for (j = 0;j < nb_state;j++) {
+            distance[j][j] = 0.;
+
+            for (k = j + 1;k < nb_state;k++) {
+              if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+                distance[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
+              }
+              else {
+                distance[j][k] = 1.;
+              }
+
+              distance[k][j] = distance[j][k];
+            }
+          }
         }
       }
-      width += ASCII_SPACE;
 
-      os.setf(ios::left , ios::adjustfield);
+      if (hidden) {
+        width = column_width(nb_state , distance[0]);
+        for (j = 1;j < nb_state;j++) {
+          buff = column_width(nb_state , distance[j]);
+          if (buff > width) {
+            width = buff;
+          }
+        }
+        width += ASCII_SPACE;
 
-      os << "\n";
-      if (file_flag) {
-        os << "# ";
-      }
-      os << STAT_label[STATL_CONSECUTIVE_STATE_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+        os.setf(ios::left , ios::adjustfield);
 
-      for (j = 0;j < nb_state;j++) {
+        os << "\n";
         if (file_flag) {
           os << "# ";
         }
-        for (k = 0;k < nb_state;k++) {
-          if ((k != j) && (transition[j][k] > MIN_PROBABILITY)) {
-            os << setw(width) << distance[j][k];
+        os << STAT_label[STATL_CONSECUTIVE_STATE_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+
+        for (j = 0;j < nb_state;j++) {
+          if (file_flag) {
+            os << "# ";
           }
-          else {
-            os << setw(width) << "_";
+          for (k = 0;k < nb_state;k++) {
+            if ((k != j) && (transition[j][k] > MIN_PROBABILITY)) {
+              os << setw(width) << distance[j][k];
+            }
+            else {
+              os << setw(width) << "_";
+            }
           }
+          os << endl;
         }
-        os << endl;
       }
     }
   }
@@ -1475,7 +1438,7 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
     double information;
 
 
-    // writing of the sequence length frequency distribution
+    // ecriture de la loi empirique des longueurs des sequences
 
     os << "\n";
     if (file_flag) {
@@ -1499,7 +1462,7 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
     }
     os << SEQ_label[SEQL_CUMUL_LENGTH] << ": " << seq->cumul_length << endl;
 
-    // writing of the information quantity of the observed sequences in the i.i.d. case
+    // ecriture de la quantite d'information des sequences dans le cas iid
 
     for (i = 0;i < seq->nb_variable;i++) {
       if (seq->type[i] == REAL_VALUE) {
@@ -1518,9 +1481,21 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
          << information / seq->cumul_length << ")" << endl;
     }
 
-    // writing of the (penalized) log-likelihoods of the model for sequences
+    // ecriture des vraisemblances des sequences
 
-    if (hidden) {
+    switch (hidden) {
+
+    case false : {
+      os << "\n";
+      if (file_flag) {
+        os << "# ";
+      }
+      os << STAT_label[STATL_LIKELIHOOD] << ": " << seq->likelihood << "   ("
+         << STAT_label[STATL_NORMALIZED] << ": " << seq->likelihood / seq->cumul_length << ")" << endl;
+      break;
+    }
+
+    case true : {
       if (seq->restoration_likelihood != D_INF) {
         os << "\n";
         if (file_flag) {
@@ -1547,15 +1522,8 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
         os << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << seq->likelihood << "   ("
            << STAT_label[STATL_NORMALIZED] << ": " << seq->likelihood / seq->cumul_length << ")" << endl;
       }
+      break;
     }
-
-    else {
-      os << "\n";
-      if (file_flag) {
-        os << "# ";
-      }
-      os << STAT_label[STATL_LIKELIHOOD] << ": " << seq->likelihood << "   ("
-         << STAT_label[STATL_NORMALIZED] << ": " << seq->likelihood / seq->cumul_length << ")" << endl;
     }
 
     if (seq->likelihood != D_INF) {
@@ -1617,20 +1585,19 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
     }
   }
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a SemiMarkov object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet SemiMarkov.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& SemiMarkov::ascii_write(ostream &os , bool exhaustive) const
 
@@ -1639,24 +1606,21 @@ ostream& SemiMarkov::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a SemiMarkov object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet SemiMarkov dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool SemiMarkov::ascii_write(StatError &error , const string path ,
+bool SemiMarkov::ascii_write(StatError &error , const char *path ,
                              bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -1674,23 +1638,128 @@ bool SemiMarkov::ascii_write(StatError &error , const string path ,
   return status;
 }
 
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a SemiMarkov object and the associated data structure
- *         in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
+ *  B.O.
+ *  Write an initialization file for a Hidden Semi Markov Model
  *
- *  \param[in,out] os     stream,
- *  \param[in]     seq    pointer on a SemiMarkovData object,
- *  \param[in]     hidden flag hidden model.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
+
+bool SemiMarkov::write_hidden_semi_markov_init_file(StatError &error , const char *path) const {
+    bool status;
+    register int i , j , k;
+    int buff , width , variable;
+    double sum_probabilities, current_probability;
+    FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
+    SequenceCharacteristics *characteristics = NULL;
+    //SemiMarkovData* seq = semi_markov_data;
+
+    ofstream out_file(path);
+    error.init();
+    if (!out_file) {
+        status = false;
+        error.update(STAT_error[STATR_FILE_NAME]);
+    }
+    else {
+        status = true;
+        // FILE HEADER
+        out_file << SEQ_word[SEQW_HIDDEN_SEMI_MARKOV_CHAIN] << endl;
+        out_file << "\n" << nb_state << " " << STAT_word[STATW_STATES] << endl;
+        out_file << "\n" << STAT_word[STATW_INITIAL_PROBABILITIES] << endl;
+        width = column_width(nb_state , initial);
+        for (i = 0;i < nb_row;i++) {
+            buff = column_width(nb_state , transition[i]);
+            if (buff > width) {
+                width = buff;
+            }
+        }
+        width += ASCII_SPACE;
+
+        // INITIAL_PROBABILITIES
+        sum_probabilities = 0.0;
+        current_probability = 0.0;
+        for (i = 0;i < nb_state - 1;i++) {
+            current_probability = (int)initial[i] + floor((initial[i] - (int)initial[i])*10000)/10000;
+            sum_probabilities += current_probability;
+            out_file << current_probability << setw(width);
+        }
+        out_file << setw(width) << 1 - sum_probabilities;
+        out_file << endl;
+
+        // TRANSITION_PROBABILITIES
+        out_file << "\n" << STAT_word[STATW_TRANSITION_PROBABILITIES] << endl;
+
+        for (i = 0;i < nb_row-1;i++) {
+            sum_probabilities = 0.0;
+            current_probability = 0.0;
+            for (j = 0;j < nb_state - 1;j++) {
+                current_probability = (int)transition[i][j] + floor((transition[i][j] - (int)transition[i][j])*10000)/10000;
+                sum_probabilities += current_probability;
+                out_file << current_probability << setw(width);
+            }
+            out_file << setw(width) << 1 - sum_probabilities;
+            out_file << endl;
+        }
+        // sum probs last line debug
+        sum_probabilities = 0.0;
+        current_probability = 0.0;
+        for (j = 0;j < nb_state - 1;j++) {
+            current_probability = (int)transition[i][j] + floor((transition[i][j] - (int)transition[i][j])*10000)/10000;
+            sum_probabilities += current_probability;
+        }
+        current_probability = (int)transition[i][0] + floor((transition[i][0] - (int)transition[i][0])*10000)/10000;
+        current_probability += 1 - sum_probabilities;
+        out_file << current_probability << setw(width);
+        for (j = 1;j < nb_state;j++) {
+            current_probability = (int)transition[i][j] + floor((transition[i][j] - (int)transition[i][j])*10000)/10000;
+            out_file << current_probability << setw(width);
+        }
+        out_file << endl;
+
+
+        // OCCUPANCY_DISTRIBUTION
+        if ((semi_markov_data) && (semi_markov_data->type[0] == STATE)) {
+            characteristics = semi_markov_data->characteristics[0];
+        }
+        else {
+            characteristics = NULL;
+        }
+        state_process->ascii_print(out_file, 0, NULL, NULL, characteristics, false, true, forward);
+
+        // OUTPUT_PROCESS
+        out_file << "\n" << nb_output_process << " " << STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES] << endl;
+        for (i = 0;i < nb_output_process;i++) {
+            out_file << "\n" << STAT_word[STATW_OUTPUT_PROCESS] << " " << i+1;
+            out_file << " : " << STAT_word[STATW_CATEGORICAL] << endl;
+
+            if (semi_markov_data->observation_distribution) {
+              observation_dist = semi_markov_data->observation_distribution[variable];
+            }
+            marginal_dist = semi_markov_data->marginal_distribution[variable];
+            characteristics = semi_markov_data->characteristics[variable];
+            categorical_process[i]->ascii_print(out_file, i+1, observation_dist, marginal_dist, characteristics, false, true);
+        }
+    }
+    return status;
+}
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture d'un objet SemiMarkov et de la structure de donnees associee
+ *  dans un fichier au format tableur.
+ *
+ *  arguments : stream, pointeur sur les sequences observees,
+ *              flag semi-Markov cache.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
                                        bool hidden) const
 
 {
-  int i , j , k;
+  register int i , j , k;
   int variable;
   double **distance;
   FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
@@ -1698,33 +1767,38 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
   SequenceCharacteristics *characteristics = NULL;
 
 
-  if (hidden) {
-    switch (type) {
-    case ORDINARY :
-      os << SEQ_word[SEQW_HIDDEN_SEMI_MARKOV_CHAIN] << endl;
-      break;
-    case EQUILIBRIUM :
-      os << SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_SEMI_MARKOV_CHAIN] << endl;
-      break;
-    }
-  }
+  switch (hidden) {
 
-  else {
+  case false : {
     switch (type) {
-    case ORDINARY :
+    case 'o' :
       os << SEQ_word[SEQW_SEMI_MARKOV_CHAIN] << endl;
       break;
-    case EQUILIBRIUM :
+    case 'e' :
       os << SEQ_word[SEQW_EQUILIBRIUM_SEMI_MARKOV_CHAIN] << endl;
       break;
     }
+    break;
   }
 
-  // writing of the Markov chain parameters
+  case true : {
+    switch (type) {
+    case 'o' :
+      os << SEQ_word[SEQW_HIDDEN_SEMI_MARKOV_CHAIN] << endl;
+      break;
+    case 'e' :
+      os << SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_SEMI_MARKOV_CHAIN] << endl;
+      break;
+    }
+    break;
+  }
+  }
+
+  // ecriture des parametres de la chaine de Markov
 
   spreadsheet_print(os);
 
-  // writing of the state occupancy distributions
+  // ecriture des lois d'occupation des etats
 
   if ((seq) && (seq->type[0] == STATE)) {
     characteristics = seq->characteristics[0];
@@ -1735,7 +1809,7 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
 
   state_process->spreadsheet_print(os , 0 , NULL , NULL , characteristics , forward);
 
-  // writing of the distributions associated with each observation process
+  // ecriture des lois associees a chaque processus d'observation
 
   if (hidden) {
     os << "\n" << nb_output_process << "\t"
@@ -1767,8 +1841,7 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
     }
     os << endl;
 
-    if ((continuous_parametric_process[i]) && ((continuous_parametric_process[i]->ident == LINEAR_MODEL) ||
-         (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL))) {
+    if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == LINEAR_MODEL)) {
       for (j = 0;j < nb_state;j++) {
         os << "\n" << STAT_word[STATW_STATE] << " " << j << "\t"
            << STAT_word[STATW_OBSERVATION_MODEL] << endl;
@@ -1789,11 +1862,6 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
       if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == LINEAR_MODEL)) {
         seq->linear_model_spreadsheet_print(os , variable , continuous_parametric_process[i]);
       }
-      else if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL)) {
-        if (seq->type[0] == STATE) {
-          seq->autoregressive_model_spreadsheet_print(os , variable , continuous_parametric_process[i]);
-        }
-      }
 
       else {
         if (seq->observation_distribution) {
@@ -1807,70 +1875,67 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
         marginal_histo = seq->marginal_histogram[variable];
 
         characteristics = seq->characteristics[variable];
-      }
-    }
 
-    if (categorical_process[i]) {
-      categorical_process[i]->spreadsheet_print(os , i + 1 , observation_dist , marginal_dist ,
-                                                characteristics);
+        if (categorical_process[i]) {
+          categorical_process[i]->spreadsheet_print(os , i + 1 , observation_dist , marginal_dist ,
+                                                    characteristics);
 
-      if (hidden) {
-        for (j = 0;j < nb_state;j++) {
-          for (k = j + 1;k < nb_state;k++) {
-            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-              distance[j][k] = categorical_process[i]->observation[j]->overlap_distance_computation(*(categorical_process[i]->observation[k]));
-              distance[k][j] = distance[j][k];
+          if (hidden) {
+            for (j = 0;j < nb_state;j++) {
+              for (k = j + 1;k < nb_state;k++) {
+                if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+                  distance[j][k] = categorical_process[i]->observation[j]->overlap_distance_computation(*(categorical_process[i]->observation[k]));
+                  distance[k][j] = distance[j][k];
+                }
+              }
             }
           }
         }
-      }
-    }
 
-    else if (discrete_parametric_process[i]) {
-      discrete_parametric_process[i]->spreadsheet_print(os , observation_dist , marginal_dist);
+        else if (discrete_parametric_process[i]) {
+          discrete_parametric_process[i]->spreadsheet_print(os , observation_dist , marginal_dist);
 
-      if (hidden) {
-        for (j = 0;j < nb_state;j++) {
-          for (k = j + 1;k < nb_state;k++) {
-            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-              distance[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
-              distance[k][j] = distance[j][k];
+          if (hidden) {
+            for (j = 0;j < nb_state;j++) {
+              for (k = j + 1;k < nb_state;k++) {
+                if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+                  distance[j][k] = discrete_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(discrete_parametric_process[i]->observation[k]));
+                  distance[k][j] = distance[j][k];
+                }
+              }
             }
           }
         }
-      }
-    }
 
-    else if ((continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
-             (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)) {
-      continuous_parametric_process[i]->spreadsheet_print(os , observation_histo , observation_dist ,
-                                                          marginal_histo , marginal_dist);
+        else {
+          continuous_parametric_process[i]->spreadsheet_print(os , observation_histo , observation_dist ,
+                                                              marginal_histo , marginal_dist);
 
-      if (hidden) {
-        for (j = 0;j < nb_state;j++) {
-          for (k = j + 1;k < nb_state;k++) {
-            if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
-              distance[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
-              distance[k][j] = distance[j][k];
+          if (hidden) {
+            for (j = 0;j < nb_state;j++) {
+              for (k = j + 1;k < nb_state;k++) {
+                if ((transition[j][k] > MIN_PROBABILITY) || (transition[k][j] > MIN_PROBABILITY)) {
+                  distance[j][k] = continuous_parametric_process[i]->observation[j]->sup_norm_distance_computation(*(continuous_parametric_process[i]->observation[k]));
+                  distance[k][j] = distance[j][k];
+                }
+              }
             }
           }
         }
-      }
-    }
 
-    if ((hidden) && ((categorical_process[i]) || (discrete_parametric_process[i]) ||
-         ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
-          (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)))) {
-      os << "\n" << STAT_label[STATL_CONSECUTIVE_STATE_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
+        if (hidden) {
+          os << "\n" << STAT_label[STATL_CONSECUTIVE_STATE_OBSERVATION_DISTRIBUTION_DISTANCE] << endl;
 
-      for (j = 0;j < nb_state;j++) {
-        for (k = 0;k < nb_state;k++) {
-          if ((k != j) && (transition[j][k] > MIN_PROBABILITY)) {
-            os << distance[j][k];
+          for (j = 0;j < nb_state;j++) {
+            for (k = 0;k < nb_state;k++) {
+              if ((k != j) && (transition[j][k] > MIN_PROBABILITY)) {
+                os << distance[j][k];
+              }
+              os << "\t";
+            }
+            os << endl;
           }
-          os << "\t";
         }
-        os << endl;
       }
     }
   }
@@ -1887,7 +1952,7 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
     double information;
 
 
-    // writing of the sequence length frequency distribution
+    // ecriture de la loi empirique des longueurs des sequences
 
     os << "\n" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     seq->length_distribution->spreadsheet_characteristic_print(os);
@@ -1897,7 +1962,7 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
 
     os << "\n" << SEQ_label[SEQL_CUMUL_LENGTH] << "\t" << seq->cumul_length << endl;
 
-    // writing of the information quantity of the observed sequences in the i.i.d. case
+    // ecriture de la quantite d'information des sequences dans le cas iid
 
     for (i = 0;i < seq->nb_variable;i++) {
       if (seq->type[i] == REAL_VALUE) {
@@ -1912,9 +1977,17 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
          << information / seq->cumul_length << endl;
     }
 
-    // writing of the (penalized) log-likelihoods of the model for sequences
+    // ecriture des vraisemblances des sequences
 
-    if (hidden) {
+    switch (hidden) {
+
+    case false : {
+      os << "\n" << STAT_label[STATL_LIKELIHOOD] << "\t" << seq->likelihood << "\t"
+         << STAT_label[STATL_NORMALIZED] << "\t" << seq->likelihood / seq->cumul_length << endl;
+      break;
+    }
+
+    case true : {
       if (seq->restoration_likelihood != D_INF) {
         os << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << "\t" << seq->restoration_likelihood << "\t"
            << STAT_label[STATL_NORMALIZED] << "\t" << seq->restoration_likelihood / seq->cumul_length << endl;
@@ -1929,11 +2002,8 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
         os << "\n" << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << "\t" << seq->likelihood << "\t"
            << STAT_label[STATL_NORMALIZED] << "\t" << seq->likelihood / seq->cumul_length << endl;
       }
+      break;
     }
-
-    else {
-      os << "\n" << STAT_label[STATL_LIKELIHOOD] << "\t" << seq->likelihood << "\t"
-         << STAT_label[STATL_NORMALIZED] << "\t" << seq->likelihood / seq->cumul_length << endl;
     }
 
     if (seq->likelihood != D_INF) {
@@ -1975,22 +2045,19 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a SemiMarkov object in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet SemiMarkov dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool SemiMarkov::spreadsheet_write(StatError &error , const string path) const
+bool SemiMarkov::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -2009,24 +2076,22 @@ bool SemiMarkov::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a SemiMarkov object and the associated data structure using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title,
- *  \param[in] seq    pointer on a SemiMarkovData object.
+ *  Sortie Gnuplot d'un objet SemiMarkov et de la structure
+ *  de donnees associee.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : prefixe des fichiers, titre des figures,
+ *              pointeur sur les sequences observees.
+ *
+ *--------------------------------------------------------------*/
 
 bool SemiMarkov::plot_write(const char *prefix , const char *title ,
                             const SemiMarkovData *seq) const
 
 {
   bool status;
-  int i;
+  register int i;
   int variable , nb_value = I_DEFAULT;
   double *empirical_cdf[2];
   FrequencyDistribution *length_distribution = NULL , *marginal_dist = NULL , **observation_dist = NULL;
@@ -2064,11 +2129,6 @@ bool SemiMarkov::plot_write(const char *prefix , const char *title ,
         if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == LINEAR_MODEL)) {
           seq->linear_model_plot_print(prefix , title , variable , continuous_parametric_process[i]);
         }
-        else if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL)) {
-          if (seq->type[0] == STATE) {
-            seq->autoregressive_model_plot_print(prefix , title , variable , continuous_parametric_process[i]);
-          }
-        }
 
         else {
           if (seq->observation_distribution) {
@@ -2098,8 +2158,7 @@ bool SemiMarkov::plot_write(const char *prefix , const char *title ,
         discrete_parametric_process[i]->plot_print(prefix , title , i + 1 , observation_dist ,
                                                    marginal_dist);
       }
-      else if ((continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
-               (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)) {
+      else if (continuous_parametric_process[i]->ident != LINEAR_MODEL) {
         continuous_parametric_process[i]->plot_print(prefix , title , i + 1 ,
                                                      observation_histo , observation_dist ,
                                                      marginal_histo , marginal_dist ,
@@ -2116,17 +2175,14 @@ bool SemiMarkov::plot_write(const char *prefix , const char *title ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a SemiMarkov object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title.
+ *  Sortie Gnuplot d'un objet SemiMarkov.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool SemiMarkov::plot_write(StatError &error , const char *prefix ,
                             const char *title) const
@@ -2144,20 +2200,19 @@ bool SemiMarkov::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a SemiMarkov object and the associated data structure.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq pointer on a SemiMarkovData object.
+ *  Sortie graphique d'un objet SemiMarkov et de la structure
+ *  de donnees associee.
  *
- *  \return        MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : pointeur sur les sequences observees.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
 
 {
-  int i , j;
+  register int i , j;
   int nb_plot_set , index_length , index , variable;
   FrequencyDistribution *length_distribution = NULL , *marginal_dist = NULL , **observation_dist = NULL;
   Histogram *marginal_histo = NULL , **observation_histo = NULL;
@@ -2172,7 +2227,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
     characteristics = NULL;
   }
 
-  // computation of the number of plots
+  // calcul du nombre de vues
 
   nb_plot_set = 0;
 
@@ -2402,20 +2457,14 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
       }
     }
 
-    if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
-        (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL) &&
-        ((seq->marginal_histogram[variable]) || (seq->marginal_distribution[variable]))) {
+    if ((continuous_parametric_process[i]) && ((seq->marginal_histogram[variable]) ||
+         (seq->marginal_distribution[variable]))) {
       if (continuous_parametric_process[i]->weight) {
         nb_plot_set += 2;
       }
       if (continuous_parametric_process[i]->restoration_weight) {
         nb_plot_set += 2;
       }
-    }
-
-    if ((continuous_parametric_process[i]) && ((continuous_parametric_process[i]->ident == LINEAR_MODEL) ||
-         ((continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL) && (seq->type[0] == STATE)))) {
-      nb_plot_set += nb_state;
     }
   }
 
@@ -2450,28 +2499,17 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
         break;
       }
 
-      if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == LINEAR_MODEL)) {
-        seq->linear_model_plotable_write(*plot_set , index , variable , continuous_parametric_process[i]);
+      if (seq->observation_distribution) {
+        observation_dist = seq->observation_distribution[variable];
       }
-      else if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL)) {
-        if (seq->type[0] == STATE) {
-          seq->autoregressive_model_plotable_write(*plot_set , index , variable , continuous_parametric_process[i]);
-        }
+      marginal_dist = seq->marginal_distribution[variable];
+
+      if (seq->observation_histogram) {
+        observation_histo = seq->observation_histogram[variable];
       }
+      marginal_histo = seq->marginal_histogram[variable];
 
-      else {
-        if (seq->observation_distribution) {
-          observation_dist = seq->observation_distribution[variable];
-        }
-        marginal_dist = seq->marginal_distribution[variable];
-
-        if (seq->observation_histogram) {
-          observation_histo = seq->observation_histogram[variable];
-        }
-        marginal_histo = seq->marginal_histogram[variable];
-
-        characteristics = seq->characteristics[variable];
-      }
+      characteristics = seq->characteristics[variable];
     }
 
     if (categorical_process[i]) {
@@ -2484,8 +2522,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
       discrete_parametric_process[i]->plotable_write(*plot_set , index , i + 1 , observation_dist ,
                                                      marginal_dist);
     }
-    else if ((continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
-             (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL)) {
+    else {
       continuous_parametric_process[i]->plotable_write(*plot_set , index , i + 1 ,
                                                        observation_histo , observation_dist ,
                                                        marginal_histo , marginal_dist);
@@ -2496,13 +2533,11 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a SemiMarkov object.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet SemiMarkov.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* SemiMarkov::get_plotable() const
 
@@ -2511,20 +2546,18 @@ MultiPlotSet* SemiMarkov::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the number of parameters of a SemiMarkov object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] min_probability minimum probability.
+ *  Calcul du nombre de parametres independants d'un objet SemiMarkov.
  *
- *  \return                    number of parameters.
- */
-/*--------------------------------------------------------------*/
+ *  argument : probabilite minimum.
+ *
+ *--------------------------------------------------------------*/
 
 int SemiMarkov::nb_parameter_computation(double min_probability) const
 
 {
-  int i;
+  register int i;
   int nb_parameter = SemiMarkovChain::nb_parameter_computation(min_probability);
 
 
@@ -2544,21 +2577,19 @@ int SemiMarkov::nb_parameter_computation(double min_probability) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of an adaptative penalty.
+/*--------------------------------------------------------------*
  *
- *  \param[in] hidden          flag hidden model,
- *  \param[in] min_probability minimum probability.
+ *  Calcul d'une penalite adaptative.
  *
- *  \return                    adaptative penalty.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : flag semi-Markov cache, probabilite minimum.
+ *  la proba minimum correspond au seuil a partir duquel on considere que le param vaut 0. e.g. 1e-5
+ *
+ *--------------------------------------------------------------*/
 
 double SemiMarkov::penalty_computation(bool hidden , double min_probability) const
 
 {
-  int i , j , k;
+  register int i , j , k;
   int nb_parameter , sample_size;
   double sum , *memory , *state_marginal;
   double penalty = 0.;
@@ -2572,7 +2603,7 @@ double SemiMarkov::penalty_computation(bool hidden , double min_probability) con
 
       switch (type) {
 
-      case ORDINARY : {
+      case 'o' : {
         sum = 0.;
         for (i = 0;i < state_process->length->nb_value - 2;i++) {
           sum += (1. - state_process->length->cumul[i + 1]);
@@ -2601,7 +2632,7 @@ double SemiMarkov::penalty_computation(bool hidden , double min_probability) con
         break;
       }
 
-      case EQUILIBRIUM : {
+      case 'e' : {
         for (i = 0;i < nb_state;i++) {
           state_marginal[i] = initial[i];
         }
@@ -2627,33 +2658,40 @@ double SemiMarkov::penalty_computation(bool hidden , double min_probability) con
       nb_parameter--;
 
       if (nb_parameter > 0) {
-        if (hidden) {
-          if (memory[i] > 0.) {
-            penalty += nb_parameter * log(memory[i] * semi_markov_data->cumul_length);
-          }
-        }
+        switch (hidden) {
 
-        else {
+        case false : {
           if (sample_size > 0) {
             penalty += nb_parameter * log((double)sample_size);
           }
+          break;
+        }
+
+        case true : {
+          if (memory[i] > 0.) {
+            penalty += nb_parameter * log(memory[i] * semi_markov_data->cumul_length);
+          }
+          break;
+        }
         }
       }
     }
 
     for (i = 0;i < nb_state;i++) {
-      if (sojourn_type[i] == SEMI_MARKOVIAN) {
+      if (state_subtype[i] == SEMI_MARKOVIAN) {
         nb_parameter = state_process->sojourn_time[i]->nb_parameter_computation();
         if (state_process->sojourn_time[i]->inf_bound == 1) {
           nb_parameter--;
         }
 
-        if (hidden) {
-          penalty += nb_parameter * log(state_marginal[i] * semi_markov_data->cumul_length);
-        }
-        else {
+        switch (hidden) {
+        case false :
           penalty += nb_parameter *
                      log((double)semi_markov_data->marginal_distribution[0]->frequency[i]);
+          break;
+        case true :
+          penalty += nb_parameter * log(state_marginal[i] * semi_markov_data->cumul_length);
+          break;
         }
       }
     }
@@ -2671,12 +2709,14 @@ double SemiMarkov::penalty_computation(bool hidden , double min_probability) con
           nb_parameter--;
 
           if (nb_parameter > 0) {
-            if (hidden) {
-              penalty += nb_parameter * log(state_marginal[j] * semi_markov_data->cumul_length);
-            }
-            else {
+            switch (hidden) {
+              case false :
               penalty += nb_parameter *
                          log((double)semi_markov_data->marginal_distribution[0]->frequency[j]);
+              break;
+            case true :
+              penalty += nb_parameter * log(state_marginal[j] * semi_markov_data->cumul_length);
+              break;
             }
           }
         }
@@ -2686,12 +2726,14 @@ double SemiMarkov::penalty_computation(bool hidden , double min_probability) con
         for (j = 0;j < nb_state;j++) {
           nb_parameter = discrete_parametric_process[i]->observation[j]->nb_parameter_computation();
 
-          if (hidden) {
-            penalty += nb_parameter * log(state_marginal[j] * semi_markov_data->cumul_length);
-          }
-          else {
+          switch (hidden) {
+            case false :
             penalty += nb_parameter *
                        log((double)semi_markov_data->marginal_distribution[0]->frequency[j]);
+            break;
+          case true :
+            penalty += nb_parameter * log(state_marginal[j] * semi_markov_data->cumul_length);
+            break;
           }
         }
       }
@@ -2700,12 +2742,14 @@ double SemiMarkov::penalty_computation(bool hidden , double min_probability) con
         for (j = 0;j < nb_state;j++) {
           nb_parameter = continuous_parametric_process[i]->observation[j]->nb_parameter_computation();
 
-          if (hidden) {
-            penalty += nb_parameter * log(state_marginal[j] * semi_markov_data->cumul_length);
-          }
-          else {
+          switch (hidden) {
+            case false :
             penalty += nb_parameter *
                        log((double)semi_markov_data->marginal_distribution[0]->frequency[j]);
+            break;
+          case true :
+            penalty += nb_parameter * log(state_marginal[j] * semi_markov_data->cumul_length);
+            break;
           }
         }
       }
@@ -2721,11 +2765,11 @@ double SemiMarkov::penalty_computation(bool hidden , double min_probability) con
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Default constructor of the SemiMarkovData class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par defaut de la classe SemiMarkovData.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovData::SemiMarkovData()
 
@@ -2738,25 +2782,22 @@ SemiMarkovData::SemiMarkovData()
   sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
-  posterior_state_probability = NULL;
   entropy = NULL;
   nb_state_sequence = NULL;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the SemiMarkovData class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] ilength_distribution sequence length frequency distribution,
- *  \param[in] inb_variable         number of variables,
- *  \param[in] itype                variable types,
- *  \param[in] init_flag            flag initialization.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe SemiMarkovData.
+ *
+ *  arguments : loi empirique des longueurs des sequences, nombre de variables,
+ *              type de chaque variable, flag initialisation.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovData::SemiMarkovData(const FrequencyDistribution &ilength_distribution , int inb_variable ,
-                               variable_nature *itype , bool init_flag)
+                               int *itype , bool init_flag)
 :MarkovianSequences(ilength_distribution , inb_variable , itype , init_flag)
 
 {
@@ -2768,23 +2809,22 @@ SemiMarkovData::SemiMarkovData(const FrequencyDistribution &ilength_distribution
   sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
-  posterior_state_probability = NULL;
   entropy = NULL;
   nb_state_sequence = NULL;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a SemiMarkovData object from a MarkovianSequences object
- *         adding a state variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq reference on a MarkovianSequences object.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet SemiMarkovData a partir d'un objet MarkovianSequences
+ *  avec ajout d'une variable d'etat.
+ *
+ *  argument : reference sur un objet MarkovianSequences.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovData::SemiMarkovData(const MarkovianSequences &seq)
-:MarkovianSequences(seq , ADD_STATE_VARIABLE , UNCHANGED)
+:MarkovianSequences(seq , 'a' , UNCHANGED)
 
 {
   semi_markov = NULL;
@@ -2795,23 +2835,22 @@ SemiMarkovData::SemiMarkovData(const MarkovianSequences &seq)
   sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
-  posterior_state_probability = NULL;
   entropy = NULL;
   nb_state_sequence = NULL;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a SemiMarkovData object from a MarkovianSequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq              reference on a MarkovianSequences object,
- *  \param[in] transform        type of transform (SEQUENCE_COPY/ADD_STATE_VARIABLE),
- *  \param[in] initial_run_flag addition/removing of the initial run length frequency distributions.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet SemiMarkovData a partir d'un objet MarkovianSequences.
+ *
+ *  arguments : reference sur un objet MarkovianSequences, type de transformation
+ *              ('c' : copie, 'a' : ajout d'une variable d'etat),
+ *              ajout/suppression des lois empiriques de temps de sejour initial.
+ *
+ *--------------------------------------------------------------*/
 
-SemiMarkovData::SemiMarkovData(const MarkovianSequences &seq , sequence_transformation transform ,
+SemiMarkovData::SemiMarkovData(const MarkovianSequences &seq , char transform ,
                                bool initial_run_flag)
 :MarkovianSequences(seq , transform , (initial_run_flag ? ADD_INITIAL_RUN : REMOVE_INITIAL_RUN))
 
@@ -2824,25 +2863,24 @@ SemiMarkovData::SemiMarkovData(const MarkovianSequences &seq , sequence_transfor
   sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
-  posterior_state_probability = NULL;
   entropy = NULL;
   nb_state_sequence = NULL;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *   \brief Copy of a SemiMarkovData object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq        reference on a SemiMarkovData object,
- *  \param[in] model_flag flag copy of the included SemiMarkov object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet SemiMarkovData.
+ *
+ *  arguments : reference sur un objet SemiMarkovData,
+ *              flag copie de l'objet SemiMarkov.
+ *
+ *--------------------------------------------------------------*/
 
 void SemiMarkovData::copy(const SemiMarkovData &seq , bool model_flag)
 
 {
-  int i;
+  register int i;
 
 
   if ((model_flag) && (seq.semi_markov)) {
@@ -2873,16 +2911,6 @@ void SemiMarkovData::copy(const SemiMarkovData &seq , bool model_flag)
     posterior_probability = NULL;
   }
 
-  if (seq.posterior_state_probability) {
-    posterior_state_probability = new double[nb_sequence];
-    for (i = 0;i < nb_sequence;i++) {
-      posterior_state_probability[i] = seq.posterior_state_probability[i];
-    }
-  }
-  else {
-    posterior_state_probability = NULL;
-  }
-
   if (seq.entropy) {
     entropy = new double[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
@@ -2905,11 +2933,11 @@ void SemiMarkovData::copy(const SemiMarkovData &seq , bool model_flag)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the SemiMarkovData class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe SemiMarkovData.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovData::~SemiMarkovData()
 
@@ -2918,21 +2946,18 @@ SemiMarkovData::~SemiMarkovData()
   delete chain_data;
 
   delete [] posterior_probability;
-  delete [] posterior_state_probability;
   delete [] entropy;
   delete [] nb_state_sequence;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the SemiMarkovData class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq reference on a SemiMarkovData object.
+ *  Operateur d'assignement de la classe SemiMarkovData.
  *
- *  \return        SemiMarkovData object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet SemiMarkovData.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovData& SemiMarkovData::operator=(const SemiMarkovData &seq)
 
@@ -2942,7 +2967,6 @@ SemiMarkovData& SemiMarkovData::operator=(const SemiMarkovData &seq)
     delete chain_data;
 
     delete [] posterior_probability;
-    delete [] posterior_state_probability;
     delete [] entropy;
     delete [] nb_state_sequence;
 
@@ -2958,20 +2982,16 @@ SemiMarkovData& SemiMarkovData::operator=(const SemiMarkovData &seq)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of a frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] histo_type frequency distribution type,
- *  \param[in] variable   variable,
- *  \param[in] value      state or observation.
+ *  Extraction d'une loi empirique.
  *
- *  \return               DiscreteDistributionData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, type de loi empirique,
+ *              variable, etat ou observation.
+ *
+ *--------------------------------------------------------------*/
 
-DiscreteDistributionData* SemiMarkovData::extract(StatError &error , process_distribution histo_type ,
+DiscreteDistributionData* SemiMarkovData::extract(StatError &error , int type ,
                                                   int variable , int value) const
 
 {
@@ -2988,7 +3008,7 @@ DiscreteDistributionData* SemiMarkovData::extract(StatError &error , process_dis
 
   phisto = NULL;
 
-  if (histo_type == OBSERVATION) {
+  if (type == OBSERVATION) {
     if ((variable < 2) || (variable > nb_variable)) {
       status = false;
       error.update(STAT_error[STATR_VARIABLE_INDEX]);
@@ -3052,7 +3072,7 @@ DiscreteDistributionData* SemiMarkovData::extract(StatError &error , process_dis
       }
 
       if (status) {
-        switch (histo_type) {
+        switch (type) {
 
         case FIRST_OCCURRENCE : {
           phisto = characteristics[variable]->first_occurrence[value];
@@ -3115,7 +3135,7 @@ DiscreteDistributionData* SemiMarkovData::extract(StatError &error , process_dis
     pdist = NULL;
     pparam = NULL;
 
-    switch (histo_type) {
+    switch (type) {
 
     case OBSERVATION : {
       if (semi_markov->categorical_process[variable - 1]) {
@@ -3179,46 +3199,13 @@ DiscreteDistributionData* SemiMarkovData::extract(StatError &error , process_dis
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a SemiMarkovData object transforming the implicit index parameters in
- *         explicit index parameters.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Suppression du parametre d'index.
  *
- *  \return          SemiMarkovData object.
- */
-/*--------------------------------------------------------------*/
-
-SemiMarkovData* SemiMarkovData::explicit_index_parameter(StatError &error) const
-
-{
-  SemiMarkovData *seq;
-
-
-  error.init();
-
-  if (index_parameter) {
-    seq = NULL;
-    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
-  }
-  else {
-    seq = new SemiMarkovData(*this , true , EXPLICIT_INDEX_PARAMETER);
-  }
-
-  return seq;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Removing of the index parameters.
+ *  argument : reference sur un objet StatError.
  *
- *  \param[in] error reference on a StatError object.
- *
- *  \return          SemiMarkovData object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 SemiMarkovData* SemiMarkovData::remove_index_parameter(StatError &error) const
 
@@ -3233,29 +3220,56 @@ SemiMarkovData* SemiMarkovData::remove_index_parameter(StatError &error) const
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
-    seq = new SemiMarkovData(*this , true , REMOVE_INDEX_PARAMETER);
+    seq = new SemiMarkovData(*this , true , 'm');
   }
 
   return seq;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of the auxiliary variables corresponding to
- *         the restored state sequences.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Copie d'un objet SemiMarkovData avec transformation du parametre d'index implicite
+ *  en parametre d'index explicite.
  *
- *  \return          SemiMarkovData object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
+
+SemiMarkovData* SemiMarkovData::explicit_index_parameter(StatError &error) const
+
+{
+  SemiMarkovData *seq;
+
+
+  error.init();
+
+  if (index_parameter) {
+    seq = NULL;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+  else {
+    seq = new SemiMarkovData(*this , true , 'e');
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction des variables auxilliaires correspondant a
+ *  la restauration des sequences d'etats optimales.
+ *
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
 
 MarkovianSequences* SemiMarkovData::build_auxiliary_variable(StatError &error) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   MarkovianSequences *seq;
 
 
@@ -3291,77 +3305,36 @@ MarkovianSequences* SemiMarkovData::build_auxiliary_variable(StatError &error) c
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Building of residual sequences on the basis of restored state sequences.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Ecriture d'un objet SemiMarkovData.
  *
- *  \return          MarkovianSequences object.
- */
-/*--------------------------------------------------------------*/
-
-MarkovianSequences* SemiMarkovData::residual_sequences(StatError &error) const
-
-{
-  MarkovianSequences *seq;
-
-
-  error.init();
-
-  if (type[0] != STATE) {
-    seq = NULL;
-
-    ostringstream error_message;
-    error_message << STAT_label[STATL_VARIABLE] << " 1: "
-                  << STAT_error[STATR_VARIABLE_TYPE];
-    error.correction_update((error_message.str()).c_str() , STAT_variable_word[STATE]);
-  }
-
-  else {
-    seq = MarkovianSequences::residual_sequences(semi_markov->categorical_process ,
-                                                 semi_markov->discrete_parametric_process ,
-                                                 semi_markov->continuous_parametric_process);
-  }
-
-  return seq;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a SemiMarkovData object.
+ *  arguments : stream, flag niveau de detail.
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 ostream& SemiMarkovData::ascii_write(ostream &os , bool exhaustive) const
 
 {
   if (semi_markov) {
     semi_markov->ascii_write(os , this , exhaustive , false ,
-                             CategoricalSequenceProcess::test_hidden(semi_markov->nb_output_process , semi_markov->categorical_process));
+                             sequence_analysis::test_hidden(semi_markov->nb_output_process , semi_markov->categorical_process));
   }
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a SemiMarkovData object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet SemiMarkovData dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool SemiMarkovData::ascii_write(StatError &error , const string path ,
+bool SemiMarkovData::ascii_write(StatError &error , const char *path ,
                                  bool exhaustive) const
 
 {
@@ -3369,7 +3342,7 @@ bool SemiMarkovData::ascii_write(StatError &error , const string path ,
 
 
   if (semi_markov) {
-    ofstream out_file(path.c_str());
+    ofstream out_file(path);
 
     error.init();
 
@@ -3381,7 +3354,7 @@ bool SemiMarkovData::ascii_write(StatError &error , const string path ,
     else {
       status = true;
       semi_markov->ascii_write(out_file , this , exhaustive , true ,
-                               CategoricalSequenceProcess::test_hidden(semi_markov->nb_output_process , semi_markov->categorical_process));
+                               sequence_analysis::test_hidden(semi_markov->nb_output_process , semi_markov->categorical_process));
     }
   }
 
@@ -3389,48 +3362,39 @@ bool SemiMarkovData::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a SemiMarkovData object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     format     format (line/column),
- *  \param[in]     exhaustive flag detail level.
+ *  Ecriture d'un objet SemiMarkovData.
  *
- *  \return                   error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : stream, format (ligne/colonne), flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-ostream& SemiMarkovData::ascii_data_write(ostream &os , output_sequence_format format ,
-                                          bool exhaustive) const
+ostream& SemiMarkovData::ascii_data_write(ostream &os , char format , bool exhaustive) const
 
 {
   MarkovianSequences::ascii_write(os , exhaustive , false);
-  ascii_print(os , format , false , posterior_probability , entropy , nb_state_sequence , posterior_state_probability);
+  ascii_print(os , format , false , posterior_probability , entropy , nb_state_sequence);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a SemiMarkovData object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] format     format (line/column),
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet SemiMarkovData dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              format (ligne/colonne), flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool SemiMarkovData::ascii_data_write(StatError &error , const string path ,
-                                      output_sequence_format format , bool exhaustive) const
+bool SemiMarkovData::ascii_data_write(StatError &error , const char *path ,
+                                      char format , bool exhaustive) const
 
 {
   bool status = false;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -3445,32 +3409,29 @@ bool SemiMarkovData::ascii_data_write(StatError &error , const string path ,
     if (format != 'a') {
       MarkovianSequences::ascii_write(out_file , exhaustive , true);
     }
-    ascii_print(out_file , format , true , posterior_probability , entropy , nb_state_sequence , posterior_state_probability);
+    ascii_print(out_file , format , true , posterior_probability , entropy , nb_state_sequence);
   }
 
   return status;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a SemiMarkovData object in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet SemiMarkovData dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool SemiMarkovData::spreadsheet_write(StatError &error , const string path) const
+bool SemiMarkovData::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status = false;
 
 
   if (semi_markov) {
-    ofstream out_file(path.c_str());
+    ofstream out_file(path);
 
     error.init();
 
@@ -3482,7 +3443,7 @@ bool SemiMarkovData::spreadsheet_write(StatError &error , const string path) con
     else {
       status = true;
       semi_markov->spreadsheet_write(out_file , this ,
-                                     CategoricalSequenceProcess::test_hidden(semi_markov->nb_output_process , semi_markov->categorical_process));
+                                     sequence_analysis::test_hidden(semi_markov->nb_output_process , semi_markov->categorical_process));
     }
   }
 
@@ -3490,17 +3451,14 @@ bool SemiMarkovData::spreadsheet_write(StatError &error , const string path) con
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a SemiMarkovData object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title.
+ *  Sortie Gnuplot d'un objet SemiMarkovData.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool SemiMarkovData::plot_write(StatError &error , const char *prefix ,
                                 const char *title) const
@@ -3523,13 +3481,11 @@ bool SemiMarkovData::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a SemiMarkovData object.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet SemiMarkovData.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* SemiMarkovData::get_plotable() const
 

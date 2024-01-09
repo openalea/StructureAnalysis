@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: clusters.cpp 17977 2015-04-23 06:35:58Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -36,11 +36,13 @@
 
 
 
-#include <string>
 #include <sstream>
 #include <iomanip>
 #include <cstring>
 
+#include "tool/config.h"
+
+#include "stat_tools.h"
 #include "distance_matrix.h"
 #include "stat_label.h"
 
@@ -56,11 +58,11 @@ extern int* pattern_sort(int nb_pattern , double *distance , int nb_sorted_patte
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Default constructor of the Clusters class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par defaut de la classe Clusters.
+ *
+ *--------------------------------------------------------------*/
 
 Clusters::Clusters()
 
@@ -78,20 +80,19 @@ Clusters::Clusters()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Clusters class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist_matrix reference on a DistanceMatrix object,
- *  \param[in] inb_cluster number of clusters.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Clusters.
+ *
+ *  arguments : reference sur un objet DistanceMatrix et nombre de groupes.
+ *
+ *--------------------------------------------------------------*/
 
 Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster)
 :DistanceMatrix(dist_matrix , inb_cluster , STAT_label[STATL_CLUSTER])
 
 {
-  int i , j;
+  register int i , j;
 
 
   distance_matrix = new DistanceMatrix(dist_matrix);
@@ -127,23 +128,21 @@ Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Clusters class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist_matrix         reference on a DistanceMatrix object,
- *  \param[in] inb_cluster         number of clusters,
- *  \param[in] icluster_nb_pattern pointer on the cluster sizes,
- *  \param[in] cluster_pattern     pointer on the cluster compositions.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Clusters.
+ *
+ *  arguments : reference sur un objet DistanceMatrix, nombre de groupes,
+ *              effectifs et composition des groupes.
+ *
+ *--------------------------------------------------------------*/
 
 Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster ,
                    int *icluster_nb_pattern , int **cluster_pattern)
 :DistanceMatrix(dist_matrix , inb_cluster , STAT_label[STATL_CLUSTER])
 
 {
-  int i , j , k;
+  register int i , j , k;
 
 
   distance_matrix = new DistanceMatrix(dist_matrix);
@@ -189,18 +188,18 @@ Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Clusters object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] clusters reference on a Clusters object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Clusters.
+ *
+ *  arguments : reference sur un objet Clusters.
+ *
+ *--------------------------------------------------------------*/
 
 void Clusters::copy(const Clusters &clusters)
 
 {
-  int i , j;
+  register int i , j;
 
 
   distance_matrix = new DistanceMatrix(*(clusters.distance_matrix));
@@ -236,16 +235,16 @@ void Clusters::copy(const Clusters &clusters)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the data members of a Clusters object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet Clusters.
+ *
+ *--------------------------------------------------------------*/
 
 void Clusters::remove()
 
 {
-  int i;
+  register int i;
 
 
   delete distance_matrix;
@@ -269,11 +268,11 @@ void Clusters::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the Clusters class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe Clusters.
+ *
+ *--------------------------------------------------------------*/
 
 Clusters::~Clusters()
 
@@ -282,15 +281,13 @@ Clusters::~Clusters()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the Clusters class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] clusters reference on a Clusters object.
+ *  Operateur d'assignement de la classe Clusters.
  *
- *  \return             Clusters object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet Clusters.
+ *
+ *--------------------------------------------------------------*/
 
 Clusters& Clusters::operator=(const Clusters &clusters)
 
@@ -307,13 +304,13 @@ Clusters& Clusters::operator=(const Clusters &clusters)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing on a line of a Clusters object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture sur une ligne d'un objet Clusters.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Clusters::line_write(ostream &os) const
 
@@ -325,22 +322,20 @@ ostream& Clusters::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Sort of the individuals of a cluster by increasing average distance to
- *         another individual of the cluster.
+/*--------------------------------------------------------------*
  *
- *  \param[in] cluster cluster index.
+ *  Tri des formes d'un groupe par distance moyenne croissante a
+ *  une autre forme du groupe.
  *
- *  \return            sorted individual indices.
- */
-/*--------------------------------------------------------------*/
+ *  argument : indice du groupe.
+ *
+ *--------------------------------------------------------------*/
 
 int* Clusters::pattern_sort(int cluster) const
 
 {
   bool *selected_pattern;
-  int i , j;
+  register int i , j;
   int *index;
   double min_distance , *normalized_distance;
 
@@ -384,33 +379,32 @@ int* Clusters::pattern_sort(int cluster) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Clusters object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet Clusters.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  int i , j;
+  register int i , j;
   int buff , max_identifier , neighbor_cluster , most_distant_pattern , neighbor_pattern ,
       isolation , *index , *order , width[3];
+  long old_adjust;
   double **normalized_pattern_distance , **normalized_pattern_cluster_distance ,
          **normalized_cluster_distance;
-  ios_base::fmtflags format_flags;
 
 
-  format_flags = os.setf(ios::right , ios::adjustfield);
+  old_adjust = os.setf(ios::right , ios::adjustfield);
 
   if (exhaustive) {
     order = new int[nb_pattern];
   }
 
-  // writing of the cluster compositions
+  // ecriture de la composition des groupes
 
   for (i = 0;i < nb_cluster;i++) {
     index = pattern_sort(i);
@@ -447,7 +441,7 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
     }
   }
 
-  // computation of the column widths
+  // calcul de la largeur des colonnes
 
   width[2] = 0;
   for (i = 0;i < nb_pattern;i++) {
@@ -472,7 +466,7 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
       }
     }
 
-    // computation of the column widths
+    // calcul des largeurs des colonnes
 
     max_identifier = 0;
     for (i = 0;i < nb_pattern;i++) {
@@ -492,7 +486,7 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
     }
     width[1] += ASCII_SPACE;
 
-    // writing of the individual/cluster distance matrix
+    // ecriture de la matrice des distances formes/groupes
 
     os << "\n" << distance_matrix->label << "/" << STAT_label[STATL_CLUSTER] << " "
        << STAT_label[STATL_DISTANCE] << " " << STAT_label[STATL_MATRIX] << endl;
@@ -515,9 +509,9 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
       os << endl;
     }
 
-    // writing of the distances between an individual and, (i) the cluster to which this individual is assigned,
-    // (ii) the neighboring cluster, (iii) the farthest individual within the cluster,
-    // (iv) the closest individual belonging to another cluster
+    // ecriture des distances entre une forme donne et, (i) le groupe auquel appartient la forme,
+    // (ii) le groupe voisin, (iii) la forme la plus distante a l'interieur du groupe,
+    // (iv) la forme d'un autre groupe la plus proche
 
     os << "\n";
     for (i = 0;i < distance_matrix->label_size - 1;i++) {
@@ -554,8 +548,6 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
     delete [] normalized_pattern_cluster_distance;
   }
 
-  // computation of within-cluster and between-cluster distances
-
   normalized_cluster_distance = new double*[nb_cluster];
   for (i = 0;i < nb_cluster;i++) {
     normalized_cluster_distance[i] = new double[nb_cluster];
@@ -567,7 +559,7 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
     }
   }
 
-  // computation of the column widths
+  // calcul des largeurs des colonnes
 
   width[0] = column_width(nb_cluster);
 
@@ -580,7 +572,7 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
   }
   width[1] += ASCII_SPACE;
 
-  // writing of the between-cluster distance matrix
+  // ecriture de la matrice des distance entre groupes
 
   os << "\n" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE] << " "
      << STAT_label[STATL_MATRIX] << endl;
@@ -599,10 +591,9 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
     os << endl;
   }
 
-  // for each cluster, writing of (i) the within-cluster distance, (ii) the between-cluster distance,
-  // (iii) the largest distance between individuals of a cluster (diameter),
-  // (iv) the smallest distance between individuals, one belonging to the cluster and
-  // the other to another cluster (separation)
+  // ecriture (i) de la distance intra-groupe, (ii) de la distance inter-groupe,
+  // (iii) de la distance entre les formes les plus distantes a l'interieur du groupe (diametre),
+  // (iv) de la distance entre les formes les plus proches entre ce groupe et un autre (separation)
 
   os << "\n        " << setw(width[0]) << " " << " | "
      << STAT_label[STATL_WITHIN] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE] << " | "
@@ -619,12 +610,12 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
 
   for (i = 0;i < nb_cluster;i++) {
     os << "\n" << STAT_label[STATL_CLUSTER] << " " << i + 1 << ": ";
-    isolation = isolation_property(normalized_pattern_distance , i , CLUSTER_SCALE);
+    isolation = isolation_property(normalized_pattern_distance , i , 'c');
     if (isolation) {
       os << STAT_label[STATL_ISOLATED];
     }
     else {
-      isolation = isolation_property(normalized_pattern_distance , i , INDIVIDUAL);
+      isolation = isolation_property(normalized_pattern_distance , i , 'p');
       if (isolation) {
         os << STAT_label[STATL_ISOLATED] << " (" << STAT_label[STATL_PATTERN_LEVEL] << ")";
       }
@@ -645,30 +636,27 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
   }
   delete [] normalized_cluster_distance;
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Clusters object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet Clusters dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool Clusters::ascii_write(StatError &error , const string path ,
+bool Clusters::ascii_write(StatError &error , const char *path ,
                            bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -687,26 +675,23 @@ bool Clusters::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Clusters object in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet Clusters dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool Clusters::spreadsheet_write(StatError &error , const string path) const
+bool Clusters::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
-  int i , j;
+  register int i , j;
   int isolation , neighbor_cluster , most_distant_pattern , neighbor_pattern , *index , *order;
   double **normalized_pattern_distance , **normalized_pattern_cluster_distance ,
          **normalized_cluster_distance;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -719,7 +704,7 @@ bool Clusters::spreadsheet_write(StatError &error , const string path) const
   else {
     status = true;
 
-    // writing of the cluster compositions
+    // ecriture de la composition des groupes
 
     order = new int[nb_pattern];
 
@@ -766,7 +751,7 @@ bool Clusters::spreadsheet_write(StatError &error , const string path) const
       }
     }
 
-    // writing of the individual/cluster distance matrix
+    // ecriture de la matrice des distances formes/groupes
 
     out_file << "\n" << distance_matrix->label << "/" << STAT_label[STATL_CLUSTER] << " "
              << STAT_label[STATL_DISTANCE] << " " << STAT_label[STATL_MATRIX] << endl;
@@ -785,9 +770,9 @@ bool Clusters::spreadsheet_write(StatError &error , const string path) const
       out_file << endl;
     }
 
-    // writing of the distances between an individual and, (i) the cluster to which this individual is assigned,
-    // (ii) the neighboring cluster, (iii) the farthest individual within the cluster,
-    // (iv) the closest individual belonging to another cluster
+    // ecriture des distances entre une forme donne et, (i) le groupe auquel appartient la forme,
+    // (ii) le groupe voisin, (iii) la forme la plus distante a l'interieur du groupe,
+    // (iv) la forme d'un autre groupe la plus proche
 
     out_file << "\n\t" << STAT_label[STATL_WITHIN] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
              << "\t" << STAT_label[STATL_NEIGHBOR] << " " << STAT_label[STATL_CLUSTER] << "\t"
@@ -818,7 +803,7 @@ bool Clusters::spreadsheet_write(StatError &error , const string path) const
     }
     delete [] normalized_pattern_cluster_distance;
 
-    // computation of within-cluster and between-cluster distances
+    // calcul des distances intra-groupe et inter-groupe
 
     normalized_cluster_distance = new double*[nb_cluster];
     for (i = 0;i < nb_cluster;i++) {
@@ -831,7 +816,7 @@ bool Clusters::spreadsheet_write(StatError &error , const string path) const
       }
     }
 
-    // writing of the between-cluster distance matrix
+    // ecriture de la matrice des distance entre groupes
 
     out_file << "\n" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE] << " "
              << STAT_label[STATL_MATRIX] << endl;
@@ -850,10 +835,9 @@ bool Clusters::spreadsheet_write(StatError &error , const string path) const
       out_file << endl;
     }
 
-    // for each cluster, writing of (i) the within-cluster distance, (ii) the between-cluster distance,
-    // (iii) the largest distance between individuals of the cluster (diameter),
-    // (iv) the smallest distance between individuals, one belonging to the cluster and
-    // the other to another cluster (separation)
+    // ecriture (i) de la distance intra-groupe, (ii) de la distance inter-groupe,
+    // (iii) de la distance entre les formes les plus distantes a l'interieur du groupe (diametre),
+    // (iv) de la distance entre les formes les plus proches entre ce groupe et un autre (separation)
 
     out_file << "\n\t" << STAT_label[STATL_WITHIN] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
              << "\t"  << STAT_label[STATL_BETWEEN] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
@@ -869,12 +853,12 @@ bool Clusters::spreadsheet_write(StatError &error , const string path) const
 
     for (i = 0;i < nb_cluster;i++) {
       out_file << "\n" << STAT_label[STATL_CLUSTER] << " " << i + 1 << "\t";
-      isolation = isolation_property(normalized_pattern_distance , i , CLUSTER_SCALE);
+      isolation = isolation_property(normalized_pattern_distance , i , 'c');
       if (isolation) {
         out_file << STAT_label[STATL_ISOLATED];
       }
       else {
-        isolation = isolation_property(normalized_pattern_distance , i , INDIVIDUAL);
+        isolation = isolation_property(normalized_pattern_distance , i , 'p');
         if (isolation) {
           out_file << STAT_label[STATL_ISOLATED] << " (" << STAT_label[STATL_PATTERN_LEVEL] << ")";
         }
@@ -900,31 +884,28 @@ bool Clusters::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a Clusters object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title.
+ *  Sortie Gnuplot d'un objet Clusters.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool Clusters::plot_write(StatError &error , const char *prefix ,
                           const char *title) const
 
 {
   bool status = true;
-  int i , j , k;
+  register int i , j , k;
   int max_nb_pattern , plot_nb_cluster , *plot_nb_pattern , **index;
   double min_distance , max_distance , **normalized_distance;
   ostringstream *data_file_name;
   ofstream *out_data_file;
 
 
-  // writing of the data files
+  // ecriture des fichiers de donnees
 
   data_file_name = new ostringstream[nb_cluster];
 
@@ -945,7 +926,7 @@ bool Clusters::plot_write(StatError &error , const char *prefix ,
 
     for (i = 0;i < nb_cluster;i++) {
 
-      // sort of distances by increasing distance
+      // tri par distance croissante
 
       index[i] = pattern_sort(i);
 
@@ -1008,7 +989,7 @@ bool Clusters::plot_write(StatError &error , const char *prefix ,
         }
       }
 
-      // writing of the script files
+      // ecriture du fichier de commandes et du fichier d'impression
 
       for (i = 0;i < 2;i++) {
         ostringstream file_name[2];
@@ -1102,20 +1083,18 @@ bool Clusters::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a Clusters object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Sortie graphique d'un objet Clusters.
  *
- *  \return          MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* Clusters::get_plotable(StatError &error) const
 
 {
-  int i , j , k;
+  register int i , j , k;
   int max_nb_pattern , plot_nb_cluster , *plot_nb_pattern , **index;
   double min_distance , max_distance , **normalized_distance;
   ostringstream title , legend , identifier;
@@ -1130,7 +1109,7 @@ MultiPlotSet* Clusters::get_plotable(StatError &error) const
 
   for (i = 0;i < nb_cluster;i++) {
 
-    // sort of distances by increasing distances
+    // tri par distance croissante
 
     index[i] = pattern_sort(i);
 
@@ -1240,13 +1219,11 @@ MultiPlotSet* Clusters::get_plotable(StatError &error) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a Clusters object.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet Clusters.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* Clusters::get_plotable() const
 
@@ -1259,16 +1236,16 @@ MultiPlotSet* Clusters::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of cluster sizes.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des effectifs des groupes.
+ *
+ *--------------------------------------------------------------*/
 
 void Clusters::cluster_nb_pattern_computation()
 
 {
-  int i;
+  register int i;
 
 
   for (i = 0;i < nb_cluster;i++) {
@@ -1281,17 +1258,17 @@ void Clusters::cluster_nb_pattern_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of individual-cluster distances and associated lengths
- *         on the basis of individual assignment to clusters.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des distances entre formes et groupes et des longueurs
+ *  correspondantes a partir des affectations des formes.
+ *
+ *--------------------------------------------------------------*/
 
 void Clusters::pattern_distance_computation()
 
 {
-  int i , j;
+  register int i , j;
 
 
   for (i = 0;i < nb_pattern;i++) {
@@ -1318,16 +1295,16 @@ void Clusters::pattern_distance_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of between-cluster distances and associated lengths.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des distances entre groupes et des longueurs correspondantes.
+ *
+ *--------------------------------------------------------------*/
 
 void Clusters::cluster_distance_computation_1()
 
 {
-  int i , j;
+  register int i , j;
 
 
   for (i = 0;i < nb_cluster;i++) {
@@ -1464,17 +1441,18 @@ void Clusters::cluster_distance_computation_1()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of between-cluster distances and associated lengths
- *         on the basis of individual-cluster distances and associated lengths.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des distances entre groupes et des longueurs correspondantes
+ *  a partir des distances entre formes et groupes et des longueurs
+ *  correspondantes.
+ *
+ *--------------------------------------------------------------*/
 
 void Clusters::cluster_distance_computation_2()
 
 {
-  int i , j;
+  register int i , j;
 
 
   for (i = 0;i < nb_cluster;i++) {
@@ -1501,7 +1479,7 @@ void Clusters::cluster_distance_computation_2()
 
 # ifdef DEBUG
   {
-    int k;
+    register int k;
     double **normalized_distance;
 
 
@@ -1542,21 +1520,18 @@ void Clusters::cluster_distance_computation_2()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of the farthest individual assigned to the same cluster.
+/*--------------------------------------------------------------*
  *
- *  \param[in] normalized_distance normalized distance matrix,
- *  \param[in] ipattern            individual index.
+ *  Recherche de la forme la plus distante appartenant au meme groupe.
  *
- *  \return                        farthest individual index.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : matrice des distances normalisees, indice de la forme.
+ *
+ *--------------------------------------------------------------*/
 
 int Clusters::most_distant_pattern_selection(double **normalized_distance , int ipattern) const
 
 {
-  int i;
+  register int i;
   int pattern = ipattern;
   double max_within_cluster_distance;
 
@@ -1576,21 +1551,18 @@ int Clusters::most_distant_pattern_selection(double **normalized_distance , int 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of the closest individual assigned to another cluster.
+/*--------------------------------------------------------------*
  *
- *  \param[in] normalized_distance normalized distance matrix,
- *  \param[in] ipattern            individual index.
+ *  Recherche de la forme la plus proche appartenant a un autre groupe.
  *
- *  \return                        closest individual index.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : matrice des distances normalisees, indice de la forme.
+ *
+ *--------------------------------------------------------------*/
 
 int Clusters::neighbor_pattern_selection(double **normalized_distance , int ipattern) const
 
 {
-  int i;
+  register int i;
   int pattern;
   double min_between_cluster_distance;
 
@@ -1608,21 +1580,18 @@ int Clusters::neighbor_pattern_selection(double **normalized_distance , int ipat
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of the closest cluster for a given individual.
+/*--------------------------------------------------------------*
  *
- *  \param[in] normalized_distance normalized distance matrix,
- *  \param[in] pattern             individual index.
+ *  Recherche du groupe le plus proche pour une forme donnee.
  *
- *  \return                        closest cluster index.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : matrice des distances normalisees, indice de la forme.
+ *
+ *--------------------------------------------------------------*/
 
 int Clusters::neighbor_pattern_cluster_selection(double **normalized_distance , int pattern) const
 
 {
-  int i;
+  register int i;
   int cluster;
   double min_between_cluster_distance;
 
@@ -1640,21 +1609,18 @@ int Clusters::neighbor_pattern_cluster_selection(double **normalized_distance , 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the cluster diameter (maximum within-cluster distance).
+/*--------------------------------------------------------------*
  *
- *  \param[in] normalized_distance normalized distance matrix,
- *  \param[in] cluster             cluster index.
+ *  Calcul du diametre (distance intra-classe maximum) d'un groupe.
  *
- *  \return                        cluster diameter.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : matrice des distances normalisees, indice du groupe.
+ *
+ *--------------------------------------------------------------*/
 
 double Clusters::max_within_cluster_distance_computation(double **normalized_distance , int cluster) const
 
 {
-  int i , j;
+  register int i , j;
   double max_within_cluster_distance;
 
 
@@ -1677,21 +1643,18 @@ double Clusters::max_within_cluster_distance_computation(double **normalized_dis
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the cluster separation (minimum between-cluster distance).
+/*--------------------------------------------------------------*
  *
- *  \param[in] normalized_distance normalized distance matrix,
- *  \param[in] cluster             cluster index.
+ *  Calcul de la separation d'un groupe (distance inter-classe minimum).
  *
- *  \return                        cluster separation.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : matrice des distances normalisees, indice du groupe.
+ *
+ *--------------------------------------------------------------*/
 
 double Clusters::min_between_cluster_distance_computation(double **normalized_distance , int cluster) const
 
 {
-  int i , j;
+  register int i , j;
   double min_between_cluster_distance;
 
 
@@ -1712,63 +1675,59 @@ double Clusters::min_between_cluster_distance_computation(double **normalized_di
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the cluster isolation property.
+/*--------------------------------------------------------------*
  *
- *  \param[in] normalized_distance normalized distance matrix,
- *  \param[in] cluster             cluster index,
- *  \param[in] scale               property at the individual (INDIVIDUAL) or cluster (CLUSTER_SCALE) level.
+ *  Calcul de la propriete d'isolement d'un groupe.
  *
- *  \return                        isolation property or not.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : matrice des distances normalisees, indice du groupe,
+ *              propriete niveau pattern ('p') ou niveau cluster ('c').
+ *
+ *--------------------------------------------------------------*/
 
-bool Clusters::isolation_property(double **normalized_distance , int cluster ,
-                                  isolation_scale scale) const
+bool Clusters::isolation_property(double **normalized_distance , int cluster , char type) const
 
 {
   bool isolation = true;
-  int i , j;
-  double max_within_distance , min_between_distance;
+  register int i , j;
+  double max_intra_distance , min_inter_distance;
 
 
-  if (scale == CLUSTER_SCALE) {
-    max_within_distance = 0.;
-    min_between_distance = -D_INF;
+  if (type == 'c') {
+    max_intra_distance = 0.;
+    min_inter_distance = -D_INF;
   }
 
   for (i = 0;i < nb_pattern;i++) {
     if (assignment[i] == cluster) {
-      if (scale == INDIVIDUAL) {
-        max_within_distance = 0.;
-        min_between_distance = -D_INF;
+      if (type == 'p') {
+        max_intra_distance = 0.;
+        min_inter_distance = -D_INF;
       }
 
       for (j = 0;j < nb_pattern;j++) {
         if (j != i) {
           if (assignment[j] == cluster) {
-            if (normalized_distance[i][j] > max_within_distance) {
-              max_within_distance = normalized_distance[i][j];
+            if (normalized_distance[i][j] > max_intra_distance) {
+              max_intra_distance = normalized_distance[i][j];
             }
           }
 
           else {
-            if (normalized_distance[i][j] < min_between_distance) {
-              min_between_distance = normalized_distance[i][j];
+            if (normalized_distance[i][j] < min_inter_distance) {
+              min_inter_distance = normalized_distance[i][j];
             }
           }
         }
       }
 
-      if ((scale == INDIVIDUAL) && (max_within_distance >= min_between_distance)) {
+      if ((type == 'p') && (max_intra_distance >= min_inter_distance)) {
         isolation = false;
         break;
       }
     }
   }
 
-  if ((scale == CLUSTER_SCALE) && (max_within_distance >= min_between_distance)) {
+  if ((type == 'c') && (max_intra_distance >= min_inter_distance)) {
     isolation = false;
   }
 
@@ -1776,110 +1735,107 @@ bool Clusters::isolation_property(double **normalized_distance , int cluster ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the average distance between a given cluster and
- *         all the other clusters.
+/*--------------------------------------------------------------*
  *
- *  \param[in] cluster cluster index.
+ *  Calcul de la distance d'un groupe donne a tous les autres groupes.
  *
- *  \return            average distance.
- */
-/*--------------------------------------------------------------*/
+ *  argument : indice du groupe.
+ *
+ *--------------------------------------------------------------*/
 
 double Clusters::between_cluster_distance_computation(int cluster) const
 
 {
-  int i;
-  int between_length;
-  double between_distance;
+  register int i;
+  int inter_length;
+  double inter_distance;
 
 
-  between_distance = 0.;
-  between_length = 0;
+  inter_distance = 0.;
+  inter_length = 0;
 
   for (i = 0;i < nb_cluster;i++) {
     if (i != cluster) {
       if (distance[cluster][i] == -D_INF) {
-        between_distance = -D_INF;
+        inter_distance = -D_INF;
         break;
       }
       else {
-        between_distance += distance[cluster][i];
-        between_length += length[cluster][i];
+        inter_distance += distance[cluster][i];
+        inter_length += length[cluster][i];
       }
     }
   }
 
-  if ((between_distance != -D_INF) && (between_length > 1)) {
-    between_distance /= between_length;
+  if ((inter_distance != -D_INF) && (inter_length > 1)) {
+    inter_distance /= inter_length;
   }
 
-  return between_distance;
+  return inter_distance;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of within-cluster and between-cluster distances and
- *         writing of the results.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul des distances intra-groupe et inter-groupe globales et
+ *  ecriture des resultats.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Clusters::global_distance_ascii_print(ostream &os)
 
 {
-  int i , j;
-  int within_length , between_length;
-  double within_distance , between_distance;
+  register int i , j;
+  int intra_length , inter_length;
+  double intra_distance , inter_distance;
 
 
-  within_distance = 0.;
-  within_length = 0;
-  between_distance = 0.;
-  between_length = 0;
+  intra_distance = 0.;
+  intra_length = 0;
+  inter_distance = 0.;
+  inter_length = 0;
 
   for (i = 0;i < nb_cluster;i++) {
-    if (within_distance != -D_INF) {
+    if (intra_distance != -D_INF) {
       if (distance[i][i] == -D_INF) {
-        within_distance = -D_INF;
+        intra_distance = -D_INF;
       }
       else {
-        within_distance += distance[i][i];
-        within_length += length[i][i];
+        intra_distance += distance[i][i];
+        intra_length += length[i][i];
       }
     }
 
-    if (between_distance != -D_INF) {
+    if (inter_distance != -D_INF) {
       for (j = 0;j < nb_cluster;j++) {
         if (j != i) {
           if (distance[i][j] == -D_INF) {
-            between_distance = -D_INF;
+            inter_distance = -D_INF;
             break;
           }
           else {
-            between_distance += distance[i][j];
-            between_length += length[i][j];
+            inter_distance += distance[i][j];
+            inter_length += length[i][j];
           }
         }
       }
     }
   }
 
-  if ((within_distance != -D_INF) && (within_length > 1)) {
-    within_distance /= within_length;
+  if ((intra_distance != -D_INF) && (intra_length > 1)) {
+    intra_distance /= intra_length;
   }
-  if ((between_distance != -D_INF) && (between_length > 1)) {
-    between_distance /= between_length;
+  if ((inter_distance != -D_INF) && (inter_length > 1)) {
+    inter_distance /= inter_length;
   }
 
   os << "\n" << STAT_label[STATL_WITHIN] << "-" << STAT_label[STATL_CLUSTER] << " " << STAT_label[STATL_DISTANCE]
-     << ": " << within_distance << "   " << STAT_label[STATL_BETWEEN] << "-" << STAT_label[STATL_CLUSTER]
-     << " " << STAT_label[STATL_DISTANCE] << ": " << between_distance;
-  if ((within_distance != -D_INF) && (within_length > 0) && (between_distance != -D_INF) && (between_length > 0)) {
-    os << "   " << STAT_label[STATL_RATIO] << ": " << within_distance / between_distance << "\n";
+     << ": " << intra_distance << "   " << STAT_label[STATL_BETWEEN] << "-" << STAT_label[STATL_CLUSTER]
+     << " " << STAT_label[STATL_DISTANCE] << ": " << inter_distance;
+  if ((intra_distance != -D_INF) && (intra_length > 0) && (inter_distance != -D_INF) && (inter_length > 0)) {
+    os << "   " << STAT_label[STATL_RATIO] << ": " << intra_distance / inter_distance << "\n";
   }
   os << endl;
 
@@ -1887,17 +1843,17 @@ ostream& Clusters::global_distance_ascii_print(ostream &os)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Initialization of prototypes as a function of the average distance of an individual to
- *         the other individuals.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Initialisation des prototypes en fonction de la distance moyenne
+ *  d'une forme a toutes les autres formes.
+ *
+ *--------------------------------------------------------------*/
 
 void Clusters::prototype_initialization_1()
 
 {
-  int i;
+  register int i;
   int *index;
   double *cumul_distance;
 
@@ -1922,16 +1878,16 @@ void Clusters::prototype_initialization_1()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Initialization of prototypes (Kaufman & Rousseeuw, pp. 102-103).
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Initialisation des prototypes (Kaufman & Rousseeuw, pp. 102-103).
+ *
+ *--------------------------------------------------------------*/
 
 void Clusters::prototype_initialization_2()
 
 {
-  int i , j , k , m;
+  register int i , j , k , m;
   int *prototype , *index;
   double distance_diff , min_distance , max_distance , *cumul_distance , **normalized_distance;
 
@@ -1949,7 +1905,7 @@ void Clusters::prototype_initialization_2()
 
   prototype = new int[nb_cluster];
 
-  // determination of the first prototype (most central individual)
+  // recherche du premier prototype (forme la plus centrale)
 
   cumul_distance = new double[distance_matrix->nb_row];
 
@@ -1968,7 +1924,7 @@ void Clusters::prototype_initialization_2()
   delete [] cumul_distance;
   delete [] index;
 
-  // determination of the other prototypes
+  // recherche des autres prototypes
 
   for (i = 1;i < nb_cluster;i++) {
     max_distance = -1.;
@@ -2009,22 +1965,20 @@ void Clusters::prototype_initialization_2()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Update of the distances between individuals of the old and new cluster and
- *         the associated lengths as a function of the change in assignment of an individual.
+/*--------------------------------------------------------------*
  *
- *  \param[in] pattern     individual index,
- *  \param[in] old_cluster old cluster index.
- *  \param[in] new_cluster new cluster index.
- */
-/*--------------------------------------------------------------*/
+ *  Mise a jour des distances entre formes et l'ancien et le nouveau groupe,
+ *  et des longueurs correspondantes en fonction du changement d'affectation d'une forme.
+ *
+ *  arguments : indice de la forme, indices de l'ancien et du nouveau groupe.
+ *
+ *--------------------------------------------------------------*/
 
 void Clusters::pattern_distance_update(int pattern , int old_cluster , int new_cluster)
 
 {
   bool *pattern_flag , *cluster_flag;
-  int i , j;
+  register int i , j;
 
 
   for (i = 0;i < nb_pattern;i++) {
@@ -2079,17 +2033,17 @@ void Clusters::pattern_distance_update(int pattern , int old_cluster , int new_c
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Step of a partitioning clustering algorithm.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Etape elementaire d'un algorithme de clustering par partitionnement.
+ *
+ *--------------------------------------------------------------*/
 
 void Clusters::algorithmic_step_1()
 
 {
   bool infinite_distance;
-  int i , j;
+  register int i , j;
   int iter , nb_change , *tmp_assignment;
   double min_distance , normalized_distance;
 
@@ -2109,7 +2063,7 @@ void Clusters::algorithmic_step_1()
 
   tmp_assignment = new int[nb_pattern];
 
-  // initial assignment of the individuals
+  // affectation initiale des formes
 
   for (i = 0;i < nb_pattern;i++) {
     if (assignment[i] == I_DEFAULT) {
@@ -2157,7 +2111,7 @@ void Clusters::algorithmic_step_1()
     iter++;
     nb_change = 0;
 
-    // assignment of the individuals
+    // affectation des formes
 
     for (i = 0;i < nb_pattern;i++) {
       min_distance = -D_INF * 10.;
@@ -2174,8 +2128,8 @@ void Clusters::algorithmic_step_1()
         }
       }
 
-      // test old cluster empty and update of the size of the old and new clusters as a function
-      // of the change in assignment of an individual
+      // test ancien groupe vide et mise a jour des effectifs de l'ancien et
+      // du nouveau groupe en fonction du changement d'affectation d'une forme
 
       if (tmp_assignment[i] != assignment[i]) {
         if (cluster_nb_pattern[assignment[i]] > 1) {
@@ -2187,8 +2141,8 @@ void Clusters::algorithmic_step_1()
         }
       }
 
-      // update of the distances between individuals of the old and new clusters
-      // as a function of the change in assignment of an individual
+      // mise a jour des distances entre formes et l'ancien et le nouveau groupe
+      // en fonction du changement d'affectation d'une forme
 
       if ((iter > GLOBAL_NB_ITER) && (tmp_assignment[i] != assignment[i])) {
         nb_change++;
@@ -2197,7 +2151,7 @@ void Clusters::algorithmic_step_1()
       }
     }
 
-    // global update of the individual-cluster distances
+    // mise a jour globale des distances entre formes et groupes
 
     if (iter <= GLOBAL_NB_ITER) {
       for (i = 0;i < nb_pattern;i++) {
@@ -2244,22 +2198,23 @@ void Clusters::algorithmic_step_1()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Step of a partitioning clustering algorithm (Kaufman & Rousseeuw, pp. 103-104).
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Etape elementaire d'un algorithme de clustering par partitionnement
+ *  (Kaufman & Rousseeuw, pp. 103-104).
+ *
+ *--------------------------------------------------------------*/
 
 void Clusters::algorithmic_step_2()
 
 {
-  int i , j , k , m;
+  register int i , j , k , m;
   int iter , pattern , cluster , *prototype , *tmp_assignment , *index;
   double min_distance , min_swap_distance = D_INF , previous_min_swap_distance , *prototype_distance ,
          **normalized_distance , **swap_distance;
 
 
-  // initializations
+  // initialisations
 
   normalized_distance = new double*[distance_matrix->nb_row];
   for (i = 0;i < distance_matrix->nb_row;i++) {
@@ -2282,7 +2237,7 @@ void Clusters::algorithmic_step_2()
     tmp_assignment[i] = assignment[i];
   }
 
-  // assignment of the non-selected individuals to clusters
+  // affectation des formes non-selectionnees aux groupes
 
   for (i = 0;i < nb_pattern;i++) {
     if (tmp_assignment[i] == I_DEFAULT) {
@@ -2321,7 +2276,7 @@ void Clusters::algorithmic_step_2()
     iter++;
     previous_min_swap_distance = min_swap_distance;
 
-    // computation of the costs of replacement of prototypes
+    // calcul des couts de remplacement des prototypes
 
     for (i = 0;i < nb_pattern;i++) {
       if (tmp_assignment[i] == I_DEFAULT) {
@@ -2353,7 +2308,7 @@ void Clusters::algorithmic_step_2()
       }
     }
 
-    // choice of replacement of a prototype
+    // choix du remplacement d'un prototype
 
     min_swap_distance = -D_INF * nb_pattern * nb_cluster;
     for (i = 0;i < nb_pattern;i++) {
@@ -2380,7 +2335,7 @@ void Clusters::algorithmic_step_2()
       assignment[pattern] = cluster;
       prototype[cluster] = pattern;
 
-      // assignment of the non-selected individuals to clusters
+      // affectation des formes non-selectionnees aux groupes
 
       for (i = 0;i < nb_pattern;i++) {
         if (tmp_assignment[i] == I_DEFAULT) {
@@ -2444,26 +2399,21 @@ void Clusters::algorithmic_step_2()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Partitioning clustering algorithm.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error          reference on a StatError object,
- *  \param[in] display        flag for displaying the partitioning results,
- *  \param[in] nb_cluster     number of clusters,
- *  \param[in] initialization initial prototypes,
- *  \param[in] algorithm      algorithm type.
+ *  Algorithme de clustering par partitionnement.
  *
- *  \return                   Clusters object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, nombre de groupes,
+ *              prototypes initiaux.
+ *
+ *--------------------------------------------------------------*/
 
-Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_cluster ,
+Clusters* DistanceMatrix::partitioning(StatError &error , ostream &os , int nb_cluster ,
                                        int *prototype , int initialization , int algorithm) const
 
 {
   bool status = true , *selected_prototype;
-  int i , j;
+  register int i , j;
   int max_identifier;
   DistanceMatrix *dist_matrix;
   Clusters *clusters;
@@ -2533,7 +2483,7 @@ Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_
   }
 
   if (status) {
-    dist_matrix = new DistanceMatrix(*this , (test_symmetry() ? COPY : SYMMETRIZATION));
+    dist_matrix = new DistanceMatrix(*this , (test_symmetry() ? 'c' : 's'));
 
 #   ifdef DEBUG
     if (!(test_symmetry())) {
@@ -2543,7 +2493,7 @@ Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_
 
     clusters = new Clusters(*dist_matrix , nb_cluster);
 
-    // initialization of cluster prototypes
+    // initialisation des prototypes des groupes
 
     if (prototype) {
       for (i = 0;i < clusters->nb_cluster;i++) {
@@ -2578,7 +2528,7 @@ Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_
 #     endif
     }
 
-    // iterative clustering algorithm
+    // algorithme iteratif de clustering
 
     switch (algorithm) {
     case 1 :
@@ -2591,9 +2541,9 @@ Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_
 
     clusters->cluster_distance_computation_1();
 
-    if (display) {
-      clusters->global_distance_ascii_print(cout);
-    }
+#   ifdef MESSAGE
+    clusters->global_distance_ascii_print(os);
+#   endif
 
     delete dist_matrix;
   }
@@ -2602,26 +2552,21 @@ Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Partitioning clustering algorithm.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error              reference on a StatError object,
- *  \param[in] display            flag for displaying the partitioning results,
- *  \param[in] nb_cluster         number of clusters,
- *  \param[in] cluster_nb_pattern cluster sizes.
- *  \param[in] cluster_pattern    cluster compositions.
+ *  Algorithme de clustering par partitionnement.
  *
- *  \return                       Clusters object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, nombre de groupes,
+ *              effectifs et composition des groupes.
+ *
+ *--------------------------------------------------------------*/
 
-Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_cluster ,
+Clusters* DistanceMatrix::partitioning(StatError &error , ostream &os , int nb_cluster ,
                                        int *cluster_nb_pattern , int **cluster_pattern) const
 
 {
   bool status = true , *selected_pattern;
-  int i , j , k;
+  register int i , j , k;
   int nb_pattern , max_identifier;
   DistanceMatrix *dist_matrix;
   Clusters *clusters;
@@ -2704,7 +2649,7 @@ Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_
   }
 
   if (status) {
-    dist_matrix = new DistanceMatrix(*this , (test_symmetry() ?  COPY : SYMMETRIZATION));
+    dist_matrix = new DistanceMatrix(*this , (test_symmetry() ? 'c' : 's'));
 
 #   ifdef DEBUG
     if (!(test_symmetry())) {
@@ -2717,9 +2662,9 @@ Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_
     clusters->pattern_distance_computation();
     clusters->cluster_distance_computation_1();
 
-    if (display) {
-      clusters->global_distance_ascii_print(cout);
-    }
+#   ifdef MESSAGE
+    clusters->global_distance_ascii_print(os);
+#   endif
 
     delete dist_matrix;
   }

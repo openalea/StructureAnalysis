@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: interface.cpp 18004 2015-04-23 06:59:04Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -37,7 +37,6 @@
 
 
 #include <string.h>
-#include <string>
 #include <sstream>
 
 #include "stat_tools.h"
@@ -50,18 +49,18 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the StatError class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] imax_nb_error maximum number of errors.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe StatError.
+ *
+ *  argument : nombre maximum d'erreurs.
+ *
+ *--------------------------------------------------------------*/
 
 StatError::StatError(int imax_nb_error)
 
 {
-  int i;
+  register int i;
 
 
   nb_error = 0;
@@ -77,16 +76,16 @@ StatError::StatError(int imax_nb_error)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the StatError class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe StatError.
+ *
+ *--------------------------------------------------------------*/
 
 StatError::~StatError()
 
 {
-  int i;
+  register int i;
 
 
   delete [] line;
@@ -101,19 +100,18 @@ StatError::~StatError()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a StatError object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os   stream,
- *  \param[in]     type type (ERROR/WARNING).
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet StatError.
+ *
+ *  arguments : stream, type des erreurs (ERROR / WARNING).
+ *
+ *--------------------------------------------------------------*/
 
-ostream& StatError::ascii_write(ostream &os , error_type type) const
+ostream& StatError::ascii_write(ostream &os , int type) const
 
 {
-  int i;
+  register int i;
 
 
   if (nb_error > 0) {
@@ -143,15 +141,13 @@ ostream& StatError::ascii_write(ostream &os , error_type type) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Update of a StatError object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] ilabel  label,
- *  \param[in] iline   line,
- *  \param[in] icolumn column.
- */
-/*--------------------------------------------------------------*/
+ *  Mise a jour d'un objet StatError.
+ *
+ *  arguments : label, ligne, colonne.
+ *
+ *--------------------------------------------------------------*/
 
 void StatError::update(const char *ilabel , int iline , int icolumn)
 
@@ -165,16 +161,13 @@ void StatError::update(const char *ilabel , int iline , int icolumn)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Update of a StatError object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] ilabel     label,
- *  \param[in] correction correction,
- *  \param[in] iline      line,
- *  \param[in] icolumn    column.
- */
-/*--------------------------------------------------------------*/
+ *  Mise a jour d'un objet StatError.
+ *
+ *  arguments : label, correction, ligne, colonne.
+ *
+ *--------------------------------------------------------------*/
 
 void StatError::correction_update(const char *ilabel , const char *correction ,
                                   int iline , int icolumn)
@@ -194,16 +187,13 @@ void StatError::correction_update(const char *ilabel , const char *correction ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Update of a StatError object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] ilabel     label,
- *  \param[in] correction correction,
- *  \param[in] iline      line,
- *  \param[in] icolumn    column.
- */
-/*--------------------------------------------------------------*/
+ *  Mise a jour d'un objet StatError.
+ *
+ *  arguments : label, correction, ligne, colonne.
+ *
+ *--------------------------------------------------------------*/
 
 void StatError::correction_update(const char *ilabel , int correction ,
                                   int iline , int icolumn)
@@ -221,64 +211,6 @@ void StatError::correction_update(const char *ilabel , int correction ,
     nb_error++;
   }
 }
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a StructureAnalysis object (for display on the console).
- *
- *  \param[in] exhaustive flag detail level,
- *
- *  \return    string.
- */
-/*--------------------------------------------------------------*/
-
-string StatInterface::ascii_write(bool exhaustive) const
-
-{
-  ostringstream oss;
-      
-
-  ascii_write(oss , exhaustive);
-
-  return oss.str();
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a StructureAnalysis object in a file.
- *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
- *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
-
-/* bool StatInterface::ascii_write(StatError &error , const string path ,
-                                bool exhaustive) const
-
-{
-  bool status;
-  ofstream out_file(path.c_str());
-
-
-  error.init();
-
-  if (!out_file) {
-    status = false;
-    error.update(STAT_error[STATR_FILE_NAME]);
-  }
-
-  else {
-    status = true;
-    ascii_write(out_file , exhaustive);
-  }
-
-  return status;
-} */
 
 
 };  // namespace stat_tool

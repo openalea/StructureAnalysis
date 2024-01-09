@@ -3,7 +3,7 @@
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_iterator.py 9885 2010-11-06 18:19:34Z cokelaer $"
 
 from openalea.sequence_analysis import _sequence_analysis as sa
 from openalea.sequence_analysis.hidden_variable_order_markov import *

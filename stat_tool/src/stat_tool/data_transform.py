@@ -11,7 +11,7 @@
     :Author: Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
         Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: data_transform.py 15183 2013-11-06 10:35:50Z jbdurand $
 
 .. testsetup:: *
 
@@ -19,7 +19,7 @@
     
 .. warning:: sequence analysis package also contain a data transform module
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: data_transform.py 15183 2013-11-06 10:35:50Z jbdurand $"
 
 import error
 from openalea.stat_tool._stat_tool import \
@@ -357,7 +357,7 @@ def Extract(obj, *args, **kargs):
         error.CheckType([args[0]], [str])
         if args[0] == 'Mixture':
             assert len(args) == 1
-            ret = obj.extract_mixture()
+            ret = obj.extract_DiscreteMixture()
         elif args[0] == 'Component':
             assert len(args) == 2
             error.CheckType([args[1]], [int])

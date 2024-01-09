@@ -7,7 +7,7 @@ vector done
 
 .. todo:: sequence and markov
 """
-__version__ = "$Id$"
+__version__ = "$Id: test_comparison.py 9380 2010-08-06 17:53:45Z cokelaer $"
 
 
 import os

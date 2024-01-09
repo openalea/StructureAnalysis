@@ -10,9 +10,9 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: enums.py 15827 2014-02-19 16:17:45Z jbdurand $
 """
-__version__ = "$Id$"
+__version__ = "$Id: enums.py 15827 2014-02-19 16:17:45Z jbdurand $"
 
 #from openalea.stat_tool._stat_tool import GraphicalType
 from openalea.sequence_analysis._sequence_analysis import *
@@ -145,6 +145,7 @@ model_type = {
               "Gaussian": ChangeType.GAUSSIAN_CHANGE,
               "Mean": ChangeType.MEAN_CHANGE,
               "Variance": ChangeType.VARIANCE_CHANGE,
+              "MeanVariance": ChangeType.MEAN_VARIANCE_CHANGE
               }
 
 # todo:: ckean the 2 next enums ?
@@ -166,26 +167,26 @@ index_parameter_type_map = {
 
 
 stochastic_process_type = {
-    'Ordinary': _stat_tool.ProcessType.ORDINARY,
-    'Equilibrium' : _stat_tool.ProcessType.EQUILIBRIUM,
-    'DefaultType' : _stat_tool.ProcessType.DEFAULT_TYPE
+    'Ordinary': 'o',
+    'Equilibrium' : 'e'
     }
 
 markovian_algorithms = {
     'Forward':_stat_tool.RestorationAlgorithm.FORWARD,
-    'ForwardDynamicProgramming': \
-        _stat_tool.RestorationAlgorithm.FORWARD_DYNAMIC_PROGRAMMING, # change point detection
+    'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,
+    'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,
     'ForwardBackwardSampling': \
-        _stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,
+        _stat_tool.RestorationAlgorithm.FORWARD_DYNAMIC_PROGRAMMING,
     'GeneralizedViterbi': \
         _stat_tool.RestorationAlgorithm.GENERALIZED_VITERBI,
+    'Gibbs':_stat_tool.RestorationAlgorithm.GIBBS_SAMPLING,
     'NoComputation':_stat_tool.RestorationAlgorithm.NO_COMPUTATION,
     'Viterbi':_stat_tool.RestorationAlgorithm.VITERBI,
     }
 
 sub_markovian_algorithms = {
-    'EM':0,
-    'MCEM':1,
+    'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,
+    'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,
     }
 
 
@@ -231,10 +232,10 @@ estimator_semi_markov_type = {
 
 ident_map = {
              "VOID" : _stat_tool.I_DEFAULT,
-             "LINEAR": _stat_tool.RegressionType.LINEAR_FUNCTION,
-             "MONOMOLECULAR": _stat_tool.RegressionType.MONOMOLECULAR,
-             "LOGISTIC": _stat_tool.RegressionType.LOGISTIC,
-             "NONPARAMETRIC": _stat_tool.RegressionType.NONPARAMETRIC_FUNCTION,
+             "LINEAR": _stat_tool.RegressionType.STAT_LINEAR,
+             "MONOMOLECULAR": _stat_tool.RegressionType.STAT_MONOMOLECULAR,
+             "LOGISTIC": _stat_tool.RegressionType.STAT_LOGISTIC,
+             "NONPARAMETRIC": _stat_tool.RegressionType.STAT_NONPARAMETRIC,
 
              }
 

@@ -4,7 +4,7 @@
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
- *        File author(s): Yann Guedon <yann.guedon@cirad.fr>
+ *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
  *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
@@ -24,9 +24,22 @@
 #include <math.h>
 #include <iomanip>
 #include <sstream>
+#include <tool/rw_tokenizer.h>
+#include <tool/rw_cstring.h>
+#include <tool/rw_locale.h>
 
+#include "tool/config.h"
+
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/regression.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
+#include "sequence_analysis/sequences.h"
 #include "sequence_analysis/nonhomogeneous_markov.h"
 #include "sequence_analysis/sequence_label.h"
 
@@ -48,7 +61,7 @@ class FunctionWrap {
 
 public:
 
-  static boost::shared_ptr<Function> function_from_list(parametric_function ident, int length,
+  static boost::shared_ptr<Function> function_from_list(int ident, int length,
       boost::python::list& input_parameter)
   {
     Function *ret = NULL;
@@ -77,7 +90,7 @@ void class_function() {
 
   class_<Function, bases<RegressionKernel> > ("_Function", "Function")
     .def("__init__", make_constructor(FunctionWrap::function_from_list))
-    .def(init<parametric_function, int>())
+    .def(init<int, int>())
     .def(init<const Function &>())
 /*    .def("get_residual",&Function::get_residual,args("index"), "get residual")
       .def("get_frequency",&Function::get_frequency,args("index"), "get frequency") */

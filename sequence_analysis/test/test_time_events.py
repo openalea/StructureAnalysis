@@ -3,7 +3,7 @@
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_time_events.py 9885 2010-11-06 18:19:34Z cokelaer $"
 
 
 from openalea.stat_tool import _stat_tool

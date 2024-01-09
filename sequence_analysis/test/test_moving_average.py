@@ -4,7 +4,7 @@
 
 .. todo:: to be done
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_moving_average.py 9885 2010-11-06 18:19:34Z cokelaer $"
 
 from openalea.sequence_analysis import *
 from openalea.stat_tool.distribution import Distribution

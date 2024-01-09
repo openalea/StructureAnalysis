@@ -10,23 +10,23 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: vectors.py 9404 2010-08-10 14:45:08Z cokelaer $
     
 """
-__version__ = "$Id$"
+__version__ = "$Id: vectors.py 9404 2010-08-10 14:45:08Z cokelaer $"
 
 import interface
 import error
 
+from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
+
 from openalea.stat_tool._stat_tool import _Vectors
 from openalea.stat_tool._stat_tool import _VectorDistance
 from openalea.stat_tool._stat_tool import I_DEFAULT
-# from openalea.stat_tool.enums import format_type
+from openalea.stat_tool.enums import format_type
 from openalea.stat_tool.enums import variable_type
 from openalea.stat_tool.enums import variance_type
 from openalea.stat_tool.enums import distance_type
-from openalea.stat_tool.enums import OutputFormat
-
 
 __all__ = ['Vectors',
            '_Vectors',
@@ -34,8 +34,7 @@ __all__ = ['Vectors',
            '_VectorDistance',
            'ContingencyTable',
            'VarianceAnalysis',
-           'ComputeRankCorrelation',
-           'OutputFormat']
+           'ComputeRankCorrelation']
 
 
 ############### VectorDistance #################################################
@@ -324,8 +323,8 @@ def VarianceAnalysis(*args, **kargs):
 
     #kargs
     filename = error.ParseKargs(kargs, "FileName", default="result")
-    format = error.ParseKargs(kargs, "Format", default="O",
-                              possible=variance_type)
+    format = error.ParseKargs(kargs, "Format", default="ASCII",
+                              possible=format_type)
 
     #args
     vec = args[0]
@@ -377,11 +376,10 @@ def ContingencyTable(*args, **kargs):
     error.CheckArgumentsLength(args, 3, 3)
     error.CheckKargs(kargs, possible_kargs = ["FileName", "Format"])
 
-    possible_v = [str(f) for f in OutputFormat.values.values()] # possible output formats
     #kargs
     filename = error.ParseKargs(kargs, "FileName", default="result")
     format = error.ParseKargs(kargs, "Format", default="ASCII",
-                              possible=possible_v)
+                              possible=format_type)
 
     #args
     vec = args[0]
@@ -389,9 +387,7 @@ def ContingencyTable(*args, **kargs):
     variable2 = args[2]
     error.CheckType([vec, variable1, variable2], [_Vectors, int, int])
 
-    of = "OutputFormat." + format + ".real"
-    of = eval(of)
-    return vec.contingency_table(variable1, variable2, filename, of)
+    return vec.contingency_table(variable1, variable2, filename, format)
 
 
 def ComputeRankCorrelation(*args, **kargs):

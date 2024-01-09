@@ -15,7 +15,7 @@
  *                                                                              
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
  *       
- *        $Id$
+ *        $Id: export_mixture.h 8246 2010-02-19 15:16:31Z guedon $
  *                                                                       
  *-----------------------------------------------------------------------------*/
 
@@ -25,7 +25,7 @@
 // Boost.Python Wrapper export function
 void class_mixture();
 void class_mixture_data();
-// void class_multivariate_mixture();
-// void class_multivariate_mixture_data();
+void class_multivariate_mixture();
+void class_multivariate_mixture_data();
 
 #endif

@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: curves.h 17988 2015-04-23 06:44:46Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -40,7 +40,9 @@
 #define CURVES_H
 
 
-#include "stat_tools.h"
+
+#include "plotable.h"
+
 
 
 namespace stat_tool {
@@ -48,43 +50,37 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constants
+ *  Constantes :
  */
 
 
-  const int MAX_FREQUENCY = 50;          // maximum frequency for smoothing the curves
-  const int MAX_RANGE = 2;               // maximum half-width of the smoothing window
+  const int MAX_FREQUENCY = 50;          // effectif maximum pour lisser les courbes
+  const int MAX_RANGE = 2;               // demi-largeur maximum de la fenetre de lissage
 
-  const int PLOT_NB_CURVE = 12;          // maximum number of curves (Gnuplot output)
-  const int PLOT_MIN_FREQUENCY = 10;     // minimum frequency for plotting curve points (Gnuplot output)
-
-  enum curve_transformation {
-    CURVE_COPY ,
-    SMOOTHING
-  };
+  const int PLOT_NB_CURVE = 12;          // nombre maximum des courbes (sortie Gnuplot)
+  const int PLOT_MIN_FREQUENCY = 10;     // effectif minimum pour afficher les points
+                                         // des courbes (sortie Gnuplot)
 
 
 
 /****************************************************************
  *
- *  Class definition
+ *  Definition des classes :
  */
 
 
-  /// \brief Family of curves with frequencies
-
-  class Curves {
+  class Curves {          // famille de courbes avec effectif
 
     friend std::ostream& operator<<(std::ostream& , const Curves&);
 
   public :
 
-    int nb_curve;           ///< number of curves
-    int length;             ///< curve length
-    int offset;             ///< index of the beginning of the curves
-    int *index_parameter;   ///< explicit index parameters
-    int *frequency;         ///< frequency for each index
-    double **point;         ///< curves
+    int nb_curve;           // nombre de courbes
+    int length;             // longueur des courbes
+    int offset;             // abscisse des premiers points definis
+    int *index_parameter;   // parametres d'index explicites
+    int *frequency;         // effectifs correspondant a chaque abscisse
+    double **point;         // points des courbes
 
     void copy(const Curves&);
     void smooth(const Curves &curves , int max_frequency);
@@ -93,8 +89,7 @@ namespace stat_tool {
     Curves();
     Curves(int inb_curve , int ilength , bool frequency_flag = false ,
            bool index_parameter_flag = false , bool init_flag = true);
-    Curves(const Curves &curves , curve_transformation transform = CURVE_COPY ,
-           int max_frequency = MAX_FREQUENCY);
+    Curves(const Curves &curves , char transform = 'c' , int max_frequency = MAX_FREQUENCY);
     Curves(const Distribution &dist);
     Curves(const FrequencyDistribution &histo);
     ~Curves();

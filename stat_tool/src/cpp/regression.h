@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: regression.h 18017 2015-04-23 07:05:02Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -40,8 +40,6 @@
 #define REGRESSION_H
 
 
-#include "vectors.h"
-
 
 namespace stat_tool {
 
@@ -49,51 +47,50 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constants
+ *  Constantes :
  */
 
 
-  const int REGRESSION_NB_VECTOR = 10000;  // maximum number of individuals for the nonparametric regression
-  const int NEIGHBORHOOD = 3;            // minimum neighborhood on the values of the explanatory variable
+  const int REGRESSION_NB_VECTOR = 10000;  // nombre maximum de vecteurs pour la
+                                           // regression non-parametrique
+  const int NEIGHBORHOOD = 3;            // voisinage minimum sur les valeurs
+                                         // de la variable explicative
 
-  enum parametric_function {
-    LINEAR_FUNCTION ,
-    LOGISTIC ,
-    MONOMOLECULAR ,
-    NONPARAMETRIC_FUNCTION ,
-    CONSTANT_FUNCTION
+  enum {
+    STAT_LINEAR ,
+    STAT_LOGISTIC ,
+    STAT_MONOMOLECULAR ,
+    STAT_NONPARAMETRIC
   };
 
 
 
 /****************************************************************
  *
- *  Class definition
+ *  Definition des classes :
  */
 
 
-  /// \brief Regression kernel class
-
-  class RegressionKernel {
+  class RegressionKernel {  // noyau de regression
 
   public :
 
-    parametric_function ident;  ///< identifier of the regression function
-    int min_value;          ///< minimum value
-    int max_value;          ///< maximum value
-    double regression_df;   ///< degrees of freedom regression
-    double residual_df;     ///< degrees of freedom residuals
-    int nb_parameter;       ///< number of parameters
-    double *parameter;      ///< parameters
-//    double step;             step for representing the regression function
-    double *point;          ///< points
+    int ident;              // identificateur de la fonction de regression
+    int min_value;          // valeur minimum
+    int max_value;          // valeur maximum
+    double regression_df;   // degres de liberte regression
+    double residual_df;     // degres de liberte residus
+    int nb_parameter;       // nombre de parametres
+    double *parameter;      // parametres
+//    double step;            // pas pour representer la fonction de regression
+    double *point;          // points
 
     void copy(const RegressionKernel&);
     void remove();
 
     RegressionKernel();
-//    RegressionKernel(parametric_function iident , double imin_value , double imax_value , double istep = 1);
-    RegressionKernel(parametric_function iident , int imin_value , int imax_value);
+//    RegressionKernel(int iident , double imin_value , double imax_value , double istep = 1);
+    RegressionKernel(int iident , int imin_value , int imax_value);
     RegressionKernel(const RegressionKernel &regression) { copy(regression); }
     ~RegressionKernel();
     RegressionKernel& operator=(const RegressionKernel &regression);
@@ -111,9 +108,11 @@ namespace stat_tool {
   };
 
 
-  /// \brief Regression function
 
-  class Regression : public StatInterface , public RegressionKernel {
+  class Vectors;
+
+
+  class Regression : public StatInterface , public RegressionKernel {  // fonction de regression
 
     friend class Vectors;
 
@@ -122,9 +121,9 @@ namespace stat_tool {
 
   private :
 
-    Vectors *vectors;       ///< pointer on a Vectors object
-    int nb_vector;          ///< number of individuals
-    double *residual;       ///< residuals
+    Vectors *vectors;       // pointeur sur un objet Vectors
+    int nb_vector;          // nombre de vecteurs
+    double *residual;       // residus
 
     void copy(const Regression&);
     void remove();
@@ -138,8 +137,7 @@ namespace stat_tool {
   public :
 
     Regression();
-    Regression(parametric_function iident , int explanatory_variable ,
-               int response_variable , const Vectors &vec);
+    Regression(int iident , int explanatory_variable , int response_variable , const Vectors &vec);
     Regression(const Regression &regression);
     ~Regression();
     Regression& operator=(const Regression &regression);
@@ -147,12 +145,12 @@ namespace stat_tool {
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    // class member access
+    // acces membres de la classe
 
     Vectors* get_vectors() const { return vectors; }
     int get_nb_vector() const { return nb_vector; }

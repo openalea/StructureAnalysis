@@ -15,7 +15,7 @@
  *                                                                              
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
  *       
- *        $Id$
+ *        $Id: export_frequency_distribution.h 8182 2010-02-18 10:32:28Z guedon $
  *                                                                       
  *-----------------------------------------------------------------------------*/
 

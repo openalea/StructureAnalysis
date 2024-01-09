@@ -4,7 +4,7 @@
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
- *        File author(s): Yann Guedon <yann.guedon@cirad.fr>
+ *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
  *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
@@ -21,8 +21,18 @@
 
 #include "wrapper_util.h"
 
+#include "tool/config.h"
+
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/regression.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
+#include "sequence_analysis/sequences.h"
 #include "sequence_analysis/nonhomogeneous_markov.h"
 #include "sequence_analysis/sequence_label.h"
 
@@ -53,7 +63,7 @@ public:
     //olf_format should be true
     StatError error;
     NonhomogeneousMarkov *nonhomo = NULL;
-    nonhomo = NonhomogeneousMarkov::ascii_read(error, filename, length);
+    nonhomo = nonhomogeneous_markov_ascii_read(error, filename, length);
     /*if (!nonhomo)
       {
         sequence_analysis::wrap_util::throw_error(error);
@@ -87,10 +97,10 @@ public:
   }
 
   static DiscreteParametricModel*
-  extract(const NonhomogeneousMarkov &input, process_distribution dist_type, int state)
+  extract(const NonhomogeneousMarkov &input, int type, int state)
   {
     SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel,
-        dist_type, state);
+        type, state);
   }
 
  static MultiPlotSet*
@@ -144,7 +154,7 @@ void class_nonhomogeneous_markov() {
     double likelihood_computation(const MarkovianSequences &seq , int index = I_DEFAULT) const;
 
     NonhomogeneousMarkovData* get_markov_data() const { return markov_data; }
-    CategoricalSequenceProcess* get_process() const { return process; }
+    NonparametricSequenceProcess* get_process() const { return process; }
    */
 }
 #undef WRAP
@@ -157,10 +167,10 @@ class NonHomogeneousMarkovDataWrap
 
 public:
   static DiscreteDistributionData*
-  extract(const NonhomogeneousMarkovData &input, process_distribution histo_type, int state)
+  extract(const NonhomogeneousMarkovData &input, int type, int state)
   {
     SIMPLE_METHOD_TEMPLATE_1(input, extract,
-        DiscreteDistributionData, histo_type, state);
+        DiscreteDistributionData, type, state);
   }
 
   static NonhomogeneousMarkovData*

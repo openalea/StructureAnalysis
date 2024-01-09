@@ -16,7 +16,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id$
+ *        $Id: export_plotable.cpp 18038 2015-04-23 07:16:50Z guedon $
  *
  *-----------------------------------------------------------------------------*/
 

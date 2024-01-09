@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: distribution_reestimation.hpp 18000 2015-04-23 06:56:37Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -50,24 +50,22 @@ void reestimation(int nb_value , Type *reestim , double *pmass ,
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Reestimation of the probability masses of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_value         number of values,
- *  \param[in] reestim          pointer on the reestimation quantities,
- *  \param[in] pmass            pointer on the probability mass function,
- *  \param[in] min_probability  minimum probability,
- *  \param[in] null_probability flag for reestimating null probabilities.
- */
-/*--------------------------------------------------------------*/
+ *  Reestimation des probabilites d'une loi discrete.
+ *
+ *  arguments : nombre de valeurs, pointeurs sur les quantites
+ *              de reestimation et sur les probabilites de la loi discrete,
+ *              probabilite minimum, flag pour reestimer des probabilites nulles.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void reestimation(int nb_value , Type *reestim , double *pmass ,
                   double min_probability , bool null_probability)
 
 {
-  int i;
+  register int i;
   int nb_correction;
   double sum , norm;
 

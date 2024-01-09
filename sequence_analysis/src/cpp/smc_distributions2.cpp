@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: smc_distributions2.cpp 18078 2015-04-23 10:57:34Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -36,6 +36,14 @@
 
 
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
+
+#include "sequences.h"
 #include "semi_markov.h"
 #include "sequence_label.h"
 
@@ -47,21 +55,20 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the mixture of the distributions of the number of runs (RUN) or
- *         occurrences (OCCURRENCE) of a state for a sequence length mixing distribution and
- *         a semi-Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] state   state,
- *  \param[in] pattern count pattern type.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul d'un melange de lois du nombre de series d'un etat ('r') ou
+ *  du nombre d'occurrences d'un etat ('o') d'une semi-chaine de Markov
+ *  pour une distribution des longueurs de sequences donnee.
+ *
+ *  arguments : etat, type de forme.
+ *
+ *--------------------------------------------------------------*/
 
-void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern)
+void SemiMarkovChain::state_nb_pattern_mixture(int state , char pattern)
 
 {
-  int i , j , k , m;
+  register int i , j , k , m;
   int max_length , index_nb_pattern , previous_nb_pattern , increment;
   double sum , *pmass , *lmass , **state_out , *pstate_out , ***state_in;
   Distribution *pdist;
@@ -69,10 +76,10 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
 
 
   switch (pattern) {
-  case RUN :
+  case 'r' :
     pdist = state_process->nb_run[state];
     break;
-  case OCCURRENCE :
+  case 'o' :
     pdist = state_process->nb_occurrence[state];
     break;
   }
@@ -86,7 +93,7 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
 
   state_out = new double*[nb_state];
   for (i = 0;i < nb_state;i++) {
-    state_out[i] = new double[pattern == OCCURRENCE ? max_length : (max_length + 1) / 2 + 1];
+    state_out[i] = new double[pattern == 'o' ? max_length : (max_length + 1) / 2 + 1];
   }
 
   state_in = new double**[max_length - 1];
@@ -97,13 +104,13 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
     for (j = 0;j < nb_state;j++) {
       state_in[i][j] = new double[index_nb_pattern + 1];
     }
-    if ((pattern == OCCURRENCE) || (i % 2 == 1)) {
+    if ((pattern == 'o') || (i % 2 == 1)) {
       index_nb_pattern++;
     }
   }
 
-  // computation of the probabilities of leaving (semi-Markov) / of being in (Markov) a state as
-  // a function of the number of runs or occurrences of the selected state
+  // calcul des probabilites de quitter (semi-Markov) / d'etre dans (Markov) un etat
+  // fonction du nombre de formes de l'etat selectionne
 
   lmass = state_process->length->mass;
   index_nb_pattern = 1;
@@ -113,7 +120,7 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
 
     for (j = 0;j < nb_state;j++) {
 
-      // initialization of the probabilities of leaving a state at time i
+      // initialisation des probabilites de quitter un etat a l'instant i
 
       if (i < max_length - 1) {
         pstate_out = state_out[j];
@@ -122,19 +129,19 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
         }
       }
 
-      switch (sojourn_type[j]) {
+      switch (state_subtype[j]) {
 
-      // case semi-Markovian state
+      // cas etat semi-markovien
 
       case SEMI_MARKOVIAN : {
         occupancy = state_process->sojourn_time[j];
 
         for (k = (*lmass > 0. ? 1 : occupancy->offset);k <= MIN(i + 1 , occupancy->nb_value - 1);k++) {
           switch (pattern) {
-          case RUN :
+          case 'r' :
             increment = 1;
             break;
-          case OCCURRENCE :
+          case 'o' :
             increment = k;
             break;
           }
@@ -155,7 +162,7 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
           if (k < i + 1) {
             switch (pattern) {
 
-            case RUN : {
+            case 'r' : {
               if ((j == state) && (k == 1) && (i % 2 == 1)) {
                 previous_nb_pattern = index_nb_pattern - 1;
               }
@@ -165,7 +172,7 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
               break;
             }
 
-            case OCCURRENCE : {
+            case 'o' : {
               previous_nb_pattern = i - k + 1;
               break;
             }
@@ -186,10 +193,10 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
           else {
             if (i < max_length - 1) {
               switch (type) {
-              case ORDINARY :
+              case 'o' :
                 *pstate_out += occupancy->mass[k] * initial[j];
                 break;
-              case EQUILIBRIUM :
+              case 'e' :
                 *pstate_out += forward[j]->mass[k] * initial[j];
                 break;
               }
@@ -197,10 +204,10 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
 
             if (*lmass > 0.) {
               switch (type) {
-              case ORDINARY :
+              case 'o' :
                 *pmass += *lmass * (1. - occupancy->cumul[k - 1]) * initial[j];
                 break;
-              case EQUILIBRIUM :
+              case 'e' :
                 *pmass += *lmass * (1. - forward[j]->cumul[k - 1]) * initial[j];
                 break;
               }
@@ -210,7 +217,7 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
         break;
       }
 
-      // case Markovian state
+      // cas etat markovien
 
       case MARKOVIAN : {
         if (i < max_length - 1) {
@@ -237,7 +244,7 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
         else {
           switch (pattern) {
 
-          case RUN : {
+          case 'r' : {
             if ((j == state) && (i % 2 == 1)) {
               previous_nb_pattern = index_nb_pattern - 1;
             }
@@ -247,7 +254,7 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
             break;
           }
   
-          case OCCURRENCE : {
+          case 'o' : {
             previous_nb_pattern = i;
             break;
           }
@@ -274,7 +281,7 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
         for (k = 0;k <= index_nb_pattern;k++) {
           state_in[i][j][k] = 0.;
           for (m = 0;m < nb_state;m++) {
-            if ((pattern == OCCURRENCE) || (j != state) || (j != m)) {
+            if ((pattern == 'o') || (j != state) || (j != m)) {
               state_in[i][j][k] += transition[m][j] * state_out[m][k];
             }
             else if (k < index_nb_pattern) {
@@ -285,14 +292,14 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
       }
     }
 
-    if ((pattern == OCCURRENCE) || (i % 2 == 1)) {
+    if ((pattern == 'o') || (i % 2 == 1)) {
       index_nb_pattern++;
     }
   }
 
-  // renormalization of the mixture of the distributions of the number of runs or
-  // occurrences of the selected state for taking account of the thresholds applied on
-  // the cumulative state occupancy distribution functions
+  // renormalisation du melange de lois du nombre de formes de l'etat
+  // selectionne pour tenir compte des seuils appliques sur les fonctions
+  // de repartition des lois d'occupation des etats
 
   pmass = pdist->mass;
   sum = 0.;
@@ -330,21 +337,20 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the mixture of the distributions of the number of runs of
- *         a categorical observation for a sequence length mixing distribution and
- *         a hidden semi-Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable observation process index,
- *  \param[in] output   observation.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul d'un melange de lois du nombre de series d'une observation
+ *  emise par une semi-chaine de Markov cachee pour une distribution
+ *  des longueurs de sequences donnee.
+ *
+ *  arguments : indice du processus d'observation, observation.
+ *
+ *--------------------------------------------------------------*/
 
 void SemiMarkov::output_nb_run_mixture(int variable , int output)
 
 {
-  int i , j , k , m , n;
+  register int i , j , k , m , n;
   int max_length , index_nb_pattern , min , max;
   double sum0 , sum1 , *pmass , *lmass , **state_out , ***state_in , ***state_nb_run;
   Distribution *nb_run;
@@ -378,14 +384,14 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
     }
   }
 
-  // computation of the distributions of the number of runs of the selected observation
-  // for the different times spent in a state taking account of the observation emitted
-  // before entering in the state
+  // calcul des lois du nombre de series de l'observation selectionnee
+  // pour les differents temps passes dans un etat en tenant compte
+  // de l'observation emise avant d'entrer dans l'etat
 
   state_nb_run = new double**[nb_state * 2];
 
   for (i = 0;i < nb_state * 2;i++) {
-    if (sojourn_type[i / 2] == SEMI_MARKOVIAN) {
+    if (state_subtype[i / 2] == SEMI_MARKOVIAN) {
       occupancy = state_process->sojourn_time[i / 2];
       state_nb_run[i] = new double*[MIN(max_length + 1 , occupancy->nb_value) * 2];
 
@@ -403,7 +409,7 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
   }
 
   for (i = 0;i < nb_state * 2;i++) {
-    if (sojourn_type[i / 2] == SEMI_MARKOVIAN) {
+    if (state_subtype[i / 2] == SEMI_MARKOVIAN) {
       switch (i % 2) {
 
       case 0 : {
@@ -447,8 +453,8 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
     }
   }
 
-  // computation of the probabilities of leaving (semi-Markov) / of being in (Markov) a state as
-  // a function of the number of runs of the selected observation
+  // calcul des probabilites de quitter (semi-Markov) / d'etre dans (Markov) un etat
+  // fonction du nombre de series de l'observation selectionnee
 
   lmass = categorical_process[variable]->length->mass;
   index_nb_pattern = 1;
@@ -456,7 +462,7 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
   for (i = 0;i < max_length;i++) {
     lmass++;
 
-    // initialization of the probabilities of leaving a state at time i
+    // initialisation des probabilites de quitter un etat a l'instant i
 
     for (j = 0;j < nb_state * 2;j++) {
       for (k = 0;k <= index_nb_pattern;k++) {
@@ -465,9 +471,9 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
     }
 
     for (j = 0;j < nb_state;j++) {
-      switch (sojourn_type[j]) {
+      switch (state_subtype[j]) {
 
-      // case semi-Markovian state
+      // cas etat semi-markovien
 
       case SEMI_MARKOVIAN : {
         occupancy = state_process->sojourn_time[j];
@@ -508,11 +514,11 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
 
               if (i < max_length - 1) {
                 switch (type) {
-                case ORDINARY :
+                case 'o' :
                   state_out[j * 2][m] += occupancy->mass[k] * sum0;
                   state_out[j * 2 + 1][m] += occupancy->mass[k] * sum1;
                   break;
-                case EQUILIBRIUM :
+                case 'e' :
                   state_out[j * 2][m] += forward[j]->mass[k] * sum0;
                   state_out[j * 2 + 1][m] += forward[j]->mass[k] * sum1;
                   break;
@@ -521,10 +527,10 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
 
               if (*lmass > 0.) {
                 switch (type) {
-                case ORDINARY :
+                case 'o' :
                   *pmass += *lmass * (1. - occupancy->cumul[k - 1]) * (sum0 + sum1);
                   break;
-                case EQUILIBRIUM :
+                case 'e' :
                   *pmass += *lmass * (1. - forward[j]->cumul[k - 1]) * (sum0 + sum1);
                   break;
                 }
@@ -539,7 +545,7 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
         break;
       }
 
-      // case Markovian state
+      // cas etat markovien
 
       case MARKOVIAN : {
         if (*lmass > 0.) {
@@ -597,9 +603,9 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
     }
   }
 
-  // renormalization of the mixture of the distributions of the number of runs of
-  // the selected observation for taking account of the thresholds applied on
-  // the cumulative state occupancy distribution functions
+  // renormalisation du melange de lois du nombre de series de l'etat
+  // selectionne pour tenir compte des seuils appliques sur les fonctions
+  // de repartition des lois d'occupation des etats
 
   pmass = nb_run->mass;
   sum0 = 0.;
@@ -623,7 +629,7 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
   nb_run->variance_computation();
 
   for (i = 0;i < nb_state * 2;i++) {
-    if (sojourn_type[i / 2] == SEMI_MARKOVIAN) {
+    if (state_subtype[i / 2] == SEMI_MARKOVIAN) {
       occupancy = state_process->sojourn_time[i / 2];
       for (j = 1;j < MIN(max_length + 1 , occupancy->nb_value);j++) {
         delete [] state_nb_run[i][j * 2];
@@ -649,21 +655,20 @@ void SemiMarkov::output_nb_run_mixture(int variable , int output)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the mixture of the distributions of the number of occurrences of
- *         a categorical observation for a sequence length mixing distribution and
- *         a hidden semi-Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable observation process index,
- *  \param[in] output   observation.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul d'un melange de lois du nombre d'occurrences d'une observation
+ *  emise par une semi-chaine de Markov cachee pour une distribution
+ *  des longueurs de sequences donnee.
+ *
+ *  arguments : indice du processus d'observation, observation.
+ *
+ *--------------------------------------------------------------*/
 
 void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
 
 {
-  int i , j , k , m , n;
+  register int i , j , k , m , n;
   int max_length , min , max;
   double sum , *pmass , *omass , *lmass , **state_out , ***state_in;
   Distribution *nb_occurrence;
@@ -692,12 +697,12 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
     }
   }
 
-  // computation of the distributions of the number of occurrences of the selected observation
-  // for the different times spent in a state
+  // calcul des lois du nombre d'occurrences de l'observation selectionnee
+  // pour les differents temps passes dans un etat donne
 
   observation = new DiscreteParametric**[nb_state];
   for (i = 0;i < nb_state;i++) {
-    if (sojourn_type[i] == SEMI_MARKOVIAN) {
+    if (state_subtype[i] == SEMI_MARKOVIAN) {
       occupancy = state_process->sojourn_time[i];
       observation[i] = new DiscreteParametric*[MIN(max_length + 1 , occupancy->nb_value)];
 
@@ -709,8 +714,8 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
     }
   }
 
-  // computation of the probabilities of leaving (semi-Markov) / of being in (Markov) a state as
-  // function of the number of occurrences of the selected observation
+  // calcul des probabilites de quitter (semi-Markov) / d'etre dans (Markov) un etat
+  // fonction du nombre d'occurrences de l'observation selectionnee
 
   lmass = categorical_process[variable]->length->mass;
 
@@ -719,15 +724,15 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
 
     for (j = 0;j < nb_state;j++) {
 
-      // initialization of the probabilities of leaving a state at time i
+      // initialisation des probabilites de quitter un etat a l'instant i
 
       for (k = 0;k <= i + 1;k++) {
         state_out[j][k] = 0.;
       }
 
-      switch (sojourn_type[j]) {
+      switch (state_subtype[j]) {
 
-      // case semi-Markovian state
+      // cas etat semi-markovien
 
       case SEMI_MARKOVIAN : {
         occupancy = state_process->sojourn_time[j];
@@ -763,10 +768,10 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
 
               if (i < max_length - 1) {
                 switch (type) {
-                case ORDINARY :
+                case 'o' :
                   state_out[j][m] += occupancy->mass[k] * sum;
                   break;
-                case EQUILIBRIUM :
+                case 'e' :
                   state_out[j][m] += forward[j]->mass[k] * sum;
                   break;
                 }
@@ -774,10 +779,10 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
 
               if (*lmass > 0.) {
                 switch (type) {
-                case ORDINARY :
+                case 'o' :
                   *pmass += *lmass * (1. - occupancy->cumul[k - 1]) * sum;
                   break;
-                case EQUILIBRIUM :
+                case 'e' :
                   *pmass += *lmass * (1. - forward[j]->cumul[k - 1]) * sum;
                   break;
                 }
@@ -792,7 +797,7 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
         break;
       }
 
-      // case Markovian state
+      // cas etat markovien
 
       case MARKOVIAN : {
         if (*lmass > 0.) {
@@ -842,9 +847,9 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
     }
   }
 
-  // renormalization of the mixture of the distributions of the number of occurrences of
-  // the selected observation for taking account of the thresholds applied on
-  // the cumulative state occupancy distribution functions
+  // renormalisation du melange de lois du nombre d'occurrences de l'etat
+  // selectionne pour tenir compte des seuils appliques sur les fonctions
+  // de repartition des lois d'occupation des etats
 
   pmass = nb_occurrence->mass;
   sum = 0.;
@@ -868,7 +873,7 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
   nb_occurrence->variance_computation();
 
   for (i = 0;i < nb_state;i++) {
-    if (sojourn_type[i] == SEMI_MARKOVIAN) {
+    if (state_subtype[i] == SEMI_MARKOVIAN) {
       for (j = 1;j < MIN(max_length + 1 , state_process->sojourn_time[i]->nb_value);j++) {
         delete observation[i][j];
       }
@@ -892,29 +897,28 @@ void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the characteristic distributions of a SemiMarkov object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] length        sequence length,
- *  \param[in] counting_flag flag on the computation of the counting distributions,
- *  \param[in] variable      observation process index.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul des lois caracteristiques d'un objet SemiMarkov.
+ *
+ *  arguments : longueur des sequences, flag sur le calcul des lois de comptage,
+ *              indice du processus d'observation.
+ *
+ *--------------------------------------------------------------*/
 
 void SemiMarkov::characteristic_computation(int length , bool counting_flag , int variable)
 
 {
   if (nb_component > 0) {
     bool computation[NB_OUTPUT_PROCESS + 1];
-    int i , j , k;
+    register int i , j , k;
     double *memory;
     DiscreteParametric dlength(UNIFORM , length , length , D_DEFAULT , D_DEFAULT);
 
 
     memory = NULL;
 
-    // computation of the state intensity and interval distributions
+    // calcul des lois de type intensite et intervalle au niveau etat
 
     if (((variable == I_DEFAULT) || (variable == 0)) &&
         ((!(state_process->length)) ||
@@ -925,12 +929,12 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
       index_state_distribution();
 
       for (i = 0;i < nb_state;i++) {
-        if (type == ORDINARY) {
+        if (type == 'o') {
           state_no_occurrence_probability(i);
         }
         state_first_occurrence_distribution(i);
 
-        if (type == ORDINARY) {
+        if (type == 'o') {
           state_leave_probability(i);
         }
         if (state_process->leave[i] < 1. - DOUBLE_ERROR) {
@@ -941,7 +945,7 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
           state_process->recurrence_time[i] = NULL;
         }
 
-        if ((sojourn_type[i] == MARKOVIAN) && (transition[i][i] < 1.)) {
+        if ((state_subtype[i] == MARKOVIAN) && (transition[i][i] < 1.)) {
           if (transition[i][i] > 0.) {
             state_process->sojourn_time[i] = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 ,
                                                                     I_DEFAULT , 1. , 1. - transition[i][i] ,
@@ -962,12 +966,12 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
       }
 
 #     ifdef MESSAGE
-      if (type == EQUILIBRIUM) {
+      if (type == 'e') {
         double sum = 0.;
 
-        // computation of the stationary distribution in the case of an equilibrium process
-        // with renormalization for taking account of the thresholds applied on
-        // the cumulative distribution functions of the recurrence times in states
+        // calcul de la loi stationnaire dans le cas d'un processus en equilibre
+        // avec renormalisation pour tenir compte des seuils appliques sur
+        // les fonctions de repartition des lois de temps de retour dans les etats
 
         for (i = 0;i < nb_state;i++) {
           sum += 1. / state_process->recurrence_time[i]->mean;
@@ -987,7 +991,7 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
       computation[0] = false;
     }
 
-    // computation of the observation intensity and interval distributions
+    // calcul des lois de type intensite et intervalle au niveau observation
 
     for (i = 0;i < nb_output_process;i++) {
       if ((categorical_process[i]) && ((variable == I_DEFAULT) || (i == variable)) &&
@@ -1003,7 +1007,7 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
         }
 
         for (j = 0;j < categorical_process[i]->nb_value;j++) {
-          if (type == ORDINARY) {
+          if (type == 'o') {
             output_no_occurrence_probability(i , j);
           }
           if (categorical_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
@@ -1015,7 +1019,7 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
             categorical_process[i]->leave[j] = 1.;
           }
 
-          if ((type == ORDINARY) && (categorical_process[i]->first_occurrence[j])) {
+          if ((type == 'o') && (categorical_process[i]->first_occurrence[j])) {
             output_leave_probability(memory , i , j);
           }
           if (categorical_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
@@ -1028,7 +1032,7 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
 
           for (k = 0;k < nb_state;k++) {
             if ((categorical_process[i]->observation[k]->mass[j] > 0.) &&
-                ((stype[k] != ABSORBING) || (categorical_process[i]->observation[k]->mass[j] < 1.))) {
+                ((state_type[k] != 'a') || (categorical_process[i]->observation[k]->mass[j] < 1.))) {
               break;
             }
           }
@@ -1053,16 +1057,16 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
 
     if (counting_flag) {
 
-      // computation of the state counting distributions
+      // calcul des lois de comptage au niveau etat
 
       if (computation[0]) {
         for (i = 0;i < nb_state;i++) {
-          state_nb_pattern_mixture(i , RUN);
-          state_nb_pattern_mixture(i , OCCURRENCE);
+          state_nb_pattern_mixture(i , 'r');
+          state_nb_pattern_mixture(i , 'o');
         }
       }
 
-      // computation of the observation counting distributions
+      // calcul des lois de comptage au niveau observation
 
       for (i = 0;i < nb_output_process;i++) {
         if (computation[i + 1]) {
@@ -1077,16 +1081,16 @@ void SemiMarkov::characteristic_computation(int length , bool counting_flag , in
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the characteristic distributions of a SemiMarkov object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq           reference on a SemiMarkovData object,
- *  \param[in] counting_flag flag on the computation of the counting distributions,
- *  \param[in] variable      observation process index,
- *  \param[in] length_flag   flag on the sequence length.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul des lois caracteristiques d'un objet SemiMarkov.
+ *
+ *  arguments : reference sur un objet SemiMarkovData,
+ *              flag sur le calcul des lois de comptage,
+ *              indice du processus d'observation,
+ *              flag pour tenir compte des longueurs.
+ *
+ *--------------------------------------------------------------*/
 
 void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool counting_flag ,
                                             int variable , bool length_flag)
@@ -1094,7 +1098,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
 {
   if (nb_component > 0) {
     bool computation[NB_OUTPUT_PROCESS + 1];
-    int i , j , k;
+    register int i , j , k;
     int seq_variable;
     double *memory;
     Distribution dlength(*(seq.length_distribution));
@@ -1102,7 +1106,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
 
     memory = NULL;
 
-    // computation of the state intensity and interval distributions
+    // calcul des lois de type intensite et intervalle au niveau etat
 
     if (((variable == I_DEFAULT) || (variable == 0)) && ((!length_flag) ||
          ((length_flag) && ((!(state_process->length)) ||
@@ -1113,7 +1117,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
       index_state_distribution();
 
       for (i = 0;i < nb_state;i++) {
-        if (type == ORDINARY) {
+        if (type == 'o') {
           state_no_occurrence_probability(i);
         }
         if (seq.type[0] == STATE) {
@@ -1123,7 +1127,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
           state_first_occurrence_distribution(i);
         }
 
-        if (type == ORDINARY) {
+        if (type == 'o') {
           state_leave_probability(i);
         }
         if (state_process->leave[i] < 1. - DOUBLE_ERROR) {
@@ -1139,7 +1143,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
           state_process->recurrence_time[i] = NULL;
         }
 
-        if ((sojourn_type[i] == MARKOVIAN) && (transition[i][i] < 1.)) {
+        if ((state_subtype[i] == MARKOVIAN) && (transition[i][i] < 1.)) {
           if (transition[i][i] > 0.) {
             state_process->sojourn_time[i] = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 ,
                                                                     I_DEFAULT , 1. , 1. - transition[i][i] ,
@@ -1165,12 +1169,12 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
       }
 
 #     ifdef MESSAGE
-      if (type == EQUILIBRIUM) {
+      if (type == 'e') {
         double sum = 0.;
 
-        // computation of the stationary distribution in the case of an equilibrium process
-        // with renormalization for taking account of the thresholds applied on
-        // the cumulative distribution functions of the recurrence times in states
+        // calcul de la loi stationnaire dans le cas d'un processus en equilibre
+        // avec renormalisation pour tenir compte des seuils appliques sur
+        // les fonctions de repartition des lois de temps de retour dans les etats
 
         for (i = 0;i < nb_state;i++) {
           sum += 1. / state_process->recurrence_time[i]->mean;
@@ -1190,7 +1194,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
       computation[0] = false;
     }
 
-    // computation of the observation intensity and interval distributions
+    // calcul des lois de type intensite et intervalle au niveau observation
 
     for (i = 0;i < nb_output_process;i++) {
       if ((categorical_process[i]) && ((variable == I_DEFAULT) || (i == variable)) &&
@@ -1215,7 +1219,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
         }
 
         for (j = 0;j < categorical_process[i]->nb_value;j++) {
-          if (type == ORDINARY) {
+          if (type == 'o') {
             output_no_occurrence_probability(i , j);
           }
           if (categorical_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
@@ -1227,7 +1231,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
             categorical_process[i]->leave[j] = 1.;
           }
 
-          if ((type == ORDINARY) && (categorical_process[i]->first_occurrence[j])) {
+          if ((type == 'o') && (categorical_process[i]->first_occurrence[j])) {
             output_leave_probability(memory , i , j);
           }
           if (categorical_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
@@ -1240,7 +1244,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
 
           for (k = 0;k < nb_state;k++) {
             if ((categorical_process[i]->observation[k]->mass[j] > 0.) &&
-                ((stype[k] != ABSORBING) || (categorical_process[i]->observation[k]->mass[j] < 1.))) {
+                ((state_type[k] != 'a') || (categorical_process[i]->observation[k]->mass[j] < 1.))) {
               break;
             }
           }
@@ -1265,16 +1269,16 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
 
     if (counting_flag) {
 
-      // computation of the state counting distributions
+      // calcul des lois de comptage au niveau etat
 
       if (computation[0]) {
         for (i = 0;i < nb_state;i++) {
-          state_nb_pattern_mixture(i , RUN);
-          state_nb_pattern_mixture(i , OCCURRENCE);
+          state_nb_pattern_mixture(i , 'r');
+          state_nb_pattern_mixture(i , 'o');
         }
       }
 
-      // computation of the observation counting distributions
+      // calcul des lois de comptage au niveau observation
 
       for (i = 0;i < nb_output_process;i++) {
         if (computation[i + 1]) {

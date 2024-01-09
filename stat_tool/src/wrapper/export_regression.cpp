@@ -24,7 +24,14 @@
 #include "wrapper_util.h"
 #include "export_base.h"
 
+#include "stat_tool/stat_tools.h"
+
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
 #include "stat_tool/regression.h"
+#include "stat_tool/distance_matrix.h"
+#include "stat_tool/multivariate_mixture.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -45,7 +52,7 @@ class RegressionKernelWrap
 public:
 
   static boost::shared_ptr<RegressionKernel>
-  regression_constructor(parametric_function ident, int min_value, int max_value)
+  regression_constructor(int ident, int min_value, int max_value)
   {
     RegressionKernel *ret = NULL;
     ret = new RegressionKernel(ident, min_value, max_value);
@@ -110,7 +117,7 @@ void class_regression()
 {
   class_< Regression, bases<StatInterface> >
   ("_Regression", "Regression class")
-    .def(init <parametric_function, int, int, const Vectors&>())
+    .def(init <int, int, int, const Vectors&>())
     .def(init <const Regression &>())
 
     .def(self_ns::str(self)) // __str__

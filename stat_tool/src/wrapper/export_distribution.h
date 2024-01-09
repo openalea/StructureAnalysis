@@ -15,7 +15,7 @@
  *                                                                              
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
  *       
- *        $Id$
+ *        $Id: export_distribution.h 8088 2010-02-18 09:33:26Z guedon $
  *                                                                       
  *-----------------------------------------------------------------------------*/
 

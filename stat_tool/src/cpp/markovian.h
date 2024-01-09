@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: markovian.h 18005 2015-04-23 06:59:40Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -40,8 +40,9 @@
 #define MARKOVIAN_H
 
 
-#include "stat_tools.h"
+
 #include "chain_reestimation.h"
+
 
 
 namespace stat_tool {
@@ -50,74 +51,69 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constants
+ *  Constantes :
  */
 
 
-  const int NB_STATE = 100;              // maximum number of states of a Markov chain
-  const int ORDER = 8;                   // maximum order of a Markov chain
-  const double MIN_PROBABILITY = 1.e-5;  // minimum initial/transition/categorical observation probability
-  const double THRESHOLDING_FACTOR = 0.8;  // factor for the thresholding of probabilities
-  const int NB_PARAMETER = 100000;       // maximum number of parameters of a Markov chain
-  const int NB_OUTPUT_PROCESS = 15;      // maximum number of observation processes
-  const int NB_OUTPUT = 25;              // maximum number of observed categories per state (categorical case)
-  const double OBSERVATION_THRESHOLD = 0.999;  // threshold on the cumulative distribution function for bounding
-                                               // a discrete parametric observation distribution
+  const int NB_STATE = 100;              // nombre maximum d'etats d'une chaine de Markov
+  const int ORDER = 8;                   // ordre maximum d'une chaine de Markov
+  const double MIN_PROBABILITY = 1.e-5;  // probabilite minimum
+  const double THRESHOLDING_FACTOR = 0.8;  // facteur pour le seuillage des probabilites
+  const int NB_PARAMETER = 100000;       // nombre maximum de parametres d'une chaine de Markov
+  const int NB_OUTPUT_PROCESS = 10;      // nombre maximum de processus d'observation
+  const int NB_OUTPUT = 25;              // nombre maximum d'observations par etat (cas categoriel)
+  const double OBSERVATION_THRESHOLD = 0.999;  // seuil sur la fonction de repartition pour borner
+                                               // une loi d'observation discrete parametrique
 
-  const double ACCESSIBILITY_THRESHOLD = 1.e-6;  // threshold for stopping the probabilistic algorithm
-                                                 // for computing state accessibility
-  const int ACCESSIBILITY_LENGTH = 100;  // maximum sequence length for the probabilistic algorithm
-                                         // for computing state accessibility
+  const double ACCESSIBILITY_THRESHOLD = 1.e-6;  // seuil pour stopper l'algorithme
+                                                 // de calcul de l'accessibilite des etats
+  const int ACCESSIBILITY_LENGTH = 100;  // longueur maximum de sequence pour l'algorithme
+                                         // de calcul de l'accessibilite des etats
 
-  const double NOISE_PROBABILITY = 0.05;  // perturbation of observation probabilities
-  const double MEAN_SHIFT_COEFF = 0.1;   // coefficient for shifting continuous observation distributions
+  const double NOISE_PROBABILITY = 0.05;  // perturbation des probabilites d'observation
+  const double MEAN_SHIFT_COEFF = 0.1;   // coefficient pour decaler les lois d'observations
+                                         // continus parametriques
 
-  const int MIN_NB_ELEMENT = 10;         // minimum size of the sample built by rounding
-  const int OBSERVATION_COEFF = 10;      // rounding coefficient for the parametric observation distribution estimator
+  const int MIN_NB_ELEMENT = 10;         // taille minimum de l'echantillon construit par arrondi
+  const int OBSERVATION_COEFF = 10;      // coefficient arrondi estimateur pour les lois
+                                         // d'observation parametriques
 
-  const int GAMMA_MAX_NB_DECIMAL = 6;     // maximum number of decimals for the simulation of a gamma distribution
-  const int INVERSE_GAUSSIAN_MAX_NB_DECIMAL = 6;  // maximum number of decimals for the simulation
-                                                  // of an inverse Gaussian distribution
-  const int GAUSSIAN_MAX_NB_DECIMAL = 6;  // maximum number of decimals for the simulation of a Gaussian distribution
-  const int DEGREE_DECIMAL_SCALE = 10;   // factor for determining the number of decimals
-                                         // for the simulation of a von Mises distribution in degrees
-  const int RADIAN_DECIMAL_SCALE = 1000;  // factor for determining the number of decimals
-                                          // for the simulation of a von Mises distribution in radians
+  const int GAMMA_MAX_NB_DECIMAL = 6;     // nombre maximum de decimales pour la simulation
+                                          // d'une loi gamma
+  const int GAUSSIAN_MAX_NB_DECIMAL = 6;  // nombre maximum de decimales pour la simulation
+                                          // d'une loi gaussienne
+  const int DEGREE_DECIMAL_SCALE = 10;   // facteur pour determiner le nombre de decimales
+                                         // pour la simulation d'une loi de Von Mises en degrees
+  const int RADIAN_DECIMAL_SCALE = 1000;  // facteur pour determiner le nombre de decimales
+                                          // pour la simulation d'une loi de Von Mises en radians
 
-  // const double SELF_TRANSITION = 0.9;    initial self-tranistion
+  // const double SELF_TRANSITION = 0.9;    probabilite de rester dans un etat initiale
 
-  enum state_type {
-    TRANSIENT ,
-    RECURRENT ,
-    ABSORBING
-  };
-
-  enum model_type {
+  enum {
     MIXTURE ,
     HIDDEN_MARKOV
   };
 
-  enum observation_process {
+  enum {
     CATEGORICAL_PROCESS ,
     DISCRETE_PARAMETRIC ,
-    CONTINUOUS_PARAMETRIC ,
-    DEFAULT_PROCESS
+    CONTINUOUS_PARAMETRIC
   };
 
-  enum count_pattern {
-    RUN ,
-    OCCURRENCE
+  enum {
+    EM ,
+    MCEM
+//    SAEM
   };
 
-  enum latent_structure_algorithm {
-    NO_LATENT_STRUCTURE ,
+  enum {
     FORWARD ,
-//    FORWARD_BACKWARD ,
+    FORWARD_BACKWARD ,
     VITERBI ,
 //    VITERBI_FORWARD_BACKWARD ,
     GENERALIZED_VITERBI ,
     FORWARD_BACKWARD_SAMPLING ,
-//    GIBBS_SAMPLING ,
+    GIBBS_SAMPLING ,
     FORWARD_DYNAMIC_PROGRAMMING
   };
 
@@ -125,45 +121,46 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Class definition
+ *  Definition des classes :
  */
 
 
   class ChainData;
 
-  /// \brief Markov chain
 
-  class Chain {
+  class Chain {           // chaine de Markov
 
     friend std::ostream& operator<<(std::ostream &os , const Chain &chain)
     { return chain.ascii_print(os , true); }
 
   public :
 
-    process_type type;      ///< process type (ORDINARY/EQUILIBRIUM)
-    int nb_state;           ///< number of states
-    int nb_row;             ///< number of rows of the transition probability matrix
-    bool **accessibility;   ///< state accessibility matrix
-    int nb_component;       ///< number of classes
-    int *component_nb_state;  ///< numbers of states per class
-    int **component;        ///< classes
-    state_type *stype;      ///< state types (TRANSIENT/RECURRENT/ABSORBING)
-    double *initial;        ///< initial probabilities
-    double *cumul_initial;  ///< cumulative initial distribution function
-    double **transition;    ///< transition probability matrix
-    double **cumul_transition;  ///< cumulative transition distribution functions
+    char type;              // 'o' : ordinaire, 'e' : en equilibre
+    int nb_state;           // nombre d'etats
+    int nb_row;             // nombre de lignes de la matrice
+                            // des probabilites de transition
+    bool **accessibility;   // matrice d'accessibilite des etats
+    int nb_component;       // nombre de classes
+    int *component_nb_state;  // nombre d'etats par classe
+    int **component;        // classes
+    char *state_type;       // types des etats ('r' : recurrent,
+                            // 't' : transitoire, 'a' : absorbant)
+    double *initial;        // probabilites initiales
+    double *cumul_initial;  // fonction de repartition correspondant
+                            // au probabilites initiales
+    double **transition;    // matrice des probabilites de transition
+    double **cumul_transition;  // fonctions de repartition correspondant aux lignes
+                                // de la matrice des probabilites de transition
 
     void parameter_copy(const Chain&);
     void copy(const Chain&);
     void remove();
 
-    Chain(process_type itype = ORDINARY , int inb_state = 0 , bool init_flag = true);
-    Chain(process_type itype , int inb_state , int inb_row , bool init_flag);
+    Chain(char itype = 'o' , int inb_state = 0 , bool init_flag = true);
+    Chain(char itype , int inb_state , int inb_row , bool init_flag);
     Chain(const Chain &chain) { copy(chain); }
     ~Chain();
     Chain& operator=(const Chain &chain);
-
-    static Chain* parsing(StatError &error , ifstream &in_file , int &line , process_type type);
 
     std::ostream& ascii_print(std::ostream &os , bool file_flag = false) const;
     std::ostream& spreadsheet_print(std::ostream &os) const;
@@ -174,11 +171,10 @@ namespace stat_tool {
     void log_computation();
 
     bool** logic_transition_computation() const;
-    bool strongly_connected_component_research(StatError &error , bool **ilogic_transition = NULL) const;
+    bool connex_component_research(StatError &error , bool **ilogic_transition = NULL) const;
     void graph_accessibility_computation(bool **ilogic_transition);
     void probability_accessibility_computation();
     void component_computation(bool **ilogic_transition = NULL);
-    bool parallel_initial_state() const;
 
     void thresholding(double min_probability , bool semi_markov = false);
 
@@ -192,12 +188,15 @@ namespace stat_tool {
   };
 
 
-  /// \brief Data structure corresponding to a Markov chain
+  Chain* chain_parsing(StatError &error , ifstream &in_file , int &line , char type);
 
-  class ChainData : public ChainReestimation<int> {
+
+
+  class ChainData : public ChainReestimation<int> {  // structure de donnees correspondant a
+                                                     // une chaine de Markov
   public :
 
-    ChainData(process_type itype , int inb_state , int inb_row , bool init_flag = false)
+    ChainData(char itype , int inb_state , int inb_row , bool init_flag = false)
     :ChainReestimation<int>(itype , inb_state , inb_row , init_flag) {}
     ChainData(const ChainData &chain_data);
 
@@ -207,25 +206,24 @@ namespace stat_tool {
   };
 
 
-  /// \brief Categorical observation process
 
-  class CategoricalProcess {
+  class CategoricalProcess {  // processus d'observation categoriel
 
   public :
 
-    int nb_state;           ///< number of states
-    int nb_value;           ///< number of categories
-    Distribution **observation;  ///< categorical observation distributions
-    Distribution *weight;   ///< theoretical weights of observation distributions
-    Distribution *mixture;  ///< mixture of observation distributions
-    Distribution *restoration_weight;  ///< weights of observation distributions
-                                       ///< deduced from the restoration
-    Distribution *restoration_mixture;  ///< mixture of observation distributions
+    int nb_state;           // nombre d'etats
+    int nb_value;           // nombre de valeurs
+    Distribution **observation;  // lois d'observation
+    Distribution *weight;   // poids theoriques des lois d'observation
+    Distribution *mixture;  // melange de lois d'observation
+    Distribution *restoration_weight;  // poids des lois d'observation
+                                       // deduits de la restoration
+    Distribution *restoration_mixture;  // melange de lois d'observation
 
     void copy(const CategoricalProcess &process);
     void remove();
 
-    CategoricalProcess(int inb_state = 0 , int inb_value = 0 , bool observation_flag = false);
+    CategoricalProcess(int inb_state = 0 , int inb_value = 0 , int observation_flag = false);
     CategoricalProcess(int inb_state , int inb_value , double **observation_probability);
     CategoricalProcess(int inb_state , Distribution **pobservation);
     CategoricalProcess(const CategoricalProcess &process)
@@ -233,51 +231,52 @@ namespace stat_tool {
     ~CategoricalProcess();
     CategoricalProcess& operator=(const CategoricalProcess &process);
 
-    static CategoricalProcess* parsing(StatError &error , ifstream &in_file ,
-                                       int &line , int nb_state ,
-                                       model_type model , bool hidden);
-    static CategoricalProcess** old_parsing(StatError &error , ifstream &in_file ,
-                                            int &line , int nb_state , int &nb_output_process);
-
     std::ostream& ascii_print(std::ostream &os , FrequencyDistribution **empirical_observation ,
                               FrequencyDistribution *marginal_distribution ,
-                              bool exhaustive , bool file_flag , model_type model = HIDDEN_MARKOV) const;
+                              bool exhaustive , bool file_flag , int model = HIDDEN_MARKOV) const;
     std::ostream& spreadsheet_print(std::ostream &os ,
                                     FrequencyDistribution **empirical_observation = NULL ,
                                     FrequencyDistribution *marginal_distribution = NULL ,
-                                    model_type model = HIDDEN_MARKOV) const;
+                                    int model = HIDDEN_MARKOV) const;
     bool plot_print(const char *prefix , const char *title , int process ,
                     FrequencyDistribution **empirical_observation = NULL ,
                     FrequencyDistribution *marginal_distribution = NULL ,
-                    model_type model = HIDDEN_MARKOV) const;
+                    int model = HIDDEN_MARKOV) const;
     void plotable_write(MultiPlotSet &plot , int &index , int process ,
                         FrequencyDistribution **empirical_observation = NULL ,
                         FrequencyDistribution *marginal_distribution = NULL ,
-                        model_type model = HIDDEN_MARKOV) const;
+                        int model = HIDDEN_MARKOV) const;
 
     bool test_hidden() const;
     void thresholding(double min_probability);
-    void state_permutation(int *permut) const;  // permutation of states - to be rework with J.-B.
+    void state_permutation(int *permut) const;  // permutation des etats - revoir avec J.-B.
     int nb_parameter_computation(double min_probability) const;
     Distribution* mixture_computation(Distribution *pweight);
     void init();
   };
 
 
-  /// \brief Discrete parametric observation process
+  CategoricalProcess* categorical_observation_parsing(StatError &error , ifstream &in_file ,
+                                                      int &line , int nb_state ,
+                                                      int model , bool hidden);
 
-  class DiscreteParametricProcess {
+  CategoricalProcess** old_categorical_observation_parsing(StatError &error , ifstream &in_file ,
+                                                           int &line , int nb_state , int &nb_output_process);
+
+
+
+  class DiscreteParametricProcess {  // processus d'observation discret parametrique
 
   public :
 
-    int nb_state;           ///< number of states
-    int nb_value;           ///< number of values
-    DiscreteParametric **observation;  ///< discrete parametric observation distributions
-    Distribution *weight;   ///< theoretical weights of observation distributions
-    Distribution *mixture;  ///< mixture of observation distributions
-    Distribution *restoration_weight;  ///< weights of observation distributions
-                                       ///< deduced from the restoration
-    Distribution *restoration_mixture;  ///< mixture of observation distributions
+    int nb_state;           // nombre d'etats
+    int nb_value;           // nombre de valeurs
+    DiscreteParametric **observation;  // lois d'observation
+    Distribution *weight;   // poids theoriques des lois d'observation
+    Distribution *mixture;  // melange de lois d'observation
+    Distribution *restoration_weight;  // poids des lois d'observation
+                                       // deduits de la restoration
+    Distribution *restoration_mixture;  // melange de lois d'observation
 
     void copy(const DiscreteParametricProcess &process);
     void remove();
@@ -289,28 +288,24 @@ namespace stat_tool {
     ~DiscreteParametricProcess();
     DiscreteParametricProcess& operator=(const DiscreteParametricProcess &process);
 
-    static DiscreteParametricProcess* parsing(StatError &error , ifstream &in_file ,
-                                              int &line , int nb_state , model_type model ,
-                                              double cumul_threshold = OBSERVATION_THRESHOLD);
-
     std::ostream& ascii_print(std::ostream &os , FrequencyDistribution **empirical_observation ,
                               FrequencyDistribution *marginal_distribution ,
-                              bool exhaustive , bool file_flag , model_type model = HIDDEN_MARKOV) const;
+                              bool exhaustive , bool file_flag , int model = HIDDEN_MARKOV) const;
     std::ostream& spreadsheet_print(std::ostream &os ,
                                     FrequencyDistribution **empirical_observation = NULL ,
                                     FrequencyDistribution *marginal_distribution = NULL ,
-                                    model_type model = HIDDEN_MARKOV) const;
+                                    int model = HIDDEN_MARKOV) const;
     bool plot_print(const char *prefix , const char *title , int process ,
                     FrequencyDistribution **empirical_observation = NULL ,
                     FrequencyDistribution *marginal_distribution = NULL ,
-                    model_type model = HIDDEN_MARKOV) const;
+                    int model = HIDDEN_MARKOV) const;
     void plotable_write(MultiPlotSet &plot , int &index , int process ,
                         FrequencyDistribution **empirical_observation = NULL ,
                         FrequencyDistribution *marginal_distribution = NULL ,
-                        model_type model = HIDDEN_MARKOV) const;
+                        int model = HIDDEN_MARKOV) const;
 
     void nb_value_computation();
-    void state_permutation(int *permut) const;  // permutation of states - to be rework with J.-B.
+    void state_permutation(int *permut) const;  // permutation des etats - revoir avec J.-B.
     int nb_parameter_computation() const;
     double mean_computation(Distribution *pweight) const;
     double variance_computation(Distribution *pweight , double mean = D_INF) const;
@@ -319,22 +314,25 @@ namespace stat_tool {
   };
 
 
-  /// \brief Continuous parametric observation process
+  DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstream &in_file ,
+                                                          int &line , int nb_state , int model ,
+                                                          double cumul_threshold = OBSERVATION_THRESHOLD);
 
-  class ContinuousParametricProcess {
+
+
+  class ContinuousParametricProcess {  // processus d'observation continu parametrique
 
   public :
 
-    int nb_state;           ///< number of states
-    continuous_parametric ident;  ///< identifiers of observation distributions
-    bool tied_location;     ///< flag tied means  (gamma, Gaussian)
-    bool tied_dispersion;   ///< flag tied dispersion parameters (gamma, Gaussian, von Mises)
-    double offset;          ///< offset for Gaussian mixture with evenly spaced means
-    angle_unit unit;        ///< unit (degree/radian) for von Mises distributions
-    ContinuousParametric **observation;  ///< continuous observation distributions
-    Distribution *weight;   ///< theoretical weights of observation distributions
-    Distribution *restoration_weight;  ///< weights of observation distributions
-                                       ///< deduced from the restoration
+    int nb_state;           // nombre d'etats
+    int ident;              // identificateur des lois d'observation
+    bool tied_location;     // moyennes lies ou non  (GAMMA / GAUSSIAN)
+    bool tied_dispersion;   // parametres de dispersion lies ou non (GAMMA / GAUSSIAN / VON_MISES)
+    int unit;               // unite (degre/radian) pour les lois de von Mises
+    ContinuousParametric **observation;  // lois d'observation
+    Distribution *weight;   // poids theorique des lois d'observation
+    Distribution *restoration_weight;  // poids des lois d'observation
+                                       // deduits de la restoration
 
     void copy(const ContinuousParametricProcess &process);
     void remove();
@@ -346,45 +344,46 @@ namespace stat_tool {
     ~ContinuousParametricProcess();
     ContinuousParametricProcess& operator=(const ContinuousParametricProcess &process);
 
-    static ContinuousParametricProcess* parsing(StatError &error , ifstream &in_file ,
-                                                int &line , int nb_state , model_type model ,
-                                                continuous_parametric last_ident = VON_MISES);
-
     std::ostream& ascii_print(std::ostream &os , Histogram **observation_histogram ,
                               FrequencyDistribution **observation_distribution ,
                               Histogram *marginal_histogram ,
                               FrequencyDistribution *marginal_distribution ,
-                              bool exhaustive , bool file_flag , model_type model = HIDDEN_MARKOV) const;
+                              bool exhaustive , bool file_flag , int model = HIDDEN_MARKOV) const;
     std::ostream& spreadsheet_print(std::ostream &os ,
                                     Histogram **observation_histogram = NULL ,
                                     FrequencyDistribution **observation_distribution = NULL ,
                                     Histogram *marginal_histogram = NULL ,
                                     FrequencyDistribution *marginal_distribution = NULL ,
-                                    model_type model = HIDDEN_MARKOV) const;
+                                    int model = HIDDEN_MARKOV) const;
     bool plot_print(const char *prefix , const char *title ,
                     int process , Histogram **observation_histogram = NULL ,
                     FrequencyDistribution **observation_distribution = NULL ,
                     Histogram *marginal_histogram = NULL ,
                     FrequencyDistribution *marginal_distribution = NULL ,
                     int nb_value = I_DEFAULT , double **empirical_cdf = NULL ,
-                    model_type model = HIDDEN_MARKOV) const;
+                    int model = HIDDEN_MARKOV) const;
     void plotable_write(MultiPlotSet &plot , int &index , int process ,
                         Histogram **observation_histogram = NULL ,
                         FrequencyDistribution **observation_distribution = NULL ,
                         Histogram *marginal_histogram = NULL ,
                         FrequencyDistribution *marginal_distribution = NULL ,
                         int nb_value = I_DEFAULT , double **empirical_cdf = NULL ,
-                        model_type model = HIDDEN_MARKOV) const;
+                        int model = HIDDEN_MARKOV) const;
 
     int nb_parameter_computation() const;
     double mean_computation(Distribution *pweight) const;
     double variance_computation(Distribution *pweight , double mean = D_INF) const;
-    void select_unit(angle_unit iunit);
-    void init(continuous_parametric iident , double min_value , double max_value ,
+    void select_unit(int iunit);
+    void init(int iident , double min_value , double max_value ,
               double mean , double variance);
 
     std::ostream& interval_computation(std::ostream &os);
   };
+
+
+  ContinuousParametricProcess* continuous_observation_parsing(StatError &error , ifstream &in_file ,
+                                                              int &line , int nb_state ,
+                                                              int model , int last_ident = VON_MISES);
 
 
   void log_computation(int nb_value , const double *pmass , double *plog);

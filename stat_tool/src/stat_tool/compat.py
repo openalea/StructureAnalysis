@@ -1,5 +1,5 @@
 """to be done"""
-__version__ = "$Id$"
+__version__ = "$Id: compat.py 9038 2010-06-01 19:31:37Z cokelaer $"
 
 #import _stat_tool 
 #import openalea.stat_tool as stat_tool

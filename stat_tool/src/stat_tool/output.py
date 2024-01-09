@@ -4,7 +4,7 @@
 
 .. topic:: output.py summary
 
-    A module dedicated to Output functions (plot, displya, save)
+    A module dedicated to Output functions (plot, display, save)
 
     :Code status: mature
     :Documentation status: to be completed
@@ -12,10 +12,10 @@
         * Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
         * Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: output.py 15183 2013-11-06 10:35:50Z jbdurand $
 
 """
-__version__ = "$Id$"
+__version__ = "$Id: output.py 15183 2013-11-06 10:35:50Z jbdurand $"
 
 import plot
 import os
@@ -687,9 +687,10 @@ class StatInterface(object):
                     plotable = self.state_profile_plotable_write(identifier, Output)
                 else:
                     #todo 3 args required
-                    from openalea.sequence_analysis._sequence_analysis import _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData, _NonhomogeneousMarkovData
+                    from openalea.sequence_analysis._sequence_analysis import _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData
+                    # , _NonhomogeneousMarkovData
                     assert type(self) in [_MarkovianSequences, _VariableOrderMarkovData,
-                                          _SemiMarkovData, _NonhomogeneousMarkovData]
+                                          _SemiMarkovData] #, _NonhomogeneousMarkovData]
                     if type(args[1])==_HiddenVariableOrderMarkov:
                         plotable = args[1].state_profile_plotable_write2(self , args[0]);
                     elif type(args[1])==_HiddenSemiMarkov:
@@ -741,9 +742,10 @@ class StatInterface(object):
 
             #data viewPoint
             elif ViewPoint == 'd':
-                from openalea.sequence_analysis._sequence_analysis import _SemiMarkovData, _MarkovianSequences, _Sequences, _NonHomogeneousMarkovData, _Tops
+                from openalea.sequence_analysis._sequence_analysis import _SemiMarkovData, _MarkovianSequences, _Sequences, _Tops
+                #, _NonHomogeneousMarkovData, 
                 if type(self) in [_SemiMarkovData, _MarkovianSequences, _Sequences,
-                                  _NonHomogeneousMarkovData, _Tops]:
+                                  _Tops]: #, _NonHomogeneousMarkovData, 
                     #status = seq->plot_data_write(error , Plot_prefix , title);
                     plotable = self.get_plotable_data(*params)
             elif ViewPoint == 'v':
@@ -975,12 +977,12 @@ class StatInterface(object):
             try:
                 from openalea.sequence_analysis._sequence_analysis import \
                     _HiddenVariableOrderMarkov, _HiddenSemiMarkov, \
-                    _MarkovianSequences, VariableOrderMarkovData, \
-                    _SemiMarkovData, _NonhomogenousMarkovData
+                    _MarkovianSequences, _VariableOrderMarkovData, \
+                    _SemiMarkovData# , _NonhomogenousMarkovData
             except:
                 raise ImportError("openalea.sequence_analysis not found")
             assert len(args)>=1
-            error.CheckType(args[0], [int])
+            assert type(args[0]) is int
 
             if type(self) == _HiddenVariableOrderMarkov:
                 assert len(args)==1
@@ -988,10 +990,12 @@ class StatInterface(object):
                                                NbStateSequence)
             elif type(self) == _HiddenSemiMarkov:
                 assert len(args)==1
-                self._HiddenSemiMarkov.state_profile_ascii_write(args[0],
-                                 output , StateSequence , NbStateSequence)
+                ## HERE HERE
+                #args[0] is identifier
+                output = self.state_profile_ascii_write(
+                    args[0], Output, StateSequence, NbStateSequence)
             elif type(self) in [_MarkovianSequences, VariableOrderMarkovData,
-                                _SemiMarkovData, _NonhomogenousMarkovData]:
+                                _SemiMarkovData]:#, _NonhomogenousMarkovData]:
                 assert len(args)==2
                 if type(args[1]) == _HiddenVariableOrderMarkov:
                     args[1].state_profile_write(self , args[0], 'a',
@@ -1053,8 +1057,10 @@ class StatInterface(object):
 
         return output
 
+    # TODO
+    # Save(hsmc, ViewPoint="StateProfile", Sequence=1, Format="SpreadSheet")
     @add_doc
-    def save(self, filename, Detail=2, ViewPoint="", Format="ASCII" ):
+    def save(self, filename, Detail=2, ViewPoint="", Sequence="", Format="ASCII" ):
 
         # Detail level
         if(Detail>1):
@@ -1072,4 +1078,3 @@ class StatInterface(object):
             self.file_ascii_data_write(filename, exhaustive)
         else:
             self.file_ascii_write(filename, exhaustive)
-

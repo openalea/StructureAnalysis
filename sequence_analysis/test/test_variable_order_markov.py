@@ -2,7 +2,7 @@
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_variable_order_markov.py 9885 2010-11-06 18:19:34Z cokelaer $"
 
 
 from openalea.stat_tool import _stat_tool
@@ -22,7 +22,7 @@ from tools import runTestClass
 from openalea.sequence_analysis import get_shared_data
 
 def VariableOrderMarkovData():
-    sm =  VariableOrderMarkov(str(get_shared_data('test_variable_order_markov.dat')))
+    sm =  VariableOrderMarkov(get_shared_data('test_variable_order_markov.dat'))
     ret = Simulate(sm, 1, 1000, True)
     return sm
 
@@ -34,11 +34,11 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           str(get_shared_data("test_variable_order_markov.dat")),
+                           get_shared_data("test_variable_order_markov.dat"),
                            VariableOrderMarkov)
 
     def build_data(self):
-        seq = Sequences(str(get_shared_data("belren1.seq")))
+        seq = Sequences(get_shared_data("belren1.seq"))
         vom = Estimate(seq, "VARIABLE_ORDER_MARKOV", "Ordinary",
                         MaxOrder=4, GlobalInitialTransition=False)
 

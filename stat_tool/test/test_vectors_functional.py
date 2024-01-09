@@ -16,7 +16,7 @@
 #
 #######################################################################
 """
-__version__ = "$Id$"
+__version__ = "$Id: test_vectors_functional.py 7886 2010-02-09 07:49:53Z cokelaer $"
 
 from openalea.stat_tool.vectors import Vectors, \
     VarianceAnalysis, ContingencyTable

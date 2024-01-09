@@ -15,7 +15,7 @@
  *                                                                              
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
  *       
- *        $Id$
+ *        $Id: export_plotable.h 15669 2014-02-04 16:05:56Z gbaty $
  *                                                                       
  *-----------------------------------------------------------------------------*/
 

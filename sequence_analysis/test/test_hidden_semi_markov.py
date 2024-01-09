@@ -4,7 +4,7 @@
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_hidden_semi_markov.py 9885 2010-11-06 18:19:34Z cokelaer $"
 
 
 from openalea.stat_tool import _stat_tool
@@ -24,7 +24,7 @@ from openalea.sequence_analysis import get_shared_data
 import os
 
 def HiddenSemiMarkovData():
-     hsm = HiddenSemiMarkov(str(get_shared_data( "wij1.hsc")))
+     hsm = HiddenSemiMarkov(get_shared_data( "wij1.hsc"))
      return hsm
 
 
@@ -53,7 +53,7 @@ class Test(interface):
         self.constructor_from_file()
 
     def _test_constructor_from_file2(self):
-        hmc = HiddenSemiMarkov(str(get_shared_data("test_hidden_markov.hmc")))
+        hmc = HiddenSemiMarkov(get_shared_data("test_hidden_markov.hmc"))
         assert hmc
 
     def test_constructor_from_file_nonparametric1(self):

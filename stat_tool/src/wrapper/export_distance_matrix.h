@@ -15,7 +15,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id$
+ *        $Id: export_distance_matrix.h 8180 2010-02-18 10:32:08Z guedon $
  *
  *-----------------------------------------------------------------------------*/
 

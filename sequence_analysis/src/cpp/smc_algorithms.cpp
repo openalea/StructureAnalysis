@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: smc_algorithms.cpp 18076 2015-04-23 10:57:06Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -37,19 +37,375 @@
 
 
 #include <math.h>
-
-#include <string>
 #include <sstream>
+#include <csignal>
 
 #include <boost/math/distributions/normal.hpp>
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
+#include "sequences.h"
 #include "semi_markov.h"
 #include "sequence_label.h"
 
 using namespace std;
 using namespace boost::math;
+
+
+namespace stat_tool {
+
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la vraisemblance des temps de sejour dans un etat pour
+ *  une semi-chaine de Markov ordinaire.
+ *
+ *  arguments : lois empiriques des temps de sejour complets et censures a droite.
+ *
+ *--------------------------------------------------------------*/
+
+double DiscreteParametric::state_occupancy_likelihood_computation(const FrequencyDistribution &sojourn_time ,
+                                                                  const FrequencyDistribution &final_run) const
+
+{
+  double likelihood , buff;
+
+
+  likelihood = likelihood_computation(sojourn_time);
+
+  if (likelihood != D_INF) {
+    buff = survivor_likelihood_computation(final_run);
+
+    if (buff != D_INF) {
+      likelihood += buff;
+    }
+    else {
+      likelihood = D_INF;
+    }
+  }
+
+  return likelihood;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la vraisemblance des temps de sejour dans un etat pour
+ *  une semi-chaine de Markov en equilibre.
+ *
+ *  arguments : loi de l'intervalle de temps residuel, lois empiriques des temps
+ *              de sejour complets, censures a droite, a gauche et
+ *              de la longueur des sequences dans le cas d'un seul etat visite.
+ *
+ *--------------------------------------------------------------*/
+
+double DiscreteParametric::state_occupancy_likelihood_computation(const Forward &forward ,
+                                                                  const FrequencyDistribution &sojourn_time ,
+                                                                  const FrequencyDistribution &final_run ,
+                                                                  const FrequencyDistribution &initial_run ,
+                                                                  const FrequencyDistribution &single_run) const
+
+{
+  double likelihood , buff;
+
+
+  likelihood = likelihood_computation(sojourn_time);
+
+  if (likelihood != D_INF) {
+    buff = survivor_likelihood_computation(final_run);
+
+    if (buff != D_INF) {
+      likelihood += buff;
+      buff = forward.likelihood_computation(initial_run);
+
+      if (buff != D_INF) {
+        likelihood += buff;
+        buff = forward.survivor_likelihood_computation(single_run);
+
+        if (buff != D_INF) {
+          likelihood += buff;
+        }
+        else {
+          likelihood = D_INF;
+        }
+      }
+
+      else {
+        likelihood = D_INF;
+      }
+    }
+
+    else {
+      likelihood = D_INF;
+    }
+  }
+
+  return likelihood;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des quantites de reestimation correspondant a la loi d'occupation d'un etat
+ *  (estimateur EM d'une semi-chaine de Markov ordinaire).
+ *
+ *  arguments : lois empiriques des temps de sejour complets et censures a droite,
+ *              pointeurs sur les quantites de reestimation de la loi d'occupation de l'etat.
+ *
+ *--------------------------------------------------------------*/
+
+void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_time ,
+                                          const FrequencyDistribution &final_run ,
+                                          Reestimation<double> *occupancy_reestim , int iter) const
+
+{
+  register int i;
+  int *pfrequency;
+  double sum , *ofrequency , *pmass , *pcumul;
+
+  // initialisations
+
+  ofrequency = occupancy_reestim->frequency;
+  for (i = 0;i < occupancy_reestim->alloc_nb_value;i++) {
+    *ofrequency++ = 0.;
+  }
+
+  // calcul des quantites de reestimation de la loi d'occupation de l'etat
+
+  ofrequency = occupancy_reestim->frequency + sojourn_time.offset;
+  pfrequency = sojourn_time.frequency + sojourn_time.offset;
+  for (i = sojourn_time.offset;i < sojourn_time.nb_value;i++) {
+    *ofrequency++ += *pfrequency++;
+  }
+
+  pfrequency = final_run.frequency + final_run.offset;
+  pcumul = cumul + final_run.offset - 1;
+  ofrequency = occupancy_reestim->frequency + final_run.offset;
+  pmass = mass + final_run.offset;
+  sum = 0.;
+
+  for (i = final_run.offset;i < final_run.nb_value;i++) {
+    sum += *pfrequency++ / (1. - *pcumul++);
+    *ofrequency++ += *pmass++ * sum;
+  }
+  for (i = final_run.nb_value;i < nb_value;i++) {
+    *ofrequency++ += *pmass++ * sum;
+  }
+
+  occupancy_reestim->nb_value_computation();
+  occupancy_reestim->offset_computation();
+  occupancy_reestim->nb_element_computation();
+
+# ifdef DEBUG
+  if ((iter < 10) || ((iter < 100) && (iter % 10 == 0)) ||
+      ((iter < 1000) && (iter % 100 == 0)) || (iter % 1000 == 0)) {
+    occupancy_reestim->max_computation();
+    occupancy_reestim->mean_computation();
+    occupancy_reestim->variance_computation();
+
+    cout << "\nquantites de reestimation loi d'occupation de l'etat :" << *occupancy_reestim << endl;
+  }
+# endif
+
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des quantites de reestimation correspondant a la loi d'occupation d'un etat
+ *  (estimateur EM d'une semi-chaine de Markov en equilibre).
+ *
+ *  arguments : lois empiriques des temps de sejour complets, censures a droite, a gauche et
+ *              de la longueur des sequences dans le cas d'un seul etat visite,
+ *              pointeurs sur les quantites de reestimation de la loi d'occupation de l'etat et
+ *              de la loi biaisee par la longueur, combinaison ou non des quantites de reestimation,
+ *              methode de calcul de la moyenne de la loi d'occupation de l'etat.
+ *
+ *--------------------------------------------------------------*/
+
+void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_time ,
+                                          const FrequencyDistribution &final_run ,
+                                          const FrequencyDistribution &initial_run ,
+                                          const FrequencyDistribution &single_run ,
+                                          Reestimation<double> *occupancy_reestim ,
+                                          Reestimation<double> *length_bias_reestim , int iter ,
+                                          bool combination , int mean_computation_method) const
+
+{
+  register int i , j;
+  int reestim_offset , reestim_nb_value , *pfrequency;
+  double sum , occupancy_mean , *ofrequency , *lfrequency , *pmass , *pcumul , *norm;
+
+
+  // initialisations
+
+  ofrequency = occupancy_reestim->frequency;
+  lfrequency = length_bias_reestim->frequency;
+  for (i = 0;i < occupancy_reestim->alloc_nb_value;i++) {
+    *ofrequency++ = 0.;
+    *lfrequency++ = 0.;
+  }
+
+  // calcul des quantites de reestimation de la loi d'occupation de l'etat
+
+  ofrequency = occupancy_reestim->frequency + sojourn_time.offset;
+  pfrequency = sojourn_time.frequency + sojourn_time.offset;
+  for (i = sojourn_time.offset;i < sojourn_time.nb_value;i++) {
+    *ofrequency++ += *pfrequency++;
+  }
+
+  if (final_run.nb_element > 0) {
+    pfrequency = final_run.frequency + final_run.offset;
+    pcumul = cumul + final_run.offset - 1;
+    ofrequency = occupancy_reestim->frequency + final_run.offset;
+    pmass = mass + final_run.offset;
+    sum = 0.;
+
+    for (i = final_run.offset;i < final_run.nb_value;i++) {
+      sum += *pfrequency++ / (1. - *pcumul++);
+      *ofrequency++ += *pmass++ * sum;
+    }
+    for (i = final_run.nb_value;i < nb_value;i++) {
+      *ofrequency++ += *pmass++ * sum;
+    }
+  }
+
+  // calcul des quantites de reestimation de la loi biaisee par la longueur
+
+  if (initial_run.nb_element > 0) {
+    pfrequency = initial_run.frequency + initial_run.offset;
+    pcumul = cumul + initial_run.offset - 1;
+    lfrequency = length_bias_reestim->frequency + initial_run.offset;
+    pmass = mass + initial_run.offset;
+    sum = 0.;
+
+    for (i = initial_run.offset;i < initial_run.nb_value;i++) {
+      sum += *pfrequency++ / (1. - *pcumul++);
+      *lfrequency++ += *pmass++ * sum;
+    }
+    for (i = initial_run.nb_value;i < nb_value;i++) {
+      *lfrequency++ += *pmass++ * sum;
+    }
+  }
+
+  if (single_run.nb_element > 0) {
+    norm = new double[single_run.nb_value];
+
+    for (i = single_run.offset;i < single_run.nb_value;i++) {
+      if (single_run.frequency[i] > 0) {
+        pmass = mass + i;
+        norm[i] = 0.;
+        for (j = i;j < nb_value;j++) {
+          norm[i] += (j + 1 - i) * *pmass++;
+        }
+      }
+    }
+
+    lfrequency = length_bias_reestim->frequency + single_run.offset;
+    pmass = mass + single_run.offset;
+    for (i = single_run.offset;i < nb_value;i++) {
+      pfrequency = single_run.frequency + single_run.offset;
+      sum = 0.;
+      for (j = single_run.offset;j <= MIN(i , single_run.nb_value - 1);j++) {
+        if ((*pfrequency > 0) && (norm[j] > 0.)) {
+          sum += *pfrequency * (i + 1 - j) / norm[j];
+               }
+        pfrequency++;
+      }
+
+      *lfrequency++ += *pmass++ * sum;
+    }
+
+    delete [] norm;
+  }
+
+  reestim_offset = 1;
+  reestim_nb_value = occupancy_reestim->alloc_nb_value;
+
+  ofrequency = occupancy_reestim->frequency + occupancy_reestim->alloc_nb_value;
+  lfrequency = length_bias_reestim->frequency + occupancy_reestim->alloc_nb_value;
+  # ifdef DEBUG
+  int debug_var = 0;
+  # endif
+  while ((*--ofrequency == 0) && (*--lfrequency == 0) && (reestim_nb_value > 2)) {
+    # ifdef DEBUG
+    cout << "iter = " << debug_var << ", ofrequency = " << *ofrequency << ", lfrequency = " << *lfrequency << ", reestim_nb_value = " << reestim_nb_value << endl;
+    debug_var++;
+    # endif
+    reestim_nb_value--;
+      }
+   # ifdef DEBUG
+   cout << "iter = " << debug_var << ", ofrequency = " << *ofrequency << ", lfrequency = " << *lfrequency << ", reestim_nb_value = " << reestim_nb_value << endl;
+   # endif
+
+  occupancy_reestim->nb_value = reestim_nb_value;
+  length_bias_reestim->nb_value = reestim_nb_value;
+
+  ofrequency = occupancy_reestim->frequency + reestim_offset;
+  lfrequency = length_bias_reestim->frequency + reestim_offset;
+  while ((*ofrequency++ == 0) && (*lfrequency++ == 0) && (reestim_offset < reestim_nb_value - 1)) {
+    reestim_offset++;
+  }
+  occupancy_reestim->offset = reestim_offset;
+  length_bias_reestim->offset = reestim_offset;
+
+  occupancy_reestim->nb_element_computation();
+  length_bias_reestim->nb_element_computation();
+
+# ifdef DEBUG
+  if ((iter < 10) || ((iter < 100) && (iter % 10 == 0)) ||
+      ((iter < 1000) && (iter % 100 == 0)) || (iter % 1000 == 0)) {
+    occupancy_reestim->max_computation();
+    occupancy_reestim->mean_computation();
+    occupancy_reestim->variance_computation();
+
+    length_bias_reestim->max_computation();
+    length_bias_reestim->mean_computation();
+    length_bias_reestim->variance_computation();
+
+    cout << "\nquantites de reestimation loi d'occupation de l'etat :" << *occupancy_reestim << endl;
+    cout << "\nquantites de reestimation loi biaisee par la longueur :" << *length_bias_reestim << endl;
+  }
+# endif
+
+  if (combination) {
+    switch (mean_computation_method) {
+    case COMPUTED :
+      occupancy_mean = interval_bisection(occupancy_reestim , length_bias_reestim);
+      break;
+    case ONE_STEP_LATE :
+      occupancy_mean = mean;
+      break;
+    }
+
+#   ifdef DEBUG
+    cout << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_MEAN] << ": " << occupancy_mean << endl;
+#   endif
+
+    occupancy_reestim->equilibrium_process_combination(length_bias_reestim , occupancy_mean);
+
+#   ifdef DEBUG
+    if ((iter < 10) || ((iter < 100) && (iter % 10 == 0)) ||
+        ((iter < 1000) && (iter % 100 == 0)) || (iter % 1000 == 0)) {
+      cout << "\nquantites de reestimation loi d'occupation de l'etat :" << *occupancy_reestim << endl;
+    }
+#   endif
+
+  }
+}
+
+
+};  // namespace stat_tool
+
+
+
 using namespace stat_tool;
 
 
@@ -57,16 +413,16 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the stationary distribution for an equilibrium semi-Markov chain.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la loi stationnaire pour une semi-chaine de Markov en equilibre.
+ *
+ *--------------------------------------------------------------*/
 
 void SemiMarkovChain::initial_probability_computation()
 
 {
-  int i , j , k;
+  register int i , j , k;
   double sum , *state , *state_out , **state_in;
   DiscreteParametric *occupancy;
 
@@ -91,9 +447,9 @@ void SemiMarkovChain::initial_probability_computation()
         sum += fabs(state_in[i - 1][j] - state_out[j]);
       }
 
-      switch (sojourn_type[j]) {
+      switch (state_subtype[j]) {
 
-      // case semi-Markovian state
+      // cas etat semi-markovien
 
       case SEMI_MARKOVIAN : {
         if (i == 0) {
@@ -117,7 +473,7 @@ void SemiMarkovChain::initial_probability_computation()
         break;
       }
 
-      // case Markovian state
+      // cas etat markovien
 
       case MARKOVIAN : {
         if (i == 0) {
@@ -158,16 +514,16 @@ void SemiMarkovChain::initial_probability_computation()
 # endif
 
   for (j = 0;j < nb_state;j++) {
-    switch (sojourn_type[j]) {
+    switch (state_subtype[j]) {
 
-    // case semi-Markovian state
+    // cas etat semi-markovien
 
     case SEMI_MARKOVIAN :
       initial[j] = state_in[i - 1][j] - state_out[j] + state[j];
 //      initial[j] = state[j];
       break;
 
-    // case Markovian state
+    // cas etat markovien
 
     case MARKOVIAN :
       initial[j] = state_in[i - 1][j];
@@ -176,8 +532,8 @@ void SemiMarkovChain::initial_probability_computation()
     }
   }
 
-  // renormalization for taking account of the thresholds applied on
-  // the cumulative state occupancy distribution functions
+  // renormalisation pour tenir compte des seuils appliques sur
+  // les fonctions de repartition des lois d'occupation des etats
 
   sum = 0.;
   for (i = 0;i < nb_state;i++) {
@@ -197,26 +553,23 @@ void SemiMarkovChain::initial_probability_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the log-likelihood of a semi-Markov chain for sequences.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq   reference on a MarkovianSequences object,
- *  \param[in] index sequence index.
+ *  Calcul de la vraisemblance de sequences pour une semi-chaine de Markov.
  *
- *  \return          log-likelihood.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet MarkovianSequences, indice de la sequence.
+ *
+ *--------------------------------------------------------------*/
 
 double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int index) const
 
 {
-  int i , j , k , m;
+  register int i , j , k , m;
   int nb_value , occupancy , *pstate , **pioutput;
-  double likelihood = 0. , proba , residual , **proutput;
+  double likelihood = 0. , proba , **proutput;
 
 
-  // checking of the compatibility of the model with the data
+  // verification de la compatibilite entre le modele et les donnees
 
   if (nb_output_process + 1 == seq.nb_variable) {
     if (state_process->nb_value < seq.marginal_distribution[0]->nb_value) {
@@ -293,18 +646,20 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
           }
 
           if (transition[*pstate][*pstate] < 1.) {
+            j++;
             occupancy = 1;
 
-            if (sojourn_type[*pstate] == SEMI_MARKOVIAN) {
-              while ((j + occupancy < seq.length[i]) && (*(pstate + 1) == *pstate)) {
+            if (state_subtype[*pstate] == SEMI_MARKOVIAN) {
+              while ((j < seq.length[i]) && (*(pstate + 1) == *pstate)) {
+                j++;
                 occupancy++;
                 pstate++;
               }
 
               proba = 0.;
-              if ((type == EQUILIBRIUM) && (j == occupancy)) {
+              if ((type == 'e') && (j == occupancy)) {
                 if (occupancy < forward[*pstate]->nb_value) {
-                  if (j + occupancy < seq.length[i]) {
+                  if (j < seq.length[i]) {
                     proba = forward[*pstate]->mass[occupancy];
                   }
                   else {
@@ -315,7 +670,7 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
 
               else {
                 if (occupancy < state_process->sojourn_time[*pstate]->nb_value) {
-                  if (j + occupancy < seq.length[i]) {
+                  if (j < seq.length[i]) {
                     proba = state_process->sojourn_time[*pstate]->mass[occupancy];
                   }
                   else {
@@ -336,98 +691,31 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
 
           else {
             occupancy = seq.length[i] - j;
+            j += occupancy;
           }
 
           if (nb_output_process > 0) {
-            for (k = j;k < j + occupancy;k++) {
+            for (k = 0;k < occupancy;k++) {
               for (m = 0;m < nb_output_process;m++) {
                 if (categorical_process[m]) {
-                  proba = categorical_process[m]->observation[*pstate]->mass[*pioutput[m]];
+                  proba = categorical_process[m]->observation[*pstate]->mass[*pioutput[m]++];
                 }
 
                 else if (discrete_parametric_process[m]) {
-                  proba = discrete_parametric_process[m]->observation[*pstate]->mass[*pioutput[m]];
+                  proba = discrete_parametric_process[m]->observation[*pstate]->mass[*pioutput[m]++];
                 }
 
                 else {
-                  if (((continuous_parametric_process[m]->ident == GAMMA) ||
-                       (continuous_parametric_process[m]->ident == ZERO_INFLATED_GAMMA)) && (seq.min_value[m + 1] < seq.min_interval[m + 1] / 2)) {
-                    switch (seq.type[m + 1]) {
-                    case INT_VALUE :
-                      proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*pioutput[m] , *pioutput[m] + seq.min_interval[m + 1]);
-                      break;
-                    case REAL_VALUE :
-                      proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*proutput[m] , *proutput[m] + seq.min_interval[m + 1]);
-                      break;
-                    }
+                  switch (seq.type[m + 1]) {
+                  case INT_VALUE :
+                    proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
+                    pioutput[m]++;
+                    break;
+                  case REAL_VALUE :
+                    proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
+                    proutput[m]++;
+                    break;
                   }
-
-                  else if (continuous_parametric_process[m]->ident == LINEAR_MODEL) {
-                    switch (seq.type[m + 1]) {
-                    case INT_VALUE :
-                      residual = *pioutput[m] - (continuous_parametric_process[m]->observation[*pstate]->intercept +
-                                  continuous_parametric_process[m]->observation[*pstate]->slope *
-                                  (seq.index_param_type == IMPLICIT_TYPE ? k : seq.index_parameter[i][k]));
-                      break;
-                    case REAL_VALUE :
-                      residual = *proutput[m] - (continuous_parametric_process[m]->observation[*pstate]->intercept +
-                                  continuous_parametric_process[m]->observation[*pstate]->slope *
-                                  (seq.index_param_type == IMPLICIT_TYPE ? k : seq.index_parameter[i][k]));
-                      break;
-                    }
-
-                    proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(residual - seq.min_interval[m + 1] / 2 , residual + seq.min_interval[m + 1] / 2);
-                  }
-
-                  else if (continuous_parametric_process[m]->ident == AUTOREGRESSIVE_MODEL) {
-                    if (k == 0) {
-                      switch (seq.type[m + 1]) {
-                      case INT_VALUE :
-                        residual = *pioutput[m] - continuous_parametric_process[m]->observation[*pstate]->location;
-                        break;
-                      case REAL_VALUE :
-                        residual = *proutput[m] - continuous_parametric_process[m]->observation[*pstate]->location;
-                        break;
-                      }
-                    }
-
-                    else {
-                      switch (seq.type[m + 1]) {
-                      case INT_VALUE :
-                        residual = *pioutput[m] - (continuous_parametric_process[m]->observation[*pstate]->location +
-                                    continuous_parametric_process[m]->observation[*pstate]->autoregressive_coeff *
-                                    (*(pioutput[m] - 1) - continuous_parametric_process[m]->observation[*pstate]->location));
-                        break;
-                      case REAL_VALUE :
-                        residual = *proutput[m] - (continuous_parametric_process[m]->observation[*pstate]->location +
-                                    continuous_parametric_process[m]->observation[*pstate]->autoregressive_coeff *
-                                    (*(proutput[m] - 1) - continuous_parametric_process[m]->observation[*pstate]->location));
-                        break;
-                      }
-                    }
-
-                    proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(residual - seq.min_interval[m + 1] / 2 , residual + seq.min_interval[m + 1] / 2);
-                  }
-
-                  else {
-                    switch (seq.type[m + 1]) {
-                    case INT_VALUE :
-                      proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*pioutput[m] - seq.min_interval[m + 1] / 2 , *pioutput[m] + seq.min_interval[m + 1] / 2);
-                      break;
-                    case REAL_VALUE :
-                      proba = continuous_parametric_process[m]->observation[*pstate]->mass_computation(*proutput[m] - seq.min_interval[m + 1] / 2 , *proutput[m] + seq.min_interval[m + 1] / 2);
-                      break;
-                    }
-                  }
-                }
-
-                switch (seq.type[m + 1]) {
-                case INT_VALUE :
-                  pioutput[m]++;
-                  break;
-                case REAL_VALUE :
-                  proutput[m]++;
-                  break;
                 }
 
                 if (proba > 0.) {
@@ -448,8 +736,6 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
               break;
             }
           }
-
-          j += occupancy;
         }
         while (j < seq.length[i]);
 
@@ -469,26 +755,24 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the log-likelihood of a semi-Markov chain for sequences.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq reference on a SemiMarkovData object.
+ *  Calcul de la vraisemblance de sequences pour une semi-chaine de Markov.
  *
- *  \return        log-likelihood.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet SemiMarkovData.
+ *
+ *--------------------------------------------------------------*/
 
 double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
 
 {
-  int i , j;
+  register int i , j;
   int nb_value;
   double buff , likelihood = 0.;
   FrequencyDistribution **initial_run , **final_run , **single_run;
 
 
-  // checking of the compatibility of the model with the data
+  // verification de la compatibilite entre le modele et les donnees
 
   if (nb_output_process + 1 == seq.nb_variable) {
     if ((!(seq.marginal_distribution[0])) || (nb_state < seq.marginal_distribution[0]->nb_value)) {
@@ -510,8 +794,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
         }
       }
 
-      else if ((continuous_parametric_process[i]->ident == LINEAR_MODEL) ||
-               (continuous_parametric_process[i]->ident == AUTOREGRESSIVE_MODEL) || (!(seq.marginal_distribution[i + 1]))) {
+      else if (!(seq.marginal_distribution[i + 1])) {
         likelihood = D_INF;
         break;
       }
@@ -526,9 +809,9 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
     likelihood = Chain::likelihood_computation(*(seq.chain_data));
 
     if (likelihood != D_INF) {
-      if (type == EQUILIBRIUM) {
+      if (type == 'e') {
 
-        // construction of the censored sojourn time frequency distributions
+        // creation des lois empiriques des temps de sejour censures
 
         initial_run = new FrequencyDistribution*[seq.marginal_distribution[0]->nb_value];
         for (i = 0;i < seq.marginal_distribution[0]->nb_value;i++) {
@@ -545,13 +828,13 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
           single_run[i] = new FrequencyDistribution(seq.max_length + 1);
         }
 
-        // update of the censored sojourn time frequency distributions
+        // mise a jour des lois empiriques des temps de sejour censures
 
         seq.censored_sojourn_time_frequency_distribution_computation(initial_run , final_run , single_run);
       }
 
       for (i = 0;i < nb_state;i++) {
-        if (sojourn_type[i] == SEMI_MARKOVIAN) {
+        if (state_subtype[i] == SEMI_MARKOVIAN) {
           buff = state_process->sojourn_time[i]->likelihood_computation(*(seq.characteristics[0]->sojourn_time[i]));
 
           if (buff != D_INF) {
@@ -564,7 +847,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
 
           switch (type) {
 
-          case ORDINARY : {
+          case 'o' : {
             buff = state_process->sojourn_time[i]->survivor_likelihood_computation(*(seq.characteristics[0]->final_run[i]));
 
             if (buff != D_INF) {
@@ -576,7 +859,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
             break;
           }
 
-          case EQUILIBRIUM : {
+          case 'e' : {
             buff = state_process->sojourn_time[i]->survivor_likelihood_computation(*(final_run[i]));
 
             if (buff != D_INF) {
@@ -613,7 +896,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
         }
       }
 
-      if (type == EQUILIBRIUM) {
+      if (type == 'e') {
         for (i = 0;i < seq.marginal_distribution[0]->nb_value;i++) {
           delete initial_run[i];
         }
@@ -687,20 +970,20 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Counting of initial states and transitions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] chain_data reference on a ChainData object,
- *  \param[in] smarkov    flags on the self-transition probabilities.
- */
-/*--------------------------------------------------------------*/
+ *  Comptage des etats initiaux et des transitions.
+ *
+ *  arguments : reference sur un objet ChainData,
+ *              flags sur les probabilites de rester dans un etat.
+ *
+ *--------------------------------------------------------------*/
 
 void MarkovianSequences::transition_count_computation(const ChainData &chain_data ,
                                                       const SemiMarkov *smarkov) const
 
 {
-  int i , j;
+  register int i , j;
   int *pstate;
 
 
@@ -714,7 +997,7 @@ void MarkovianSequences::transition_count_computation(const ChainData &chain_dat
     }
   }
 
-  // extraction of initial states and transitions
+  // extraction des etats initiaux et des transitions
 
   for (i = 0;i < nb_sequence;i++) {
     pstate = int_sequence[i][0];
@@ -728,7 +1011,7 @@ void MarkovianSequences::transition_count_computation(const ChainData &chain_dat
 
   if (smarkov) {
     for (i = 0;i < chain_data.nb_state;i++) {
-      if (smarkov->sojourn_type[i] == SEMI_MARKOVIAN) {
+      if (smarkov->state_subtype[i] == SEMI_MARKOVIAN) {
         chain_data.transition[i][i] = 0;
       }
     }
@@ -736,48 +1019,44 @@ void MarkovianSequences::transition_count_computation(const ChainData &chain_dat
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of the initial state and transition counts.
+/*--------------------------------------------------------------*
  *
- *  \param[in] smarkov flags on the self-transition probabilities.
- */
-/*--------------------------------------------------------------*/
+ *  Construction des comptages des etats initiaux et des transitions.
+ *
+ *  argument : flags sur les probabilites de rester dans un etat.
+ *
+ *--------------------------------------------------------------*/
 
 void SemiMarkovData::build_transition_count(const SemiMarkov *smarkov)
 
 {
-  chain_data = new ChainData(ORDINARY , marginal_distribution[0]->nb_value ,
+  chain_data = new ChainData('o' , marginal_distribution[0]->nb_value ,
                              marginal_distribution[0]->nb_value);
   transition_count_computation(*chain_data , smarkov);
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of a semi-Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error          reference on a StatError object,
- *  \param[in] display        flag for displaying estimation intermediate results,
- *  \param[in] itype          process type (ORDINARY/EQUILIBRIUM),
- *  \param[in] estimator      estimator type for the reestimation of the state occupancy distribution
- *                            (complete or partial likelihood),
- *  \param[in] counting_flag  flag on the computation of the counting distributions,
- *  \param[in] nb_iter        number of iterations,
- *  \param[in] mean_estimator method for the computation of the state occupancy
- *                            distribution mean (equilibrium semi-Markov chain).
+ *  Estimation des parametres d'une semi-chaine de Markov
+ *  a partir d'un echantillon de sequences.
  *
- *  \return                   SemiMarkov object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream,
+ *              type de processus ('o' : ordinaire, 'e' : en equilibre),
+ *              type d'estimateur pour la reestimation des lois d'occupation des etats,
+ *              flag sur le calcul des lois de comptage, nombre d'iterations,
+ *              methode de calcul de la moyenne des lois d'occupation des etats
+ *              (semi-chaine de Markov en equilibre).
+ *
+ *--------------------------------------------------------------*/
 
-SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool display , process_type itype ,
-                                                       censoring_estimator estimator , bool counting_flag , int nb_iter ,
-                                                       duration_distribution_mean_estimator mean_estimator) const
+SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostream &os ,
+                                                       char model_type , int estimator , bool counting_flag ,
+                                                       int nb_iter , int mean_computation_method) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
   int nb_likelihood_decrease , *occupancy_survivor , *censored_occupancy_survivor , nb_value[1];
   double likelihood , previous_likelihood , hlikelihood , occupancy_mean;
   DiscreteParametric *occupancy;
@@ -789,6 +1068,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
                         **initial_run , **final_run , **single_run;
   const FrequencyDistribution *prun[3];
 
+  //raise(SIGTRAP); // Debugging trick - MODIFIED BY BRICE OLIVIER
 
   smarkov = NULL;
   error.init();
@@ -836,13 +1116,13 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
     }
 
     else {
-      if (test_hidden(1)) {
+      /*if (test_hidden(1)) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
                       << SEQ_error[SEQR_OVERLAP];
         error.update((error_message.str()).c_str());
-      }
+      }*/
 
       if (marginal_distribution[1]->nb_value > NB_STATE) {
         status = false;
@@ -868,9 +1148,9 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
       counting_flag = false;
     }
 
-    if (itype == EQUILIBRIUM) {
+    if (model_type == 'e') {
 
-      // construction of the censored sojourn time frequency distributions
+      // creation des lois empiriques des temps de sejour censures
 
       initial_run = new FrequencyDistribution*[marginal_distribution[0]->nb_value];
       for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
@@ -887,19 +1167,29 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
         single_run[i] = new FrequencyDistribution(max_length + 1);
       }
 
-      // update of the censored sojourn time frequency distributions
+      // mise a jour des lois empiriques des temps de sejour censures
 
       censored_sojourn_time_frequency_distribution_computation(initial_run , final_run , single_run);
     }
 
     if (nb_variable == 2) {
       nb_value[0] = marginal_distribution[1]->nb_value;
+      //nb_value[0] = marginal_distribution[0]->nb_value;
+      //nb_value[1] = marginal_distribution[1]->nb_value;
+      /*
+      BRICE OLIVIER : Should not it be modified as followed ?
+      before modification :
+      nb_value[0] = marginal_distribution[1]->nb_value;
+      after modification :
+      nb_value[0] = marginal_distribution[0]->nb_value;
+      nb_value[1] = marginal_distribution[1]->nb_value;
+      */
     }
 
-    smarkov = new SemiMarkov(itype , marginal_distribution[0]->nb_value ,
+    smarkov = new SemiMarkov(model_type , marginal_distribution[0]->nb_value ,
                              nb_variable - 1 , nb_value);
-    smarkov->semi_markov_data = new SemiMarkovData(*this , SEQUENCE_COPY ,
-                                                   (itype == EQUILIBRIUM ? true : false));
+    smarkov->semi_markov_data = new SemiMarkovData(*this , 'c' ,
+                                                   (model_type == 'e' ? true : false));
 
     seq = smarkov->semi_markov_data;
     seq->state_variable_init();
@@ -907,17 +1197,17 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
 
     for (i = 0;i < smarkov->nb_state;i++) {
       if ((seq->characteristics[0]->sojourn_time[i]->nb_element > 0) ||
-          ((itype == EQUILIBRIUM) && (initial_run[i]->nb_element > 0))) {
+          ((model_type == 'e') && (initial_run[i]->nb_element > 0))) {
         seq->chain_data->transition[i][i] = 0;
       }
     }
 
-    // estimation of the Markov chain parameters
+    // estimation des parametres de la chaine de Markov sous-jacente
 
     seq->chain_data->estimation(*smarkov);
     smarkov->component_computation();
 
-    if ((itype == EQUILIBRIUM) && (smarkov->nb_component > 1)) {
+    if ((model_type == 'e') && (smarkov->nb_component > 1)) {
       delete smarkov;
       smarkov = NULL;
       error.correction_update(STAT_parsing[STATP_CHAIN_STRUCTURE] , STAT_parsing[STATP_IRREDUCIBLE]);
@@ -925,7 +1215,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
 
     else {
 
-      // estimation of the state occupancy distributions
+      // estimation des lois d'occupation des etats
 
       if (estimator != PARTIAL_LIKELIHOOD) {
         occupancy_survivor = new int[max_length];
@@ -933,7 +1223,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
         occupancy_reestim = new Reestimation<double>(max_length + 1);
       }
 
-      smarkov->sojourn_type = new state_sojourn_type[smarkov->nb_state];
+      smarkov->state_subtype = new int[smarkov->nb_state];
       smarkov->state_process->absorption = new double[smarkov->nb_state];
       smarkov->state_process->sojourn_time = new DiscreteParametric*[smarkov->nb_state];
       smarkov->forward = new Forward*[smarkov->nb_state];
@@ -944,22 +1234,22 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
 
       for (i = 0;i < smarkov->nb_state;i++) {
         if ((seq->characteristics[0]->sojourn_time[i]->nb_element == 0) &&
-            ((itype == ORDINARY) || (initial_run[i]->nb_element == 0))) {
-          smarkov->sojourn_type[i] = MARKOVIAN;
+            ((model_type == 'o') || (initial_run[i]->nb_element == 0))) {
+          smarkov->state_subtype[i] = MARKOVIAN;
           smarkov->state_process->absorption[i] = 1.;
         }
 
         else {
           smarkov->state_process->absorption[i] = 0.;
 
-          if ((itype == EQUILIBRIUM) && (seq->characteristics[0]->sojourn_time[i]->nb_element == 0)) {
+          if ((model_type == 'e') && (seq->characteristics[0]->sojourn_time[i]->nb_element == 0)) {
             occupancy = NULL;
           }
 
-          else if ((estimator != PARTIAL_LIKELIHOOD) && (itype == EQUILIBRIUM) && 
+          else if ((estimator != PARTIAL_LIKELIHOOD) && (model_type == 'e') && 
                    ((initial_run[i]->nb_element > 0) || (single_run[i]->nb_element > 0))) {
 
-            //  initialization of the state occupancy distribution
+            //  initialisation de la loi d'occupation de l'etat
 
             prun[0] = seq->characteristics[0]->sojourn_time[i];
             prun[1] = seq->characteristics[0]->sojourn_time[i];
@@ -988,9 +1278,11 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
             }
 
             else {
+             
               occupancy = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
                                                  (occupancy_reestim->mean > 1. ? 1. / occupancy_reestim->mean : 0.99) ,
                                                  OCCUPANCY_THRESHOLD);
+              occupancy->Distribution::init(max(occupancy->nb_value, seq->characteristics[0]->sojourn_time[i]->nb_value));
               occupancy->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
               forward = new Forward(*occupancy , occupancy->alloc_nb_value);
 
@@ -1004,14 +1296,14 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
               do {
                 j++;
 
-                // computation of the reestimation quantities of the state occupancy distribution
+                // calcul des quantites de reestimation de la loi d'occupation de l'etat
 
                 occupancy->expectation_step(*(seq->characteristics[0]->sojourn_time[i]) ,
-                                            *(initial_run[i]) , *(final_run[i]) ,
+                                            *(final_run[i]) , *(initial_run[i]) ,
                                             *(single_run[i]) , occupancy_reestim ,
                                             length_bias_reestim , j);
 
-                switch (mean_estimator) {
+                switch (mean_computation_method) {
                 case COMPUTED :
                   occupancy_mean = interval_bisection(occupancy_reestim , length_bias_reestim);
                   break;
@@ -1026,26 +1318,33 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
 
                 previous_likelihood = likelihood;
                 likelihood = occupancy->state_occupancy_likelihood_computation(*forward , *(seq->characteristics[0]->sojourn_time[i]) ,
-                                                                               *(initial_run[i]) , *(final_run[i]) ,
+                                                                               *(final_run[i]) , *(initial_run[i]) ,
                                                                                *(single_run[i]));
 
-                if ((display) && ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0))) {
-                  cout << STAT_label[STATL_ITERATION] << " " << j << "   "
-                       << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                       << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
+                //if(likelihood == D_INF) {
+                //    raise(SIGTRAP);
+                //}
+#               ifdef MESSAGE
+                if ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0)) {
+                  os << STAT_label[STATL_ITERATION] << " " << j << "   "
+                     << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                     << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
                 }
+#               endif
+
               }
               while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (j < OCCUPANCY_NB_ITER) &&
                        ((likelihood - previous_likelihood) / -likelihood > OCCUPANCY_LIKELIHOOD_DIFF)) ||
                       ((nb_iter != I_DEFAULT) && (j < nb_iter))));
 
               if (likelihood != D_INF) {
-                if (display) {
-                  cout << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
-                       << j << " " << STAT_label[STATL_ITERATIONS] << "   "
-                       << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                       << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
-                }
+
+#               ifdef MESSAGE
+                os << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
+                   << j << " " << STAT_label[STATL_ITERATIONS] << "   "
+                   << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                   << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
+#               endif
 
                 hreestim = new FrequencyDistribution(MAX(occupancy->alloc_nb_value , max_length + 1));
 
@@ -1056,17 +1355,18 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
                 do {
                   j++;
 
-                  // computation of the reestimation quantities of the state occupancy distribution
+                  // calcul des quantites de reestimation de la loi d'occupation de l'etat
 
                   occupancy->expectation_step(*(seq->characteristics[0]->sojourn_time[i]) ,
-                                              *(initial_run[i]) , *(final_run[i]) ,
+                                              *(final_run[i]) , *(initial_run[i]) ,
                                               *(single_run[i]) , occupancy_reestim ,
-                                              length_bias_reestim , j , true , mean_estimator);
+                                              length_bias_reestim , j , true ,
+                                              mean_computation_method);
 
                   hreestim->update(occupancy_reestim , (int)(occupancy_reestim->nb_element *
                                    MAX(sqrt(occupancy_reestim->variance) , 1.) * OCCUPANCY_COEFF));
                   hlikelihood = hreestim->Reestimation<int>::type_parametric_estimation(occupancy , 1 , true ,
-                                                                                        OCCUPANCY_THRESHOLD);
+                                                                                        OCCUPANCY_THRESHOLD); // recalcul de l'ident
 
                   if (hlikelihood == D_INF) {
                     likelihood = D_INF;
@@ -1079,7 +1379,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
 
                     previous_likelihood = likelihood;
                     likelihood = occupancy->state_occupancy_likelihood_computation(*forward , *(seq->characteristics[0]->sojourn_time[i]) ,
-                                                                                   *(initial_run[i]) , *(final_run[i]) ,
+                                                                                   *(final_run[i]) , *(initial_run[i]) ,
                                                                                    *(single_run[i]));
 
                     if (likelihood < previous_likelihood) {
@@ -1089,11 +1389,14 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
                       nb_likelihood_decrease = 0;
                     }
 
-                    if ((display) && ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0))) {
-                      cout << STAT_label[STATL_ITERATION] << " " << j << "   "
-                           << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                           << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
+#                   ifdef MESSAGE
+                    if ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0)) {
+                      os << STAT_label[STATL_ITERATION] << " " << j << "   "
+                         << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                         << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
                     }
+#                   endif
+
                   }
                 }
                 while ((likelihood != D_INF) && (j < OCCUPANCY_NB_ITER) &&
@@ -1103,12 +1406,14 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
                 delete hreestim;
 
                 if (likelihood != D_INF) {
-                  if (display) {
-                    cout << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
-                         << j << " " << STAT_label[STATL_ITERATIONS] << "   "
-                         << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                         << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
-                  }
+
+#                 ifdef MESSAGE
+                  os << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
+                     << j << " " << STAT_label[STATL_ITERATIONS] << "   "
+                     << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                     << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
+#                 endif
+
                 }
 
                 else {
@@ -1127,19 +1432,19 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
             }
           }
 
-          else if ((estimator != PARTIAL_LIKELIHOOD) && (((itype == ORDINARY) && (seq->characteristics[0]->final_run[i]->nb_element > 0) &&
-                     (seq->characteristics[0]->final_run[i]->nb_value > seq->characteristics[0]->sojourn_time[i]->nb_value)) || ((itype == EQUILIBRIUM) &&
+          else if ((estimator != PARTIAL_LIKELIHOOD) && (((model_type == 'o') && (seq->characteristics[0]->final_run[i]->nb_element > 0) &&
+                     (seq->characteristics[0]->final_run[i]->nb_value > seq->characteristics[0]->sojourn_time[i]->nb_value)) || ((model_type == 'e') &&
                      (final_run[i]->nb_element > 0) && (final_run[i]->nb_value > seq->characteristics[0]->sojourn_time[i]->nb_value)))) {
-            switch (itype) {
-            case ORDINARY :
+            switch (model_type) {
+            case 'o' :
               pfinal_run = seq->characteristics[0]->final_run[i];
               break;
-            case EQUILIBRIUM :
+            case 'e' :
               pfinal_run = final_run[i];
               break;
             }
 
-            //  initialization of the state occupancy distribution
+            //  initialisation de la loi d'occupation de l'etat
 
             seq->characteristics[0]->sojourn_time[i]->state_occupancy_estimation(pfinal_run , occupancy_reestim ,
                                                                                  occupancy_survivor ,
@@ -1157,7 +1462,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
             do {
               j++;
 
-              // computation of the reestimation quantities of the state occupancy distribution
+              // calcul des quantites de reestimation de la loi d'occupation de l'etat
 
               occupancy->expectation_step(*(seq->characteristics[0]->sojourn_time[i]) ,
                                           *pfinal_run , occupancy_reestim , j);
@@ -1167,23 +1472,27 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
               likelihood = occupancy->state_occupancy_likelihood_computation(*(seq->characteristics[0]->sojourn_time[i]) ,
                                                                              *pfinal_run);
 
-              if ((display) && ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0))) {
-                cout << STAT_label[STATL_ITERATION] << " " << j << "   "
-                     << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                     << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
+#             ifdef MESSAGE
+              if ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0)) {
+                os << STAT_label[STATL_ITERATION] << " " << j << "   "
+                   << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                   << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
               }
+#             endif
+
             }
             while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (j < OCCUPANCY_NB_ITER) &&
                      ((likelihood - previous_likelihood) / -likelihood > OCCUPANCY_LIKELIHOOD_DIFF)) ||
                     ((nb_iter != I_DEFAULT) && (j < nb_iter))));
 
             if (likelihood != D_INF) {
-              if (display) {
-                cout << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
-                     << j << " " << STAT_label[STATL_ITERATIONS] << "   "
-                     << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                     << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
-              }
+
+#             ifdef MESSAGE
+              os << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
+                 << j << " " << STAT_label[STATL_ITERATIONS] << "   "
+                 << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                 << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
+#             endif
 
               hreestim = new FrequencyDistribution(MAX(occupancy->alloc_nb_value , max_length + 1));
 
@@ -1194,7 +1503,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
               do {
                 j++;
 
-                // computation of the reestimation quantities of the state occupancy distribution
+                // calcul des quantites de reestimation de la loi d'occupation de l'etat
 
                 occupancy->expectation_step(*(seq->characteristics[0]->sojourn_time[i]) ,
                                             *pfinal_run , occupancy_reestim , j);
@@ -1222,11 +1531,14 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
                     nb_likelihood_decrease = 0;
                   }
 
-                  if ((display) && ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0))) {
-                    cout << STAT_label[STATL_ITERATION] << " " << j << "   "
-                         << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                         << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
+#                 ifdef MESSAGE
+                  if ((j < 10) || ((j < 100) && (j % 10 == 0)) || ((j < 1000) && (j % 100 == 0)) || (j % 1000 == 0)) {
+                    os << STAT_label[STATL_ITERATION] << " " << j << "   "
+                       << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                       << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << endl;
                   }
+#                 endif
+
                 }
               }
               while ((likelihood != D_INF) && (j < OCCUPANCY_NB_ITER) &&
@@ -1236,12 +1548,14 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
               delete hreestim;
 
               if (likelihood != D_INF) {
-                if (display) {
-                  cout << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
-                       << j << " " << STAT_label[STATL_ITERATIONS] << "   "
-                       << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                       << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
-                }
+
+#               ifdef MESSAGE
+                os << "\n" << STAT_label[STATL_STATE] << " " << i << " - "
+                   << j << " " << STAT_label[STATL_ITERATIONS] << "   "
+                   << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                   << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
+#               endif
+
               }
 
               else {
@@ -1256,9 +1570,9 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
             }
           }
 
-          else if ((estimator != PARTIAL_LIKELIHOOD) && (((itype == ORDINARY) && (seq->characteristics[0]->final_run[i]->nb_element > 0)) ||
-                    ((itype == EQUILIBRIUM) && (final_run[i]->nb_element > 0)))) {
-            seq->characteristics[0]->sojourn_time[i]->state_occupancy_estimation((itype == ORDINARY ? seq->characteristics[0]->final_run[i] : final_run[i]) ,
+          else if ((estimator != PARTIAL_LIKELIHOOD) && (((model_type == 'o') && (seq->characteristics[0]->final_run[i]->nb_element > 0)) ||
+                    ((model_type == 'e') && (final_run[i]->nb_element > 0)))) {
+            seq->characteristics[0]->sojourn_time[i]->state_occupancy_estimation((model_type == 'o' ? seq->characteristics[0]->final_run[i] : final_run[i]) ,
                                                                                  occupancy_reestim , occupancy_survivor ,
                                                                                  censored_occupancy_survivor);
 
@@ -1275,13 +1589,13 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
 
           if (occupancy) {
             if (occupancy->mean == 1.) {
-              smarkov->sojourn_type[i] = MARKOVIAN;
+              smarkov->state_subtype[i] = MARKOVIAN;
             }
 
             else {
-              smarkov->sojourn_type[i] = SEMI_MARKOVIAN;
+              smarkov->state_subtype[i] = SEMI_MARKOVIAN;
               smarkov->state_process->sojourn_time[i] = new DiscreteParametric(*occupancy);
-              if (smarkov->stype[i] == RECURRENT) {
+              if (smarkov->state_type[i] == 'r') {
                 smarkov->forward[i] = new Forward(*(smarkov->state_process->sojourn_time[i]));
               }
             }
@@ -1310,7 +1624,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
       }
     }
 
-    if (itype == EQUILIBRIUM) {
+    if (model_type == 'e') {
       for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
         delete initial_run[i];
       }
@@ -1328,14 +1642,14 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
     }
 
     if (smarkov) {
-      if (itype == EQUILIBRIUM) {
+      if (model_type == 'e') {
         for (i = 0;i < smarkov->nb_state;i++) {
           smarkov->initial[i] = 1. / (double)smarkov->nb_state;
         }
         smarkov->initial_probability_computation();
       }
 
-      // estimation of categorical observation distributions
+      // estimation des lois d'observation
 
       if (smarkov->nb_output_process == 1) {
         seq->build_observation_frequency_distribution(smarkov->nb_state);
@@ -1345,7 +1659,7 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
         }
       }
 
-      // computation of the log-likelihood and the characteristic distributions of the estimated semi-Markov chain
+      // calcul de la vraisemblance et des lois caracteristiques du modele
 
       seq->likelihood = smarkov->likelihood_computation(*seq);
 
@@ -1370,26 +1684,22 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , bool d
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Comparison of semi-Markov chains for a sample of sequences.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] display  flag for displaying the results of model comparison,
- *  \param[in] nb_model number of semi-Markov chains,
- *  \param[in] ismarkov pointer on SemiMarkov objects,
- *  \param[in] path     file path.
+ *  Comparaison de differentes semi-chaines de Markov pour un ensemble
+ *  de sequences.
  *
- *  \return             error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
+ *              de Markov, pointeur sur les semi-chaines de Markov, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool MarkovianSequences::comparison(StatError &error , bool display , int nb_model ,
-                                    const SemiMarkov **ismarkov , const string path) const
+bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_model ,
+                                    const SemiMarkov **ismarkov , const char *path) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
   double **likelihood;
 
 
@@ -1488,7 +1798,7 @@ bool MarkovianSequences::comparison(StatError &error , bool display , int nb_mod
       likelihood[i] = new double[nb_model];
     }
 
-    // for each sequence, computation of the log-likelihood for each model
+    // pour chaque sequence, calcul de la vraisemblance pour chaque modele possible
 
     for (i = 0;i < nb_sequence;i++) {
       for (j = 0;j < nb_model;j++) {
@@ -1496,10 +1806,11 @@ bool MarkovianSequences::comparison(StatError &error , bool display , int nb_mod
       }
     }
 
-    if (display) {
-      likelihood_write(cout , nb_model , likelihood , SEQ_label[SEQL_SEMI_MARKOV_CHAIN] , true);
-    }
-    if (!path.empty()) {
+#   ifdef MESSAGE
+    likelihood_write(os , nb_model , likelihood , SEQ_label[SEQL_SEMI_MARKOV_CHAIN] , true);
+#   endif
+
+    if (path) {
       status = likelihood_write(error , path , nb_model , likelihood , SEQ_label[SEQL_SEMI_MARKOV_CHAIN]);
     }
 
@@ -1513,27 +1824,24 @@ bool MarkovianSequences::comparison(StatError &error , bool display , int nb_mod
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Simulation using a semi-Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error               reference on a StatError object,
- *  \param[in] length_distribution sequence length frequency distribution,
- *  \param[in] counting_flag       flag on the computation of the counting distributions,
- *  \param[in] divergence_flag     flag on the computation of a Kullback-Leibler divergence.
+ *  Simulation par une semi-chaine de Markov.
  *
- *  \return                        SemiMarkovData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError,
+ *              loi empirique des longueurs des sequences,
+ *              flag sur le calcul des lois de comptage,
+ *              flag calcul d'une divergence de Kullback-Leibler.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistribution &length_distribution ,
                                        bool counting_flag , bool divergence_flag) const
 
 {
   bool status = true , hidden;
-  int i , j , k , m;
-  int cumul_length , occupancy , *decimal_scale , *pstate , **pioutput;
-  variable_nature *itype;
+  register int i , j , k , m;
+  int cumul_length , occupancy , *itype , *decimal_scale , *pstate , **pioutput;
   double buff , min_location , likelihood , **proutput;
   Distribution *weight , *restoration_weight;
   SemiMarkov *smarkov;
@@ -1572,11 +1880,11 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
     if (length_distribution.nb_value - 1 > COUNTING_MAX_LENGTH) {
       counting_flag = false;
     }
-    hidden = CategoricalSequenceProcess::test_hidden(nb_output_process , categorical_process);
+    hidden = test_hidden(nb_output_process , categorical_process);
 
-    // initializations
+    // initialisations
 
-    itype = new variable_nature[nb_output_process + 1];
+    itype = new int[nb_output_process + 1];
 
     itype[0] = STATE;
     for (i = 0;i < nb_output_process;i++) {
@@ -1697,10 +2005,10 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
           *pstate = cumul_method(smarkov->nb_state , smarkov->cumul_transition[*(pstate - 1)]);
         }
 
-        switch (smarkov->sojourn_type[*pstate]) {
+        switch (smarkov->state_subtype[*pstate]) {
 
         case SEMI_MARKOVIAN : {
-          if ((smarkov->type == EQUILIBRIUM) && (j == 0)) {
+          if ((smarkov->type == 'e') && (j == 0)) {
             occupancy = smarkov->forward[*pstate]->simulation();
           }
           else {
@@ -1724,61 +2032,31 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
         }
         }
 
+        j += occupancy;
+
         for (k = 1;k < occupancy;k++) {
           pstate++;
           *pstate = *(pstate - 1);
         }
 
-        for (k = j;k < j + occupancy;k++) {
+        for (k = 0;k < occupancy;k++) {
           for (m = 0;m < smarkov->nb_output_process;m++) {
             if (smarkov->categorical_process[m]) {
-              *pioutput[m] = smarkov->categorical_process[m]->observation[*pstate]->simulation();
+              *pioutput[m]++ = smarkov->categorical_process[m]->observation[*pstate]->simulation();
             }
-
             else if (smarkov->discrete_parametric_process[m]) {
-              *pioutput[m] = smarkov->discrete_parametric_process[m]->observation[*pstate]->simulation();
+              *pioutput[m]++ = smarkov->discrete_parametric_process[m]->observation[*pstate]->simulation();
             }
-
+            else if (smarkov->continuous_parametric_process[m]->ident != LINEAR_MODEL) {
+              *proutput[m]++ = round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
+            }
             else {
-              if (smarkov->continuous_parametric_process[m]->ident == LINEAR_MODEL) {
-                *proutput[m] = smarkov->continuous_parametric_process[m]->observation[*pstate]->intercept +
-                               smarkov->continuous_parametric_process[m]->observation[*pstate]->slope * k +
-//                               round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
-                               smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation();
-              }
-
-              else if (smarkov->continuous_parametric_process[m]->ident == AUTOREGRESSIVE_MODEL) {
-                if (k == 0) {
-                  *proutput[m] = smarkov->continuous_parametric_process[m]->observation[*pstate]->location +
-//                                 round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
-                                 smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation();
-                }
-                else {
-                  *proutput[m] = smarkov->continuous_parametric_process[m]->observation[*pstate]->location +
-                                 smarkov->continuous_parametric_process[m]->observation[*pstate]->autoregressive_coeff *
-                                 (*(proutput[m] - 1) - smarkov->continuous_parametric_process[m]->observation[*pstate]->location) +
-//                                 round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
-                                 smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation();
-                }
-              }
-
-              else {
-                *proutput[m] = round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
-              }
-            }
-
-            switch (seq->type[m + 1]) {
-            case INT_VALUE :
-              pioutput[m]++;
-              break;
-            case REAL_VALUE :
-              proutput[m]++;
-              break;
+              *proutput[m]++ = smarkov->continuous_parametric_process[m]->observation[*pstate]->intercept +
+                               smarkov->continuous_parametric_process[m]->observation[*pstate]->slope * (j + k) +
+                               round(smarkov->continuous_parametric_process[m]->observation[*pstate]->simulation() * decimal_scale[m]) / decimal_scale[m];
             }
           }
         }
-
-        j += occupancy;
       }
       while (j < seq->length[i]);
     }
@@ -1802,7 +2080,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
       }
     }
 
-    // extraction of the characteristics of the generated sequences
+    // extraction des caracteristiques des sequences simulees
 
     seq->min_value[0] = 0;
     seq->max_value[0] = nb_state - 1;
@@ -1819,7 +2097,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
     seq->build_transition_count(smarkov);
     seq->build_observation_frequency_distribution(nb_state);
     seq->build_observation_histogram(nb_state);
-    seq->build_characteristic(I_DEFAULT , true , (type == EQUILIBRIUM ? true : false));
+    seq->build_characteristic(I_DEFAULT , true , (type == 'e' ? true : false));
 
 /*    if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
       delete seq;
@@ -1831,7 +2109,7 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
     if (!divergence_flag) {
       smarkov->characteristic_computation(*seq , counting_flag);
 
-      // computation of the log-likelihood of the model for the generated sequences
+      // calcul de la vraisemblance
 
       likelihood = smarkov->likelihood_computation(*seq);
 
@@ -1846,66 +2124,68 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
       }
 #     endif
 
-      if (hidden) {
-        seq->restoration_likelihood = likelihood;
-      }
-      else {
+      switch (hidden) {
+      case false :
         seq->likelihood = likelihood;
+        break;
+      case true :
+        seq->restoration_likelihood = likelihood;
+        break;
+      }
+    }
+
+    // calcul des melanges de lois d'observation (poids theoriques et poids deduits de la restauration)
+
+    if (hidden) {
+      weight = NULL;
+      restoration_weight = NULL;
+
+      for (i = 0;i < smarkov->nb_output_process;i++) {
+        if ((smarkov->categorical_process[i]) || (smarkov->discrete_parametric_process[i]) ||
+            ((smarkov->continuous_parametric_process[i]) &&
+             (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
+          weight = smarkov->state_process->weight_computation();
+          restoration_weight = seq->weight_computation();
+          break;
+        }
       }
 
-      // computation of the mixtures of observation distributions (theoretical weights and weights deduced from the restoration)
-
-      if (hidden) {
-        weight = NULL;
-        restoration_weight = NULL;
-
-        for (i = 0;i < smarkov->nb_output_process;i++) {
-          if ((smarkov->categorical_process[i]) || (smarkov->discrete_parametric_process[i]) ||
-              ((smarkov->continuous_parametric_process[i]) &&
-               (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL))) {
-            weight = smarkov->state_process->weight_computation();
-            restoration_weight = seq->weight_computation();
-            break;
-          }
+      for (i = 0;i < smarkov->nb_output_process;i++) {
+        if (smarkov->categorical_process[i]) {
+          delete smarkov->categorical_process[i]->weight;
+          delete smarkov->categorical_process[i]->mixture;
+          smarkov->categorical_process[i]->weight = new Distribution(*weight);
+          smarkov->categorical_process[i]->mixture = smarkov->categorical_process[i]->mixture_computation(smarkov->categorical_process[i]->weight);
+          delete smarkov->categorical_process[i]->restoration_weight;
+          delete smarkov->categorical_process[i]->restoration_mixture;
+          smarkov->categorical_process[i]->restoration_weight = new Distribution(*restoration_weight);
+          smarkov->categorical_process[i]->restoration_mixture = smarkov->categorical_process[i]->mixture_computation(smarkov->categorical_process[i]->restoration_weight);
         }
 
-        for (i = 0;i < smarkov->nb_output_process;i++) {
-          if (smarkov->categorical_process[i]) {
-            delete smarkov->categorical_process[i]->weight;
-            delete smarkov->categorical_process[i]->mixture;
-            smarkov->categorical_process[i]->weight = new Distribution(*weight);
-            smarkov->categorical_process[i]->mixture = smarkov->categorical_process[i]->mixture_computation(smarkov->categorical_process[i]->weight);
-            delete smarkov->categorical_process[i]->restoration_weight;
-            delete smarkov->categorical_process[i]->restoration_mixture;
-            smarkov->categorical_process[i]->restoration_weight = new Distribution(*restoration_weight);
-            smarkov->categorical_process[i]->restoration_mixture = smarkov->categorical_process[i]->mixture_computation(smarkov->categorical_process[i]->restoration_weight);
-          }
+        else if (smarkov->discrete_parametric_process[i]) {
+          delete smarkov->discrete_parametric_process[i]->weight;
+          delete smarkov->discrete_parametric_process[i]->mixture;
+          smarkov->discrete_parametric_process[i]->weight = new Distribution(*weight);
+          smarkov->discrete_parametric_process[i]->mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->weight);
 
-          else if (smarkov->discrete_parametric_process[i]) {
-            delete smarkov->discrete_parametric_process[i]->weight;
-            delete smarkov->discrete_parametric_process[i]->mixture;
-            smarkov->discrete_parametric_process[i]->weight = new Distribution(*weight);
-            smarkov->discrete_parametric_process[i]->mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->weight);
-
-            delete smarkov->discrete_parametric_process[i]->restoration_weight;
-            delete smarkov->discrete_parametric_process[i]->restoration_mixture;
-            smarkov->discrete_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
-            smarkov->discrete_parametric_process[i]->restoration_mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->restoration_weight);
-          }
-
-          else if ((smarkov->continuous_parametric_process[i]) &&
-                   (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
-            delete smarkov->continuous_parametric_process[i]->weight;
-            smarkov->continuous_parametric_process[i]->weight = new Distribution(*weight);
-
-            delete smarkov->continuous_parametric_process[i]->restoration_weight;
-            smarkov->continuous_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
-          }
+          delete smarkov->discrete_parametric_process[i]->restoration_weight;
+          delete smarkov->discrete_parametric_process[i]->restoration_mixture;
+          smarkov->discrete_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
+          smarkov->discrete_parametric_process[i]->restoration_mixture = smarkov->discrete_parametric_process[i]->mixture_computation(smarkov->discrete_parametric_process[i]->restoration_weight);
         }
 
-        delete weight;
-        delete restoration_weight;
+        else if ((smarkov->continuous_parametric_process[i]) &&
+                 (smarkov->continuous_parametric_process[i]->ident != LINEAR_MODEL)) {
+          delete smarkov->continuous_parametric_process[i]->weight;
+          smarkov->continuous_parametric_process[i]->weight = new Distribution(*weight);
+
+          delete smarkov->continuous_parametric_process[i]->restoration_weight;
+          smarkov->continuous_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
+        }
       }
+
+      delete weight;
+      delete restoration_weight;
     }
   }
 
@@ -1913,18 +2193,15 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistrib
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Simulation using a semi-Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] nb_sequence   number of sequences,
- *  \param[in] length        sequence length,
- *  \param[in] counting_flag flag on the computation of the counting distributions.
+ *  Simulation par une semi-chaine de Markov.
  *
- *  \return                  SemiMarkovData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError,
+ *              nombre et longueur des sequences,
+ *              flag sur le calcul des lois de comptage.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
                                        int length , bool counting_flag) const
@@ -1959,7 +2236,6 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
     length_distribution.mean = length;
     length_distribution.variance = 0.;
     length_distribution.frequency[length] = nb_sequence;
-
     seq = simulation(error , length_distribution , counting_flag);
   }
 
@@ -1967,18 +2243,15 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Simulation using a semi-Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] nb_sequence   number of sequences,
- *  \param[in] iseq          reference on a MarkovianSequences object,
- *  \param[in] counting_flag flag on the computation of the counting distributions.
+ *  Simulation par une semi-chaine de Markov.
  *
- *  \return                  SemiMarkovData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, nombre de sequences,
+ *              reference sur un objet MarkovianSequences,
+ *              flag sur le calcul des lois de comptage.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
                                        const MarkovianSequences &iseq , bool counting_flag) const
@@ -2006,29 +2279,24 @@ SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of Kullback-Leibler divergences between semi-Markov chains.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error               reference on a StatError object,
- *  \param[in] display             flag for displaying the matrix of pairwise distances between models,
- *  \param[in] nb_model            number of semi-Markov chains,
- *  \param[in] ismarkov            pointer on SemiMarkov objects,
- *  \param[in] length_distribution sequence length frequency distribution,
- *  \param[in] path                file path.
+ *  Comparaison de semi-chaines de Markov par calcul de divergences de Kullback-Leibler.
  *
- *  \return                        DistanceMatrix object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
+ *              de Markov, pointeur sur les semi-chaines de Markov,
+ *              loi empirique des longueurs des sequences, path.
+ *
+ *--------------------------------------------------------------*/
 
-DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool display ,
+DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                    int nb_model , const SemiMarkov **ismarkov ,
                                                    FrequencyDistribution **length_distribution ,
-                                                   const string path) const
+                                                   const char *path) const
 
 {
   bool status = true , lstatus;
-  int i , j , k;
+  register int i , j , k;
   int cumul_length , nb_failure;
   double **likelihood;
   long double divergence;
@@ -2140,14 +2408,16 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
   if (status) {
     out_file = NULL;
 
-    if (!path.empty()) {
-      out_file = new ofstream(path.c_str());
+    if (path) {
+      out_file = new ofstream(path);
 
       if (!out_file) {
         error.update(STAT_error[STATR_FILE_NAME]);
-        if (display) {
-          cout << error;
-        }
+
+#       ifdef MESSAGE
+        os << error;
+#       endif
+
       }
     }
 
@@ -2162,7 +2432,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
 
     for (i = 0;i < nb_model;i++) {
 
-      // generation of a sample of sequences using a semi-Markov chain
+      // simulation d'un echantillon de sequences a partir d'une semi-chaine de Markov
 
       simul_seq = smarkov[i]->simulation(error , *length_distribution[i] , false , true);
 
@@ -2174,9 +2444,12 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
       for (j = 0;j < simul_seq->nb_sequence;j++) {
         likelihood[j][i] = smarkov[i]->likelihood_computation(*simul_seq , j);
 
-        if ((display) && (likelihood[j][i] == D_INF)) {
-          cout << "\nERROR - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << endl;
+#       ifdef MESSAGE
+        if (likelihood[j][i] == D_INF) {
+          os << "\nERROR - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << endl;
         }
+#       endif
+
       }
 
       if (smarkov[i]->nb_output_process == 1) {
@@ -2186,7 +2459,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
         iseq = simul_seq;
       }
 
-      // computation of the log-likelihood of each semi-Markov chain for the sample of sequences
+      // calcul des vraisemblances de l'echantillon pour chacune des semi-chaines de Markov
 
       for (j = 0;j < nb_model;j++) {
         if (j != i) {
@@ -2216,11 +2489,13 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
 //            }
           }
 
-          if ((display) && (nb_failure > 0)) {
-            cout << "\nWARNING - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << ", "
-                 << SEQ_error[SEQR_TARGET_MODEL] << ": " << j + 1 << " - "
-                 << SEQ_error[SEQR_DIVERGENCE_NB_FAILURE] << ": " << nb_failure << endl;
+#         ifdef MESSAGE
+          if (nb_failure > 0) {
+            os << "\nWARNING - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << ", "
+               << SEQ_error[SEQR_TARGET_MODEL] << ": " << j + 1 << " - "
+               << SEQ_error[SEQR_DIVERGENCE_NB_FAILURE] << ": " << nb_failure << endl;
           }
+#         endif
 
 //          if (divergence != -D_INF) {
             dist_matrix->update(i + 1 , j + 1 , divergence , cumul_length);
@@ -2232,11 +2507,12 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
         }
       }
 
-      if (display) {
-        cout << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": " << simul_seq->nb_sequence << " "
-             << SEQ_label[SEQL_SIMULATED] << " " << SEQ_label[simul_seq->nb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << endl;
-        simul_seq->likelihood_write(cout , nb_model , likelihood , SEQ_label[SEQL_SEMI_MARKOV_CHAIN]);
-      }
+#     ifdef MESSAGE
+      os << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": " << simul_seq->nb_sequence << " "
+         << SEQ_label[SEQL_SIMULATED] << " " << SEQ_label[simul_seq->nb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << endl;
+      simul_seq->likelihood_write(os , nb_model , likelihood , SEQ_label[SEQL_SEMI_MARKOV_CHAIN]);
+#     endif
+
       if (out_file) {
         *out_file << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": " << simul_seq->nb_sequence << " "
                   << SEQ_label[SEQL_SIMULATED] << " " << SEQ_label[simul_seq->nb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << endl;
@@ -2266,29 +2542,23 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of Kullback-Leibler divergences between semi-Markov chains.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error       reference on a StatError object,
- *  \param[in] display     flag for displaying the matrix of pairwise distances between models,
- *  \param[in] nb_model    number of semi-Markov chains,
- *  \param[in] smarkov     pointer on SemiMarkov objects,
- *  \param[in] nb_sequence number of generated sequences,
- *  \param[in] length      sequence length,
- *  \param[in] path        file path.
+ *  Comparaison de semi-chaines de Markov par calcul de divergences de Kullback-Leibler.
  *
- *  \return                DistanceMatrix object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
+ *              de Markov, pointeur sur les semi-chaines de Markov,
+ *              nombre et longueur des sequences, path.
+ *
+ *--------------------------------------------------------------*/
 
-DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool display ,
+DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                    int nb_model , const SemiMarkov **smarkov ,
-                                                   int nb_sequence , int length , const string path) const
+                                                   int nb_sequence , int length , const char *path) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   FrequencyDistribution **length_distribution;
   DistanceMatrix *dist_matrix;
 
@@ -2325,7 +2595,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
       length_distribution[i] = new FrequencyDistribution(*length_distribution[0]);
     }
 
-    dist_matrix = divergence_computation(error , display , nb_model , smarkov , length_distribution , path);
+    dist_matrix = divergence_computation(error , os , nb_model , smarkov , length_distribution , path);
 
     for (i = 0;i < nb_model;i++) {
       delete length_distribution[i];
@@ -2337,29 +2607,23 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of Kullback-Leibler divergences between semi-Markov chains.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error       reference on a StatError object,
- *  \param[in] display     flag for displaying the matrix of pairwise distances between models,
- *  \param[in] nb_model    number of semi-Markov chains,
- *  \param[in] smarkov     pointer on SemiMarkov objects,
- *  \param[in] nb_sequence number of generated sequences,
- *  \param[in] seq         pointer on MarkovianSequences objects,
- *  \param[in] path        file path.
+ *  Comparaison de semi-chaines de Markov par calcul de divergences de Kullback-Leibler.
  *
- *  \return                DistanceMatrix object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
+ *              de Markov, pointeur sur les semi-chaines de Markov,
+ *              pointeurs sur des objets MarkovianSequences, path.
+ *
+ *--------------------------------------------------------------*/
 
-DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool display ,
+DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
                                                    int nb_model , const SemiMarkov **smarkov ,
                                                    int nb_sequence , const MarkovianSequences **seq ,
-                                                   const string path) const
+                                                   const char *path) const
 
 {
-  int i;
+  register int i;
   FrequencyDistribution **length_distribution;
   DistanceMatrix *dist_matrix;
 
@@ -2377,7 +2641,7 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
       length_distribution[i] = seq[i]->length_distribution->frequency_scale(nb_sequence);
     }
 
-    dist_matrix = divergence_computation(error , display , nb_model , smarkov , length_distribution , path);
+    dist_matrix = divergence_computation(error , os , nb_model , smarkov , length_distribution , path);
 
     for (i = 0;i < nb_model;i++) {
       delete length_distribution[i];
@@ -2389,13 +2653,13 @@ DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , bool displ
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the SemiMarkovIterator class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] ismarkov pointer on a SemiMarkov object.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe SemiMarkovIterator.
+ *
+ *  argument : pointeur sur un objet SemiMarkov.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovIterator::SemiMarkovIterator(SemiMarkov *ismarkov)
 
@@ -2414,13 +2678,13 @@ SemiMarkovIterator::SemiMarkovIterator(SemiMarkov *ismarkov)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a SemiMarkovIterator object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] iter reference on a SemiMarkovIterator object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet SemiMarkovIterator.
+ *
+ *  argument : reference sur un objet SemiMarkovIterator.
+ *
+ *--------------------------------------------------------------*/
 
 void SemiMarkovIterator::copy(const SemiMarkovIterator &iter)
 
@@ -2434,11 +2698,11 @@ void SemiMarkovIterator::copy(const SemiMarkovIterator &iter)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the SemiMarkovIterator class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe SemiMarkovIterator.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovIterator::~SemiMarkovIterator()
 
@@ -2447,15 +2711,13 @@ SemiMarkovIterator::~SemiMarkovIterator()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the SemiMarkovIterator class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] iter reference on a SemiMarkovIterator object.
+ *  Operateur d'assignement de la classe SemiMarkovIterator.
  *
- *  \return         SemiMarkovIterator object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet SemiMarkovIterator.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkovIterator& SemiMarkovIterator::operator=(const SemiMarkovIterator &iter)
 
@@ -2469,17 +2731,13 @@ SemiMarkovIterator& SemiMarkovIterator::operator=(const SemiMarkovIterator &iter
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Simulation using a semi-Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] int_seq        sequence,
- *  \param[in] length         sequence length,
- *  \param[in] initialization flag initialization.
+ *  Simulation par une semi-chaine de Markov.
  *
- *  \return                   error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : sequence, longueur de la sequence, flag initialisation.
+ *
+ *--------------------------------------------------------------*/
 
 bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initialization)
 
@@ -2492,7 +2750,7 @@ bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initializa
   }
 
   else {
-    int i , j;
+    register int i , j;
     int *pstate , **pioutput;
 //    double **proutput;
 
@@ -2507,14 +2765,14 @@ bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initializa
     if (initialization) {
       state = cumul_method(semi_markov->nb_state , semi_markov->cumul_initial);
 
-      switch (semi_markov->sojourn_type[state]) {
+      switch (semi_markov->state_subtype[state]) {
 
       case SEMI_MARKOVIAN : {
         switch (semi_markov->type) {
-        case ORDINARY :
+        case 'o' :
           occupancy = semi_markov->state_process->sojourn_time[state]->simulation();
           break;
-        case EQUILIBRIUM :
+        case 'e' :
           occupancy = semi_markov->forward[state]->simulation();
           break;
         }
@@ -2563,7 +2821,7 @@ bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initializa
       if ((semi_markov->transition[state][state] < 1.) && (counter == occupancy)) {
         state = cumul_method(semi_markov->nb_state , semi_markov->cumul_transition[state]);
 
-        switch (semi_markov->sojourn_type[state]) {
+        switch (semi_markov->state_subtype[state]) {
         case SEMI_MARKOVIAN :
           occupancy = semi_markov->state_process->sojourn_time[state]->simulation();
           break;
@@ -2586,21 +2844,18 @@ bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initializa
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Simulation using a semi-Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] length         sequence length,
- *  \param[in] initialization flag initialization.
+ *  Simulation par une semi-chaine de Markov.
  *
- *  \return                   generated sequence.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : longueur de la sequence, flag initialisation.
+ *
+ *--------------------------------------------------------------*/
 
 int** SemiMarkovIterator::simulation(int length , bool initialization)
 
 {
-  int i;
+  register int i;
   int **int_seq;
 
 

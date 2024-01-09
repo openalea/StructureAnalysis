@@ -1,5 +1,5 @@
 """output tests"""
-__version__ = "$Id$"
+__version__ = "$Id: test_output.py 9397 2010-08-10 10:50:07Z cokelaer $"
 
 from openalea.stat_tool.distribution import Uniform, Distribution
 from openalea.stat_tool.histogram import Histogram

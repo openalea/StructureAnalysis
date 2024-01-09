@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: reestimation.h 18014 2015-04-23 07:03:45Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -51,32 +51,23 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constants
+ *  Constantes :
  */
 
 
-  const double CUMUL_THRESHOLD = 0.999;  // threshold on the cumulative distribution function
-                                         // to determine an upper bound of the support
+  const double CUMUL_THRESHOLD = 0.999;  // seuil sur la fonction de repartition
+                                         // pour borner une loi
 
-  const double BISECTION_RATIO_THRESHOLD = 1.e-8;  // threshold for stopping the interval bisection method
-  const int BISECTION_NB_ITER = 100;     // maximum number of iterations for the interval bisection method
-
-  enum penalty_type {
-    FIRST_DIFFERENCE ,
-    SECOND_DIFFERENCE ,
-    ENTROPY
-  };
-
-  enum side_effect {
-    ZERO ,
-    CONTINUATION
-  };
+  const double BISECTION_RATIO_THRESHOLD = 1.e-8;  // seuil pour stopper la recherche
+                                                   // par bissection d'intervalle
+  const int BISECTION_NB_ITER = 100;     // nombre d'iterations maximum pour la methode
+                                         // de bissection d'intervalle
 
 
 
 /****************************************************************
  *
- *  Class definition
+ *  Definition de la classe :
  */
 
 
@@ -84,24 +75,25 @@ namespace stat_tool {
   class DiscreteParametric;
   class ContinuousParametric;
 
-  /// \brief Frequency distribution with integer or real (for EM algorithms) frequencies
 
   template <typename Type>
-  class Reestimation {
+  class Reestimation {    // loi empirique a frequences entieres ou reelles (estimateur EM)
 
     friend std::ostream& operator<<(std::ostream &os , const Reestimation<Type> &histo)
     { return histo.print(os); }
 
   public :
 
-    int nb_value;           ///< number of values from 0
-    int alloc_nb_value;     ///< number of allocated values
-    int offset;             ///< number of values of null frequencies from 0
-    Type nb_element;        ///< sample size
-    Type max;               ///< maximum frequency
-    double mean;            ///< mean
-    double variance;        ///< variance
-    Type *frequency;        ///< frequency for each value
+    int nb_value;           // nombre de valeurs a partir de 0
+    int alloc_nb_value;     // nombre de valeurs alloues a partir de 0
+    int offset;             // nombre de valeurs de frequence nulle a partir de 0. Elles sont quand meme allouees
+    /// sample size
+    Type nb_element;        // effectif total
+    /// maximal frequency
+    Type max;               // frequence maximum
+    double mean;            // moyenne
+    double variance;        // variance
+    Type *frequency;        // frequence de chacune des valeurs a partir de 0
 
     void init(int inb_value);
     void copy(const Reestimation<Type> &histo);
@@ -122,12 +114,10 @@ namespace stat_tool {
     void offset_computation();
     void nb_element_computation();
     void max_computation();
-    double mode_computation() const;
     void mean_computation();
-    double quantile_computation(double icumul = 0.5) const;
     void variance_computation(bool bias = false);
 
-    double mean_absolute_deviation_computation(double location) const;
+    double mean_absolute_deviation_computation() const;
     double log_geometric_mean_computation() const;
     double skewness_computation() const;
     double kurtosis_computation() const;
@@ -138,23 +128,21 @@ namespace stat_tool {
     double likelihood_computation(const Distribution &dist) const;
 
     void distribution_estimation(Distribution *pdist) const;
-    void penalized_likelihood_estimation(Distribution *dist , double weight , penalty_type pen_type ,
-                                         double *penalty , side_effect outside) const;
+    void penalized_likelihood_estimation(Distribution *dist , double weight , int type ,
+                                         double *penalty , int outside) const;
 
     double binomial_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag) const;
     double poisson_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
                               double cumul_threshold) const;
     double negative_binomial_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
                                         double cumul_threshold) const;
-    double poisson_geometric_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
-                                        double cumul_threshold) const;
 
     double parametric_estimation(DiscreteParametric *pdist , int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
-                                 double cumul_threshold = CUMUL_THRESHOLD , bool poisson_geometric = false) const;
+                                 double cumul_threshold = CUMUL_THRESHOLD) const;
     double type_parametric_estimation(DiscreteParametric *pdist , int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
-                                      double cumul_threshold = CUMUL_THRESHOLD , bool poisson_geometric = false) const;
+                                      double cumul_threshold = CUMUL_THRESHOLD) const;
 
-    DiscreteParametric* type_parametric_estimation(int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
+    DiscreteParametric* type_parametric_estimation(int min_inf_bound = 0 , bool flag = true ,
                                                    double cumul_threshold = CUMUL_THRESHOLD) const;
 
     void equilibrium_process_combination(const Reestimation<Type> *length_bias_reestim , double imean);
@@ -162,8 +150,8 @@ namespace stat_tool {
                                         Distribution *dist , double imean) const;
     void penalized_likelihood_equilibrium_process_estimation(const Reestimation<Type> *length_bias_reestim ,
                                                              Distribution *dist , double imean ,
-                                                             double weight , penalty_type pen_type ,
-                                                             double *penalty , side_effect outside) const;
+                                                             double weight , int type ,
+                                                             double *penalty , int outside) const;
 
     void state_occupancy_estimation(const Reestimation<Type> *final_run ,
                                     Reestimation<double> *occupancy_reestim ,
@@ -172,7 +160,6 @@ namespace stat_tool {
 
     void gamma_estimation(ContinuousParametric *dist , int iter) const;
     void zero_inflated_gamma_estimation(ContinuousParametric *dist , int iter) const;
-    void inverse_gaussian_estimation(ContinuousParametric *dist) const;
   };
 
 

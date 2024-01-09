@@ -4,7 +4,7 @@
 #
 #########################################################################
 """
-__version__ = "$Id$"
+__version__ = "$Id: test_multivariate_mixture.py 9869 2010-11-04 17:31:41Z dbarbeau $"
 
 
 from openalea.stat_tool.plot import DISABLE_PLOT

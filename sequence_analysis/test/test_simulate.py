@@ -4,7 +4,7 @@
 
 .. todo:: to be done
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_simulate.py 7884 2010-02-09 07:42:43Z cokelaer $"
 
 def test_simulate_markov():
     """test to be done"""

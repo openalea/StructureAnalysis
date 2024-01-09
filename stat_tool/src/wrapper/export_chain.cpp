@@ -23,6 +23,7 @@
 #include "wrapper_util.h"
 #include "export_base.h"
 
+#include "stat_tool/stat_tools.h"
 #include "stat_tool/markovian.h"
 
 #include <boost/python.hpp>
@@ -45,9 +46,9 @@ class ChainWrap
 void class_chain()
 {
     class_< Chain >("_Chain", "Chain")
-    .def(init<process_type, int , bool>())
-    .def(init<process_type, int, int , bool>())
-    .def(init< optional<process_type, int, bool> >())
+    .def(init<char, int , bool>())
+    .def(init<char, int, int , bool>())
+    .def(init< optional<char, int, bool> >())
 
     .def(self_ns::str(self)) //__str__
 

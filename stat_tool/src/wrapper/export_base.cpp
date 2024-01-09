@@ -16,7 +16,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id$
+ *        $Id: export_base.cpp 18026 2015-04-23 07:10:04Z guedon $
  *
  *-----------------------------------------------------------------------------*/
 
@@ -25,12 +25,14 @@
 #include "export_base.h"
 #include "wrapper_util.h"
 
-// #include "stat_tool/stat_tools.h"
+#include "stat_tool/stat_tools.h"
 
 // related to the enumerates
+#include "stat_tool/regression.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/distance_matrix.h"
-#include "stat_tool/regression.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -168,7 +170,7 @@ void class_constant()
   scope().attr("DISPLAY_CONDITIONAL_NB_VALUE") = DISPLAY_CONDITIONAL_NB_VALUE;
   scope().attr("PLOT_NB_VALUE") = PLOT_NB_VALUE;
   scope().attr("PLOT_RANGE_RATIO") = PLOT_RANGE_RATIO;
-  scope().attr("NB_CATEGORY") = NB_CATEGORY;
+  scope().attr("NB_SYMBOL") = NB_SYMBOL;
 
 
   // distance_matrix
@@ -213,7 +215,7 @@ void class_constant()
   ;
 
   enum_<stat_tool::wrap_util::UniqueInt<4, 6> >("VariableType")
-  .value("NOMINAL", NOMINAL)
+  .value("SYMBOLIC", SYMBOLIC)
   .value("ORDINAL", ORDINAL)
   .value("NUMERIC", NUMERIC)
   .value("CIRCULAR", CIRCULAR)
@@ -302,35 +304,27 @@ void class_constant()
   .value("NB_OCCURRENCE" , NB_OCCURRENCE)
   .value("COUNTING" , COUNTING)
   .value("LENGTH" , LENGTH)
+  .value("SEQUENCE_CUMUL", SEQUENCE_CUMUL)
+  .value("SEQUENCE_MEAN", SEQUENCE_MEAN)
   .export_values()
   ;
 
 
   // regression
   enum_<stat_tool::wrap_util::UniqueInt<4, 17> >("RegressionType")
-  .value("LINEAR_FUNCTION", LINEAR_FUNCTION)
-  .value("LOGISTIC", LOGISTIC)
-  .value("MONOMOLECULAR", MONOMOLECULAR)
-  .value("NONPARAMETRIC_FUNCTION", NONPARAMETRIC_FUNCTION)
+  .value("STAT_LINEAR", STAT_LINEAR)
+  .value("STAT_LOGISTIC", STAT_LOGISTIC)
+  .value("STAT_MONOMOLECULAR", STAT_MONOMOLECULAR)
+  .value("STAT_NONPARAMETRIC", STAT_NONPARAMETRIC)
   .export_values()
   ;
+
 
   // markovian
 
 
   scope().attr("MIN_PROBABILITY") = MIN_PROBABILITY;
   scope().attr("ORDER") = ORDER;
-  
-  // Vectors
-  
-  enum_<stat_tool::wrap_util::UniqueInt<4, 18> >("OutputFormat")
-  .value("ASCII", ASCII)
-  .value("SPREADSHEET", SPREADSHEET)
-  .value("GNUPLOT", GNUPLOT)
-  .value("PLOT", PLOT)
-  .export_values()
-  ;
-  
   /*const int NB_STATE = 100;
   const int ORDER = 8;
   const double THRESHOLDING_FACTOR = 0.8;

@@ -8,7 +8,7 @@
  *       File author(s): Ch. Godin (christophe.godin@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: gscanner.h 17590 2014-10-10 13:19:31Z boudon $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *

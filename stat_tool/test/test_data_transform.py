@@ -4,7 +4,7 @@
 
 .. todo:: to be clean
 """
-__version__ = "$Id$"
+__version__ = "$Id: test_data_transform.py 9397 2010-08-10 10:50:07Z cokelaer $"
 
 from openalea.stat_tool.vectors import Vectors
 from openalea.stat_tool.histogram import Histogram

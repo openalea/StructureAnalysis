@@ -1,5 +1,5 @@
 """vectors tests"""
-__version__ = "$Id$"
+__version__ = "$Id: test_matrix.py 9380 2010-08-06 17:53:45Z cokelaer $"
 
 from openalea.stat_tool.vectors import Vectors, VectorDistance
 from openalea.stat_tool.data_transform import SelectVariable

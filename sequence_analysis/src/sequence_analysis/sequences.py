@@ -12,11 +12,11 @@
     :Code status: mature
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
-    :Revision: $Id$
+    :Revision: $Id: sequences.py 10441 2011-04-11 16:57:28Z pradal $
     :Usage: >>> from openalea.sequence_analysis.sequences import *
 
 """
-__version__ = "$Id$"
+__version__ = "$Id: sequences.py 10441 2011-04-11 16:57:28Z pradal $"
 
 import os
 import openalea.stat_tool.interface as interface

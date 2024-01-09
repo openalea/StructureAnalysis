@@ -1,7 +1,7 @@
 """
 Mixture functional test from exploratory.aml and stat_tool_test.aml files
 """
-__version__ = "$Id$"
+__version__ = "$Id: test_mixture_functional.py 9397 2010-08-10 10:50:07Z cokelaer $"
 
 from openalea.stat_tool.plot import DISABLE_PLOT
 

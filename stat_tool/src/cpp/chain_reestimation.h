@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: chain_reestimation.h 17975 2015-04-23 06:34:35Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -47,32 +47,31 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Class definition
+ *  Definition de la classe :
  */
 
 
-  /// \brief Data structure corresponding to a Markov chain
-
   template <typename Type>
-  class ChainReestimation {
+  class ChainReestimation {  // structure de donnees correspondant a une chaine de Markov
 
     friend std::ostream& operator<<(std::ostream &os , const ChainReestimation<Type> &chain_data)
     { return chain_data.print(os); }
 
   public :
 
-    process_type type;      ///< process type (ORDINARY/EQUILIBRIUM)
-    int nb_state;           ///< number of states
-    int nb_row;             ///< number of rows of the transition frequency matrix
-    Type *initial;          ///< initial state frequencies
-    Type **transition;      ///< transition frequency matrix
+    char type;              // 'o' : ordinaire, 'e' : en equilibre
+    int nb_state;           // nombre d'etats
+    int nb_row;             // nombre de lignes de la matrice des frequences
+                            // de transition
+    Type *initial;          // frequences des etats initiaux
+    Type **transition;      // matrice des frequences des transition
 
     void init();
     void copy(const ChainReestimation<Type> &chain_data);
     void remove();
 
     ChainReestimation();
-    ChainReestimation(process_type itype , int inb_state , int inb_row , bool init_flag = false);
+    ChainReestimation(char itype , int inb_state , int inb_row , bool init_flag = false);
     ChainReestimation(const ChainReestimation<Type> &chain_data)
     { copy(chain_data); }
     ~ChainReestimation();

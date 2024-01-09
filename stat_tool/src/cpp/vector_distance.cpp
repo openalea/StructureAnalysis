@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: vector_distance.cpp 18023 2015-04-23 07:08:20Z guedon $
  *
  *       Forum for V-Plants developers
  *
@@ -37,75 +37,75 @@
 
 
 #include <math.h>
-
-#include <string>
 #include <sstream>
 #include <iomanip>
 
-#include <boost/tokenizer.hpp>
+#include "tool/rw_tokenizer.h"
+#include "tool/rw_cstring.h"
+#include "tool/rw_locale.h"
+#include "tool/config.h"
 
+#include "stat_tools.h"
+#include "markovian.h"
 #include "vectors.h"
 #include "stat_label.h"
 
 using namespace std;
-using namespace boost;
 
 
 namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Default constructor of the VectorDistance class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par defaut de la classe VectorDistance.
+ *
+ *--------------------------------------------------------------*/
 
 VectorDistance::VectorDistance()
 
 {
   nb_variable = 0;
-  distance_type = ABSOLUTE_VALUE;
+  distance_type = I_DEFAULT;
 
-  var_type = NULL;
+  variable_type = NULL;
   weight = NULL;
   dispersion = NULL;
 
   nb_value = NULL;
-  category_distance = NULL;
+  symbol_distance = NULL;
 
   period = NULL;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the VectorDistance class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_variable   number of variables,
- *  \param[in] ivar_type      variable types,
- *  \param[in] iweight        variable weights,
- *  \param[in] idistance_type distance type (ABSOLUTE_VALUE/QUADRATIC).
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe VectorDistance.
+ *
+ *  arguments : nombre de variables, type et poids de chaque variable,
+ *              type de distance (ABSOLUTE_VALUE/QUADRATIC).
+ *
+ *--------------------------------------------------------------*/
 
-VectorDistance::VectorDistance(int inb_variable , variable_type *ivar_type ,
-                               double *iweight , metric idistance_type)
+VectorDistance::VectorDistance(int inb_variable , int *ivariable_type ,
+                               double *iweight , int idistance_type)
 
 {
-  int i;
+  register int i;
 
 
   nb_variable = inb_variable;
   distance_type = idistance_type;
 
-  var_type = new variable_type[nb_variable];
+  variable_type = new int[nb_variable];
   weight = new double[nb_variable];
   dispersion = new double[nb_variable];
   nb_value = new int[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
-    var_type[i] = ivar_type[i];
+    variable_type[i] = ivariable_type[i];
 
     if (iweight) {
       weight[i] = iweight[i];
@@ -118,9 +118,9 @@ VectorDistance::VectorDistance(int inb_variable , variable_type *ivar_type ,
     nb_value[i] = 0;
   }
 
-  category_distance = new double**[nb_variable];
+  symbol_distance = new double**[nb_variable];
   for (i = 0;i < nb_variable;i++) {
-    category_distance[i] = NULL;
+    symbol_distance[i] = NULL;
   }
 
   period = new int[nb_variable];
@@ -130,54 +130,50 @@ VectorDistance::VectorDistance(int inb_variable , variable_type *ivar_type ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the VectorDistance class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_variable       number of variables,
- *  \param[in] idistance_type     distance type (ABSOLUTE_VALUE/QUADRATIC),
- *  \param[in] ivar_type          variable types,
- *  \param[in] iweight            variable weights,
- *  \param[in] inb_value          number of categories (for categorical variables),
- *  \param[in] icategory_distance between-category distance matrices (for categorical variables),
- *  \param[in] iperiod            periods (for circular variables).
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe VectorDistance.
+ *
+ *  arguments : nombre de variables, type de distance (ABSOLUTE_VALUE/QUADRATIC),
+ *              type et poids de chaque variable, nombre de valeurs,
+ *              matrice des distances entre symboles, periodes.
+ *
+ *--------------------------------------------------------------*/
 
-VectorDistance::VectorDistance(int inb_variable , metric idistance_type , variable_type *ivar_type ,
-                               double *iweight , int *inb_value , double ***icategory_distance ,
+VectorDistance::VectorDistance(int inb_variable , int idistance_type , int *ivariable_type ,
+                               double *iweight , int *inb_value , double ***isymbol_distance ,
                                int *iperiod)
 
 {
-  int i , j , k;
+  register int i , j , k;
   double *pdistance , *cdistance;
 
 
   nb_variable = inb_variable;
   distance_type = idistance_type;
 
-  var_type = new variable_type[nb_variable];
+  variable_type = new int[nb_variable];
   weight = new double[nb_variable];
   dispersion = new double[nb_variable];
   nb_value = new int[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
-    var_type[i] = ivar_type[i];
+    variable_type[i] = ivariable_type[i];
     weight[i] = iweight[i];
     dispersion[i] = D_DEFAULT;
     nb_value[i] = inb_value[i];
   }
 
-  category_distance = new double**[nb_variable];
+  symbol_distance = new double**[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
-    if (icategory_distance[i]) {
-      category_distance[i] = new double*[nb_value[i]];
+    if (isymbol_distance[i]) {
+      symbol_distance[i] = new double*[nb_value[i]];
       for (j = 0;j < nb_value[i];j++) {
-        category_distance[i][j] = new double[nb_value[i]];
+        symbol_distance[i][j] = new double[nb_value[i]];
 
-        pdistance = category_distance[i][j];
-        cdistance = icategory_distance[i][j];
+        pdistance = symbol_distance[i][j];
+        cdistance = isymbol_distance[i][j];
         for (k = 0;k < nb_value[i];k++) {
           *pdistance++ = *cdistance++;
         }
@@ -185,7 +181,7 @@ VectorDistance::VectorDistance(int inb_variable , metric idistance_type , variab
     }
 
     else {
-      category_distance[i] = NULL;
+      symbol_distance[i] = NULL;
     }
   }
 
@@ -196,47 +192,47 @@ VectorDistance::VectorDistance(int inb_variable , metric idistance_type , variab
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a VectorDistance object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] vector_dist reference on a VectorDistance object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet VectorDistance.
+ *
+ *  argument : reference sur un objet VectorDistance.
+ *
+ *--------------------------------------------------------------*/
 
 void VectorDistance::copy(const VectorDistance &vector_dist)
 
 {
-  int i , j , k;
+  register int i , j , k;
   double *pdistance , *cdistance;
 
 
   nb_variable = vector_dist.nb_variable;
   distance_type = vector_dist.distance_type;
 
-  var_type = new variable_type[nb_variable];
+  variable_type = new int[nb_variable];
   weight = new double[nb_variable];
   dispersion = new double[nb_variable];
   nb_value = new int[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
-    var_type[i] = vector_dist.var_type[i];
+    variable_type[i] = vector_dist.variable_type[i];
     weight[i] = vector_dist.weight[i];
     dispersion[i] = vector_dist.dispersion[i];
     nb_value[i] = vector_dist.nb_value[i];
   }
 
-  category_distance = new double**[nb_variable];
+  symbol_distance = new double**[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
-    if (vector_dist.category_distance[i]) {
-      category_distance[i] = new double*[nb_value[i]];
+    if (vector_dist.symbol_distance[i]) {
+      symbol_distance[i] = new double*[nb_value[i]];
 
       for (j = 0;j < nb_value[i];j++) {
-        category_distance[i][j] = new double[nb_value[i]];
+        symbol_distance[i][j] = new double[nb_value[i]];
 
-        pdistance = category_distance[i][j];
-        cdistance = vector_dist.category_distance[i][j];
+        pdistance = symbol_distance[i][j];
+        cdistance = vector_dist.symbol_distance[i][j];
         for (k = 0;k < nb_value[i];k++) {
           *pdistance++ = *cdistance++;
         }
@@ -244,7 +240,7 @@ void VectorDistance::copy(const VectorDistance &vector_dist)
     }
 
     else {
-      category_distance[i] = NULL;
+      symbol_distance[i] = NULL;
     }
   }
 
@@ -255,32 +251,32 @@ void VectorDistance::copy(const VectorDistance &vector_dist)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of data members of a VectorDistance object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet VectorDistance.
+ *
+ *--------------------------------------------------------------*/
 
 void VectorDistance::remove()
 
 {
-  int i , j;
+  register int i , j;
 
 
-  delete [] var_type;
+  delete [] variable_type;
   delete [] weight;
   delete [] dispersion;
 
-  if (category_distance) {
+  if (symbol_distance) {
     for (i = 0;i < nb_variable;i++) {
-      if (category_distance[i]) {
+      if (symbol_distance[i]) {
         for (j = 0;j < nb_value[i];j++) {
-          delete [] category_distance[i][j];
+          delete [] symbol_distance[i][j];
         }
-        delete [] category_distance[i];
+        delete [] symbol_distance[i];
       }
     }
-    delete [] category_distance;
+    delete [] symbol_distance;
   }
 
   delete [] nb_value;
@@ -289,11 +285,11 @@ void VectorDistance::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the VectorDistance class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe VectorDistance.
+ *
+ *--------------------------------------------------------------*/
 
 VectorDistance::~VectorDistance()
 
@@ -302,15 +298,13 @@ VectorDistance::~VectorDistance()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the VectorDistance class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] vector_dist reference on a VectorDistance object.
+ *  Operateur d'assignement de la classe VectorDistance.
  *
- *  \return                VectorDistance object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet VectorDistance.
+ *
+ *--------------------------------------------------------------*/
 
 VectorDistance& VectorDistance::operator=(const VectorDistance &vector_dist)
 
@@ -324,33 +318,29 @@ VectorDistance& VectorDistance::operator=(const VectorDistance &vector_dist)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a VectorDistance object from a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Construction d'un objet VectorDistance a partir d'un fichier.
  *
- *  \return          VectorDistance object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
+VectorDistance* vector_distance_ascii_read(StatError &error , const char *path)
 
 {
-  string buffer;
+  RWLocaleSnapshot locale("en");
+  RWCString buffer , token;
   size_t position;
-  typedef tokenizer<char_separator<char>> tokenizer;
-  char_separator<char> separator(" \t");
   bool status , lstatus , weight_flag;
-  int i , j , k , m;
-  int line , read_line , read_type , nb_variable , value , variable , category ,
-      nb_value[VECTOR_NB_VARIABLE] , period[VECTOR_NB_VARIABLE];
-  metric distance_type = ABSOLUTE_VALUE;
-  variable_type var_type[VECTOR_NB_VARIABLE];
-  double cumul , weight[VECTOR_NB_VARIABLE] , ***category_distance;
+  register int i , j , k , m;
+  int line , read_line , read_type , nb_variable , distance_type = ABSOLUTE_VALUE ,
+      variable , symbol , variable_type[VECTOR_NB_VARIABLE] , nb_value[VECTOR_NB_VARIABLE] ,
+      period[VECTOR_NB_VARIABLE];
+  long value;
+  double cumul , weight[VECTOR_NB_VARIABLE] , ***symbol_distance;
   VectorDistance *vector_dist;
-  ifstream in_file(path.c_str());
+  ifstream in_file(path);
 
 
   vector_dist = NULL;
@@ -365,39 +355,30 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
     line = 0;
     read_line = 0;
 
-    // analysis of the line defining the number of variables
+    // analyse de la ligne definissant le nombre de variables
 
-    while (getline(in_file , buffer)) {
+    while (buffer.readLine(in_file , false)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.find('#');
-      if (position != string::npos) {
-        buffer.erase(position);
+      position = buffer.first('#');
+      if (position != RW_NPOS) {
+        buffer.remove(position);
       }
       i = 0;
 
-      tokenizer tok_buffer(buffer , separator);
+      RWCTokenizer next(buffer);
 
-      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+      while (!((token = next()).isNull())) {
         switch (i) {
 
-        // test number of variables
+        // test nombre de variables
 
         case 0 : {
-          lstatus = true;
-
-/*          try {
-            value = stoi(*token);   in C++ 11
-          }
-          catch(invalid_argument &arg) {
-            lstatus = false;
-          } */
-          value = atoi(token->c_str());
-
+          lstatus = locale.stringToNum(token , &value);
           if (lstatus) {
             if ((value < 1) || (value > VECTOR_NB_VARIABLE)) {
               lstatus = false;
@@ -414,12 +395,12 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
           break;
         }
 
-        // test VARIABLE(S) keyword
+        // test mot cle VARIABLE(S)
 
         case 1 : {
-          if (*token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
+          if (token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEYWORD] ,
+            error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
                                     STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] , line , i + 1);
           }
           break;
@@ -447,59 +428,59 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
     if ((status) && (nb_variable > 1)) {
 
-      // analysis of the line defining the distance type
+      // analyse de la ligne definissant le type de distance
 
-      while (getline(in_file , buffer)) {
+      while (buffer.readLine(in_file , false)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.find('#');
-        if (position != string::npos) {
-          buffer.erase(position);
+        position = buffer.first('#');
+        if (position != RW_NPOS) {
+          buffer.remove(position);
         }
         i = 0;
 
-        tokenizer tok_buffer(buffer , separator);
+        RWCTokenizer next(buffer);
 
-        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+        while (!((token = next()).isNull())) {
           switch (i) {
 
-          // test DISTANCE keyword
+          // test mot cle DISTANCE
 
           case 0 : {
-            if (*token != STAT_word[STATW_DISTANCE]) {
+            if (token != STAT_word[STATW_DISTANCE]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_DISTANCE] , line , i + 1);
+              error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_DISTANCE] , line , i + 1);
             }
             break;
           }
 
-          // test separator
+          // test separateur
 
           case 1 : {
-            if (*token != ":") {
+            if (token != ":") {
               status = false;
               error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
             }
             break;
           }
 
-          // test keyword defining the distance type
+          // test mot cle correspondant au type de distance
 
           case 2 : {
             for (j = ABSOLUTE_VALUE;j <= QUADRATIC;j++) {
-              if (*token == STAT_distance_word[j]) {
-                distance_type = (metric)j;
+              if (token == STAT_distance_word[j]) {
+                distance_type = j;
                 break;
               }
             }
 
             if (j == QUADRATIC + 1) {
               status = false;
-              error.update(STAT_parsing[STATP_KEYWORD] , line , i + 1);
+              error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
             }
             break;
           }
@@ -520,15 +501,15 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
     if (status) {
 
-      // analysis of the lines defining the type of each variable and
-      // the between-category distance matrices
+      // analyse des lignes definissant le type de chaque variable et
+      // les matrices de distances entre symboles
 
-      category_distance = new double**[nb_variable];
+      symbol_distance = new double**[nb_variable];
       for (i = 0;i < nb_variable;i++) {
-        var_type[i] = NUMERIC;
+        variable_type[i] = NUMERIC;
         weight[i] = 1. / (double)nb_variable;
         nb_value[i] = 0;
-        category_distance[i] = NULL;
+        symbol_distance[i] = NULL;
         period[i] = I_DEFAULT;
       }
 
@@ -537,45 +518,37 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
       weight_flag = false;
       cumul = 0.;
 
-      while (getline(in_file , buffer)) {
+      while (buffer.readLine(in_file , false)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.find('#');
-        if (position != string::npos) {
-          buffer.erase(position);
+        position = buffer.first('#');
+        if (position != RW_NPOS) {
+          buffer.remove(position);
         }
         i = 0;
 
-        tokenizer tok_buffer(buffer , separator);
+        RWCTokenizer next(buffer);
 
-        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+        while (!((token = next()).isNull())) {
           if ((i == 0) && (read_type == 0)) {
-            if (*token == STAT_word[STATW_VARIABLE]) {
+            if (token == STAT_word[STATW_VARIABLE]) {
               variable++;
             }
 
             else if ((variable >= 0) && (variable < nb_variable) &&
-                     (var_type[variable] == NOMINAL)) {
-              lstatus = true;
-
-/*              try {
-                value = stoi(*token);   in C++ 11
-              }
-              catch(invalid_argument &arg) {
-                lstatus = false;
-              } */
-              value = atoi(token->c_str());
+                     (variable_type[variable] == SYMBOLIC)) {
+              lstatus = locale.stringToNum(token , &value);
 
               if (lstatus) {
                 read_type = 1;
 
-                if ((value < 2) || (value > NB_CATEGORY)) {
+                if ((value < 2) || (value > NB_SYMBOL)) {
                   lstatus = false;
-                  nb_value[variable] = NB_CATEGORY;
+                  nb_value[variable] = NB_SYMBOL;
                 }
                 else {
                   nb_value[variable] = value;
@@ -585,8 +558,8 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
               if (!lstatus) {
                 status = false;
                 ostringstream correction_message;
-                correction_message << "between 2 and " << NB_CATEGORY;
-                error.correction_update(STAT_parsing[STATP_NB_CATEGORY] , (correction_message.str()).c_str() ,
+                correction_message << "between 2 and " << NB_SYMBOL;
+                error.correction_update(STAT_parsing[STATP_NB_SYMBOL] , (correction_message.str()).c_str() ,
                                         line , i + 1);
               }
             }
@@ -598,19 +571,10 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
             switch (i) {
 
-            // test variable index
+            // test indice de la variable
 
             case 1 : {
-              lstatus = true;
-
-/*              try {
-                value = stoi(*token);   in C++ 11
-              }
-              catch(invalid_argument &arg) {
-                lstatus = false;
-              } */
-              value = atoi(token->c_str());
-
+              lstatus = locale.stringToNum(token , &value);
               if ((lstatus) && (value != variable + 1)) {
                 lstatus = false;
               }
@@ -622,69 +586,60 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
               break;
             }
 
-            // test separator
+            // test separateur
 
             case 2 : {
-              if (*token != ":") {
+              if (token != ":") {
                 status = false;
                 error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
               }
               break;
             }
 
-            // test keyword corresponding to the variable type
+            // test mot cle correspondant au type de la variable
 
             case 3 : {
               if ((variable >= 0) && (variable < nb_variable)) {
-                for (j = NOMINAL;j <= CIRCULAR;j++) {
-                  if (*token == STAT_variable_type_word[j]) {
-                    var_type[variable] = (variable_type)j;
+                for (j = SYMBOLIC;j <= CIRCULAR;j++) {
+                  if (token == STAT_variable_type_word[j]) {
+                    variable_type[variable] = j;
                     break;
                   }
                 }
 
                 if (j == CIRCULAR + 1) {
                   status = false;
-                  error.update(STAT_parsing[STATP_KEYWORD] , line , i + 1);
+                  error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
                 }
               }
               break;
             }
 
-            // test WEIGHT keyword
+            // test mot cle WEIGHT
 
             case 4 : {
-              if (*token != STAT_word[STATW_WEIGHT]) {
+              if (token != STAT_word[STATW_WEIGHT]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_WEIGHT] , line , i + 1);
+                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_WEIGHT] , line , i + 1);
               }
               break;
             }
 
-            // test separator
+            // test separateur
 
             case 5 : {
-              if (*token != ":") {
+              if (token != ":") {
                 status = false;
                 error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
               }
               break;
             }
 
-            // test weight value
+            // test valeur du poids
 
             case 6 : {
               if ((variable >= 0) && (variable < nb_variable)) {
-                lstatus = true;
-
-/*                try {
-                  weight[variable] = stod(*token);   in C++ 11
-                }
-                catch (invalid_argument &arg) {
-                  lstatus = false;
-                } */
-                weight[variable] = atof(token->c_str());
-
+                lstatus = locale.stringToNum(token , weight + variable);
                 if (lstatus) {
                   if ((weight[variable] <= 0.) || (weight[variable] > 1. - cumul + DOUBLE_ERROR)) {
                     lstatus = false;
@@ -708,31 +663,22 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
           case 1 : {
 
-            // test CATEGORIES keyword
+            // test mot cle SYMBOLS
 
-            if ((i == 1) && (*token != STAT_word[STATW_CATEGORIES])) {
+            if ((i == 1) && (token != STAT_word[STATW_SYMBOLS])) {
               status = false;
-              error.update(STAT_parsing[STATP_KEYWORD] , line , i + 1);
+              error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
             }
 
             break;
           }
 
           case 2 : {
-            if (i <= MIN(category , nb_value[variable] - 1)) {
-              lstatus = true;
-
-/*              try {
-                category_distance[variable][category][i] = stod(*token);   in C++ 11
-              }
-              catch (invalid_argument &arg) {
-                lstatus = false;
-              } */
-              category_distance[variable][category][i] = atof(token->c_str());
-
+            if (i <= MIN(symbol , nb_value[variable] - 1)) {
+              lstatus = locale.stringToNum(token , symbol_distance[variable][symbol] + i);
               if (lstatus) {
-                if (((i < category) && (category_distance[variable][category][i] <= 0.)) ||
-                    ((i == category) && (category_distance[variable][category][i] != 0.))) {
+                if (((i < symbol) && (symbol_distance[variable][symbol][i] <= 0.)) ||
+                    ((i == symbol) && (symbol_distance[variable][symbol][i] != 0.))) {
                   lstatus = false;
                 }
               }
@@ -750,40 +696,31 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
             switch (i) {
 
-            // test PERIOD keyword
+            // test mot cle PERIOD
 
             case 0 : {
-              if (*token != STAT_word[STATW_PERIOD]) {
+              if (token != STAT_word[STATW_PERIOD]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_PERIOD] , line , i + 1);
+                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_PERIOD] , line , i + 1);
               }
               break;
             }
 
-            // test separator
+            // test separateur
 
             case 1 : {
-              if (*token != ":") {
+              if (token != ":") {
                 status = false;
                 error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
               }
               break;
             }
 
-            // test period value
+            // test valeur de la periode
 
             case 2 : {
               if ((variable >= 0) && (variable < nb_variable)) {
-                lstatus = true;
-
-/*                try {
-                  value = stoi(*token);   in C++ 11
-                }
-                catch(invalid_argument &arg) {
-                  lstatus = false;
-                } */
-                value = atoi(token->c_str());
- 
+                lstatus = locale.stringToNum(token , &value);
                 if (lstatus) {
                   if (value < 2) {
                     lstatus = false;
@@ -828,7 +765,8 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
               error.update(STAT_parsing[STATP_FORMAT] , line);
             }
 
-            if ((variable >= 0) && (variable < nb_variable) && (var_type[variable] == CIRCULAR)) {
+            if ((variable >= 0) && (variable < nb_variable) &&
+                (variable_type[variable] == CIRCULAR)) {
               read_type = 3;
             }
             break;
@@ -841,23 +779,23 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
             }
 
             read_type = 2;
-            category = 0;
+            symbol = 0;
 
-            category_distance[variable] = new double*[nb_value[variable]];
+            symbol_distance[variable] = new double*[nb_value[variable]];
             for (j = 0;j < nb_value[variable];j++) {
-              category_distance[variable][j] = new double[nb_value[variable]];
+              symbol_distance[variable][j] = new double[nb_value[variable]];
             }
             break;
           }
 
           case 2 : {
-            if (i != category + 1) {
+            if (i != symbol + 1) {
               status = false;
               error.update(STAT_parsing[STATP_FORMAT] , line);
             }
 
-            category++;
-            if (category == nb_value[variable]) {
+            symbol++;
+            if (symbol == nb_value[variable]) {
               read_type = 0;
             }
             break;
@@ -888,26 +826,26 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 
       if (status) {
         for (i = 0;i < nb_variable;i++) {
-          if (category_distance[i]) {
+          if (symbol_distance[i]) {
             for (j = 0;j < nb_value[i];j++) {
               for (k = j + 1;k < nb_value[i];k++) {
-                category_distance[i][j][k] = category_distance[i][k][j];
+                symbol_distance[i][j][k] = symbol_distance[i][k][j];
               }
             }
 
-            // checking of the triagular inequality
+            // verification de l'inegalite triagulaire
 
             for (j = 0;j < nb_value[i];j++) {
               for (k = j + 1;k < nb_value[i];k++) {
                 for (m = 0;m < nb_value[i];m++) {
                   if ((m != j) && (m != k) &&
-                      (category_distance[i][j][m] + category_distance[i][m][k] < category_distance[i][j][k])) {
+                      (symbol_distance[i][j][m] + symbol_distance[i][m][k] < symbol_distance[i][j][k])) {
                     status = false;
                     ostringstream error_message;
                     error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                                  << STAT_label[STATL_CATEGORY] << " " << j << ", "
-                                  << STAT_label[STATL_CATEGORY] << " " << m << ", "
-                                  << STAT_label[STATL_CATEGORY] << " " << k << ": "
+                                  << STAT_label[STATL_SYMBOL] << " " << j << ", "
+                                  << STAT_label[STATL_SYMBOL] << " " << m << ", "
+                                  << STAT_label[STATL_SYMBOL] << " " << k << ": "
                                   << STAT_parsing[STATP_TRIANGLE_INEQUALITY];
                     error.update((error_message.str()).c_str());
                   }
@@ -919,8 +857,8 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
       }
 
       if (status) {
-        vector_dist = new VectorDistance(nb_variable , distance_type , var_type ,
-                                         weight , nb_value , category_distance , period);
+        vector_dist = new VectorDistance(nb_variable , distance_type , variable_type ,
+                                         weight , nb_value , symbol_distance , period);
       }
     }
   }
@@ -929,13 +867,13 @@ VectorDistance* VectorDistance::ascii_read(StatError &error , const string path)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing on a single line of a VectorDistance object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture sur une ligne d'un objet VectorDistance.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& VectorDistance::line_write(ostream &os) const
 
@@ -949,24 +887,23 @@ ostream& VectorDistance::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a VectorDistance object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet VectorDistance.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& VectorDistance::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  int i , j , k;
+  register int i , j , k;
   int buff , width[2];
-  ios_base::fmtflags format_flags;
+  long old_adjust;
 
 
-  format_flags = os.setf(ios::right , ios::adjustfield);
+  old_adjust = os.setf(ios::right , ios::adjustfield);
 
   os << nb_variable << " " << STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] << endl;
   if (nb_variable > 1) {
@@ -975,32 +912,32 @@ ostream& VectorDistance::ascii_write(ostream &os , bool exhaustive) const
 
   for (i = 0;i < nb_variable;i++) {
     os << "\n" << STAT_word[STATW_VARIABLE] << " " << i + 1 << " : "
-       << STAT_variable_type_word[var_type[i]];
+       << STAT_variable_type_word[variable_type[i]];
     if (nb_variable > 1) {
       os << "   " << STAT_word[STATW_WEIGHT] << " : " << weight[i];
     }
     os << endl;
 
-    switch (var_type[i]) {
+    switch (variable_type[i]) {
 
-    case NOMINAL : {
-      if (category_distance[i]) {
-        os << "\n" << nb_value[i] << " " << STAT_word[STATW_CATEGORIES] << endl;
+    case SYMBOLIC : {
+      if (symbol_distance[i]) {
+        os << "\n" << nb_value[i] << " " << STAT_word[STATW_SYMBOLS] << endl;
 
-        // computation of the column widths
+        // calcul des largeurs des colonnes
 
         width[0] = column_width(nb_value[i]);
 
         width[1] = 0;
         for (j = 0;j < nb_value[i];j++) {
-          buff = column_width(nb_value[i] , category_distance[i][j]);
+          buff = column_width(nb_value[i] , symbol_distance[i][j]);
           if (buff > width[1]) {
             width[1] = buff;
           }
         }
         width[1] += ASCII_SPACE;
 
-        // writing of the between-category distance matrix
+        // ecriture de la matrice des distances entre symboles
 
         os << "\n" << setw(width[0] + width[1]) << 0;
         for (j = 1;j < nb_value[i];j++) {
@@ -1011,7 +948,7 @@ ostream& VectorDistance::ascii_write(ostream &os , bool exhaustive) const
         for (j = 0;j < nb_value[i];j++) {
           os << setw(width[0]) << j;
           for (k = 0;k < nb_value[i];k++) {
-            os << setw(width[1]) << category_distance[i][j][k];
+            os << setw(width[1]) << symbol_distance[i][j][k];
           }
           os << endl;
         }
@@ -1026,23 +963,24 @@ ostream& VectorDistance::ascii_write(ostream &os , bool exhaustive) const
     }
   }
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Functions for compatibility with the StatInterface class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Fonctions pour la compatibilite avec la classe StatInterface.
+ *
+ *--------------------------------------------------------------*/
 
-bool VectorDistance::ascii_write(StatError &error , const string path , bool exhaustive) const
+bool VectorDistance::ascii_write(StatError &error , const char *path ,
+                                 bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -1061,7 +999,7 @@ bool VectorDistance::ascii_write(StatError &error , const string path , bool exh
 }
 
 
-bool VectorDistance::spreadsheet_write(StatError &error , const string path) const
+bool VectorDistance::spreadsheet_write(StatError &error , const char *path) const
 
 {
   return false;
@@ -1076,48 +1014,45 @@ bool VectorDistance::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the maximum distance for each category
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index.
+ *  Calcul de la distance maximum pour chaque symbole
  *
- *  \return             maximum distances.
- */
-/*--------------------------------------------------------------*/
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
-double* VectorDistance::max_category_distance_computation(int variable) const
+double* VectorDistance::max_symbol_distance_computation(int variable) const
 
 {
-  int i , j;
-  double *max_category_distance = NULL;
+  register int i , j;
+  double *max_symbol_distance = NULL;
 
 
-  if ((var_type[variable] == NOMINAL) && (category_distance[variable])) {
-    max_category_distance = new double[nb_value[variable]];
+  if ((variable_type[variable] == SYMBOLIC) && (symbol_distance[variable])) {
+    max_symbol_distance = new double[nb_value[variable]];
 
     for (i = 0;i < nb_value[variable];i++) {
-      max_category_distance[i] = 0.;
+      max_symbol_distance[i] = 0.;
       for (j = 0;j < nb_value[variable];j++) {
-        if (category_distance[variable][i][j] > max_category_distance[i]) {
-          max_category_distance[i] = category_distance[variable][i][j];
+        if (symbol_distance[variable][i][j] > max_symbol_distance[i]) {
+          max_symbol_distance[i] = symbol_distance[variable][i][j];
         }
       }
     }
   }
 
-  return max_category_distance;
+  return max_symbol_distance;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Update of the standardization quantity.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable    variable index,
- *  \param[in] idispersion variable dispersion.
- */
-/*--------------------------------------------------------------*/
+ *  Mise a jour de la quantite de standardisation.
+ *
+ *  arguments : indice de la variable, dispersion.
+ *
+ *--------------------------------------------------------------*/
 
 void VectorDistance::dispersion_update(int variable , double idispersion) const
 
@@ -1126,21 +1061,19 @@ void VectorDistance::dispersion_update(int variable , double idispersion) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the standardization quantity.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable              variable index,
- *  \param[in] marginal_distribution marginal frequency distribution,
- *  \param[in] rank                  ranks.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la quantite de standardisation.
+ *
+ *  arguments : indice de la variable, loi marginale empirique, rangs.
+ *
+ *--------------------------------------------------------------*/
 
 void VectorDistance::dispersion_computation(int variable , const FrequencyDistribution *marginal_distribution ,
                                             double *rank) const
 
 {
-  int i , j;
+  register int i , j;
   int *pfrequency;
   double sum , distance = 1.;
 
@@ -1153,11 +1086,11 @@ void VectorDistance::dispersion_computation(int variable , const FrequencyDistri
       sum = 0.;
       for (j = i + 1;j < marginal_distribution->nb_value;j++) {
         if (*pfrequency > 0) {
-          switch (var_type[variable]) {
+          switch (variable_type[variable]) {
 
-          case NOMINAL : {
-            if (category_distance[variable]) {
-              distance = category_distance[variable][i][j];
+          case SYMBOLIC : {
+            if (symbol_distance[variable]) {
+              distance = symbol_distance[variable][i][j];
             }
             break;
           }
@@ -1205,7 +1138,7 @@ void VectorDistance::dispersion_computation(int variable , const FrequencyDistri
   cout << "\n" << STAT_label[STATL_VARIABLE] << " " << variable << "   dispersion: "
        << dispersion[variable];
 
-  switch (var_type[variable]) {
+  switch (variable_type[variable]) {
 
   case ORDINAL : {
     double dispersion2 = marginal_distribution->nb_element *
@@ -1288,7 +1221,7 @@ void VectorDistance::dispersion_computation(int variable , const FrequencyDistri
     switch (distance_type) {
     case ABSOLUTE_VALUE :
       cout << "sqrt(2) * " << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": "
-           << sqrt(2.) * marginal_distribution->mean_absolute_deviation_computation(marginal_distribution->mean);
+           << sqrt(2.) * marginal_distribution->mean_absolute_deviation_computation();
       break;
     case QUADRATIC :
       cout << 2 * marginal_distribution->variance;

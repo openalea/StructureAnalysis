@@ -15,7 +15,7 @@
  *                                                                              
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
  *       
- *        $Id$
+ *        $Id: export_vectors.h 6295 2009-04-27 09:38:40Z cokelaer $
  *                                                                       
  *-----------------------------------------------------------------------------*/
 

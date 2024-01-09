@@ -1,7 +1,7 @@
 """ functional tests
 
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: functional2.py 9885 2010-11-06 18:19:34Z cokelaer $"
 
 
 

@@ -2,7 +2,7 @@
 
 
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_extract_parameter_index.py 9401 2010-08-10 12:24:59Z cokelaer $"
 
 
 from openalea.sequence_analysis.data_transform import IndexParameterExtract

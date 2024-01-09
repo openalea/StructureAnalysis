@@ -7,13 +7,13 @@
     :Code status: mature
     :Documentation status: mature
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
-    :Revision: $Id$
+    :Revision: $Id: error.py 15344 2013-12-04 08:53:04Z jbdurand $
 
 .. testsetup:: *
 
     from openalea.stat_tool.error import *
 """
-__version__ = "$Id$"
+__version__ = "$Id: error.py 15344 2013-12-04 08:53:04Z jbdurand $"
 
 
 

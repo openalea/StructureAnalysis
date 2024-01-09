@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: convolution.h 17985 2015-04-23 06:42:55Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -40,9 +40,6 @@
 #define CONVOLUTION_H
 
 
-#include "stat_tools.h"
-#include "distribution.h"
-
 
 namespace stat_tool {
 
@@ -50,46 +47,50 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constants
+ *  Constantes :
  */
 
 
-  const int CONVOLUTION_NB_DISTRIBUTION = 10;  // maximum number of elementary distributions
-  const double CONVOLUTION_THRESHOLD = 0.9999;  // threshold on the cumulative distribution function
-                                                // for determining the upper bound of the support
+  const int CONVOLUTION_NB_DISTRIBUTION = 10;  // nombre maximum de lois elementaires
+  const double CONVOLUTION_THRESHOLD = 0.9999;  // seuil sur la fonction de repartition
+                                              // pour borner une loi
 
-  const double CONVOLUTION_INIT_PROBABILITY = 0.001;  // threshold for probability initialization
-  const double CONVOLUTION_LIKELIHOOD_DIFF = 1.e-5;  // threshold for stopping EM iterations
-  const int CONVOLUTION_NB_ITER = 10000;  // maximum number of EM iterations
-  const double CONVOLUTION_DIFFERENCE_WEIGHT = 0.5;  // default penalty weight (1st- or 2nd-order difference cases)
-  const double CONVOLUTION_ENTROPY_WEIGHT = 0.1;  // default penalty weight (entropy case)
-  const int CONVOLUTION_COEFF = 10;      // rounding coefficient for the estimator
+  const double CONVOLUTION_INIT_PROBABILITY = 0.001;  // seuil pour l'initialisation de la probabilite
+  const double CONVOLUTION_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
+  const int CONVOLUTION_NB_ITER = 10000;  // nombre maximum d'iterations EM
+  const double CONVOLUTION_DIFFERENCE_WEIGHT = 0.5;  // poids par defaut de la penalisation
+                                                   // (cas des differences 1ere ou 2nde)
+  const double CONVOLUTION_ENTROPY_WEIGHT = 0.1;  // poids par defaut de la penalisation (cas de l'entropie)
+  const int CONVOLUTION_COEFF = 10;      // coefficient arrondi estimateur
 
 
 
 /****************************************************************
  *
- *  Class definition
+ *  Definition des classes :
  */
 
 
   class ConvolutionData;
 
-  /// \brief Convolution of discrete distributions
 
-  class Convolution : public StatInterface , public Distribution {
-
+  class Convolution : public StatInterface , public Distribution {  // produit de convolution
+                                                                    // de lois discretes
     friend class FrequencyDistribution;
     friend class ConvolutionData;
 
+    friend Convolution* convolution_building(StatError &error , int nb_dist ,
+                                             const DiscreteParametric **dist);
+    friend Convolution* convolution_ascii_read(StatError &error , const char *path ,
+                                               double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const Convolution &convol)
     { return convol.ascii_write(os , convol.convolution_data , false , false); }
 
   private :
 
-    ConvolutionData *convolution_data;  ///< pointer on a ConvolutionData object
-    int nb_distribution;    ///< number of elementary distributions
-    DiscreteParametric **distribution;  ///< elementary distributions
+    ConvolutionData *convolution_data;  // pointeur sur un objet ConvolutionData
+    int nb_distribution;    // nombre de lois elementaires
+    DiscreteParametric **distribution;  // lois elementaires
 
     void copy(const Convolution &convol , bool data_flag = true);
     void remove();
@@ -108,7 +109,6 @@ namespace stat_tool {
 
     Convolution();
     Convolution(int nb_dist , const DiscreteParametric **pdist);
-    Convolution(int nb_dist , const std::vector<DiscreteParametric> idist);
     Convolution(const DiscreteParametric &known_dist , const DiscreteParametric &unknown_dist);
     Convolution(const Convolution &convol , bool data_flag = true)
     :Distribution(convol) { copy(convol , data_flag); }
@@ -118,18 +118,11 @@ namespace stat_tool {
     DiscreteParametricModel* extract(StatError &error , int index) const;
     ConvolutionData* extract_data(StatError &error) const;
 
-    static Convolution* building(StatError &error , int nb_dist ,
-                                 const DiscreteParametric **dist);
-    static Convolution* building(StatError &error , int nb_dist ,
-                                 const std::vector<DiscreteParametric> dist);
-    static Convolution* ascii_read(StatError &error , const std::string path ,
-                                   double cumul_threshold = CONVOLUTION_THRESHOLD);
-
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -137,7 +130,7 @@ namespace stat_tool {
                      bool *dist_flag = NULL);
     ConvolutionData* simulation(StatError &error , int nb_element) const;
 
-    // class member access
+    // acces membres de la classe
 
     ConvolutionData* get_convolution_data() const { return convolution_data; }
     int get_nb_distribution() const { return nb_distribution; }
@@ -145,10 +138,15 @@ namespace stat_tool {
   };
 
 
-  /// \brief Data structure corresponding to a convolution of discrete distributions
+  Convolution* convolution_building(StatError &error , int nb_dist ,
+                                    const DiscreteParametric **dist);
+  Convolution* convolution_ascii_read(StatError &error , const char *path ,
+                                      double cumul_threshold = CONVOLUTION_THRESHOLD);
 
-  class ConvolutionData : public StatInterface , public FrequencyDistribution {
 
+
+  class ConvolutionData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
+                                                                                 // a un produit de convolution de lois discretes
     friend class FrequencyDistribution;
     friend class Convolution;
 
@@ -157,9 +155,9 @@ namespace stat_tool {
 
   private :
 
-    Convolution *convolution;  ///< pointer on a Convolution object
-    int nb_distribution;       ///< number of elementary frequency distributions
-    FrequencyDistribution **frequency_distribution;  ///< elementary frequency distributions
+    Convolution *convolution;  // pointeur sur un objet Convolution
+    int nb_distribution;       // nombre de lois elementaires empiriques
+    FrequencyDistribution **frequency_distribution;  // lois elementaires empiriques
 
     void copy(const ConvolutionData &convol_histo , bool model_flag = true);
     void remove();
@@ -179,12 +177,12 @@ namespace stat_tool {
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    // class member access
+    // acces membres de la classe
 
     Convolution* get_convolution() const { return convolution; }
     int get_nb_distribution() const { return nb_distribution; }

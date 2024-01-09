@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: renewal_distributions.cpp 18066 2015-04-23 10:51:02Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -36,6 +36,13 @@
 
 
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
+
 #include "renewal.h"
 
 using namespace std;
@@ -46,18 +53,18 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the length-biased distribution from the inter-event distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inter_event inter-event distribution.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la loi biaisee par la longueur a partir de la loi inter-evenement.
+ *
+ *  argument : loi inter-evenement.
+ *
+ *--------------------------------------------------------------*/
 
 void LengthBias::computation(const DiscreteParametric &inter_event)
 
 {
-  int i;
+  register int i;
   double norm , *pmass , *imass;
 
 
@@ -70,7 +77,7 @@ void LengthBias::computation(const DiscreteParametric &inter_event)
   }
   imass = inter_event.mass + offset;
 
-  // computation of the normalization quantity
+  // calcul de la quantite de normalisation
 
   if (ident == CATEGORICAL) {
     norm = inter_event.mean;
@@ -79,7 +86,7 @@ void LengthBias::computation(const DiscreteParametric &inter_event)
     norm = parametric_mean_computation();
   }
 
-  // computation of the probability mass function
+  // calcul des probabilites des valeurs
 
   for (i = offset;i < nb_value;i++) {
     *pmass++ = i * *imass++ / norm;
@@ -93,20 +100,19 @@ void LengthBias::computation(const DiscreteParametric &inter_event)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the backward recurrence time distribution from
- *         the inter-event distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inter_event inter-event distribution,
- *  \param[in] time        observation period distribution.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la loi de l'intervalle de temps apres le dernier evenement
+ *  a partir de la loi inter-evenement.
+ *
+ *  arguments : loi inter-evenement, loi du temps d'observation.
+ *
+ *--------------------------------------------------------------*/
 
 void Backward::computation(const DiscreteParametric &inter_event , const Distribution &time)
 
 {
-  int i , j;
+  register int i , j;
   double norm , sum , *pmass , *icumul , *scumul , *tmass , *tcumul;
 
 
@@ -116,7 +122,7 @@ void Backward::computation(const DiscreteParametric &inter_event , const Distrib
   pmass = mass;
   icumul = inter_event.cumul;
 
-  // computation of the normalization quantity
+  // calcul de la quantite de normalisation
 
   if (ident == CATEGORICAL) {
     norm = inter_event.mean;
@@ -125,7 +131,7 @@ void Backward::computation(const DiscreteParametric &inter_event , const Distrib
     norm = parametric_mean_computation();
   }
 
-  // computation of the probability mass function
+  // calcul des probabilites des valeurs
 
   tmass = time.mass;
   tcumul = time.cumul;
@@ -157,41 +163,41 @@ void Backward::computation(const DiscreteParametric &inter_event , const Distrib
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the number of events distribution from
- *         the inter-event distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inter_event reference on the inter-event distribution.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la loi du nombre d'evenements correspondant a
+ *  une loi quelconque comme loi inter-evenement.
+ *
+ *  argument : reference sur la loi inter-evenement.
+ *
+ *--------------------------------------------------------------*/
 
 void NbEvent::computation(DiscreteParametric &inter_event)
 
 {
-  int i , j;
+  register int i , j;
   int time_nb_value;
   double bcumul = 1. , previous_cumul = 1. , *pmass , *pcumul;
   DiscreteParametric *nevent_time;
   Forward *forward;
 
 
-  // computation of the number of values
+  // calcul du nombre de valeurs
 
   switch (type) {
-  case ORDINARY :
+  case 'o' :
     nb_value = time / inter_event.offset + 1;
     break;
-  case EQUILIBRIUM :
+  case 'e' :
     nb_value = (time - 1) / inter_event.offset + 2;
     break;
   }
 
   switch (type) {
-  case ORDINARY :
+  case 'o' :
     time_nb_value = time + 1;
     break;
-  case EQUILIBRIUM :
+  case 'e' :
     time_nb_value = time;
     break;
   }
@@ -207,18 +213,18 @@ void NbEvent::computation(DiscreteParametric &inter_event)
       if (i == 0) {
         switch (type) {
 
-        // ordinary renewal process: time to the 1st event distributed according to
-        // the inter-event distribution
+        // processus de renouvellement ordinaire :
+        // temps avant le 1er evenement distribue selon la loi inter-evenement
 
-        case ORDINARY : {
+        case 'o' : {
           nevent_time->mass_copy(inter_event , time + 1);
           break;
         }
 
-        // equilibrium renewal process: time to the 1st event distributed according to
-        // the forward recurrence time distribution
+        // processus de renouvellement en equilibre :
+        // temps avant le 1er evenement distribue selon la loi "forward"
 
-        case EQUILIBRIUM : {
+        case 'e' : {
           forward = new Forward(inter_event);
           nevent_time->mass_copy(*forward , time + 1);
           break;
@@ -230,15 +236,15 @@ void NbEvent::computation(DiscreteParametric &inter_event)
 
       else {
         switch (type) {
-        case ORDINARY :
+        case 'o' :
           j = i + 1;
           break;
-        case EQUILIBRIUM :
+        case 'e' :
           j = i;
           break;
         }
 
-        // computation of the time to the (n+1)th events distribution
+        // calcul de la loi du temps de (n+1) evenements
 
         if ((j == 1) && (ident != CATEGORICAL)) {
           nevent_time->mass_copy(inter_event , time + 1);
@@ -258,14 +264,14 @@ void NbEvent::computation(DiscreteParametric &inter_event)
             nevent_time->inf_bound = j * inter_event.inf_bound;
             nevent_time->sup_bound = j * inter_event.sup_bound;
             nevent_time->probability = inter_event.probability;
-            nevent_time->binomial_computation(time_nb_value , RENEWAL);
+            nevent_time->binomial_computation(time_nb_value , 'r');
             break;
           }
 
           case POISSON : {
             nevent_time->inf_bound = j * inter_event.inf_bound;
             nevent_time->parameter = j * inter_event.parameter;
-            nevent_time->poisson_computation(time_nb_value , RENEWAL_THRESHOLD , RENEWAL);
+            nevent_time->poisson_computation(time_nb_value , RENEWAL_THRESHOLD , 'r');
             break;
           }
 
@@ -273,13 +279,14 @@ void NbEvent::computation(DiscreteParametric &inter_event)
             nevent_time->inf_bound = j * inter_event.inf_bound;
             nevent_time->parameter = j * inter_event.parameter;
             nevent_time->probability = inter_event.probability;
-            nevent_time->negative_binomial_computation(time_nb_value , RENEWAL_THRESHOLD , RENEWAL);
+            nevent_time->negative_binomial_computation(time_nb_value ,
+                                                       RENEWAL_THRESHOLD , 'r');
             break;
           }
           }
         }
 
-        if ((type == EQUILIBRIUM) && (ident != CATEGORICAL)) {
+        if ((type == 'e') && (ident != CATEGORICAL)) {
           nevent_time->convolution(*forward , *nevent_time , time + 1);
           nevent_time->cumul_computation();
         }
@@ -300,7 +307,7 @@ void NbEvent::computation(DiscreteParametric &inter_event)
   }
 
   delete nevent_time;
-  if (type == EQUILIBRIUM) {
+  if (type == 'e') {
     delete forward;
   }
 
@@ -311,17 +318,18 @@ void NbEvent::computation(DiscreteParametric &inter_event)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Fast computation (O(n)) in the case of an ordinary renewal process of
- *         the number of events distribution from a binomial inter-event distribution.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul rapide (O(n)), dans le cas d'un processus de renouvellement
+ *  ordinaire, de la loi du nombre d'evenements correspondant a
+ *  une loi binomiale comme loi inter-evenement.
+ *
+ *--------------------------------------------------------------*/
 
 void NbEvent::binomial_computation()
 
 {
-  int i , j;
+  register int i , j;
   int main_set , main_subset , inf_bound_set , inf_bound_subset ,
       rapid_index , nb_term;
   double failure = 1. - probability , success = probability , k_success , main_term ,
@@ -333,7 +341,8 @@ void NbEvent::binomial_computation()
   pmass = mass;
   pcumul = cumul;
 
-  // computation of the success probability at the power (upper bound - lower bound)
+  // calcul de la probabilite de succes a la puissance de
+  // (borne superieure - borne inferieure)
 
   k_success = 1.;
   for (j = 0;j < sup_bound - inf_bound;j++) {
@@ -341,7 +350,8 @@ void NbEvent::binomial_computation()
   }
   main_term = k_success;
 
-  // values of null probability such that (observation period + 1) > (i + 1) * (upper bound)
+  // valeurs telles que (temps d'observation + 1) > (i + 1) * (borne superieure)
+  // de probabilite nulle
 
   i = 0;
   while (time + 1 > (i + 1) * sup_bound) {
@@ -351,7 +361,7 @@ void NbEvent::binomial_computation()
     i++;
   }
 
-  // computation of the first non-null probability value (exhaustive computation)
+  // calcul de la premiere valeur de probabilite > 0. (calcul exhaustif)
 
   main_subset = (i + 1) * (sup_bound - inf_bound);
   main_set = main_subset;
@@ -373,13 +383,13 @@ void NbEvent::binomial_computation()
   i++;
   rapid_index = i;
 
-  // fast computation of the probability masses for the following values
+  // calcul rapide des probabilites des valeurs suivantes
 
   while (i < nb_value) {
 
-    // computation of the main terms
+    // calcul des termes principaux
 
-    // computation of the 1st term
+    // calcul du 1er terme
 
     if (i > rapid_index) {
       if (inf_bound == 0) {
@@ -400,7 +410,7 @@ void NbEvent::binomial_computation()
     }
     *++pmass = main_term;
 
-    // computation of the (j - lower bound - 1) following terms
+    // calcul des (j - borne inferieure - 1) termes suivants
 
     for (j = 1;j <= sup_bound - inf_bound - 1;j++) {
       main_set++;
@@ -409,9 +419,9 @@ void NbEvent::binomial_computation()
       *pmass += main_term;
     }
 
-    // computation of the terms corresponding to the lower bound
+    // calcul des termes correspondant a la borne inferieure
 
-    // computation of the 1st term
+    // calcul du 1er terme
 
     if (inf_bound > 0) {
       inf_bound_subset = main_subset;
@@ -421,7 +431,7 @@ void NbEvent::binomial_computation()
       *pmass += inf_bound_term;
     }
 
-    // computation of the (lower bound - 1) following terms
+    // calcul des (borne inferieure - 1) termes suivants
 
     if (inf_bound > 1) {
       nb_term = inf_bound - 1;
@@ -436,7 +446,7 @@ void NbEvent::binomial_computation()
       }
     }
 
-    // update of the cumulative distribution function
+    // mise a jour le la fonction de repartition
 
     pcumul++;
     *pcumul = *(pcumul - 1) + *pmass;
@@ -450,18 +460,19 @@ void NbEvent::binomial_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Fast computation (O(n)) in the case of an ordinary renewal process of
- *         the number of events distribution from a negative binomial inter-event distribution.
- *         This computation requires an integer-valued negative binomial shape parameter.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul rapide (O(n)), dans le cas d'un processus de renouvellement
+ *  ordinaire, de la loi du nombre  d'evenements correspondant
+ *  a une loi binomiale negative comme loi inter-evenement. Ce calcul
+ *  n'est valable que si le parametre est entier.
+ *
+ *--------------------------------------------------------------*/
 
 void NbEvent::negative_binomial_computation()
 
 {
-  int i , j;
+  register int i , j;
   int main_set , main_subset , inf_bound_set , inf_bound_subset;
   double failure = 1. - probability , success = probability , main_term , inf_bound_term ,
          scale , *pmass;
@@ -471,7 +482,7 @@ void NbEvent::negative_binomial_computation()
 
   pmass = mass;
 
-  // computation of the terms for number of events = 0
+  // calcul des termes pour nombre d'evenements = 0
 
   main_term = 1.;
   for (i = 0;i < parameter;i++) {
@@ -490,14 +501,14 @@ void NbEvent::negative_binomial_computation()
   *pmass = 1. - *pmass;
   pmass++;
 
-  // computation of probability masses for values from 1 to (observation period / lower bound)
+  // calcul des probabilites des valeurs de 1 a (temps d'observation / borne inferieure)
 
   for (i = 1;i < nb_value;i++) {
     *pmass = 0.;
 
-    // computation of the terms corresponding to the lower bound
+    // calcul des termes correspondant a la borne inferieure
 
-    // computation of the 1st term
+    // calcul du 1er terme
 
     if (inf_bound > 1) {
       if (i == 1) {
@@ -513,7 +524,7 @@ void NbEvent::negative_binomial_computation()
       }
       *pmass += inf_bound_term;
 
-      // computation of the (lower bound - 2) following terms
+      // calcul des (borne inferieure - 2) termes suivants
 
       if (inf_bound > 2) {
         for (j = 0;j < inf_bound - 2;j++) {
@@ -525,9 +536,9 @@ void NbEvent::negative_binomial_computation()
       }
     }
 
-    // computation of the main terms
+    // calcul des termes principaux
 
-    // computation of the 1st term
+    // calcul du 1er terme
 
     if (i == 1) {
       main_subset++;
@@ -552,7 +563,7 @@ void NbEvent::negative_binomial_computation()
     }
     *pmass += main_term;
 
-    // computation of the (k - 1) following terms
+    // calcul des (k-1) termes suivant
 
     if (parameter > 1) {
       for (j = 1;j <= (int)parameter - 1;j++) {
@@ -579,20 +590,20 @@ void NbEvent::negative_binomial_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation in the case of an ordinary renewal process of
- *         the number of events distribution from a parametric inter-event
- *         distribution (binomial, Poisson, negative binomial).
+/*--------------------------------------------------------------*
  *
- *  \param[in] inter_event reference on an inter-event distribution.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul dans le cas dans le cas d'un processus de renouvellement
+ *  ordinaire de la loi du nombre d'evenements correspondant a une loi
+ *  inter-evenement parametrique (binomiale negative, binomiale, Poisson).
+ *
+ *  argument : reference sur la loi inter-evenement.
+ *
+ *--------------------------------------------------------------*/
 
 void NbEvent::ordinary_computation(DiscreteParametric &inter_event)
 
 {
-  if (type == ORDINARY) {
+  if (type == 'o') {
     if ((ident == BINOMIAL) &&
         (time * (1. - probability) / (probability * sqrt((double)(MAX(1 , inf_bound)))) < RB_THRESHOLD)) {
       binomial_computation();
@@ -603,7 +614,7 @@ void NbEvent::ordinary_computation(DiscreteParametric &inter_event)
              (time * probability / ((1. - probability) * sqrt((double)(MAX(1 , inf_bound)))) < RNB_THRESHOLD)) {
 
 #     ifdef DEBUG
-      cout << "algebric calculation" << endl;
+      cout << "calcul algebrique" << endl;
 #     endif
 
       negative_binomial_computation();
@@ -616,22 +627,22 @@ void NbEvent::ordinary_computation(DiscreteParametric &inter_event)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of non-event/event probabilities as a function of time.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des probabilites de non-evenement/evenement fonction du temps.
+ *
+ *--------------------------------------------------------------*/
 
 void Renewal::index_event_computation()
 
 {
-  int i , j;
+  register int i , j;
   double no_event , event , *pindex_event;
 
 
   switch (type) {
 
-  case ORDINARY : {
+  case 'o' : {
     index_event->offset = 0;
 
     index_event->point[0][0] = 0.;
@@ -639,7 +650,7 @@ void Renewal::index_event_computation()
     break;
   }
 
-  case EQUILIBRIUM : {
+  case 'e' : {
     index_event->offset = 1;
 
     index_event->point[0][0] = 0.;
@@ -661,11 +672,11 @@ void Renewal::index_event_computation()
 
       else {
         switch (type) {
-        case ORDINARY :
+        case 'o' :
           no_event += 1. - inter_event->cumul[j];
           event += inter_event->mass[j];
           break;
-        case EQUILIBRIUM :
+        case 'e' :
           no_event += (1. - forward->cumul[j]);
           event += forward->mass[j];
           break;
@@ -679,36 +690,37 @@ void Renewal::index_event_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the distributions of a renewal process from
- *         the inter-event distribution.
- *         time interval: length-biased distribution,
- *                        backward and forward recurrence time distributions,
- *        count: number of events distributions and resulting mixture,
- *        intensity: no-event/event probabilities as a function of time.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inter_event_flag flag for the computation of the inter-event distribution,
- *  \param[in] itype            renewal process type (ORDINARY/EQUILIBRIUM),
- *  \param[in] dtime            pointer on the observation period distribution.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul des lois d'un processus de renouvellement a partir
+ *  d'une loi quelconque comme loi inter-evenement.
+ *  intervalle : loi inter-evenement, loi biaisee par la longueur,
+ *               loi de l'intervalle de temps apres le dernier evenement,
+ *               loi de l'intervalle de temps residuel,
+ *  comptage : melange de lois du nombre d'evenements,
+ *  intensite.
+ *
+ *  arguments : flag pour le calcul de la loi inter-evenement,
+ *              type de processus ('o' : ordinaire, 'e' : en equilibre),
+ *              pointeur sur la loi du temps d'observation.
+ *
+ *--------------------------------------------------------------*/
 
-void Renewal::computation(bool inter_event_flag , process_type itype , const Distribution *dtime)
+void Renewal::computation(bool inter_event_flag , char itype , const Distribution *dtime)
 
 {
-  int i , j;
+  register int i , j;
   int nb_value , time_nb_value;
   double sum , *tmass , *pmass , *cumul , *previous_cumul , *pcumul1 , *pcumul2;
   DiscreteParametric *pnevent_time , *power , *forward_power;
 
 
-  if (itype == DEFAULT_TYPE) {
+  if (itype == 'v') {
     itype = type;
   }
 
-  // computation of the inter-event distribution, the length-biased distribution and
-  // the forward recurrence time distribution
+  // calcul de la loi inter-evenement, de la loi biaisee par la longueur et
+  // de la loi de l'intervalle de temps residuel
 
   if (inter_event_flag) {
     inter_event->computation(1 , RENEWAL_THRESHOLD);
@@ -743,10 +755,10 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
       time = new Distribution(*dtime);
 
       switch (type) {
-      case ORDINARY :
+      case 'o' :
         nb_event_max = (time->nb_value - 1) / inter_event->offset;
         break;
-      case EQUILIBRIUM :
+      case 'e' :
         nb_event_max = (time->nb_value - 2) / inter_event->offset + 1;
         break;
       }
@@ -769,10 +781,10 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
     for (i = time->offset;i < time->nb_value;i++) {
       if (*tmass++ > 0.) {
         switch (type) {
-        case ORDINARY :
+        case 'o' :
           nb_value = i / inter_event->offset + 1;
           break;
-        case EQUILIBRIUM :
+        case 'e' :
           nb_value = (i - 1) / inter_event->offset + 2;
           break;
         }
@@ -791,11 +803,11 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
     mixture = new Distribution(nb_value);
   }
 
-  // computation of the backward recurrence time distribution
+  // calcul de la loi du temps apres le dernier evenement
 
   backward->computation(*inter_event , *time);
 
-  // construction and initialization of the cumulative distribution functions
+  // creation et initialisation des variables "fonction de repartition"
 
   cumul = new double[time->nb_value];
   previous_cumul = new double[time->nb_value];
@@ -813,17 +825,17 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
     pcumul2++;
   }
 
-  // computation of the number of values of the number of events distributions and the resulting mixture
+  // calcul du nombre de valeurs des lois du nombre d'evenements et de la loi resultante
 
   tmass = time->mass + time->offset;
 
   for (i = time->offset;i < time->nb_value;i++) {
     if (*tmass++ > 0.) {
       switch (type) {
-      case ORDINARY :
+      case 'o' :
         nb_event[i]->nb_value = i / inter_event->offset + 1;
         break;
-      case EQUILIBRIUM :
+      case 'e' :
         nb_event[i]->nb_value = (i - 1) / inter_event->offset + 2;
         break;
       }
@@ -833,20 +845,21 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
   mixture->nb_value = nb_event[time->nb_value - 1]->nb_value;
 
   switch (type) {
-  case ORDINARY :
+  case 'o' :
     time_nb_value = time->nb_value;
     break;
-  case EQUILIBRIUM :
+  case 'e' :
     time_nb_value = time->nb_value - 1;
     break;
   }
 
-  if (type == EQUILIBRIUM) {
+  if (type == 'e') {
     pnevent_time = new DiscreteParametric(time->nb_value , inter_event->ident);
     power = pnevent_time;
   }
 
-  // computation of the number of events distributions and the ressulting mixture
+  // calcul des lois du nombre d'evenements et du melange resultant
+
 
   pmass = mixture->mass;
 
@@ -859,16 +872,16 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
       }
 
       switch (type) {
-      case ORDINARY :
+      case 'o' :
         power = nevent_time[j];
         break;
-      case EQUILIBRIUM :
+      case 'e' :
         forward_power = nevent_time[j];
         break;
       }
 
       if (i == 0) {
-        if (type == EQUILIBRIUM) {
+        if (type == 'e') {
           forward_power->mass_copy(*forward , time->nb_value);
           forward_power->cumul_computation();
         }
@@ -878,12 +891,12 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
       }
 
       else {
-        if (type == EQUILIBRIUM) {
+        if (type == 'e') {
           forward_power->convolution(*forward , *power , time->nb_value);
           forward_power->cumul_computation();
         }
 
-        // computation of the time to the (n+1)th event distribution
+        // calcul de la loi du temps de (n+1) evenements
 
         power->ident = inter_event->ident;
 
@@ -891,10 +904,10 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
 
         case CATEGORICAL : {
           switch (type) {
-          case ORDINARY :
+          case 'o' :
             power->convolution(*inter_event , *nevent_time[j - 1] , time_nb_value);
             break;
-          case EQUILIBRIUM :
+          case 'e' :
             power->convolution(*inter_event , *pnevent_time , time_nb_value);
             break;
           }
@@ -907,14 +920,14 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
           power->inf_bound = j * inter_event->inf_bound;
           power->sup_bound = j * inter_event->sup_bound;
           power->probability = inter_event->probability;
-          power->binomial_computation(time_nb_value , RENEWAL);
+          power->binomial_computation(time_nb_value , 'r');
           break;
         }
 
         case POISSON : {
           power->inf_bound = j * inter_event->inf_bound;
           power->parameter = j * inter_event->parameter;
-          power->poisson_computation(time_nb_value , RENEWAL_THRESHOLD , RENEWAL);
+          power->poisson_computation(time_nb_value , RENEWAL_THRESHOLD , 'r');
           break;
         }
 
@@ -922,14 +935,15 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
           power->inf_bound = j * inter_event->inf_bound;
           power->parameter = j * inter_event->parameter;
           power->probability = inter_event->probability;
-          power->negative_binomial_computation(time_nb_value , RENEWAL_THRESHOLD , RENEWAL);
+          power->negative_binomial_computation(time_nb_value ,
+                                               RENEWAL_THRESHOLD , 'r');
           break;
         }
         }
       }
     }
 
-    // computation of the number of events distributions and the resulting mixture
+    // calcul des lois du nombre d'evenements et de la loi resultante
 
     tmass = time->mass + time->offset;
     pcumul1 = cumul + time->offset;
@@ -945,14 +959,14 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
         else {
           switch (type) {
 
-          case ORDINARY : {
+          case 'o' : {
             if (j < power->nb_value) {
               *pcumul1 = MIN(power->cumul[j] , 1.);
             }
             break;
           }
 
-          case EQUILIBRIUM : {
+          case 'e' : {
             if (j < forward_power->nb_value) {
               *pcumul1 = MIN(forward_power->cumul[j] , 1.);
             }
@@ -999,7 +1013,7 @@ void Renewal::computation(bool inter_event_flag , process_type itype , const Dis
   mixture->mean_computation();
   mixture->variance_computation();
 
-  if (type == EQUILIBRIUM) {
+  if (type == 'e') {
     delete pnevent_time;
   }
 

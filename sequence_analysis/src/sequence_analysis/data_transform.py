@@ -10,10 +10,10 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: data_transform.py 15827 2014-02-19 16:17:45Z jbdurand $
     
 """
-__version__ = "$Id$"
+__version__ = "$Id: data_transform.py 15827 2014-02-19 16:17:45Z jbdurand $"
 
 from openalea.stat_tool.error import *
 
@@ -45,7 +45,7 @@ from openalea.stat_tool import error
 from openalea.stat_tool import I_DEFAULT
 
 from openalea.sequence_analysis._sequence_analysis import MEAN_CHANGE
-from openalea.sequence_analysis._sequence_analysis import GAUSSIAN_CHANGE
+from openalea.sequence_analysis._sequence_analysis import MEAN_VARIANCE_CHANGE
 from openalea.sequence_analysis._sequence_analysis import NB_EVENT
 from openalea.stat_tool._stat_tool import MIN_PROBABILITY
 
@@ -260,7 +260,7 @@ def ExtractVectors(obj, key, *args):
 
     error.CheckType([variable, value], [int, int])
 
-    rkey = markovian_sequence_type[key].real
+    rkey = markovian_sequence_type[key]
     sequence = obj.extract_vectors(rkey, variable, value)
 
     return sequence
@@ -1442,7 +1442,7 @@ def __get_model__(data, nb_variable):
         Model.append(model_type[data[i]])
 
         if (i == 0) and (model_type[data[i]] == MEAN_CHANGE) or \
-        (model_type[data[i]] == GAUSSIAN_CHANGE):
+        (model_type[data[i]] == MEAN_VARIANCE_CHANGE):
 
             for _j in range(1, nb_variable):
                 Model.append(model_type[i])

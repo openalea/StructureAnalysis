@@ -6,7 +6,7 @@ import os
 from openalea.stat_tool.output import Display, Save
 
 
-__revision__ = "$Id$"
+__revision__ = "$Id: tools.py 9000 2010-05-26 09:21:23Z cokelaer $"
 
 def runTestClass(myclass):
     functions = [x for x in dir(myclass) if x.startswith('test')]

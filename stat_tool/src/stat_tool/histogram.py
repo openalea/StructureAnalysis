@@ -10,9 +10,9 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: histogram.py 9453 2010-08-28 08:10:59Z cokelaer $
 """
-__version__ = "$Id$"
+__version__ = "$Id: histogram.py 9453 2010-08-28 08:10:59Z cokelaer $"
 
 #import sys
 #import os

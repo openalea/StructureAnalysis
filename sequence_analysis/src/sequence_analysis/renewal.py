@@ -13,11 +13,11 @@
     :Code status: mature
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
-    :Revision: $Id$
+    :Revision: $Id: renewal.py 9465 2010-08-30 08:46:21Z cokelaer $
     :Usage: >>> from openalea.sequence_analysis.renewal import *
  
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: renewal.py 9465 2010-08-30 08:46:21Z cokelaer $"
 
 import os
 import openalea.stat_tool.interface as interface

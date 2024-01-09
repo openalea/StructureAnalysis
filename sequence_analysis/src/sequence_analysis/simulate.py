@@ -10,10 +10,10 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: simulate.py 15827 2014-02-19 16:17:45Z jbdurand $
     
 """
-__version__ = "$Id$"
+__version__ = "$Id: simulate.py 15827 2014-02-19 16:17:45Z jbdurand $"
 
 
 from openalea.stat_tool.simulate import Simulate as SimulateDistribution
@@ -178,11 +178,11 @@ def Simulate(obj, *args, **kargs):
     if len(args) == 1  and isinstance(args[0], int):
         return SimulateDistribution(obj, args[0])
     # top parameters case
-    #elif isinstance(obj, _TopParameters):
-        #error.CheckArgumentsLength(args, 2, 2)
-        #NbAxillary = kargs.get("NbAxillary", 1)
-        #error.CheckType([args[0], args[1], NbAxillary], [int, int, int])
-        #return obj.simulate(args[0], args[1], NbAxillary)
+    elif isinstance(obj, _TopParameters):
+        error.CheckArgumentsLength(args, 2, 2)
+        NbAxillary = kargs.get("NbAxillary", 1)
+        error.CheckType([args[0], args[1], NbAxillary], [int, int, int])
+        return obj.simulate(args[0], args[1], NbAxillary)
 
     # Renewal case
     elif isinstance(obj, _Renewal):

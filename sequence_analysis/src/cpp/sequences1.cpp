@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: sequences1.cpp 18073 2015-04-23 10:56:03Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -38,10 +38,17 @@
 
 #include <sstream>
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "renewal.h"
 #include "sequences.h"
+// #include "tops.h"
 #include "sequence_label.h"
 
 using namespace std;
@@ -52,11 +59,11 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Default constructor of the Sequences class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par defaut de la classe Sequences.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences::Sequences()
 
@@ -71,7 +78,7 @@ Sequences::Sequences()
 
   vertex_identifier = NULL;
 
-  index_param_type = IMPLICIT_TYPE;
+  index_parameter_type = IMPLICIT_TYPE;
   index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
@@ -89,19 +96,18 @@ Sequences::Sequences()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Sequences class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_sequence number of sequences,
- *  \param[in] inb_variable number of variables.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Sequences.
+ *
+ *  arguments : nombre de sequences, nombre de variables.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences::Sequences(int inb_sequence , int inb_variable)
 
 {
-  int i , j;
+  register int i , j;
 
 
   nb_sequence = inb_sequence;
@@ -122,14 +128,14 @@ Sequences::Sequences(int inb_sequence , int inb_variable)
 
   vertex_identifier = NULL;
 
-  index_param_type = IMPLICIT_TYPE;
+  index_parameter_type = IMPLICIT_TYPE;
   index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
   nb_variable = inb_variable;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -156,29 +162,24 @@ Sequences::Sequences(int inb_sequence , int inb_variable)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Initialization of a Sequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_sequence           number of sequences,
- *  \param[in] iidentifier            sequence identifiers,
- *  \param[in] ilength                sequence lengths,
- *  \param[in] ivertex_identifier     vertex identifiers of the associated MTG,
- *  \param[in] iindex_param_type      index parameter type,
- *  \param[in] inb_variable           number of variables,
- *  \param[in] itype                  variable types,
- *  \param[in] vertex_identifier_copy flag copy of vertex identifiers,
- *  \param[in] init_flag              flag initialization.
- */
-/*--------------------------------------------------------------*/
+ *  Initialisation d'un objet Sequences.
+ *
+ *  arguments : nombre de sequences, identificateurs des sequences,
+ *              longueurs des sequences, identificateurs des vertex d'un MTG associe,
+ *              type de parametre d'index, nombre de variables, type de chaque variable,
+ *              flag copy of vertex identifiers, flag initialization.
+ *
+ *--------------------------------------------------------------*/
 
 void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
-                     int **ivertex_identifier , index_parameter_type iindex_param_type ,
-                     int inb_variable , variable_nature *itype , bool vertex_identifier_copy ,
+                     int **ivertex_identifier , int iindex_parameter_type ,
+                     int inb_variable , int *itype , bool vertex_identifier_copy ,
                      bool init_flag)
 
 {
-  int i , j , k;
+  register int i , j , k;
   int blength;
 
 
@@ -224,14 +225,14 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
     vertex_identifier = NULL;
   }
 
-  index_param_type = iindex_param_type;
+  index_parameter_type = iindex_parameter_type;
   index_parameter_distribution = NULL;
   index_interval = NULL;
 
-  if (index_param_type != IMPLICIT_TYPE) {
+  if (index_parameter_type != IMPLICIT_TYPE) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = ((index_param_type == POSITION) || (index_param_type == POSITION_INTERVAL) ? length[i] + 1 : length[i]);
+      blength = ((index_parameter_type == POSITION) || (index_parameter_type == POSITION_INTERVAL) ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
 
       if (init_flag) {
@@ -248,7 +249,7 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
 
   nb_variable = inb_variable;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -294,23 +295,20 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Initialization of a Sequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_sequence number of sequences,
- *  \param[in] iidentifier  sequence identifiers,
- *  \param[in] ilength      sequence lengths,
- *  \param[in] inb_variable number of variables,
- *  \param[in] init_flag    flag initialization.
- */
-/*--------------------------------------------------------------*/
+ *  Initialisation d'un objet Sequences.
+ *
+ *  arguments : nombre de sequences, identificateurs des sequences,
+ *              longueurs des sequences, nombre de variables, flag initialisation.
+ *
+ *--------------------------------------------------------------*/
 
 void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
                      int inb_variable , bool init_flag)
 
 {
-  int i , j , k;
+  register int i , j , k;
 
 
   nb_sequence = inb_sequence;
@@ -338,14 +336,14 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
 
   vertex_identifier = NULL;
 
-  index_param_type = IMPLICIT_TYPE;
+  index_parameter_type = IMPLICIT_TYPE;
   index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
   nb_variable = inb_variable;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -378,52 +376,48 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Sequences class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_sequence      number of sequences,
- *  \param[in] iidentifier       sequence identifiers,
- *  \param[in] ilength           sequence lengths,
- *  \param[in] iindex_param_type index parameter type (TIME/POSITION),
- *  \param[in] inb_variable      number of variables,
- *  \param[in] itype             variable type,
- *  \param[in] iint_sequence     (index parameters and) integer-valued sequences.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Sequences.
+ *
+ *  arguments : nombre de sequences, identificateurs des sequences,
+ *              longueurs des sequences, type de parametre d'index (TIME/POSITION),
+ *              nombre de variables, type des variables,
+ *              (parametres d'index et) sequences entieres.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
-                     index_parameter_type iindex_param_type , int inb_variable ,
-                     variable_nature itype , int ***iint_sequence)
+                     int iindex_parameter_type , int inb_variable , int itype ,
+                     int ***iint_sequence)
 
 {
-  int i , j , k;
-  int *pisequence , *cisequence;
-  variable_nature *btype;
+  register int i , j , k;
+  int *btype , *pisequence , *cisequence;
 
 
-  btype = new variable_nature[inb_variable];
+  btype = new int[inb_variable];
   for (i = 0;i < inb_variable;i++) {
     btype[i] = itype;
   }
 
-  init(inb_sequence , iidentifier , ilength , NULL , iindex_param_type ,
+  init(inb_sequence , iidentifier , ilength , NULL , iindex_parameter_type ,
        inb_variable , btype , false , false);
   delete [] btype;
 
-//  if (index_param_type != IMPLICIT_TYPE) {
+//  if (index_parameter_type != IMPLICIT_TYPE) {
   if (index_parameter) {
     for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+      for (j = 0;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
         index_parameter[i][j] = iint_sequence[i][0][j];
       }
     }
 
     build_index_parameter_frequency_distribution();
 
-//    if ((index_param_type == TIME) || ((index_param_type == POSITION) &&
+//    if ((index_parameter_type == TIME) || ((index_parameter_type == POSITION) &&
 //        (type[0] != NB_INTERNODE))) {
-    if ((index_param_type == TIME) || (index_param_type == POSITION)) {
+    if ((index_parameter_type == TIME) || (index_parameter_type == POSITION)) {
       index_interval_computation();
     }
   }
@@ -453,27 +447,24 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Sequences class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_sequence   number of sequences,
- *  \param[in] iidentifier    sequence identifiers,
- *  \param[in] ilength        sequence lengths,
- *  \param[in] inb_variable   number of variables,
- *  \param[in] ireal_sequence real-valued sequences.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Sequences.
+ *
+ *  arguments : nombre de sequences, identificateurs des sequences, longueurs des sequences,
+ *              nombre de variables, sequences reelles.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
                      int inb_variable , double ***ireal_sequence)
 
 {
-  int i , j , k;
-  variable_nature *itype;
+  register int i , j , k;
+  int *itype;
 
 
-  itype = new variable_nature[inb_variable];
+  itype = new int[inb_variable];
   for (i = 0;i < inb_variable;i++) {
     itype[i] = REAL_VALUE;
   }
@@ -499,46 +490,41 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Sequences class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_sequence       number of sequences,
- *  \param[in] iidentifier        sequence identifiers,
- *  \param[in] ilength            sequence lengths,
- *  \param[in] ivertex_identifier vertex identifiers of the associated MTG,
- *  \param[in] iindex_param_type  index parameter type (TIME/POSITION),
- *  \param[in] iindex_parameter   index parameters,
- *  \param[in] inb_variable       number of variables,
- *  \param[in] itype              variable type,
- *  \param[in] iint_sequence      integer-valued sequences,
- *  \param[in] ireal_sequence     real-valued sequences.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Sequences.
+ *
+ *  arguments : nombre de sequences, identificateurs des sequences,
+ *              longueurs des sequences, identificateurs des vertex d'un MTG associe,
+ *              type du parametre d'index (TIME/POSITION),
+ *              parametres d'index, nombre de variables, type des variables,
+ *              sequences entieres, sequences reelles.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
-                     int **ivertex_identifier , index_parameter_type iindex_param_type ,
-                     int **iindex_parameter , int inb_variable , variable_nature *itype ,
+                     int **ivertex_identifier , int iindex_parameter_type ,
+                     int **iindex_parameter , int inb_variable , int *itype ,
                      int ***iint_sequence , double ***ireal_sequence)
 
 {
-  int i , j , k , m , n;
+  register int i , j , k , m , n;
 
 
   init(inb_sequence , iidentifier , ilength , ivertex_identifier ,
-       iindex_param_type , inb_variable , itype , true , false);
+       iindex_parameter_type , inb_variable , itype , true , false);
 
-//  if (index_param_type != IMPLICIT_TYPE) {
+//  if (index_parameter_type != IMPLICIT_TYPE) {
   if (index_parameter) {
     for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+      for (j = 0;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
         index_parameter[i][j] = iindex_parameter[i][j];
       }
     }
 
     build_index_parameter_frequency_distribution();
 
-    if ((index_param_type == TIME) || (index_param_type == POSITION)) {
+    if ((index_parameter_type == TIME) || (index_parameter_type == POSITION)) {
       index_interval_computation();
     }
   }
@@ -586,22 +572,20 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Sequences class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] ilength_distribution sequence length frequency distribution,
- *  \param[in] inb_variable         number of variables,
- *  \param[in] itype                variable types,
- *  \param[in] init_flag            flag initialization.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Sequences.
+ *
+ *  arguments : loi empirique des longueurs des sequences, nombre de variables,
+ *              type de chaque variable, flag initialisation.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences::Sequences(const FrequencyDistribution &ilength_distribution ,
-                     int inb_variable , variable_nature *itype , bool init_flag)
+                     int inb_variable , int *itype , bool init_flag)
 
 {
-  int i , j , k;
+  register int i , j , k;
   int *plength;
 
 
@@ -626,14 +610,14 @@ Sequences::Sequences(const FrequencyDistribution &ilength_distribution ,
 
   vertex_identifier = NULL;
 
-  index_param_type = IMPLICIT_TYPE;
+  index_parameter_type = IMPLICIT_TYPE;
   index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
   nb_variable = inb_variable;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -691,18 +675,18 @@ Sequences::Sequences(const FrequencyDistribution &ilength_distribution ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a Sequences object from a RenewalData object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] timev reference on a RenewalData object.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet Sequences a partir d'un objet RenewalData.
+ *
+ *  argument : reference sur un objet RenewalData.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences::Sequences(const RenewalData &timev)
 
 {
-  int i , j;
+  register int i , j;
 
 
   nb_sequence = timev.nb_element;
@@ -723,14 +707,14 @@ Sequences::Sequences(const RenewalData &timev)
 
   vertex_identifier = NULL;
 
-  index_param_type = IMPLICIT_TYPE;
+  index_parameter_type = IMPLICIT_TYPE;
   index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
   nb_variable = 1;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   type[0] = INT_VALUE;
 
   min_value = new double[nb_variable];
@@ -759,20 +743,19 @@ Sequences::Sequences(const RenewalData &timev)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Sequences class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq      reference on a Sequences object,
- *  \param[in] variable variable index,
- *  \param[in] itype    selected variable type.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Sequences.
+ *
+ *  argument : reference sur un objet Sequences, indice de la variable,
+ *             type de la variable selectionnee.
+ *
+ *--------------------------------------------------------------*/
 
-Sequences::Sequences(const Sequences &seq , int variable , variable_nature itype)
+Sequences::Sequences(const Sequences &seq , int variable , int itype)
 
 {
-  int i , j , k;
+  register int i , j , k;
   int blength;
 
 
@@ -807,7 +790,7 @@ Sequences::Sequences(const Sequences &seq , int variable , variable_nature itype
     vertex_identifier = NULL;
   }
 
-  index_param_type = seq.index_param_type;
+  index_parameter_type = seq.index_parameter_type;
 
   if (seq.index_parameter_distribution) {
     index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
@@ -826,7 +809,7 @@ Sequences::Sequences(const Sequences &seq , int variable , variable_nature itype
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = (index_param_type == POSITION ? length[i] + 1 : length[i]);
+      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
       for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[i][j];
@@ -840,7 +823,7 @@ Sequences::Sequences(const Sequences &seq , int variable , variable_nature itype
 
   nb_variable = seq.nb_variable;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -908,20 +891,19 @@ Sequences::Sequences(const Sequences &seq , int variable , variable_nature itype
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Sequences class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq          reference on a Sequences object,
- *  \param[in] inb_sequence number of sequences,
- *  \param[in] index        selected sequence indices.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Sequences.
+ *
+ *  arguments : reference sur un objet Sequences, nombre de sequences,
+ *              indices des sequences selectionnees.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
 
 {
-  int i , j , k;
+  register int i , j , k;
   int blength;
 
 
@@ -955,13 +937,13 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
     vertex_identifier = NULL;
   }
 
-  index_param_type = seq.index_param_type;
+  index_parameter_type = seq.index_parameter_type;
 
-//  if (index_param_type != IMPLICIT_TYPE) {
+//  if (index_parameter_type != IMPLICIT_TYPE) {
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = (index_param_type == POSITION ? length[i] + 1 : length[i]);
+      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
       for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[index[i]][j];
@@ -979,7 +961,7 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
 
   nb_variable = seq.nb_variable;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -1030,26 +1012,26 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
         build_marginal_frequency_distribution(i);
       }
       else {
-        build_marginal_histogram(i , seq.marginal_histogram[i]->bin_width);
+        build_marginal_histogram(i , seq.marginal_histogram[i]->step);
       }
     }
   }
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a Sequences object adding auxiliary variables.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq       reference on a Sequences object,
- *  \param[in] auxiliary flags on the addition of auxiliary variables.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet Sequences avec ajout de variables auxilliaires.
+ *
+ *  arguments : reference sur un objet Sequences, flags sur l'ajout
+ *              des variables auxilliaires.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences::Sequences(const Sequences &seq , bool *auxiliary)
 
 {
-  int i , j , k , m;
+  register int i , j , k , m;
   int blength;
 
 
@@ -1084,7 +1066,7 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
     vertex_identifier = NULL;
   }
 
-  index_param_type = seq.index_param_type;
+  index_parameter_type = seq.index_parameter_type;
 
   if (seq.index_parameter_distribution) {
     index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
@@ -1103,7 +1085,7 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = (index_param_type == POSITION ? length[i] + 1 : length[i]);
+      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
       for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[i][j];
@@ -1122,7 +1104,7 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
     }
   }
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -1197,18 +1179,18 @@ Sequences::Sequences(const Sequences &seq , bool *auxiliary)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Sequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq reference on a Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Sequences.
+ *
+ *  argument : reference sur un objet Sequences.
+ *
+ *--------------------------------------------------------------*/
 
 void Sequences::copy(const Sequences &seq)
 
 {
-  int i , j , k;
+  register int i , j , k;
   int blength;
 
 
@@ -1243,7 +1225,7 @@ void Sequences::copy(const Sequences &seq)
     vertex_identifier = NULL;
   }
 
-  index_param_type = seq.index_param_type;
+  index_parameter_type = seq.index_parameter_type;
 
   if (seq.index_parameter_distribution) {
     index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
@@ -1262,7 +1244,7 @@ void Sequences::copy(const Sequences &seq)
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = (index_param_type == POSITION ? length[i] + 1 : length[i]);
+      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
       for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[i][j];
@@ -1276,7 +1258,7 @@ void Sequences::copy(const Sequences &seq)
 
   nb_variable = seq.nb_variable;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -1330,18 +1312,18 @@ void Sequences::copy(const Sequences &seq)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Sequences object reversing the direction of sequences.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq reference on a Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Sequences avec inversion du sens de parcours des sequences.
+ *
+ *  arguments : reference sur un objet Sequences.
+ *
+ *--------------------------------------------------------------*/
 
 void Sequences::reverse(const Sequences &seq)
 
 {
-  int i , j , k;
+  register int i , j , k;
   int blength , end_position , *pidentifier , *cidentifier , *pindex_param ,
       *cindex_param , *pisequence , *cisequence;
   double *prsequence , *crsequence;
@@ -1381,7 +1363,7 @@ void Sequences::reverse(const Sequences &seq)
     vertex_identifier = NULL;
   }
 
-  index_param_type = seq.index_param_type;
+  index_parameter_type = seq.index_parameter_type;
 
   if (seq.index_parameter_distribution) {
     index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
@@ -1400,11 +1382,11 @@ void Sequences::reverse(const Sequences &seq)
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = (index_param_type == POSITION ? length[i] + 1 : length[i]);
+      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
       pindex_param = index_parameter[i];
 
-      if (index_param_type == POSITION) {
+      if (index_parameter_type == POSITION) {
         cindex_param = seq.index_parameter[i] + length[i];
         end_position = *cindex_param--;
         for (j = 0;j < length[i];j++) {
@@ -1413,7 +1395,7 @@ void Sequences::reverse(const Sequences &seq)
         *pindex_param = end_position;
       }
 
-      else if (index_param_type == TIME) {
+      else if (index_parameter_type == TIME) {
         cindex_param = seq.index_parameter[i] + length[i] - 1;
         for (j = 0;j < length[i];j++) {
           *pindex_param++ = index_parameter_distribution->nb_value - *cindex_param--;
@@ -1435,7 +1417,7 @@ void Sequences::reverse(const Sequences &seq)
 
   nb_variable = seq.nb_variable;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -1493,18 +1475,18 @@ void Sequences::reverse(const Sequences &seq)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Sequences object adding a state variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq reference on a Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Sequences avec ajout d'une variable d'etat.
+ *
+ *  argument : reference sur un objet Sequences.
+ *
+ *--------------------------------------------------------------*/
 
 void Sequences::add_state_variable(const Sequences &seq)
 
 {
-  int i , j , k;
+  register int i , j , k;
   int blength;
 
 
@@ -1539,7 +1521,7 @@ void Sequences::add_state_variable(const Sequences &seq)
     vertex_identifier = NULL;
   }
 
-  index_param_type = seq.index_param_type;
+  index_parameter_type = seq.index_parameter_type;
 
   if (seq.index_parameter_distribution) {
     index_parameter_distribution = new FrequencyDistribution(*(seq.index_parameter_distribution));
@@ -1558,7 +1540,7 @@ void Sequences::add_state_variable(const Sequences &seq)
   if (seq.index_parameter) {
     index_parameter = new int*[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      blength = (index_param_type == POSITION ? length[i] + 1 : length[i]);
+      blength = (index_parameter_type == POSITION ? length[i] + 1 : length[i]);
       index_parameter[i] = new int[blength];
       for (j = 0;j < blength;j++) {
         index_parameter[i][j] = seq.index_parameter[i][j];
@@ -1572,7 +1554,7 @@ void Sequences::add_state_variable(const Sequences &seq)
 
   nb_variable = seq.nb_variable + 1;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -1640,50 +1622,18 @@ void Sequences::add_state_variable(const Sequences &seq)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Sequences object transforming the implicit index parameters in
- *         explicit index parameters.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq reference on a Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-void Sequences::explicit_index_parameter(const Sequences &seq)
-
-{
-  int i , j;
-
-
-  Sequences::copy(seq);
-
-  index_param_type = TIME;
-
-  index_parameter = new int*[nb_sequence];
-  for (i = 0;i < nb_sequence;i++) {
-    index_parameter[i] = new int[length[i]];
-    for (j = 0;j < length[i];j++) {
-      index_parameter[i][j] = j;
-    }
-  }
-
-  build_index_parameter_frequency_distribution();
-  index_interval_computation();
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Sequences object removing the index parameters.
+ *  Copie d'un objet Sequences avec suppression du parametre d'index.
  *
- *  \param[in] seq reference on a Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet Sequences.
+ *
+ *--------------------------------------------------------------*/
 
 void Sequences::remove_index_parameter(const Sequences &seq)
 
 {
-  int i , j , k;
+  register int i , j , k;
 
 
   nb_sequence = seq.nb_sequence;
@@ -1717,14 +1667,14 @@ void Sequences::remove_index_parameter(const Sequences &seq)
     vertex_identifier = NULL;
   }
 
-  index_param_type = IMPLICIT_TYPE;
+  index_parameter_type = IMPLICIT_TYPE;
   index_parameter_distribution = NULL;
   index_interval = NULL;
   index_parameter = NULL;
 
   nb_variable = seq.nb_variable;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   marginal_distribution = new FrequencyDistribution*[nb_variable];
@@ -1778,30 +1728,63 @@ void Sequences::remove_index_parameter(const Sequences &seq)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor by copy of the Sequences class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq       reference on a Sequences object,
- *  \param[in] transform type of transform.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Sequences avec transformation du parametre d'index implicite
+ *  en parametre d'index explicite.
+ *
+ *  argument : reference sur un objet Sequences.
+ *
+ *--------------------------------------------------------------*/
 
-Sequences::Sequences(const Sequences &seq , sequence_transformation transform)
+void Sequences::explicit_index_parameter(const Sequences &seq)
+
+{
+  register int i , j;
+
+
+  Sequences::copy(seq);
+
+  index_parameter_type = TIME;
+
+  index_parameter = new int*[nb_sequence];
+  for (i = 0;i < nb_sequence;i++) {
+    index_parameter[i] = new int[length[i]];
+    for (j = 0;j < length[i];j++) {
+      index_parameter[i][j] = j;
+    }
+  }
+
+  build_index_parameter_frequency_distribution();
+  index_interval_computation();
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par copie de la classe Sequences.
+ *
+ *  arguments : reference sur un objet Sequences, type de transformation
+ *             ('r' : inversion du sens de parcours, 'a' : addition d'une variable,
+ *              'm' : suppression du parametre d'index, 'e' : parametre d'index rendu explicite).
+ *
+ *--------------------------------------------------------------*/
+
+Sequences::Sequences(const Sequences &seq , char transform , int param)
 
 {
   switch (transform) {
-  case REVERSE :
+  case 'r' :
     Sequences::reverse(seq);
     break;
-  case ADD_STATE_VARIABLE :
+  case 'a' :
     Sequences::add_state_variable(seq);
     break;
-  case EXPLICIT_INDEX_PARAMETER :
-    Sequences::explicit_index_parameter(seq);
-    break;
-  case REMOVE_INDEX_PARAMETER :
+  case 'm' :
     Sequences::remove_index_parameter(seq);
+    break;
+  case 'e' :
+    Sequences::explicit_index_parameter(seq);
     break;
   default :
     Sequences::copy(seq);
@@ -1810,16 +1793,16 @@ Sequences::Sequences(const Sequences &seq , sequence_transformation transform)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the data members of a Sequences object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet Sequences.
+ *
+ *--------------------------------------------------------------*/
 
 void Sequences::remove()
 
 {
-  int i , j;
+  register int i , j;
 
 
   delete [] identifier;
@@ -1884,11 +1867,11 @@ void Sequences::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the Sequences class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe Sequences.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences::~Sequences()
 
@@ -1897,15 +1880,13 @@ Sequences::~Sequences()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the Sequences class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq reference on a Sequences object.
+ *  Operateur d'assignement de la classe Sequences.
  *
- *  \return        Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet Sequences.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences& Sequences::operator=(const Sequences &seq)
 
@@ -1919,16 +1900,13 @@ Sequences& Sequences::operator=(const Sequences &seq)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of the marginal frequency distribution for a positive integer-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index.
+ *  Extraction de la loi marginale empirique pour une variable entiere.
  *
- *  \return             DiscreteDistributionData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, variable.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteDistributionData* Sequences::extract(StatError &error , int variable) const
 
@@ -1969,22 +1947,19 @@ DiscreteDistributionData* Sequences::extract(StatError &error , int variable) co
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a Vectors object from a Sequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] index_variable flag index parameter variable.
+ *  Construction d'un object Vectors a partir d'un objet Sequences.
  *
- *  \return                   Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : flag variable d'index.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors* Sequences::build_vectors(bool index_variable) const
 
 {
-  int i , j , k , m;
-  int offset , **int_vector;
-  variable_nature *itype;
+  register int i , j , k , m;
+  int offset , *itype , **int_vector;
   double **real_vector;
   Vectors *vec;
 
@@ -1992,9 +1967,17 @@ Vectors* Sequences::build_vectors(bool index_variable) const
   if (index_parameter) {
     index_variable = true;
   }
-  offset = (index_variable ? 1 : 0);
 
-  itype = new variable_nature[nb_variable + offset];
+  switch (index_variable) {
+  case false :
+    offset = 0;
+    break;
+  case true :
+    offset = 1;
+    break;
+  }
+
+  itype = new int[nb_variable + offset];
 
   if (index_variable) {
     itype[0] = INT_VALUE;
@@ -2066,28 +2049,22 @@ Vectors* Sequences::build_vectors(bool index_variable) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of global measures (length, time to the 1st occurrence of a value,
- *         number of runs or occurrences of a value, mean, cumulative value) for each sequence.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] pattern  measure type,
- *  \param[in] variable variable index,
- *  \param[in] value    value.
+ *  Extraction de mesures globales (longueur, temps avant la 1ere occurrence
+ *  d'une valeur, nombre de series/d'occurrences d'une valeur) par sequence.
  *
- *  \return             Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, type, variable, valeur.
+ *
+ *--------------------------------------------------------------*/
 
-Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern ,
+Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
                                     int variable , int value) const
 
 {
   bool status = true;
-  int i , j;
-  int begin_run , count , **int_vector;
-  variable_nature itype[1];
+  register int i , j;
+  int begin_run , count , itype[1] , **int_vector;
   double **real_vector;
   Vectors *vec;
 
@@ -2104,7 +2081,7 @@ Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern 
     else {
       variable--;
 
-      if ((pattern == SEQUENCE_CUMUL) || (pattern == SEQUENCE_MEAN)) {
+      if ((feature_type == SEQUENCE_CUMUL) || (feature_type == SEQUENCE_MEAN)) {
         if ((type[variable] != INT_VALUE) && (type[variable] != STATE) &&
             (type[variable] != REAL_VALUE)) {
           status = false;
@@ -2117,8 +2094,8 @@ Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern 
         }
       }
 
-//      else if ((pattern == FIRST_OCCURRENCE) || (pattern == NB_RUN) ||
-//               (pattern == NB_OCCURRENCE)) {
+//      else if ((feature_type == FIRST_OCCURRENCE) || (feature_type == NB_RUN) ||
+//               (feature_type == NB_OCCURRENCE)) {
       else {
         if ((type[variable] != INT_VALUE) && (type[variable] != STATE)) {
           status = false;
@@ -2142,7 +2119,7 @@ Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern 
   }
 
   if (status) {
-    switch (pattern) {
+    switch (feature_type) {
     case SEQUENCE_CUMUL :
       itype[0] = type[variable];
       break;
@@ -2164,16 +2141,16 @@ Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern 
       real_vector[i] = new double[1];
     }
 
-    switch (pattern) {
+    switch (feature_type) {
 
-    case LENGTH_PATTERN : {
-      if (index_param_type == POSITION) {
+    case LENGTH : {
+      if (index_parameter_type == POSITION) {
         for (i = 0;i < nb_sequence;i++) {
           int_vector[i][0] = index_parameter[i][length[i]];
         }
       }
 
-      else if ((index_param_type == TIME) && (index_interval->variance > 0.)) {
+      else if ((index_parameter_type == TIME) && (index_interval->variance > 0.)) {
         for (i = 0;i < nb_sequence;i++) {
           int_vector[i][0] = index_parameter[i][length[i] - 1];
         }
@@ -2231,8 +2208,8 @@ Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern 
       break;
     }
 
-    case FIRST_OCCURRENCE_PATTERN : {
-      if (index_param_type != IMPLICIT_TYPE) {
+    case FIRST_OCCURRENCE : {
+      if (index_parameter_type != IMPLICIT_TYPE) {
         for (i = 0;i < nb_sequence;i++) {
           int_vector[i][0] = -1;
           for (j = 0;j < length[i];j++) {
@@ -2258,8 +2235,8 @@ Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern 
       break;
     }
 
-    case SOJOURN_TIME_PATTERN : {
-      if ((index_param_type == TIME) && (index_interval->variance > 0.)) {  // for the mango growth follow-ups
+    case SOJOURN_TIME : {
+      if ((index_parameter_type == TIME) && (index_interval->variance > 0.)) {  // pour les suivis de croissance manguier
         for (i = 0;i < nb_sequence;i++) {
           int_vector[i][0] = -1;
           if (int_sequence[i][variable][0] == value) {
@@ -2312,7 +2289,7 @@ Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern 
       break;
     }
 
-    case NB_RUN_PATTERN : {
+    case NB_RUN : {
       for (i = 0;i < nb_sequence;i++) {
         count = 0;
         if (int_sequence[i][variable][0] == value) {
@@ -2330,7 +2307,7 @@ Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern 
       break;
     }
 
-    case NB_OCCURRENCE_PATTERN : {
+    case NB_OCCURRENCE : {
       for (i = 0;i < nb_sequence;i++) {
         count = 0;
         for (j = 0;j < length[i];j++) {
@@ -2362,30 +2339,28 @@ Vectors* Sequences::extract_vectors(StatError &error , sequence_pattern pattern 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a MarkovianSequences object from a Sequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Construction d'un objet MarkovianSequences a partir d'un objet Sequences.
  *
- *  \return          MarkovianSequences object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
 
 MarkovianSequences* Sequences::markovian_sequences(StatError &error) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   MarkovianSequences *seq;
 
 
   seq = NULL;
   error.init();
 
-//  if (((index_param_type == TIME) && (index_interval->variance > 0.)) ||
-//      (index_param_type == POSITION)) {
-  if (index_param_type == POSITION) {
+//  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
+//      (index_parameter_type == POSITION)) {
+  if (index_parameter_type == POSITION) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
@@ -2437,34 +2412,31 @@ MarkovianSequences* Sequences::markovian_sequences(StatError &error) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Checking of (strictly) increasing index parameters within sequences.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] strict        flag stricty increasing or not,
- *  \param[in] pattern_label label.
+ *  Verification du caractere (strictement) croissant des parametres d'index.
  *
- *  \return                  error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, flag croissance strict ou non,
+ *              label de l'objet.
+ *
+ *--------------------------------------------------------------*/
 
 bool Sequences::increasing_index_parameter_checking(StatError &error , bool strict ,
                                                     const char *pattern_label) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
 
 
   for (i = 0;i < nb_sequence;i++) {
-    for (j = 1;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+    for (j = 1;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
       if ((((!strict) || (j == length[i])) && (index_parameter[i][j] < index_parameter[i][j - 1])) ||
           ((strict) && (j < length[i]) && (index_parameter[i][j] <= index_parameter[i][j - 1]))) {
         status = false;
         ostringstream error_message;
         error_message << pattern_label << " " << i + 1 << ": "
-                      << (index_param_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION]) << " "
+                      << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION]) << " "
                       << index_parameter[i][j] << " " << STAT_error[STATR_NOT_ALLOWED];
         error.update((error_message.str()).c_str());
       }
@@ -2475,26 +2447,22 @@ bool Sequences::increasing_index_parameter_checking(StatError &error , bool stri
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Checking of (strictly) increasing sequences.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error          reference on a StatError object,
- *  \param[in] variable       variable index,
- *  \param[in] strict         flag stricty increasing or not,
- *  \param[in] pattern_label  pattern label,
- *  \param[in] variable_label variable label.
+ *  Verification du caractere (strictement) croissant des sequences
+ *  pour une variable entiere.
  *
- *  \return                   error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              flag croissance strict ou non, labels de l'objet et de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 bool Sequences::increasing_sequence_checking(StatError &error , int variable , bool strict ,
                                              const char *pattern_label , const char *variable_label) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
 
 
   switch (type[variable]) {
@@ -2538,16 +2506,13 @@ bool Sequences::increasing_sequence_checking(StatError &error , int variable , b
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Checking of a Sequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] pattern_label label.
+ *  Verification d'un objet Sequences.
  *
- *  \return                  error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, label.
+ *
+ *--------------------------------------------------------------*/
 
 bool Sequences::check(StatError &error , const char *pattern_label)
 
@@ -2572,8 +2537,8 @@ bool Sequences::check(StatError &error , const char *pattern_label)
     status = false;
   }
 
-  if (index_param_type != IMPLICIT_TYPE) {
-    lstatus = increasing_index_parameter_checking(error , (index_param_type == POSITION ? false : true) ,
+  if (index_parameter_type != IMPLICIT_TYPE) {
+    lstatus = increasing_index_parameter_checking(error , (index_parameter_type == POSITION ? false : true) ,
                                                   pattern_label);
 
     if (!lstatus) {
@@ -2585,9 +2550,9 @@ bool Sequences::check(StatError &error , const char *pattern_label)
     if (index_parameter) {
       build_index_parameter_frequency_distribution();
     }
-//    if ((index_param_type == TIME) || ((index_param_type == POSITION) &&
+//    if ((index_parameter_type == TIME) || ((index_parameter_type == POSITION) &&
 //         (type[0] != NB_INTERNODE))) {
-    if ((index_param_type == TIME) || (index_param_type == POSITION)) {
+    if ((index_parameter_type == TIME) || (index_parameter_type == POSITION)) {
       index_interval_computation();
     }
   }
@@ -2596,20 +2561,15 @@ bool Sequences::check(StatError &error , const char *pattern_label)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of a TimeEvents object from a Sequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] variable      variable index,
- *  \param[in] begin_date    begin date,
- *  \param[in] end_date      end date,
- *  \param[in] previous_date previous date,
- *  \param[in] next_date     next date.
+ *  Extraction d'un objet TimeEvents a partir d'un objet Sequences.
  *
- *  \return                  TimeEvents object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              nombre d'evenements, dates de debut et de fin,
+ *              dates precedente et suivante.
+ *
+ *--------------------------------------------------------------*/
 
 TimeEvents* Sequences::extract_time_events(StatError &error , int variable ,
                                            int begin_date , int end_date ,
@@ -2617,7 +2577,7 @@ TimeEvents* Sequences::extract_time_events(StatError &error , int variable ,
 
 {
   bool status = true , lstatus;
-  int i , j;
+  register int i , j;
   int nb_element , previous , begin , end , next , *time , *nb_event , *pdate;
   TimeEvents *timev;
 
@@ -2625,7 +2585,7 @@ TimeEvents* Sequences::extract_time_events(StatError &error , int variable ,
   timev = NULL;
   error.init();
 
-  if (index_param_type != TIME) {
+  if (index_parameter_type != TIME) {
     status = false;
     error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE] , SEQ_index_parameter_word[TIME]);
   }
@@ -2734,25 +2694,21 @@ TimeEvents* Sequences::extract_time_events(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of a RenewalData object from a Sequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error                 reference on a StatError object,
- *  \param[in] variable              variable index,
- *  \param[in] begin_index_parameter begin index parameter,
- *  \param[in] end_index_parameter   end index parameter.
+ *  Extraction d'un objet RenewalData a partir d'un objet Sequences.
  *
- *  \return                          RenewalData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              nombre d'evenements, index de debut et de fin.
+ *
+ *--------------------------------------------------------------*/
 
 RenewalData* Sequences::extract_renewal_data(StatError &error , int variable ,
                                              int begin_index_parameter , int end_index_parameter) const
 
 {
   bool status = true , lstatus;
-  int i , j;
+  register int i , j;
   int nb_element , index , *ptime , *pnb_event , *pisequence , *cisequence;
   RenewalData *timev;
 
@@ -2836,8 +2792,8 @@ RenewalData* Sequences::extract_renewal_data(StatError &error , int variable ,
       }
     }
 
-    // construction of the triplets {observation period, number of events, frequency}, of
-    // the observation period frequency distribution and the number of events frequency distributions
+    // construction des echantillons {temps, nombre d'evenements, frequence} et
+    // des lois empiriques du temps d'observation et du nombre d'evenements
 
     ptime -= nb_element;
     pnb_event -= nb_element;
@@ -2846,9 +2802,9 @@ RenewalData* Sequences::extract_renewal_data(StatError &error , int variable ,
     delete [] ptime;
     delete [] pnb_event;
 
-    // extraction of the characteristics of the inter-event frequency distribution,
-    // the frequency distribution of time intervals between events within the observation period,
-    // the backward and forward recurrence time frequency distributions,
+    // extraction des caracteristiques des lois empiriques des intervalles de temps entre 2 evenements,
+    // des intervalles de temps entre 2 evenements compris entre les 2 dates d'observation,
+    // des intervalles de temps apres le dernier evenement, des intervalles de temps residuel
 
     timev->within->nb_value_computation();
     timev->within->offset_computation();

@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: discrete_parametric.cpp 17993 2015-04-23 06:46:53Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -37,19 +37,17 @@
 
 
 #include <math.h>
-
-#include <string>
 #include <sstream>
 
-#include <boost/tokenizer.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/classification.hpp>
+#include "tool/rw_tokenizer.h"
+#include "tool/rw_cstring.h"
+#include "tool/rw_locale.h"
 
+#include "stat_tools.h"
 #include "distribution.h"
 #include "stat_label.h"
 
 using namespace std;
-using namespace boost;
 
 
 namespace stat_tool {
@@ -60,16 +58,13 @@ extern bool cumul_matching_plot_print(const char *path , int nb_cumul , int *off
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Initialization of the parameters of a discrete parametric distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] iinf_bound   lower bound,
- *  \param[in] isup_bound   upper bound (binomial, uniform),
- *  \param[in] iparameter   parameter (Poisson, negative binomial, Poisson geometric),
- *  \param[in] iprobability probability (binomial, negative binomial, Poisson geometric).
- */
-/*--------------------------------------------------------------*/
+ *  Initialisation des parametres d'une loi discrete.
+ *
+ *  arguments : bornes inferieure et superieure, parametre, probabilite.
+ *
+ *--------------------------------------------------------------*/
 
 void DiscreteParametric::init(int iinf_bound , int isup_bound ,
                               double iparameter , double iprobability)
@@ -82,19 +77,16 @@ void DiscreteParametric::init(int iinf_bound , int isup_bound ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Initialization of the identifier and parameters of a discrete parametric distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] iident       identifier,
- *  \param[in] iinf_bound   lower bound,
- *  \param[in] isup_bound   upper bound (binomial, uniform),
- *  \param[in] iparameter   parameter (Poisson, negative binomial, Poisson geometric),
- *  \param[in] iprobability probability (binomial, negative binomial, Poisson geometric).
- */
-/*--------------------------------------------------------------*/
+ *  Initialisation de l'identificateur et des parametres d'une loi discrete.
+ *
+ *  arguments : identificateur, bornes inferieure et superieure,
+ *              parametre, probabilite.
+ *
+ *--------------------------------------------------------------*/
 
-void DiscreteParametric::init(discrete_parametric iident , int iinf_bound , int isup_bound ,
+void DiscreteParametric::init(int iident , int iinf_bound , int isup_bound ,
                               double iparameter , double iprobability)
 
 {
@@ -107,20 +99,16 @@ void DiscreteParametric::init(discrete_parametric iident , int iinf_bound , int 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the DiscreteParametric class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_value    number of values,
- *  \param[in] iident       identifier,
- *  \param[in] iinf_bound   lower bound,
- *  \param[in] isup_bound   upper bound (binomial, uniform),
- *  \param[in] iparameter   parameter (Poisson, negative binomial, Poisson geometric),
- *  \param[in] iprobability probability (binomial, negative binomial, Poisson geometric).
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe DiscreteParametric.
+ *
+ *  arguments : nombre de valeurs, identificateur, bornes inferieure et
+ *              superieure, parametre, probabilite.
+ *
+ *--------------------------------------------------------------*/
 
-DiscreteParametric::DiscreteParametric(int inb_value , discrete_parametric iident ,
+DiscreteParametric::DiscreteParametric(int inb_value , int iident ,
                                        int iinf_bound , int isup_bound ,
                                        double iparameter , double iprobability)
 :Distribution(inb_value)
@@ -135,20 +123,16 @@ DiscreteParametric::DiscreteParametric(int inb_value , discrete_parametric iiden
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the DiscreteParametric class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] iident          identifier,
- *  \param[in] iinf_bound      lower bound,
- *  \param[in] isup_bound      upper bound (binomial, uniform),
- *  \param[in] iparameter      parameter (Poisson, negative binomial, Poisson geometric),
- *  \param[in] iprobability    probability (binomial, negative binomial, Poisson geometric),
- *  \param[in] cumul_threshold threshold on the cumulative distribution function.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe DiscreteParametric.
+ *
+ *  arguments : identificateur, bornes inferieure et superieure,
+ *              parametre, probabilite, seuil sur la fonction de repartition.
+ *
+ *--------------------------------------------------------------*/
 
-DiscreteParametric::DiscreteParametric(discrete_parametric iident , int iinf_bound ,
+DiscreteParametric::DiscreteParametric(int iident , int iinf_bound ,
                                        int isup_bound , double iparameter ,
                                        double iprobability , double cumul_threshold)
 
@@ -165,16 +149,13 @@ DiscreteParametric::DiscreteParametric(discrete_parametric iident , int iinf_bou
   if ((ident == BINOMIAL) || (ident == UNIFORM)) {
     nb_value = sup_bound + 1;
   }
-
-  else if (ident == PRIOR_SEGMENT_LENGTH) {
-    nb_value = sequence_length - no_segment + 2;
-  }
-
-  else if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
-    nb_value = (int)round(inf_bound + (parametric_mean_computation() - inf_bound +
-                                       sqrt(parametric_variance_computation())) * 20.);
-    if (nb_value == inf_bound) {
-      nb_value++;
+  else {
+    if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL)) {
+      nb_value = (int)round(inf_bound + (parametric_mean_computation() - inf_bound +
+                                         sqrt(parametric_variance_computation())) * 20.);
+      if (nb_value == inf_bound) {
+        nb_value++;
+      }
     }
   }
 
@@ -184,17 +165,16 @@ DiscreteParametric::DiscreteParametric(discrete_parametric iident , int iinf_bou
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a DiscreteParametric object from a Distribution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist            reference on a Distribution object,
- *  \param[in] ialloc_nb_value number of allocated values.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet DiscreteParametric a partir d'un objet Distribution.
+ *
+ *  arguments : reference sur un objet Distribution, nombre de valeurs allouees.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametric::DiscreteParametric(const Distribution &dist , int ialloc_nb_value)
-:Distribution(dist , DISTRIBUTION_COPY , ialloc_nb_value)
+:Distribution(dist , 'c' , ialloc_nb_value)
 
 {
   ident = CATEGORICAL;
@@ -206,15 +186,14 @@ DiscreteParametric::DiscreteParametric(const Distribution &dist , int ialloc_nb_
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a DiscreteParametric object from a Distribution object
- *         applying a scaling operation.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist          reference on a Distribution object, 
- *  \param[in] scaling_coeff scaling factor.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet DiscreteParametric a partir d'un objet Distribution
+ *  avec changement d'echelle.
+ *
+ *  arguments : reference sur un objet Distribution, facteur d'echelle.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametric::DiscreteParametric(const Distribution &dist , double scaling_coeff)
 :Distribution(dist , scaling_coeff)
@@ -229,15 +208,14 @@ DiscreteParametric::DiscreteParametric(const Distribution &dist , double scaling
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of an inter-event distribution from
- *         an initial inter-event distribution up- or down-scaling the time scale.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist          reference on an inter-event distribution,
- *  \param[in] scaling_coeff scaling factor.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'une loi inter-evenement a partir d'une loi
+ *  inter-evenement initiale par dilatation/retraction de l'echelle des temps.
+ *
+ *  arguments : reference sur une loi inter-evenement, facteur d'echelle.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametric::DiscreteParametric(const DiscreteParametric &dist , double scaling_coeff)
 :Distribution((int)floor(dist.nb_value * scaling_coeff) + 1)
@@ -259,7 +237,7 @@ DiscreteParametric::DiscreteParametric(const DiscreteParametric &dist , double s
   shifted_mean = scaled_mean - inf_bound;
   ratio = scaled_variance / shifted_mean;
 
-  // case binomial
+  // cas binomiale
 
   if (ratio < 1. - POISSON_RANGE) {
     ident = BINOMIAL;
@@ -271,7 +249,7 @@ DiscreteParametric::DiscreteParametric(const DiscreteParametric &dist , double s
     probability = shifted_mean / (sup_bound - inf_bound);
   }
 
-  // case negative binomial
+  // cas binomiale negative
 
   else if (ratio > 1. + POISSON_RANGE) {
     ident = NEGATIVE_BINOMIAL;
@@ -279,7 +257,7 @@ DiscreteParametric::DiscreteParametric(const DiscreteParametric &dist , double s
     probability = shifted_mean / scaled_variance;
   }
 
-  // case Poisson
+  // cas Poisson
 
   else {
     ident = POISSON;
@@ -290,14 +268,14 @@ DiscreteParametric::DiscreteParametric(const DiscreteParametric &dist , double s
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a DiscreteParametric object from
- *         a FrequencyDistribution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo reference on a FrequencyDistribution object.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet DiscreteParametric a partir
+ *  d'un objet FrequencyDistribution.
+ *
+ *  argument : reference sur un objet FrequencyDistribution.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametric::DiscreteParametric(const FrequencyDistribution &histo)
 :Distribution(histo)
@@ -312,13 +290,13 @@ DiscreteParametric::DiscreteParametric(const FrequencyDistribution &histo)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a DiscreteParametric object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist reference on a DiscreteParametric object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet DiscreteParametric.
+ *
+ *  argument : reference sur un objet DiscreteParametric.
+ *
+ *--------------------------------------------------------------*/
 
 void DiscreteParametric::copy(const DiscreteParametric &dist)
 
@@ -332,18 +310,18 @@ void DiscreteParametric::copy(const DiscreteParametric &dist)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor by copy of the DiscreteParametric class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist            reference on a DiscreteParametric object,
- *  \param[in] transform       type of transform (DISTRIBUTION_COPY/NORMALIZATION),
- *  \param[in] ialloc_nb_value number of allocated values.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur par copie de la classe DiscreteParametric.
+ *
+ *  arguments : reference sur un objet DiscreteParametric, type de transformation
+ *              ('c' : copie , 'n' : copie avec renormalisation),
+ *              nombre de valeurs allouees.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametric::DiscreteParametric(const DiscreteParametric &dist ,
-                                       distribution_transformation transform , int ialloc_nb_value)
+                                       char transform , int ialloc_nb_value)
 :Distribution(dist , transform , ialloc_nb_value)
 
 {
@@ -351,15 +329,13 @@ DiscreteParametric::DiscreteParametric(const DiscreteParametric &dist ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the DiscreteParametric class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist reference on a DiscreteParametric object.
+ *  Operateur d'assignement de la classe DiscreteParametric.
  *
- *  \return         DiscreteParametric object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet DiscreteParametric.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametric& DiscreteParametric::operator=(const DiscreteParametric &dist)
 
@@ -376,71 +352,58 @@ DiscreteParametric& DiscreteParametric::operator=(const DiscreteParametric &dist
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Analysis of the format of a DiscreteParametric object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error           reference on a StatError object,
- *  \param[in] in_file         stream,
- *  \param[in] line            reference on the file line index,
- *  \param[in] last_ident      identifier of the last distribution in the list,
- *  \param[in] cumul_threshold threshold on the cumulative distribution function,
- *  \param[in] min_inf_bound   minimum lower bound.
+ *  Analyse du format d'un objet DiscreteParametric.
  *
- *  \return                    DiscreteParametric object.   
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream,
+ *              reference sur l'indice de la ligne lue, identificateur
+ *              de la derniere loi dans la liste, seuil sur la fonction
+ *              de repartition, borne inferieure minimum.
+ *
+ *--------------------------------------------------------------*/
 
-DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_file ,
-                                                int &line , discrete_parametric last_ident ,
+DiscreteParametric* discrete_parametric_parsing(StatError &error , ifstream &in_file ,
+                                                int &line , int last_ident ,
                                                 double cumul_threshold , int min_inf_bound)
 
 {
-  string buffer;
+  RWLocaleSnapshot locale("en");
+  RWCString buffer , token;
   size_t position;
-  typedef tokenizer<char_separator<char>> tokenizer;
-  char_separator<char> separator(" \t");
   bool status = true , lstatus;
-  int i , j;
-  discrete_parametric ident = CATEGORICAL;
-  union {
-    int inf_bound;
-    int no_segment;
-  };
-  union {
-    int sup_bound = I_DEFAULT;
-    int sequence_length;
-  };
+  register int i , j;
+  int ident = I_DEFAULT;
+  long inf_bound , sup_bound = I_DEFAULT;
   double parameter = D_DEFAULT , probability = D_DEFAULT;
   DiscreteParametric *dist;
 
 
   dist = NULL;
 
-  while (getline(in_file , buffer)) {
+  while (buffer.readLine(in_file , false)) {
     line++;
 
 #   ifdef DEBUG
     cout << line << " " << buffer << endl;
 #   endif
 
-    position = buffer.find('#');
-    if (position != string::npos) {
-      buffer.erase(position);
+    position = buffer.first('#');
+    if (position != RW_NPOS) {
+      buffer.remove(position);
     }
     i = 0;
 
-    tokenizer tok_buffer(buffer , separator);
+    RWCTokenizer next(buffer);
 
-//    for (auto &token : tok_buffer)  {   in C++ 11, entails replacing pointer by reference for token
-    for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+    while (!((token = next()).isNull())) {
 
-      // test distribution name
+      // test nom de la loi
 
       if (i == 0) {
         for (j = BINOMIAL;j <= last_ident;j++) {
-          if (*token == STAT_discrete_distribution_word[j]) {
-            ident = (discrete_parametric)j;
+          if (token == STAT_discrete_distribution_word[j]) {
+            ident = j;
             break;
           }
         }
@@ -451,7 +414,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
         }
       }
 
-      // test parameter name
+      // test nom du parametre
 
       else {
         switch ((i - 1) % 3) {
@@ -459,49 +422,39 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
         case 0 : {
           switch ((i - 1) / 3) {
 
-          // 1st parameter: lower bound or number of segments (prior segment length)
+          // 1er parametre : borne inferieure
 
           case 0 : {
-            if (((ident == BINOMIAL) || (ident == POISSON) || (ident == NEGATIVE_BINOMIAL) ||
-                 (ident == POISSON_GEOMETRIC) || (ident == UNIFORM)) && (*token != STAT_word[STATW_INF_BOUND])) {
+            if (token != STAT_word[STATW_INF_BOUND]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_INF_BOUND] , line , i + 1);
-            }
-
-            if ((ident == PRIOR_SEGMENT_LENGTH) && (*token != STAT_word[STATW_NO_SEGMENT])) {
-              status = false;
-              error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_NO_SEGMENT] , line , i + 1);
             }
             break;
           }
 
-          // 2nd parameter: upper bound (binomial, uniform), parameter (Poisson, negative binomial, Poisson geometric)
-          // or sequence length (prior segment length)
+          // 2eme parametre : borne superieure (binomiale , uniforme)
+          // ou parametre (Poisson , binomiale negative)
 
           case 1 : {
-            if (((ident == BINOMIAL) || (ident == UNIFORM)) && (*token != STAT_word[STATW_SUP_BOUND])) {
+            if (((ident == BINOMIAL) || (ident == UNIFORM)) &&
+                (token != STAT_word[STATW_SUP_BOUND])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SUP_BOUND] , line , i + 1);
             }
 
-            if (((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) &&
-                (*token != STAT_word[STATW_PARAMETER])) {
+            if (((ident == POISSON) || (ident == NEGATIVE_BINOMIAL)) &&
+                (token != STAT_word[STATW_PARAMETER])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_PARAMETER] , line , i + 1);
-            }
-
-            if ((ident == PRIOR_SEGMENT_LENGTH) && (*token != STAT_word[STATW_SEQUENCE_LENGTH])) {
-              status = false;
-              error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SEQUENCE_LENGTH] , line , i + 1);
             }
             break;
           }
 
-          // 3rd parameter: probability (binomial, negative binomial, Poisson geometric)
+          // 3eme parametre : probabilite (binomiale , binomiale negative)
 
           case 2 : {
-            if (((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) &&
-                (*token != STAT_word[STATW_PROBABILITY])) {
+            if (((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL)) &&
+                (token != STAT_word[STATW_PROBABILITY])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_PROBABILITY] , line , i + 1);
             }
@@ -512,71 +465,39 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
           break;
         }
 
-        // test separator
+        // test separateur
 
         case 1 : {
-          if (*token != ":") {
+          if (token != ":") {
             status = false;
             error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
           }
           break;
         }
 
-        // test parameter value
+        // test valeur du parametre
 
         case 2 : {
-          lstatus = true;
-
           switch ((i - 1) / 3) {
 
-          // 1st parameter: lower bound or number of segments (prior segment length)
+          // 1er parametre : borne inferieure
 
           case 0 : {
-            if ((ident == BINOMIAL) || (ident == POISSON) || (ident == NEGATIVE_BINOMIAL) ||
-                (ident == POISSON_GEOMETRIC) || (ident == UNIFORM)) {
-/*              try {
-                inf_bound = stoi(*token);   in C++ 11
-              }
-              catch (invalid_argument &arg) {
-                lstatus = false;
-              } */
-              inf_bound = atoi(token->c_str());
-
-              if ((lstatus) && ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND))) {
-                lstatus = false;
-              }
-            }
-
-            if (ident == PRIOR_SEGMENT_LENGTH) {
-/*              try {
-                no_segment = stoi(*token);   in C++ 11
-              }
-              catch(invalid_argument &arg) {
-                lstatus = false;
-              } */
-              no_segment = atoi(token->c_str());
-
-              if ((lstatus) && (no_segment < 2)) {
-                lstatus = false;
-              }
+            lstatus = locale.stringToNum(token , &inf_bound);
+            if ((lstatus) && ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND))) {
+              lstatus = false;
             }
             break;
           }
 
-          // 2nd parameter: upper bound (binomial, uniform), parameter (Poisson, negative binomial, Poisson geometric)
-          // or sequence length (prior segment length)
+          // 2eme parametre : borne superieure (binomiale , uniforme)
+          // ou parametre (Poisson , binomiale negative)
 
           case 1 : {
             if ((ident == BINOMIAL) || (ident == UNIFORM)) {
-/*              try {
-                sup_bound = stoi(*token);   in C++ 11
-              }
-              catch(invalid_argument &arg) {
-                lstatus = false;
-              } */
-              sup_bound = atoi(token->c_str());
+              lstatus = locale.stringToNum(token , &sup_bound);
 
-              if ((lstatus) && (status)) {
+              if (lstatus) {
                 switch (ident) {
 
                 case BINOMIAL : {
@@ -596,47 +517,21 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
               }
             }
 
-            if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
-/*              try {
-                parameter = stod(*token);   in C++ 11
-              }
-              catch(invalid_argument &arg) {
-                lstatus = false;
-              } */
-              parameter = atof(token->c_str());
-
-              if ((lstatus) && ((parameter <= 0.) || ((ident == POISSON) && (parameter > MAX_MEAN)))) {
-                lstatus = false;
-              }
-            }
-
-            if (ident == PRIOR_SEGMENT_LENGTH) {
-/*              try {
-                sequence_length = stoi(*token);   in C++ 11
-              }
-              catch(invalid_argument &arg) {
-                lstatus = false;
-              } */
-              sequence_length = atoi(token->c_str());
-
-              if ((lstatus) && (status) && (sequence_length <= no_segment)) {
+            if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL)) {
+              lstatus = locale.stringToNum(token , &parameter);
+              if ((lstatus) && ((parameter <= 0.) ||
+                   ((ident == POISSON) && (parameter > MAX_MEAN)))) {
                 lstatus = false;
               }
             }
             break;
           }
 
-          // 3rd parameter: probability (binomial, negative binomial, Poisson geometric)
+          // 3eme parametre : probabilite (binomiale , binomiale negative)
 
           case 2 : {
-            if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
-/*              try {
-                probability = stod(*token);   in C++ 11
-              }
-              catch(invalid_argument &arg) {
-                lstatus = false;
-              } */
-              probability = atof(token->c_str());
+            if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL)) {
+              lstatus = locale.stringToNum(token , &probability);
 
               if (lstatus) {
                 switch (ident) {
@@ -652,17 +547,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
                   if ((probability <= 0.) || (probability >= 1.)) {
                     lstatus = false;
                   }
-                  else if ((status) && (parameter * (1. - probability) / probability > MAX_MEAN)) {
-                    lstatus = false;
-                  }
-                  break;
-                }
-
-                case POISSON_GEOMETRIC : {
-                  if ((probability <= 0.) || (probability >= 1.)) {
-                    lstatus = false;
-                  }
-                  else if ((status) && ((inf_bound + parameter) / probability > MAX_MEAN)) {
+                  else if (parameter * (1. - probability) / probability > MAX_MEAN) {
                     lstatus = false;
                   }
                   break;
@@ -687,8 +572,8 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
     }
 
     if (i > 0) {
-      if ((((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) && (i != 10)) ||
-          (((ident == POISSON) || (ident == UNIFORM) || (ident == PRIOR_SEGMENT_LENGTH)) && (i != 7))) {
+      if ((((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL)) && (i != 10)) ||
+          (((ident == POISSON) || (ident == UNIFORM)) && (i != 7))) {
         status = false;
         error.update(STAT_parsing[STATP_FORMAT] , line);
       }
@@ -711,37 +596,30 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the parameters of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des parametres d'une loi discrete.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteParametric::ascii_print(ostream &os) const
 
 {
-  os << STAT_discrete_distribution_word[ident];
+  os << STAT_discrete_distribution_word[ident] << "   ";
 
-  if (ident != PRIOR_SEGMENT_LENGTH) {
-    if (inf_bound != I_DEFAULT) {
-      os << "   " << STAT_word[STATW_INF_BOUND] << " : " << inf_bound;
-    }
-    if (sup_bound != I_DEFAULT) {
-      os << "   " << STAT_word[STATW_SUP_BOUND] << " : " << sup_bound;
-    }
-    if (parameter != D_DEFAULT) {
-      os << "   " << STAT_word[STATW_PARAMETER] << " : " << parameter;
-    }
-    if (probability != D_DEFAULT) {
-      os << "   " << STAT_word[STATW_PROBABILITY] << " : " << probability;
-    }
+  if (inf_bound != I_DEFAULT) {
+    os << STAT_word[STATW_INF_BOUND] << " : " << inf_bound << "   ";
   }
-
-  else {
-    os << "   " << STAT_word[STATW_NO_SEGMENT] << " : " << no_segment
-       << "   " << STAT_word[STATW_SEQUENCE_LENGTH] << " : " << sequence_length;
+  if (sup_bound != I_DEFAULT) {
+    os << STAT_word[STATW_SUP_BOUND] << " : " << sup_bound << "   ";
+  }
+  if (parameter != D_DEFAULT) {
+    os << STAT_word[STATW_PARAMETER] << " : " << parameter << "   ";
+  }
+  if (probability != D_DEFAULT) {
+    os << STAT_word[STATW_PROBABILITY] << " : " << probability;
   }
   os << endl;
 
@@ -749,37 +627,30 @@ ostream& DiscreteParametric::ascii_print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the parameters of a discrete distribution at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des parametres d'une loi discrete au format tableur.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteParametric::spreadsheet_print(ostream &os) const
 
 {
-  os << STAT_discrete_distribution_word[ident];
+  os << STAT_discrete_distribution_word[ident] << "\t";
 
-  if (ident != PRIOR_SEGMENT_LENGTH) {
-    if (inf_bound != I_DEFAULT) {
-      os << "\t" << STAT_word[STATW_INF_BOUND] << "\t" << inf_bound;
-    }
-    if (sup_bound != I_DEFAULT) {
-      os << "\t" << STAT_word[STATW_SUP_BOUND] << "\t" << sup_bound;
-    }
-    if (parameter != D_DEFAULT) {
-      os << "\t" << STAT_word[STATW_PARAMETER] << "\t" << parameter;
-    }
-    if (probability != D_DEFAULT) {
-      os << "\t" << STAT_word[STATW_PROBABILITY] << "\t" << probability;
-    }
+  if (inf_bound != I_DEFAULT) {
+    os << STAT_word[STATW_INF_BOUND] << "\t" << inf_bound << "\t";
   }
-
-  else {
-    os << "\t" << STAT_word[STATW_NO_SEGMENT] << "\t" << no_segment
-       << "\t" << STAT_word[STATW_SEQUENCE_LENGTH] << "\t" << sequence_length;
+  if (sup_bound != I_DEFAULT) {
+    os << STAT_word[STATW_SUP_BOUND] << "\t" << sup_bound << "\t";
+  }
+  if (parameter != D_DEFAULT) {
+    os << STAT_word[STATW_PARAMETER] << "\t" << parameter << "\t";
+  }
+  if (probability != D_DEFAULT) {
+    os << STAT_word[STATW_PROBABILITY] << "\t" << probability;
   }
   os << endl;
 
@@ -787,15 +658,13 @@ ostream& DiscreteParametric::spreadsheet_print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the characteristics of a discrete parametric distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os           stream,
- *  \param[in]     shape        flag on the writing of the shape characteristics,
- *  \param[in]     comment_flag flag comment.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des caracteristiques d'une loi.
+ *
+ *  arguments : stream, flag ecriture des parametres de forme, flag commentaire.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteParametric::ascii_parametric_characteristic_print(ostream &os , bool shape , bool comment_flag) const
 
@@ -812,19 +681,8 @@ ostream& DiscreteParametric::ascii_parametric_characteristic_print(ostream &os ,
       os << "# ";
     }
     os << STAT_label[STATL_MEAN] << ": " << parametric_mean_computation() << "   "
-       << STAT_label[STATL_MEDIAN] << ": " << quantile_computation() << "   "
-       << STAT_label[STATL_MODE] << ": " << mode_computation() << endl;
-
-    if (comment_flag) {
-      os << "# ";
-    }
-    os << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
-       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance);
-    if (variance > 0.) {
-      os << "   " << STAT_label[STATL_LOWER_QUARTILE] << ": " << quantile_computation(0.25)
-         << "   " << STAT_label[STATL_UPPER_QUARTILE] << ": " << quantile_computation(0.75);
-    }
-    os << endl;
+       << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
 
     if ((shape) && (variance > 0.)) {
       if (comment_flag) {
@@ -835,24 +693,17 @@ ostream& DiscreteParametric::ascii_parametric_characteristic_print(ostream &os ,
     }
   }
 
-# ifdef MESSAGE
-  if (ident == PRIOR_SEGMENT_LENGTH) {
-    ascii_characteristic_print(os , shape , comment_flag);
-  }
-# endif
-
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the characteristics of a discrete parametric distribution at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os    stream,
- *  \param[in]     shape flag on the writing of the shape characteristics.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des caracteristiques d'une loi au format tableur.
+ *
+ *  arguments : stream, flag ecriture des parametres de forme.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteParametric::spreadsheet_parametric_characteristic_print(ostream &os , bool shape) const
 
@@ -865,20 +716,12 @@ ostream& DiscreteParametric::spreadsheet_parametric_characteristic_print(ostream
     double variance = parametric_variance_computation();
 
 
-    os << STAT_label[STATL_MEAN] << "\t" << parametric_mean_computation() << "\t\t"
-       << STAT_label[STATL_MEDIAN] << "\t" << quantile_computation() << "\t\t"
-       << STAT_label[STATL_MODE] << "\t" << mode_computation() << endl;
-
-    os << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
-       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance);
-    if (variance > 0.) {
-      os << "\t\t" << STAT_label[STATL_LOWER_QUARTILE] << "\t" << quantile_computation(0.25)
-         << "\t\t" << STAT_label[STATL_UPPER_QUARTILE] << "\t" << quantile_computation(0.75);
-    }
-    os << endl;
+    os << STAT_label[STATL_MEAN] << "\t" << parametric_mean_computation() << "\t"
+       << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
+       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
 
     if ((shape) && (variance > 0.)) {
-      os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << parametric_skewness_computation() << "\t\t"
+      os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << parametric_skewness_computation() << "\t"
          << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << parametric_kurtosis_computation() << endl;
     }
   }
@@ -887,13 +730,13 @@ ostream& DiscreteParametric::spreadsheet_parametric_characteristic_print(ostream
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the parameters of a discrete parametric distribution at the Gnuplot format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des parametres d'une loi discrete au format Gnuplot.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteParametric::plot_title_print(ostream &os) const
 
@@ -901,21 +744,15 @@ ostream& DiscreteParametric::plot_title_print(ostream &os) const
   if (ident != CATEGORICAL) {
     os << " " << STAT_discrete_distribution_letter[ident] << "(";
 
-    if (ident != PRIOR_SEGMENT_LENGTH) {
-      os << inf_bound;
-      if (sup_bound != I_DEFAULT) {
-        os << ", " << sup_bound;
-      }
-      if (parameter != D_DEFAULT) {
-        os << ", " << parameter;
-      }
-      if (probability != D_DEFAULT) {
-        os << ", " << probability;
-      }
+    os << inf_bound;
+    if (sup_bound != I_DEFAULT) {
+      os << ", " << sup_bound;
     }
-
-    else {
-      os << no_segment << ", " << sequence_length;
+    if (parameter != D_DEFAULT) {
+      os << ", " << parameter;
+    }
+    if (probability != D_DEFAULT) {
+      os << ", " << probability;
     }
     os << ")";
   }
@@ -924,40 +761,34 @@ ostream& DiscreteParametric::plot_title_print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Display of a discrete parametric distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os   stream,
- *  \param[in]     dist reference on a DiscreteParametric object.
- */
-/*--------------------------------------------------------------*/
+ *  Visualisation d'une loi discrete parametrique.
+ *
+ *  arguments : stream, reference sur un objet DiscreteParametric.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& operator<<(ostream &os , const DiscreteParametric &dist)
 
 {
-  streamsize nb_digits;
-
-
-  nb_digits = os.precision(5);
+  os.precision(5);
 
   os << endl;
   dist.ascii_print(os);
   dist.Distribution::print(os);
 
-  os.precision(nb_digits);
+  os.precision(6);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the number of parameters of a discrete parametric distribution.
+/*--------------------------------------------------------------*
  *
- *  \return number of parameters.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul du nombre de parametres d'une loi discrete.
+ *
+ *--------------------------------------------------------------*/
 
 int DiscreteParametric::nb_parameter_computation()
 
@@ -975,13 +806,7 @@ int DiscreteParametric::nb_parameter_computation()
   case NEGATIVE_BINOMIAL :
     bnb_parameter = 3;
     break;
-  case POISSON_GEOMETRIC :
-    bnb_parameter = 3;
-    break;
   case UNIFORM :
-    bnb_parameter = 2;
-    break;
-  case PRIOR_SEGMENT_LENGTH :
     bnb_parameter = 2;
     break;
   default :
@@ -993,11 +818,11 @@ int DiscreteParametric::nb_parameter_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Update of the number of parameters of a discrete parametric distribution.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Mise a jour du nombre de parametres d'une loi discrete.
+ *
+ *--------------------------------------------------------------*/
 
 void DiscreteParametric::nb_parameter_update()
 
@@ -1006,13 +831,11 @@ void DiscreteParametric::nb_parameter_update()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the theooretical mean of a discrete parametric distribution.
+/*--------------------------------------------------------------*
  *
- *  \return theoretical mean
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la moyenne d'une loi discrete parametrique.
+ *
+ *--------------------------------------------------------------*/
 
 double DiscreteParametric::parametric_mean_computation() const
 
@@ -1030,14 +853,8 @@ double DiscreteParametric::parametric_mean_computation() const
   case NEGATIVE_BINOMIAL :
     parametric_mean = inf_bound + parameter * (1. - probability) / probability;
     break;
-  case POISSON_GEOMETRIC :
-    parametric_mean = (inf_bound + parameter) / probability;
-    break;
   case UNIFORM :
     parametric_mean = (double)(inf_bound + sup_bound) / 2.;
-    break;
-  case PRIOR_SEGMENT_LENGTH :
-    parametric_mean = (double)sequence_length / (double)no_segment;
     break;
   default :
     parametric_mean = mean;
@@ -1048,13 +865,11 @@ double DiscreteParametric::parametric_mean_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the theoretical variance of a discrete parametric distribution.
+/*--------------------------------------------------------------*
  *
- *  \return theoretical variance.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la variance d'une loi discrete parametrique.
+ *
+ *--------------------------------------------------------------*/
 
 double DiscreteParametric::parametric_variance_computation() const
 
@@ -1072,17 +887,9 @@ double DiscreteParametric::parametric_variance_computation() const
   case NEGATIVE_BINOMIAL :
     parametric_variance = parameter * (1. - probability) / (probability * probability);
     break;
-  case POISSON_GEOMETRIC :
-    parametric_variance = ((inf_bound + parameter) * (1. - probability) + parameter) /
-                          (probability * probability);
-    break;
   case UNIFORM :
     parametric_variance = (double)((sup_bound - inf_bound + 2) *
                           (sup_bound - inf_bound)) / 12.;
-    break;
-  case PRIOR_SEGMENT_LENGTH :
-    parametric_variance = ((double)sequence_length * (sequence_length - no_segment) * (no_segment - 1)) /
-                          ((double)no_segment * no_segment * (no_segment + 1));
     break;
   default :
     parametric_variance = variance;
@@ -1093,13 +900,11 @@ double DiscreteParametric::parametric_variance_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the theoretical coefficient of skewness of a discrete parametric distribution.
+/*--------------------------------------------------------------*
  *
- *  \return theoretical coefficient of skewness.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul du coefficient d'asymetrie d'une loi discrete parametrique.
+ *
+ *--------------------------------------------------------------*/
 
 double DiscreteParametric::parametric_skewness_computation() const
 
@@ -1130,26 +935,13 @@ double DiscreteParametric::parametric_skewness_computation() const
     break;
   }
 
-  case POISSON_GEOMETRIC : {
-    parametric_skewness = (parameter * (1. + 3 * (1. - probability)) +
-                           (inf_bound + parameter) * (2. - probability) * (1. - probability)) /
-                          pow((inf_bound + parameter) * (1. - probability) + parameter , 1.5);
-    break;
-  }
-
   case UNIFORM : {
     parametric_skewness = 0.;
     break;
   }
 
-  case PRIOR_SEGMENT_LENGTH : {
-    parametric_skewness = (((double)(no_segment - 2) * (2 * sequence_length - no_segment)) / (double)(no_segment + 2)) *
-                          sqrt((double)(no_segment + 1) / ((double)sequence_length * (sequence_length - no_segment) * (no_segment - 1)));
-    break;
-  }
-
   default : {
-    parametric_skewness = skewness_computation();
+    parametric_skewness = D_INF;
     break;
   }
   }
@@ -1158,14 +950,12 @@ double DiscreteParametric::parametric_skewness_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the theoretical excess kurtosis of a discrete parametric distribution:
- *         excess kurtosis = coefficient of kurtosis - 3.
+/*--------------------------------------------------------------*
  *
- *  \return theoretical excess kurtosis
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de l'exces d'applatissement d'une loi discrete parametrique:
+ *  exces d'applatissement = coefficient d'applatissement - 3..
+ *
+ *--------------------------------------------------------------*/
 
 double DiscreteParametric::parametric_kurtosis_computation() const
 
@@ -1202,18 +992,8 @@ double DiscreteParametric::parametric_kurtosis_computation() const
     break;
   }
 
-  case PRIOR_SEGMENT_LENGTH : {
-    parametric_kurtosis = ((double)(no_segment + 1) * (-no_segment * no_segment * no_segment * (no_segment - 1) * (no_segment - 6) +
-                            2 * no_segment * no_segment * sequence_length * (5 * no_segment * no_segment - 14 * no_segment + 12) +
-                            3 * sequence_length * sequence_length * (sequence_length - 2 * no_segment) *
-                            (3 * no_segment * no_segment - 7 * no_segment + 6))) /
-                          ((double)sequence_length * (sequence_length - no_segment) * (sequence_length - no_segment) * (no_segment - 1) *
-                           (no_segment + 2) * (no_segment + 3)) - 3.;;
-    break;
-  }
-
   default : {
-    parametric_kurtosis = kurtosis_computation();
+    parametric_kurtosis = -D_INF;
     break;
   }
   }
@@ -1222,24 +1002,20 @@ double DiscreteParametric::parametric_kurtosis_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the distance between 2 discrete parametric distributions
- *         (sup of the absolute difference between the cumulative distribution functions
- *          in the case of non-crossing cumulative distribution functions; in the general case,
- *          sum of sup on intervals between 2 crossings of cumulative distribution functions).
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist reference on a DiscreteParametric object.
+ *  Calcul de la distance entre deux lois discretes (sup de la difference
+ *  absolue des fonctions de repartition dans le cas de fonctions de repartition
+ *  ne se croisant pas; sinon somme des sup avant et apres croisement
+ *  de la difference des fonctions de repartition).
  *
- *  \return         distance between 2 discrete parametric distributions
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 double DiscreteParametric::sup_norm_distance_computation(const DiscreteParametric &dist) const
 
 {
   bool crossing;
-  int i;
+  register int i;
   int inf , sup;
   double buff , distance , max_absolute_diff;
 
@@ -1278,7 +1054,7 @@ double DiscreteParametric::sup_norm_distance_computation(const DiscreteParametri
       overlap += MIN(mass[i] , dist.mass[i]);
     }
 
-    cout << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << distance << " " << 1. - overlap << endl;
+    cout << "\nSup norm distance: " << distance << " " << 1. - overlap << endl;
 #   endif
   }
 
@@ -1286,14 +1062,14 @@ double DiscreteParametric::sup_norm_distance_computation(const DiscreteParametri
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a DiscreteParametricModel object from
- *         a FrequencyDistribution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo reference on a FrequencyDistribution object.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet DiscreteParametricModel a partir
+ *  d'un objet FrequencyDistribution.
+ *
+ *  argument : reference sur un objet FrequencyDistribution.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametricModel::DiscreteParametricModel(const FrequencyDistribution &histo)
 :DiscreteParametric(histo)
@@ -1303,15 +1079,15 @@ DiscreteParametricModel::DiscreteParametricModel(const FrequencyDistribution &hi
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a DiscreteParametricModel object from
- *         a Distribution object and a FrequencyDistribution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist  reference on a Distribution object,
- *  \param[in] histo pointer on a FrequencyDistribution object.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet DiscreteParametricModel a partir
+ *  d'un objet Distribution et d'un objet FrequencyDistribution.
+ *
+ *  arguments : reference sur un objet Distribution,
+ *              pointeur sur un objet FrequencyDistribution.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametricModel::DiscreteParametricModel(const Distribution &dist ,
                                                  const FrequencyDistribution *histo)
@@ -1327,15 +1103,15 @@ DiscreteParametricModel::DiscreteParametricModel(const Distribution &dist ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a DiscreteParametricModel object from
- *         a DiscreteParametric object and a FrequencyDistribution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist  reference on a DiscreteParametric object,
- *  \param[in] histo pointer on a FrequencyDistribution object.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet DiscreteParametricModel a partir
+ *  d'un objet DiscreteParametric et d'un objet FrequencyDistribution.
+ *
+ *  arguments : reference sur un objet DiscreteParametric,
+ *              pointeur sur un objet FrequencyDistribution.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametricModel::DiscreteParametricModel(const DiscreteParametric &dist ,
                                                  const FrequencyDistribution *histo)
@@ -1351,14 +1127,14 @@ DiscreteParametricModel::DiscreteParametricModel(const DiscreteParametric &dist 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor by copy of the DiscreteParametricModel class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist      reference on a DiscreteParametricModel object,
- *  \param[in] data_flag flag copy of the DiscreteDistributionData object.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur par copie de la classe DiscreteParametricModel.
+ *
+ *  arguments : reference sur un objet DiscreteParametricModel,
+ *              flag copie de l'objet DiscreteDistributionData.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametricModel::DiscreteParametricModel(const DiscreteParametricModel &dist ,
                                                  bool data_flag)
@@ -1374,11 +1150,11 @@ DiscreteParametricModel::DiscreteParametricModel(const DiscreteParametricModel &
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the DiscreteParametricModel class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe DiscreteParametricModel.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametricModel::~DiscreteParametricModel()
 
@@ -1389,15 +1165,13 @@ DiscreteParametricModel::~DiscreteParametricModel()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the DiscreteParametricModel class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist reference on a DiscreteParametricModel object.
+ *  Operateur d'assignement de la classe DiscreteParametricModel.
  *
- *  \return         DiscreteParametricModel object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet DiscreteParametricModel.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametricModel& DiscreteParametricModel::operator=(const DiscreteParametricModel &dist)
 
@@ -1423,16 +1197,13 @@ DiscreteParametricModel& DiscreteParametricModel::operator=(const DiscreteParame
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of the DiscreteDistributionData object included in
- *         a DiscreteParametricModel object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Extraction de la partie "donnees" d'un objet DiscreteParametricModel.
  *
- *  \return          DiscreteDistributionData object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteDistributionData* DiscreteParametricModel::extract_data(StatError &error) const
 
@@ -1456,29 +1227,26 @@ DiscreteDistributionData* DiscreteParametricModel::extract_data(StatError &error
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a DiscreteParametricModel object from a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error           reference on a StatError object,
- *  \param[in] path            file path,
- *  \param[in] cumul_threshold threshold on the cumulative distribution function.
+ *  Construction d'un objet DiscreteParametricModel a partir d'un fichier.
  *
- *  \return                    DiscreteParametricModel object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              seuil sur la fonction de repartition.
+ *
+ *--------------------------------------------------------------*/
 
-DiscreteParametricModel* DiscreteParametricModel::ascii_read(StatError &error , const string path ,
-                                                             double cumul_threshold)
+DiscreteParametricModel* discrete_parametric_ascii_read(StatError &error , const char *path ,
+                                                        double cumul_threshold)
 
 {
-  string buffer;
+  RWCString buffer;
   size_t position;
   bool status;
   int line;
   DiscreteParametric *pdist;
   DiscreteParametricModel *dist;
-  ifstream in_file(path.c_str());
+  ifstream in_file(path);
 
 
   dist = NULL;
@@ -1492,25 +1260,25 @@ DiscreteParametricModel* DiscreteParametricModel::ascii_read(StatError &error , 
     status = true;
     line = 0;
 
-    pdist = DiscreteParametric::parsing(error , in_file , line ,
+    pdist = discrete_parametric_parsing(error , in_file , line ,
                                         UNIFORM , cumul_threshold);
 
     if (!pdist) {
       status = false;
     }
 
-    while (getline(in_file , buffer)) {
+    while (buffer.readLine(in_file , false)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << " " << buffer << endl;
 #     endif
 
-      position = buffer.find('#');
-      if (position != string::npos) {
-        buffer.erase(position);
+      position = buffer.first('#');
+      if (position != RW_NPOS) {
+        buffer.remove(position);
       }
-      if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
+      if (!(buffer.isNull())) {
         status = false;
         error.update(STAT_parsing[STATP_FORMAT] , line);
       }
@@ -1527,13 +1295,13 @@ DiscreteParametricModel* DiscreteParametricModel::ascii_read(StatError &error , 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing on a single line of a DiscreteParametricModel object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture sur une ligne d'un objet DiscreteParametricModel.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteParametricModel::line_write(ostream &os) const
 
@@ -1556,17 +1324,14 @@ ostream& DiscreteParametricModel::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a discrete parametric distribution and
- *         the associated frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     histo      pointer on a DiscreteDistributionData object,
- *  \param[in]     exhaustive flag detail level,
- *  \param[in]     file_flag  flag file.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'une loi discrete parametrique et d'une loi discrete empirique.
+ *
+ *  arguments : stream, pointeur sur une loi discrete empirique,
+ *              flag niveau de detail, flag fichier.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteParametricModel::ascii_write(ostream &os , const DiscreteDistributionData *histo ,
                                               bool exhaustive , bool file_flag) const
@@ -1587,7 +1352,7 @@ ostream& DiscreteParametricModel::ascii_write(ostream &os , const DiscreteDistri
   if (file_flag) {
     os << "# ";
   }
-  os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << mean_absolute_deviation_computation(mean);
+  os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << mean_absolute_deviation_computation();
   if (mean > 0.) {
     os << "   " << STAT_label[STATL_CONCENTRATION_COEFF] << ": " << concentration_computation();
   }
@@ -1608,7 +1373,7 @@ ostream& DiscreteParametricModel::ascii_write(ostream &os , const DiscreteDistri
     if (file_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << histo->mean_absolute_deviation_computation(histo->mean);
+    os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << histo->mean_absolute_deviation_computation();
     if (histo->mean > 0.) {
       os << "   " << STAT_label[STATL_CONCENTRATION_COEFF] << ": " << histo->concentration_computation();
     }
@@ -1671,14 +1436,13 @@ ostream& DiscreteParametricModel::ascii_write(ostream &os , const DiscreteDistri
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a DiscreteParametricModel object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet DiscreteParametricModel.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteParametricModel::ascii_write(ostream &os , bool exhaustive) const
 
@@ -1687,24 +1451,21 @@ ostream& DiscreteParametricModel::ascii_write(ostream &os , bool exhaustive) con
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a DiscreteParametricModel object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet DiscreteParametricModel dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool DiscreteParametricModel::ascii_write(StatError &error , const string path ,
+bool DiscreteParametricModel::ascii_write(StatError &error , const char *path ,
                                           bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -1723,15 +1484,14 @@ bool DiscreteParametricModel::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a discrete parametric distribution and the associated
- *         frequency distribution in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os    stream,
- *  \param[in]     histo pointer on a DiscreteDistributionData object.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'une loi discrete parametrique et d'une loi discrete empirique
+ *  dans un fichier au format tableur.
+ *
+ *  arguments : stream, pointeur sur une loi discrete empirique.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteParametricModel::spreadsheet_write(ostream &os ,
                                                     const DiscreteDistributionData *histo) const
@@ -1747,7 +1507,7 @@ ostream& DiscreteParametricModel::spreadsheet_write(ostream &os ,
 
   spreadsheet_parametric_characteristic_print(os , true);
 
-  os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << mean_absolute_deviation_computation(mean);
+  os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << mean_absolute_deviation_computation();
   if (mean > 0.) {
     os << "\t\t" << STAT_label[STATL_CONCENTRATION_COEFF] << "\t" << concentration_computation();
   }
@@ -1761,7 +1521,7 @@ ostream& DiscreteParametricModel::spreadsheet_write(ostream &os ,
     os << "\n" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     histo->spreadsheet_characteristic_print(os , true);
 
-    os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << histo->mean_absolute_deviation_computation(histo->mean);
+    os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << histo->mean_absolute_deviation_computation();
     if (histo->mean > 0.) {
       os << "\t\t" << STAT_label[STATL_CONCENTRATION_COEFF] << "\t" << histo->concentration_computation();
     }
@@ -1814,22 +1574,19 @@ ostream& DiscreteParametricModel::spreadsheet_write(ostream &os ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a DiscreteParametricModel object in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet DiscreteParametricModel dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool DiscreteParametricModel::spreadsheet_write(StatError &error , const string path) const
+bool DiscreteParametricModel::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -1848,19 +1605,14 @@ bool DiscreteParametricModel::spreadsheet_write(StatError &error , const string 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a discrete parametric distribution and
- *         the associated frequency distribution using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title,
- *  \param[in] histo  pointer on a DiscreteDistributionData object.
+ *  Sortie Gnuplot d'une loi discrete parametrique et d'une loi discrete empirique.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures, pointeur sur une loi discrete empirique.
+ *
+ *--------------------------------------------------------------*/
 
 bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix , const char *title ,
                                          const DiscreteDistributionData *histo) const
@@ -1870,7 +1622,7 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
 
 
   if (histo) {
-    int i;
+    register int i;
     int plot_nb_value , *poffset , *pnb_value;
     double scale , **pcumul , **pconcentration;
     ostringstream *data_file_name;
@@ -1878,7 +1630,7 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
 
     error.init();
 
-    // writing of the data files
+    // ecriture des fichiers de donnees
 
     data_file_name = new ostringstream[3];
 
@@ -1894,7 +1646,7 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
     poffset[0] = histo->offset;
     pnb_value[0] = histo->nb_value;
 
-    // computation of the cumulative distribution function and concentration function of the frequency distribution
+    // calcul des fonctions de repartition et de concentration de la loi discrete empirique
 
     scale = histo->nb_element / (1. - complement);
     pcumul[0] = histo->cumul_computation(scale);
@@ -1910,7 +1662,7 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
       plot_nb_value = plot_nb_value_computation(histo);
       pcumul[1] = cumul;
 
-      // computation of the concentration function
+      // calcul de la fonction de concentration
 
       pconcentration[1] = concentration_function_computation();
       plot_print((data_file_name[1].str()).c_str() , pconcentration[1] , scale);
@@ -1933,7 +1685,7 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
 
     if (status) {
 
-      // writing of the script files
+      // ecriture du fichier de commandes et du fichier d'impression
 
       for (i = 0;i < 2;i++) {
         ostringstream file_name[2];
@@ -1962,7 +1714,7 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
         }
         out_file << "\n\n";
 
-        // distribution fit
+        // ajustement
 
         if (plot_nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics 0,1" << endl;
@@ -1983,7 +1735,7 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
 
         if (variance > 0.) {
 
-          // cumulative distribution functions
+          // fonctions de repartition
 
           if (i == 0) {
             out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
@@ -2010,7 +1762,8 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
 
           if (histo->variance > 0.) {
 
-            // matching of cumulative distribution functions taking as reference the distribution one
+            // mise en correspondance des fonctions de repartition en prenant
+            // comme reference celle de la loi
 
             if (i == 0) {
               out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
@@ -2044,7 +1797,7 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
             out_file << "unset grid\n" << "set xtics autofreq\n" << "set ytics autofreq" << endl;
           }
 
-          // concentration curves
+          // courbes de concentration
 
           if (i == 0) {
             out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
@@ -2097,17 +1850,14 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a DiscreteParametricModel object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title.
+ *  Sortie Gnuplot d'un objet DiscreteParametricModel.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
                                          const char *title) const
@@ -2117,15 +1867,13 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a discrete parametric distribution and the associated frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo pointer on a DiscreteDistributionData object.
+ *  Sortie graphique d'une loi discrete parametrique et d'une loi discrete empirique.
  *
- *  \return          MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : pointeur sur une loi discrete empirique.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* DiscreteParametricModel::get_plotable(const DiscreteDistributionData *histo) const
 
@@ -2134,7 +1882,7 @@ MultiPlotSet* DiscreteParametricModel::get_plotable(const DiscreteDistributionDa
 
 
   if (histo) {
-    int i , j;
+    register int i , j;
     int nb_plot_set , plot_nb_value;
     double scale , *pcumul;
     ostringstream legend , title;
@@ -2160,7 +1908,7 @@ MultiPlotSet* DiscreteParametricModel::get_plotable(const DiscreteDistributionDa
 
     plot.border = "15 lw 0";
 
-    // distribution fit
+    // 1ere vue : ajustement
 
     plot_nb_value = plot_nb_value_computation(histo);
 
@@ -2191,12 +1939,12 @@ MultiPlotSet* DiscreteParametricModel::get_plotable(const DiscreteDistributionDa
 
     if (variance > 0.) {
 
-      // computation of the cumulative frequency distribution function
+      // calcul de la fonction de repartition de la loi empirique
 
       scale = histo->nb_element / (1. - complement);
       pcumul = histo->cumul_computation(scale);
 
-      // cumulative distribution functions
+      // 2eme vue : fonctions de repartition
 
       plot[1].xrange = Range(0 , plot_nb_value - 1);
       plot[1].yrange = Range(0. , 1. - complement);
@@ -2232,7 +1980,8 @@ MultiPlotSet* DiscreteParametricModel::get_plotable(const DiscreteDistributionDa
 
       plotable_cumul_write(plot[1][i]);
 
-      // matching of cumulative distribution functions taking as reference the distribution one
+      // 3eme vue : mise en correspondance des fonctions de repartition en prenant
+      // comme reference celle de la loi
 
       if (histo->variance > 0.) {
         title.str("");
@@ -2274,7 +2023,7 @@ MultiPlotSet* DiscreteParametricModel::get_plotable(const DiscreteDistributionDa
         plot[2][1].add_point(1. - complement , 1. - complement);
       }
 
-      // concentration curves
+      // courbes de concentration
 
       if (histo->variance == 0.) {
         i = 2;
@@ -2336,13 +2085,11 @@ MultiPlotSet* DiscreteParametricModel::get_plotable(const DiscreteDistributionDa
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a DiscreteParametricModel object.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet DiscreteParametricModel.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* DiscreteParametricModel::get_plotable() const
 

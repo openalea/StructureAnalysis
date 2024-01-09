@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: reestimation.hpp 18015 2015-04-23 07:04:17Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -45,6 +45,8 @@
 
 #include <boost/math/special_functions/digamma.hpp>
 
+#include "tool/util_math.h"
+
 #include "stat_label.h"
 
 using namespace std;
@@ -55,13 +57,13 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a Reestimation object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_value number of values from 0.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet Reestimation.
+ *
+ *  argument : nombre de valeurs.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::init(int inb_value)
@@ -80,7 +82,7 @@ void Reestimation<Type>::init(int inb_value)
   }
 
   else {
-    int i;
+    register int i;
 
     frequency = new Type[nb_value];
 
@@ -91,19 +93,19 @@ void Reestimation<Type>::init(int inb_value)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- * \brief Copy of a Reestimation object.
+/*--------------------------------------------------------------*
  *
- * \param[in] histo reference on a Reestimation object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Reestimation.
+ *
+ *  argument : reference sur un objet Reestimation.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::copy(const Reestimation<Type> &histo)
 
 {
-  int i;
+  register int i;
 
 
   nb_value = histo.nb_value;
@@ -122,13 +124,13 @@ void Reestimation<Type>::copy(const Reestimation<Type> &histo)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor by copy of the Reestimation class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo reference on a Reestimation object.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur par copie de la classe Reestimation.
+ *
+ *  argument : reference sur un objet Reestimation.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 Reestimation<Type>::Reestimation(const Reestimation<Type> &histo)
@@ -138,20 +140,19 @@ Reestimation<Type>::Reestimation(const Reestimation<Type> &histo)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor by merging of the Reestimation class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_histo number of  Reestimation objects,
- *  \param[in] histo    pointer on the Reestimation objects.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur par fusion de la classe Reestimation.
+ *
+ *  arguments : nombre d'objets Reestimation, pointeur sur les objets Reestimation.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 Reestimation<Type>::Reestimation(int nb_histo , const Reestimation<Type> **histo)
 
 {
-  int i , j;
+  register int i , j;
 
 
   nb_value = 0;
@@ -175,7 +176,7 @@ Reestimation<Type>::Reestimation(int nb_histo , const Reestimation<Type> **histo
     }
   }
 
-  // computation of the characteristics of the frequency distributions
+  // calcul des caracteristiques de la loi empirique
 
   offset_computation();
   max_computation();
@@ -184,11 +185,11 @@ Reestimation<Type>::Reestimation(int nb_histo , const Reestimation<Type> **histo
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the Reestimation class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe Reestimation.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 Reestimation<Type>::~Reestimation()
@@ -198,15 +199,13 @@ Reestimation<Type>::~Reestimation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the Reestimation class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo reference on a Reestimation object.
+ *  Operateur d'assignement de la classe Reestimation.
  *
- *  \return          Reestimation object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet Reestimation.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 Reestimation<Type>& Reestimation<Type>::operator=(const Reestimation<Type> &histo)
@@ -222,15 +221,13 @@ Reestimation<Type>& Reestimation<Type>::operator=(const Reestimation<Type> &hist
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the characteristics of a Reestimation object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os           stream,
- *  \param[in]     shape        flag on the writing of the shape characteristics,
- *  \param[in]     comment_flag flag comments.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des caracteristiques d'un objet Reestimation.
+ *
+ *  arguments : stream, flag ecriture des parametres de forme, flag commentaire.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 ostream& Reestimation<Type>::ascii_characteristic_print(ostream &os , bool shape ,
@@ -244,24 +241,8 @@ ostream& Reestimation<Type>::ascii_characteristic_print(ostream &os , bool shape
       os << "# ";
     }
     os << STAT_label[STATL_MEAN] << ": " << mean << "   "
-       << STAT_label[STATL_MEDIAN] << ": " << quantile_computation() << "   "
-       << STAT_label[STATL_MODE] << ": " << mode_computation() << endl;
-
-    if (comment_flag) {
-      os << "# ";
-    }
-    os << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
-       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance);
-    if (variance > 0.) {
-      os << "   " << STAT_label[STATL_LOWER_QUARTILE] << ": " << quantile_computation(0.25)
-         << "   " << STAT_label[STATL_UPPER_QUARTILE] << ": " << quantile_computation(0.75);
-
-#     ifdef DEBUG
-      os << "   0.9 " << STAT_label[STATL_QUANTILE] << ": " << quantile_computation(0.9);
-#     endif
-
-    }
-    os << endl;
+       << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
 
     if ((shape) && (variance > 0.)) {
       if (comment_flag) {
@@ -276,14 +257,13 @@ ostream& Reestimation<Type>::ascii_characteristic_print(ostream &os , bool shape
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the characteristics of a Reestimation object for a circular variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os           stream,
- *  \param[in]     comment_flag flag comment.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des caracteristiques d'un objet Reestimation pour une variable circulaire.
+ *
+ *  arguments : stream, flag commentaire.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 ostream& Reestimation<Type>::ascii_circular_characteristic_print(ostream &os ,
@@ -312,19 +292,19 @@ ostream& Reestimation<Type>::ascii_circular_characteristic_print(ostream &os ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Display of a Reestimation object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Visualisation d'un objet Reestimation.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 ostream& Reestimation<Type>::print(ostream &os) const
 
 {
-  int i;
+  register int i;
 
 
   os << endl;
@@ -346,11 +326,11 @@ ostream& Reestimation<Type>::print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the number of values from 0.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul du nombre de valeurs d'une loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::nb_value_computation()
@@ -368,11 +348,11 @@ void Reestimation<Type>::nb_value_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the number of values of null frequency from 0.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul du nombre de valeurs de frequence nulle a partir de 0.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::offset_computation()
@@ -390,17 +370,17 @@ void Reestimation<Type>::offset_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the sample size.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de l'effectif total d'une loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::nb_element_computation()
 
 {
-  int i;
+  register int i;
 
 
   nb_element = 0;
@@ -410,17 +390,17 @@ void Reestimation<Type>::nb_element_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Determination of the maximum frequency.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Recherche de la frequence maximum d'une loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::max_computation()
 
 {
-  int i;
+  register int i;
 
 
   max = 0;
@@ -432,55 +412,18 @@ void Reestimation<Type>::max_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Determination of the mode.
+/*--------------------------------------------------------------*
  *
- *  \return mode.
- */
-/*--------------------------------------------------------------*/
-
-template <typename Type>
-double Reestimation<Type>::mode_computation() const
-
-{
-  int i;
-  int max_frequency;
-  double mode;
-
-
-  max_frequency = 0;
-  for (i = offset;i < nb_value;i++) {
-    if (frequency[i] > max_frequency) {
-      max_frequency = frequency[i];
-      mode = i;
-    }
-  }
-
-  i = mode;
-  while (frequency[i + 1] == frequency[i]) {
-    i++;
-  }
-  if (i > mode) {
-    mode = (i + mode) / 2.;
-  }
-
-  return mode;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Mean computation.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la moyenne d'une loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::mean_computation()
 
 {
   if (nb_element > 0) {
-    int i;
+    register int i;
 
 
     mean = 0.;
@@ -492,102 +435,62 @@ void Reestimation<Type>::mean_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of a quantile.
+/*--------------------------------------------------------------*
  *
- *  \param[in] icumul value of the cumulative distribution function.
+ *  Calcul de la variance d'une loi empirique.
  *
- *  \return           quantile.
- */
-/*--------------------------------------------------------------*/
-
-template <typename Type>
-double Reestimation<Type>::quantile_computation(double icumul) const
-
-{
-  int i;
-  double cumul , quantile;
-
-
-  cumul = 0.;
-  for (i = offset;i < nb_value;i++) {
-    cumul += frequency[i] / (double)nb_element;
-    if (cumul >= icumul) {
-      quantile = i;
-      if (cumul == icumul) {
-        quantile += 0.5;
-      }
-      break;
-    }
-  }
-
-  return quantile;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Variance computation.
+ *  argument : flag biais.
  *
- *  \param[in] bias flag bias.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::variance_computation(bool bias)
 
 {
   if (mean != D_DEFAULT) {
+    variance = 0.;
+
     if (nb_element > 1) {
-      int i;
+      register int i;
       double diff;
-      long double square_sum;
 
 
-      square_sum = 0.;
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        square_sum += frequency[i] * diff * diff;
+        variance += frequency[i] * diff * diff;
       }
 
-      if (bias) {
-        variance = square_sum / nb_element;
+      switch (bias) {
+      case false :
+        variance /= (nb_element - 1);
+        break;
+      case true :
+        variance /= nb_element;
+        break;
       }
-      else {
-        variance = square_sum / (nb_element - 1);
-      }
-    }
-
-    else {
-      variance = 0.;
     }
   }
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the mean absolute deviation.
+/*--------------------------------------------------------------*
  *
- *  \param[in] location location measure (e.g. mean or median).
+ *  Calcul de l'ecart absolu moyen d'une loi empirique.
  *
- *  \return             mean absolute deviation.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 template <typename Type>
-double Reestimation<Type>::mean_absolute_deviation_computation(double location) const
+double Reestimation<Type>::mean_absolute_deviation_computation() const
 
 {
-  int i;
+  register int i;
   double mean_absolute_deviation = D_DEFAULT;
 
 
-  if (nb_element > 0) {
+  if ((mean != D_DEFAULT) && (nb_element > 0)) {
     mean_absolute_deviation = 0.;
     for (i = offset;i < nb_value;i++) {
-      mean_absolute_deviation += frequency[i] * fabs(i - location);
+      mean_absolute_deviation += frequency[i] * fabs(i - mean);
     }
     mean_absolute_deviation /= nb_element;
   }
@@ -596,19 +499,17 @@ double Reestimation<Type>::mean_absolute_deviation_computation(double location) 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the log of the geometric mean.
+/*--------------------------------------------------------------*
  *
- *  \return log geometric mean.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul du log de la moyenne geometrique.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 double Reestimation<Type>::log_geometric_mean_computation() const
 
 {
-  int i;
+  register int i;
   double log_geometric_mean = D_DEFAULT;
 
 
@@ -624,36 +525,31 @@ double Reestimation<Type>::log_geometric_mean_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the coefficient of skewness.
+/*--------------------------------------------------------------*
  *
- *  \return coefficient of skewness.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul du coefficient d'asymetrie d'une loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 double Reestimation<Type>::skewness_computation() const
 
 {
-  int i;
+  register int i;
   double skewness = D_INF , diff;
-  long double cube_sum;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
+    skewness = 0.;
+
     if ((nb_element > 2) && (variance > 0.)) {
-      cube_sum = 0.;
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        cube_sum += frequency[i] * diff * diff * diff;
+        skewness += frequency[i] * diff * diff * diff;
       }
-      skewness = cube_sum * nb_element /
-                 ((nb_element - 1) * (double)(nb_element - 2) * pow(variance , 1.5));
-    }
 
-    else {
-      skewness = 0.;
+      skewness = skewness * nb_element /
+                 ((nb_element - 1) * (double)(nb_element - 2) * pow(variance , 1.5));
     }
   }
 
@@ -661,36 +557,33 @@ double Reestimation<Type>::skewness_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the excess kurtosis:
- *         excess kurtosis = coefficient of kurtosis - 3.
+/*--------------------------------------------------------------*
  *
- *  \return excess kurtosis.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de l'exces d'applatissement d'une loi empirique :
+ *  exces d'applatissement = coefficient d'applatissement - 3.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 double Reestimation<Type>::kurtosis_computation() const
 
 {
-  int i;
+  register int i;
   double kurtosis = D_INF , diff;
-  long double power_sum;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    if (variance > 0.) {
-      power_sum = 0.;
-      for (i = offset;i < nb_value;i++) {
-        diff = i - mean;
-        power_sum += frequency[i] * diff * diff * diff * diff;
-      }
-      kurtosis = power_sum / ((nb_element - 1) * variance * variance) - 3.;
+    if (variance == 0.) {
+      kurtosis = -2.;
     }
 
     else {
-      kurtosis = -2.;
+      kurtosis = 0.;
+      for (i = offset;i < nb_value;i++) {
+        diff = i - mean;
+        kurtosis += frequency[i] * diff * diff * diff * diff;
+      }
+      kurtosis = kurtosis / ((nb_element - 1) * variance * variance) - 3.;
     }
   }
 
@@ -698,19 +591,19 @@ double Reestimation<Type>::kurtosis_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the mean direction for a circular variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] mean_direction pointer on the mean direction.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la direction moyenne d'une variable circulaire.
+ *
+ *  argument : pointeur sur la direction moyenne.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::mean_direction_computation(double *mean_direction) const
 
 {
-  int i , j;
+  register int i , j;
 
 
   mean_direction[0] = 0.;
@@ -746,19 +639,17 @@ void Reestimation<Type>::mean_direction_computation(double *mean_direction) cons
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the information quantity.
+/*--------------------------------------------------------------*
  *
- *  \return information quantity.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la quantite d'information d'une loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 double Reestimation<Type>::information_computation() const
 
 {
-  int i;
+  register int i;
   double information = D_INF;
 
 
@@ -775,21 +666,19 @@ double Reestimation<Type>::information_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the log-likelihood of a discrete distribution for a sample.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist reference on a Distribution object.
+ *  Calcul de la vraisemblance d'une loi discrete pour un echantillon.
  *
- *  \return         log-likelihood.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet Distribution.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 double Reestimation<Type>::likelihood_computation(const Distribution &dist) const
 
 {
-  int i;
+  register int i;
   double likelihood = 0.;
 
 
@@ -821,20 +710,20 @@ double Reestimation<Type>::likelihood_computation(const Distribution &dist) cons
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of a categorical distribution on the basis of a frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist pointer on a Distribution object.
- */
-/*--------------------------------------------------------------*/
+ *  Estimation d'une loi discrete a partir d'un echantillon.
+ *
+ *  argument : pointeur sur une loi discrete.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::distribution_estimation(Distribution *dist) const
 
 {
   if (nb_element > 0) {
-    int i;
+    register int i;
 
 
     dist->offset = offset;
@@ -856,37 +745,34 @@ void Reestimation<Type>::distribution_estimation(Distribution *dist) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of a discrete distribution on the basis of a frequency distribution
- *         using a penalized likelihood estimator.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist     pointer on a Distribution object,
- *  \param[in] weight   penalty weight,
- *  \param[in] pen_type penalty type (first- or second-order difference or entropy),
- *  \param[in] penalty  penalty,
- *  \param[in] outside  management of side effects (zero outside the support or
- *                      continuation of the distribution).
- */
-/*--------------------------------------------------------------*/
+ *  Estimation d'une loi discrete a partir d'un echantillon au sens
+ *  d'une vraisemblance penalisee.
+ *
+ *  arguments : pointeur sur une loi discrete, poids de la penalisation,
+ *              type de penalisation (difference 1ere, seconde ou entropie),
+ *              type de gestion des effets de bord (zero a l'exterieur du support ou
+ *              prolongation de la loi).
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , double weight ,
-                                                         penalty_type pen_type , double *penalty ,
-                                                         side_effect outside) const
+                                                         int type , double *penalty , int outside) const
 
 {
   if (nb_element > 0) {
-    int i;
+    register int i;
     int iter;
     double ratio , inf_ratio , sup_ratio , norm , inf_norm , sup_norm;
 
 
-    dist->penalty_computation(weight , pen_type , penalty , outside);
+    dist->penalty_computation(weight , type , penalty , outside);
 
 #   ifdef DEBUG
     {
-      switch (pen_type) {
+      switch (type) {
       case FIRST_DIFFERENCE :
         norm = dist->first_difference_norm_computation();
         break;
@@ -907,7 +793,7 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
     }
 #   endif
 
-    // computation of the normalization constant
+    // calcul de la constante de normalisation
 
     inf_norm = 0.;
 
@@ -924,7 +810,7 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
 
     sup_norm = 2. * nb_element;
 
-    if ((pen_type != ENTROPY) && (nb_element + weight > sup_norm)) {
+    if ((type != ENTROPY) && (nb_element + weight > sup_norm)) {
       sup_norm = nb_element + weight;
     }
 
@@ -992,7 +878,7 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
       cout << "   norm : " << norm << " | " << nb_element << "  (" << iter << ")  ";
 #     endif
 
-      // distribution reestimation
+      // reestimation de la loi
 
       for (i = 0;i < offset;i++) {
         dist->mass[i] = 0.;
@@ -1015,25 +901,22 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of the parameters of a shifted binomial distribution on the basis of
- *         a frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist               pointer on a DiscreteParametric object,
- *  \param[in] min_inf_bound      minimum lower bound of the support,
- *  \param[in] min_inf_bound_flag flag on the distribution shift.
+ *  Estimation des parametres d'une loi binomiale a partir
+ *  d'un echantillon.
  *
- *  \return                       maximized log-likelihood.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : loi discrete parametrique, borne inferieure minimum,
+ *              flag sur la borne inferieure.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int min_inf_bound ,
                                                bool min_inf_bound_flag) const
 
 {
-  int i , j;
+  register int i , j;
   int max_inf_bound , inf_bound , sup_bound , sup_sup_bound , est_sup_bound ,
       min_sup_bound , max_sup_bound;
   double shift_mean , probability , likelihood , inf_bound_likelihood , max_likelihood = D_INF;
@@ -1041,7 +924,7 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
 
   if (mean - min_inf_bound >= variance) {
 
-    // computation of the interval tested on the lower bound of the support
+    // calcul de l'intervalle teste sur la borne inferieure
 
     if (!min_inf_bound_flag) {
       max_inf_bound = min_inf_bound;
@@ -1067,14 +950,14 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
       sup_sup_bound = MIN(dist->alloc_nb_value ,
                           (int)(nb_value * SAMPLE_NB_VALUE_COEFF)) - 1;
 
-      // estimation for each possible lower and upper bounds of the probability
-      // on the basis of the sample mean
+      // estimation pour chaque bornes inferieure et superieure possibles
+      // de la probabilite a partir de la moyenne de l'echantillon
 
 #     ifdef DEBUG
-//      cout << "\nbound range: " << min_inf_bound
+//      cout << "\nplage de recherche : " << min_inf_bound
 //           << " | " << max_inf_bound << " (" << sup_sup_bound << ")" << endl;
 
-      int k = 0;
+      register int k = 0;
 #     endif
 
       for (i = min_inf_bound;i <= max_inf_bound;i++) {
@@ -1105,7 +988,7 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
             dist->sup_bound = j;
             dist->probability = (mean - i) / (j - i);
 
-            dist->binomial_computation(1 , STANDARD);
+            dist->binomial_computation(1 , 's');
             likelihood = dist->likelihood_computation(*this);
 
 #           ifdef DEBUG
@@ -1134,16 +1017,16 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
         }
       }
 
-      // update of the estimated parameters
+      // mise a jour de la loi estimee
 
       if (max_likelihood != D_INF) {
         dist->init(inf_bound , sup_bound , D_DEFAULT , probability);
       }
 
 #     ifdef DEBUG
-//      cout << "\nnumber of cases: "
+//      cout << "\nnombre de cas : "
 //           << (max_inf_bound - min_inf_bound + 1) * (2 * SUP_BOUND_MARGIN + 1)
-//           << " | number of computations: " << k << endl;
+//           << " | nombre de calculs : " << k << endl;
 #     endif
     }
   }
@@ -1152,31 +1035,27 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of the parameters of a shifted Poisson distribution on the basis of
- *         a frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist               pointer on a DiscreteParametric object,
- *  \param[in] min_inf_bound      minimum lower bound of the support,
- *  \param[in] min_inf_bound_flag flag on the distribution shift,
- *  \param[in] cumul_threshold    threshold on the cumulative distribution function.
+ *  Estimation des parametres d'une loi de Poisson a partir
+ *  d'un echantillon.
  *
- *  \return                       maximized log-likelihood.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : loi discrete parametrique, borne inferieure minimum,
+ *              flag sur la borne inferieure, seuil sur la fonction de repartition.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min_inf_bound ,
                                               bool min_inf_bound_flag , double cumul_threshold) const
 
 {
-  int i;
+  register int i;
   int max_inf_bound , inf_bound;
   double diff , parameter , likelihood , max_likelihood = D_INF;
 
 
-  // computation of the interval tested on the lower bound of the support
+  // calcul de l'intervalle teste sur la borne inferieure
 
   if (!min_inf_bound_flag) {
     max_inf_bound = min_inf_bound;
@@ -1195,17 +1074,19 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
   if (((mean - max_inf_bound) * POISSON_RATIO < variance) &&
       ((mean - min_inf_bound) / POISSON_RATIO > variance)) {
 
-    // estimation for each possible lower bound of the parameter on the basis of the sample mean
+    // estimation pour chaque borne inferieure possible du parametre
+    // a partir de la moyenne de l'echantillon
 
 #   ifdef DEBUG
-//    cout << "\ninf bound range: " << min_inf_bound << " | " << max_inf_bound << endl;
+//    cout << "\nplage de recherche : " << min_inf_bound
+//         << " | " << max_inf_bound << endl;
 #   endif
 
     for (i = max_inf_bound;i >= min_inf_bound;i--) {
       dist->inf_bound = i;
       dist->parameter = mean - i;
 
-      dist->poisson_computation(nb_value , cumul_threshold , STANDARD);
+      dist->poisson_computation(nb_value , cumul_threshold , 's');
       likelihood = dist->likelihood_computation(*this);
 
       if (likelihood > max_likelihood) {
@@ -1221,15 +1102,15 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
       }
     }
 
-    // update of the estimated parameters
+    // mise a jour de la loi estimee
 
     if (max_likelihood != D_INF) {
       dist->init(inf_bound , I_DEFAULT , parameter , D_DEFAULT);
     }
 
 #   ifdef DEBUG
-//    cout << "\nnumber of cases: " << (max_inf_bound - min_inf_bound + 1)
-//         << " | number of computations: " << (max_inf_bound - i + 1) << endl;
+//    cout << "\nnombre de cas : " << (max_inf_bound - min_inf_bound + 1)
+//         << " | nombre de calculs : " << (max_inf_bound - i + 1) << endl;
 #   endif
   }
 
@@ -1237,31 +1118,27 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of the parameters of a shifted negative binomial distribution
- *         on the basis of a frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist               pointer on a DiscreteParametric object,
- *  \param[in] min_inf_bound      minimum lower bound of the support,
- *  \param[in] min_inf_bound_flag flag on the distribution shift,
- *  \param[in] cumul_threshold    threshold on the cumulative distribution function.
+ *  Estimation des parametres d'une loi binomiale negative
+ *  a partir d'un echantillon.
  *
- *  \return                       maximized log-likelihood.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : loi discrete parametrique, borne inferieure minimum,
+ *              flag sur la borne inferieure, seuil sur la fonction de repartition.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist , int min_inf_bound ,
                                                         bool min_inf_bound_flag , double cumul_threshold) const
 
 {
-  int i;
+  register int i;
   int max_inf_bound , inf_bound;
   double diff , shift_mean , parameter , probability , likelihood , max_likelihood = D_INF;
 
 
-  // computation of the interval tested on the lower bound of the support
+  // calcul de l'intervalle teste sur la borne inferieure
 
   if (!min_inf_bound_flag) {
     max_inf_bound = min_inf_bound;
@@ -1279,11 +1156,12 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
 
   if (mean - max_inf_bound < variance) {
 
-    // estimation for each possible lower bound of the shape parameter and
-    // the probability on the basis of the sample mean and variance
+    // estimation pour chaque borne inferieure possible du parametre et
+    // de la probabilite a partir de la moyenne et de la variance de l'echantillon
 
 #   ifdef DEBUG
-    cout << "\ninf bound range: " << min_inf_bound << " | " << max_inf_bound << endl;
+//    cout << "\nplage de recherche : " << min_inf_bound
+//         << " | " << max_inf_bound << endl;
 #   endif
 
     for (i = max_inf_bound;i >= min_inf_bound;i--) {
@@ -1297,7 +1175,7 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
 //      cout << i << " : " dist->parameter << " | " << dist->probability << endl;
 #     endif
 
-      dist->negative_binomial_computation(nb_value , cumul_threshold , STANDARD);
+      dist->negative_binomial_computation(nb_value , cumul_threshold , 's');
       likelihood = dist->likelihood_computation(*this);
 
       if (likelihood > max_likelihood) {
@@ -1314,15 +1192,15 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
       }
     }
 
-    // update of the estimated parameters
+    // mise a jour de la loi estimee
 
     if (max_likelihood != D_INF) {
       dist->init(inf_bound , I_DEFAULT , parameter , probability);
     }
 
 #   ifdef DEBUG
-//    cout << "\nnumber of cases : " << max_inf_bound - min_inf_bound + 1
-//         << " | number of computations : " << (max_inf_bound - i + 1) << endl;
+//    cout << "\nnombre de cas : " << max_inf_bound - min_inf_bound + 1
+//         << " | nombre de calculs : " << (max_inf_bound - i + 1) << endl;
 #   endif
   }
 
@@ -1330,111 +1208,19 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of the parameters of a shifted Poisson geometric distribution
- *         on the basis of a frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist               pointer on a DiscreteParametric object,
- *  \param[in] min_inf_bound      minimum lower bound of the support,
- *  \param[in] min_inf_bound_flag flag on the distribution shift,
- *  \param[in] cumul_threshold    threshold on the cumulative distribution function.
+ *  Estimation des parametres d'une loi discrete elementaire
+ *  (binomiale negative, binomiale, Poisson) a partir d'un echantillon.
  *
- *  \return                       maximized log-likelihood.
- */
-/*--------------------------------------------------------------*/
-
-template <typename Type>
-double Reestimation<Type>::poisson_geometric_estimation(DiscreteParametric *dist , int min_inf_bound ,
-                                                        bool min_inf_bound_flag , double cumul_threshold) const
-
-{
-  int i;
-  int max_inf_bound , inf_bound;
-  double diff , buff , parameter , probability , likelihood , max_likelihood = D_INF;
-
-
-  // computation of the interval tested on the lower bound of the support
-
-  if (!min_inf_bound_flag) {
-    max_inf_bound = min_inf_bound;
-  }
-  else {
-    max_inf_bound = MIN(offset , (int)(mean * mean / (variance + mean)));
-  }
-
-  if (mean - max_inf_bound < variance) {
-
-    // estimation for each possible lower bound of the shape parameter and
-    // the probability on the basis of the sample mean and variance
-
-#   ifdef DEBUG
-    cout << "\ninf bound range: " << min_inf_bound << " | " << max_inf_bound << endl;
-#   endif
-
-    for (i = max_inf_bound;i >= min_inf_bound;i--) {
-      dist->inf_bound = i;
-      buff = mean * mean - (variance + mean) * i;
-      dist->parameter = (buff + mean * sqrt(buff)) / (variance + mean);
-      dist->probability = (i + dist->parameter) / mean;
-
-#     ifdef DEBUG
-//      cout << i << " : " dist->parameter << " | " << dist->probability << endl;
-#     endif
-
-      dist->poisson_geometric_computation(nb_value , cumul_threshold);
-      likelihood = dist->likelihood_computation(*this);
-
-      if (likelihood > max_likelihood) {
-        max_likelihood = likelihood;
-        inf_bound = dist->inf_bound;
-        parameter = dist->parameter;
-        probability = dist->probability;
-      }
-
-      else {
-        if (likelihood < max_likelihood) {
-          break;
-        }
-      }
-    }
-
-    // update of the estimated parameters
-
-    if (max_likelihood != D_INF) {
-      dist->init(inf_bound , I_DEFAULT , parameter , probability);
-    }
-
-#   ifdef DEBUG
-//    cout << "\nnumber of cases: " << max_inf_bound - min_inf_bound + 1
-//         << " | number of computations: " << (max_inf_bound - i + 1) << endl;
-#   endif
-  }
-
-  return max_likelihood;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of the parameters of a discrete parametric distribution
- *         (binomial, Poisson, negative binomial, Poisson geometric) on the basis of
- *         a frequency distribution.
+ *  arguments : loi discrete parametrique, borne inferieure minimum,
+ *              flag sur la borne inferieure, seuil sur la fonction de repartition.
  *
- *  \param[in] dist               pointer on a DiscreteParametric object,
- *  \param[in] min_inf_bound      minimum lower bound of the support,
- *  \param[in] min_inf_bound_flag flag on the distribution shift,
- *  \param[in] cumul_threshold    threshold on the cumulative distribution function,
- *  \param[in] poisson_geometric  flag on the estimation of a Poisson geometric distribution.
- *
- *  \return                       maximized log-likelihood.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int min_inf_bound ,
-                                                 bool min_inf_bound_flag , double cumul_threshold ,
-                                                 bool poisson_geometric) const
+                                                 bool min_inf_bound_flag , double cumul_threshold) const
 
 {
   double likelihood;
@@ -1450,35 +1236,25 @@ double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int 
   case NEGATIVE_BINOMIAL :
     likelihood = negative_binomial_estimation(dist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
     break;
-  case POISSON_GEOMETRIC :
-    likelihood = poisson_geometric_estimation(dist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
-    break;
   }
 
   return likelihood;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of the type and parameters of a discrete parametric distribution
- *         (binomial, Poisson, negative binomial, Poisson geometric) on the basis of
- *         a frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist               pointer on a DiscreteParametric object,
- *  \param[in] min_inf_bound      minimum lower bound of the support,
- *  \param[in] min_inf_bound_flag flag on the distribution shift,
- *  \param[in] cumul_threshold    threshold on the cumulative distribution function,
- *  \param[in] poisson_geometric  flag on the estimation of a Poisson geometric distribution.
+ *  Estimation du type et des parametres d'une loi discrete elementaire
+ *  (binomiale negative, binomiale, Poisson) a partir d'un echantillon.
  *
- *  \return                       maximized log-likelihood.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : loi discrete parametrique, borne inferieure minimum,
+ *              flag sur la borne inferieure, seuil sur la fonction de repartition.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist , int min_inf_bound ,
-                                                      bool min_inf_bound_flag , double cumul_threshold ,
-                                                      bool poisson_geometric) const
+                                                      bool min_inf_bound_flag , double cumul_threshold) const
 
 {
   double likelihood , max_likelihood;
@@ -1493,8 +1269,8 @@ double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist ,
   }
 
 # ifdef DEBUG
-//  max_likelihood = D_INF;   for the earthquake data (Durand & Guedon, 2016)
-//  likelihood = poisson_estimation(bdist , 0 , false , cumul_threshold);
+  max_likelihood = D_INF;  // pour les donnees de tremblements de terre
+  likelihood = poisson_estimation(bdist , 0 , false , cumul_threshold);
 # endif
 
   likelihood = poisson_estimation(bdist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
@@ -1505,24 +1281,12 @@ double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist ,
     dist->copy(*bdist);
   }
 
-  if ((min_inf_bound == 0) || (!poisson_geometric)) {  // for comparing negative binomial and poisson geometric distributions
   likelihood = negative_binomial_estimation(bdist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
   if (likelihood > max_likelihood) {
     bdist->ident = NEGATIVE_BINOMIAL;
     max_likelihood = likelihood;
     dist->equal_size_copy(*bdist);
     dist->copy(*bdist);
-  }
-  }
-
-  if ((min_inf_bound > 0) && (poisson_geometric)) {
-    likelihood = poisson_geometric_estimation(bdist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
-    if (likelihood > max_likelihood) {
-      bdist->ident = POISSON_GEOMETRIC;
-      max_likelihood = likelihood;
-      dist->equal_size_copy(*bdist);
-      dist->copy(*bdist);
-    }
   }
 
   delete bdist;
@@ -1531,21 +1295,18 @@ double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of the type and parameters of a discrete parametric distribution
- *         (binomial, Poisson, negative binomial) on the basis of a frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] min_inf_bound      minimum lower bound of the support,
- *  \param[in] min_inf_bound_flag flag on the distribution shift,
- *  \param[in] cumul_threshold    threshold on the cumulative distribution function.
+ *  Estimation du type et des parametres d'une loi discrete elementaire
+ *  (binomiale negative, binomiale, Poisson) a partir d'un echantillon.
  *
- *  \return                       discrete parametric distribution.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : borne inferieure minimum, flag sur la borne inferieure,
+ *              seuil sur la fonction de repartition.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
-DiscreteParametric* Reestimation<Type>::type_parametric_estimation(int min_inf_bound , bool min_inf_bound_flag ,
+DiscreteParametric* Reestimation<Type>::type_parametric_estimation(int min_inf_bound , bool flag ,
                                                                    double cumul_threshold) const
 
 {
@@ -1553,15 +1314,15 @@ DiscreteParametric* Reestimation<Type>::type_parametric_estimation(int min_inf_b
   DiscreteParametric *dist;
 
 
-  // construction of a DiscreteParametric object
+  // creation d'un objet DiscreteParametric
 
   dist = new DiscreteParametric((int)(nb_value * SAMPLE_NB_VALUE_COEFF));
 
-  // parameter estimation
+  // estimation des parametres de la loi
 
-  likelihood = type_parametric_estimation(dist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
+  likelihood = type_parametric_estimation(dist , min_inf_bound , flag , cumul_threshold);
 
-  // computation of the probability mass function
+  // mise a jour de la loi estimee
 
   if (likelihood != D_INF) {
     dist->computation(nb_value , cumul_threshold);
@@ -1575,15 +1336,15 @@ DiscreteParametric* Reestimation<Type>::type_parametric_estimation(int min_inf_b
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Combination of the reestimation quantities of the basis time interval distribution and
- *         the length-biased distribution (equilibrium stochastic process).
+/*--------------------------------------------------------------*
  *
- *  \param[in] length_bias_reestim pointer on the reestimation quantities of the length-biased distribution,
- *  \param[in] imean               distribution mean.
- */
-/*--------------------------------------------------------------*/
+ *  Combinaison des quantites de reestimation de la loi et
+ *  de la loi biaisee par la longueur (processus en equilibre).
+ *
+ *  arguments : pointeurs sur les quantites de reestimation de la loi biaisee
+ *              par la longueur, moyenne de la loi.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::equilibrium_process_combination(const Reestimation<Type> *length_bias_reestim ,
@@ -1591,7 +1352,7 @@ void Reestimation<Type>::equilibrium_process_combination(const Reestimation<Type
 
 {
   if (nb_element + length_bias_reestim->nb_element > 0) {
-    int i;
+    register int i;
 
 
     for (i = offset;i < nb_value;i++) {
@@ -1608,16 +1369,15 @@ void Reestimation<Type>::equilibrium_process_combination(const Reestimation<Type
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of a discrete distribution on the basis of the reestimation quantities of
- *         the basis time interval distribution and the length-biased distribution (equilibrium stochastic process).
+/*--------------------------------------------------------------*
  *
- *  \param[in] length_bias_reestim pointer on the reestimation quantities of the length-biased distribution,
- *  \param[in] dist                distribution,
- *  \param[in] imean               distribution mean.
- */
-/*--------------------------------------------------------------*/
+ *  Estimation d'une loi a partir de quantites de reestimation de la loi et
+ *  de la loi biaisee par la longueur (processus en equilibre).
+ *
+ *  arguments : pointeurs sur les quantites de reestimation de la loi biaisee
+ *              par la longueur et sur la loi, moyenne de la loi.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::equilibrium_process_estimation(const Reestimation<Type> *length_bias_reestim ,
@@ -1625,7 +1385,7 @@ void Reestimation<Type>::equilibrium_process_estimation(const Reestimation<Type>
 
 {
   if (nb_element + length_bias_reestim->nb_element > 0) {
-    int i;
+    register int i;
 
 
     for (i = 0;i < offset;i++) {
@@ -1643,10 +1403,10 @@ void Reestimation<Type>::equilibrium_process_estimation(const Reestimation<Type>
     dist->nb_value_computation();
     dist->cumul_computation();
 
-    // renormalization of the distribution
+    // renormalisation de la loi
 
     for (i = dist->offset;i < dist->nb_value;i++) {
-      dist->mass[i] /= dist->cumul[nb_value - 1];
+      dist->mass[i] /= dist->cumul[dist->nb_value - 1];  //BRICE OLIVIER : cumul[nb_value - 1] BECOMES cumul[dist->nb_value - 1]
     }
 
     dist->cumul_computation();
@@ -1657,39 +1417,36 @@ void Reestimation<Type>::equilibrium_process_estimation(const Reestimation<Type>
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of a discrete distribution on the basis of the reestimation quantities of
- *         the basis time interval distribution and the length-biased distribution using
- *         a penalized likelihood estimator (equilibrium stochastic process).
+/*--------------------------------------------------------------*
  *
- *  \param[in] length_bias_reestim pointer on the reestimation quantities of the length-biased distribution,
- *  \param[in] dist                distribution,
- *  \param[in] imean               distribution mean,
- *  \param[in] weight              penalty weight ,
- *  \param[in] pen_type            penalty type (first- or second-order difference or entropy),
- *  \param[in] penalty             penalty,
- *  \param[in] outside             management of side effects (zero outside the support or
- *                                 continuation of the distribution).
- */
-/*--------------------------------------------------------------*/
+ *  Estimation d'une loi a partir de quantites de reestimation de la loi et
+ *  de la loi biaisee par la longueur au sens d'une vraisemblance penalisee
+ *  (processus en equilibre).
+ *
+ *  arguments : pointeurs sur les quantites de reestimation de la loi biaisee
+ *              par la longueur et sur la loi, moyenne de la loi, poids de la penalisation,
+ *              type de penalisation (difference 1ere, seconde ou entropie),
+ *              type de gestion des effets de bord (zero a l'exterieur du support ou
+ *              prolongation de la loi).
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(const Reestimation<Type> *length_bias_reestim ,
                                                                              Distribution *dist , double imean ,
-                                                                             double weight , penalty_type pen_type ,
-                                                                             double *penalty , side_effect outside) const
+                                                                             double weight , int type ,
+                                                                             double *penalty , int outside) const
 
 {
   if (nb_element + length_bias_reestim->nb_element > 0) {
-    int i;
+    register int i;
     int iter;
     double ratio , inf_ratio , sup_ratio , norm , inf_norm , sup_norm;
 
 
-    dist->penalty_computation(weight , pen_type , penalty , outside);
+    dist->penalty_computation(weight , type , penalty , outside);
 
-    // computation of the normalization constant
+    // calcul de la constante de normalisation
 
     inf_norm = 0.;
 
@@ -1706,7 +1463,7 @@ void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(con
 
     sup_norm = 2. * nb_element;
 
-    if ((pen_type != ENTROPY) && (nb_element + weight > sup_norm)) {
+    if ((type != ENTROPY) && (nb_element + weight > sup_norm)) {
       sup_norm = nb_element + weight;
     }
 
@@ -1769,7 +1526,7 @@ void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(con
     if ((sup_ratio - inf_ratio <= BISECTION_RATIO_THRESHOLD) || (iter >= BISECTION_NB_ITER)) {
       norm = (inf_norm + sup_norm) / 2.;
 
-      // distribution reestimation
+      // reestimation de la loi
 
       for (i = 0;i < offset;i++) {
         dist->mass[i] = 0.;
@@ -1793,17 +1550,16 @@ void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(con
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of a state occupancy distribution using the Kaplan-Meier estimator.
+/*--------------------------------------------------------------*
  *
- *  \param[in] final_run                   pointer on the right-censored sojourn times,
- *  \param[in] occupancy_reestim           pointer on the reestimation quantities,
- *  \param[in] occupancy_survivor          pointer on the survival function corresponding to the complete sojourn times,
- *  \param[in] censored_occupancy_survivor pointer on the survival function corresponding to the right-censored sojourn times,
- *  \param[in] characteristic_computation  flag for the computation of the characteristics of the reestimation quantities.
- */
-/*--------------------------------------------------------------*/
+ *  Estimation d'une loi d'occupation d'un etat par l'estimateur de Kaplan-Meier.
+ *
+ *  arguments : pointeurs sur les temps de sejour censures a droite,
+ *              sur les quantites de reestimation, sur les fonctions de survie
+ *              correspondant aux temps de sejour complets et censures a droite,
+ *              flag pour le calcul des caracteristiques des quantites de reestimation.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::state_occupancy_estimation(const Reestimation<Type> *final_run ,
@@ -1813,7 +1569,7 @@ void Reestimation<Type>::state_occupancy_estimation(const Reestimation<Type> *fi
                                                     bool characteristic_computation)
 
 {
-  int i;
+  register int i;
   int max_nb_value;
   double hazard_rate , hazard_product;
 
@@ -1876,21 +1632,21 @@ void Reestimation<Type>::state_occupancy_estimation(const Reestimation<Type> *fi
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of a gamma distribution on the basis of a frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist continuous distribution,
- *  \param[in] iter EM iteration.
- */
-/*--------------------------------------------------------------*/
+ *  Estimation des parametres d'une loi gamma a partir
+ *  d'une distribution de frequences empiriques.
+ *
+ *  arguments : loi continue parametrique, iteration EM.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter) const
 
 {
-//  int i;
-  double buff , log_geometric_mean , diff;
+  register int i;
+  double log_geometric_mean , diff;
 //  double bvariance;
 
 
@@ -1906,30 +1662,19 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
       }
       else {
         bvariance = variance;
-      }
-
-      dist->shape = mean * mean / bvariance;
-      dist->scale = bvariance / mean; */
+      } */
+//      dist->shape = mean * mean / variance;
+//      dist->scale = variance / mean;
 
       // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
 
-      buff = mean * mean / variance;
-      if (buff > GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)nb_element) {
-        dist->shape = buff - 1. / (double)nb_element;
-      }
-      else {
-        dist->shape = buff;
-      }
-/*      if (dist->shape < GAMMA_MIN_SHAPE_PARAMETER) {
-        dist->shape = GAMMA_MIN_SHAPE_PARAMETER;
-      } */
+      dist->shape = mean * mean / variance - 1. / (double)nb_element;
       dist->scale = mean / dist->shape;
 
       if ((dist->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
           (nb_element < GAMMA_FREQUENCY_THRESHOLD)) {
         log_geometric_mean = log_geometric_mean_computation();
-
-/*        i = 0;  to be investigated
+/*        i = 0;   a revoir
 
 #       ifdef DEBUG
         cout << "\n" << STAT_word[STATW_SHAPE] << " : " << dist->shape << "   "
@@ -1966,15 +1711,14 @@ void Reestimation<Type>::gamma_estimation(ContinuousParametric *dist , int iter)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of a zero-inflated gamma distribution on the basis of
- *         a frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist continuous distribution,
- *  \param[in] iter EM iteration.
- */
-/*--------------------------------------------------------------*/
+ *  Estimation des parametres d'une loi zero-inflated gamma a partir
+ *  d'une distribution de frequences empiriques.
+ *
+ *  arguments : loi continue parametrique, iteration EM.
+ *
+ *--------------------------------------------------------------*/
 
 template <typename Type>
 void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *dist , int iter) const
@@ -1987,8 +1731,8 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
   }
 
   else {
-    int i;
-    double bmean , bvariance , buff , diff , log_geometric_mean;
+    register int i;
+    double bmean , bvariance , diff , log_geometric_mean;
 
 
     dist->zero_probability = frequency[0] / nb_element;
@@ -2012,22 +1756,13 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
     if (bvariance > 0.) {
 /*      if (sqrt(bvariance) < bmean * GAMMA_VARIATION_COEFF_THRESHOLD) {
         bvariance = bmean * bmean * GAMMA_VARIATION_COEFF_THRESHOLD * GAMMA_VARIATION_COEFF_THRESHOLD;
-      }
-      dist->shape = bmean * bmean / bvariance;
-      dist->scale = bvariance / bmean; */
+      } */
+//      dist->shape = bmean * bmean / bvariance;
+//      dist->scale = bvariance / bmean;
 
       // Hawang & Huang (2012), Ann. Inst. Statist. Math. 54(4), 840-847
 
-      buff = bmean * bmean / bvariance;
-      if (buff > GAMMA_INVERSE_SAMPLE_SIZE_FACTOR / (double)(nb_element - frequency[0])) {
-        dist->shape = buff - 1. / (double)(nb_element - frequency[0]);
-      }
-      else {
-        dist->shape = buff;
-      }
-/*      if (dist->shape < GAMMA_MIN_SHAPE_PARAMETER) {
-        dist->shape = GAMMA_MIN_SHAPE_PARAMETER;
-      } */
+      dist->shape = bmean * bmean / bvariance - 1. / (double)(nb_element - frequency[0]);
       dist->scale = bmean / dist->shape;
 
       if ((dist->shape >= GAMMA_SHAPE_PARAMETER_THRESHOLD) &&
@@ -2066,39 +1801,6 @@ void Reestimation<Type>::zero_inflated_gamma_estimation(ContinuousParametric *di
       dist->shape = GAMMA_MIN_SHAPE_PARAMETER;
       dist->scale = GAMMA_DEFAULT_SCALE_PARAMETER;
     }
-  }
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of an inverse Gaussian distribution on the basis of
- *         a frequency distribution.
- *
- *  \param[in] dist continuous distribution.
- */
-/*--------------------------------------------------------------*/
-
-template <typename Type>
-void Reestimation<Type>::inverse_gaussian_estimation(ContinuousParametric *dist) const
-
-{
-  int i;
-
-
-  if (mean > 0.) {
-    dist->location = mean;
-
-    dist->scale = 0.;
-    for (i = MIN(offset , 1);i < nb_value;i++) {
-      dist->scale += frequency[i] * (1. / (double)i - 1. / mean);
-    }
-    dist->scale = nb_element / dist->scale;
-  }
-
-  else {
-    dist->location = D_DEFAULT;
-    dist->scale = D_DEFAULT;
   }
 }
 

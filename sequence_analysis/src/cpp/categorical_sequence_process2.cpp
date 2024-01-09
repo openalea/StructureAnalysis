@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: categorical_sequence_process2.cpp 18044 2015-04-23 09:32:23Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -39,10 +39,19 @@
 #include <sstream>
 #include <iomanip>
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
 #include "sequence_label.h"
+#include "tool/config.h"
+
+#include <math.h>
 
 using namespace std;
 using namespace stat_tool;
@@ -52,20 +61,18 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a CategoricalSequenceProcess object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os                    stream,
- *  \param[in]     process               observation process index,
- *  \param[in]     empirical_observation pointer on the observation frequency distributions,
- *  \param[in]     marginal_distribution pointer on the marginal frequency distribution,
- *  \param[in]     characteristics       pointer on the observed sequences characteristics,
- *  \param[in]     exhaustive            flag detail level,
- *  \param[in]     file_flag             flag file,
- *  \param[in]     forward               pointer on the forward sojourn time distributions.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet CategoricalSequenceProcess.
+ *
+ *  arguments : stream, indice du processus d'observation,
+ *              pointeurs sur les lois d'observation empiriques,
+ *              la loi marginale empiriques et
+ *              les caracteristiques des sequences observees,
+ *              flag niveau de detail, flag fichier ,
+ *              pointeurs sur les lois de l'intervalle de temps residuel.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
                                                  FrequencyDistribution **empirical_observation ,
@@ -75,24 +82,32 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
                                                  Forward **forward) const
 
 {
-  int i , j;
+  register int i , j;
   int buff , width[2];
-  double scale[NB_STATE];
+  long old_adjust;
+  double *pmass , scale[NB_STATE];
   const Distribution *pobservation[NB_STATE];
-  ios_base::fmtflags format_flags;
+  double sum_probabilities, current_probability;
 
-
-  format_flags = os.setf(ios::left , ios::adjustfield);
+  old_adjust = os.setf(ios::left , ios::adjustfield);
 
   if (observation) {
     for (i = 0;i < nb_state;i++) {
       os << "\n" << STAT_word[STATW_STATE] << " " << i << " "
          << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
-      for (j = observation[i]->offset;j < observation[i]->nb_value;j++) {
-        if (observation[i]->mass[j] > 0.) {
-          os << STAT_word[STATW_OUTPUT] << " " << j << " : " << observation[i]->mass[j] << endl;
+      pmass = observation[i]->mass + observation[i]->offset;
+      sum_probabilities = 0.0;
+      current_probability = 0.0;
+      for (j = observation[i]->offset;j < observation[i]->nb_value - 1;j++) {
+        current_probability = (int)*pmass + floor((*pmass - (int)*pmass)*10000)/10000;
+        sum_probabilities += current_probability;
+        if (*pmass > 0.) {
+          os << STAT_word[STATW_OUTPUT] << " " << j << " : " << current_probability << endl;
         }
+        pmass++;
       }
+      j = observation[i]->nb_value-1;
+      os << STAT_word[STATW_OUTPUT] << " " << j << " : " << 1 - sum_probabilities << endl;
 
       if ((empirical_observation) && (empirical_observation[i]->nb_element > 0) && (exhaustive)) {
         os << "\n";
@@ -108,7 +123,7 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
       }
     }
 
-    // computation of the column widths
+    // calcul des largeurs des colonnes
 
     width[0] = column_width(nb_state - 1) + ASCII_SPACE;
 
@@ -121,7 +136,7 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
     }
     width[1] += ASCII_SPACE;
 
-    // writing of the observation probability matrix
+    // ecriture de la matrice des probabilites d'observation
 
     os << "\n";
     if (file_flag) {
@@ -478,7 +493,7 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
               os << "# ";
             }
             os << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-               << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
           }
 
 #         ifdef DEBUG
@@ -504,7 +519,7 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
           os << "# ";
         }
         os << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
         characteristics->sojourn_time[i]->ascii_characteristic_print(os , false , file_flag);
       }
 
@@ -519,12 +534,12 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->sojourn_time[i]->nb_element > 0)) {
           os << " | " << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if ((sojourn_time) && (sojourn_time[i])) {
           os << " | " << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->sojourn_time[i]->nb_element > 0)) {
             os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
@@ -549,8 +564,8 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
         if (file_flag) {
           os << "# ";
         }
-        os << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_FORWARD] << " "
-           << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
+        os << STAT_label[STATL_STATE] << " " << i << " " << SEQ_label[SEQL_FORWARD] << " "
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
         forward[i]->ascii_characteristic_print(os , false , file_flag);
       }
 
@@ -562,7 +577,7 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
         }
         os << SEQ_label[SEQL_INITIAL_RUN] << " - "
            << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
         characteristics->initial_run[i]->ascii_characteristic_print(os , false , file_flag);
 
         if ((characteristics->initial_run[i]->nb_element > 0) && (exhaustive)) {
@@ -572,11 +587,11 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
           }
           os << "   | " << SEQ_label[SEQL_INITIAL_RUN] << " - "
              << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 
           if ((forward) && (forward[i])) {
-            os << " | " << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_FORWARD] << " "
-               << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION]
+            os << " | " << STAT_label[STATL_STATE] << " " << i << " " << SEQ_label[SEQL_FORWARD] << " "
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION]
                << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION] << " | " << STAT_label[STATL_CUMULATIVE]
                << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
@@ -599,7 +614,7 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
         }
         os << SEQ_label[SEQL_FINAL_RUN] << " - "
            << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
         characteristics->final_run[i]->ascii_characteristic_print(os , false , file_flag);
       }
 
@@ -615,12 +630,12 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
             (characteristics->final_run[i]->nb_element > 0)) {
           os << " | " << SEQ_label[SEQL_FINAL_RUN] << " - "
              << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if ((forward) && (forward[i])) {
-          os << " | " << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_FORWARD] << " "
-             << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+          os << " | " << STAT_label[STATL_STATE] << " " << i << " " << SEQ_label[SEQL_FORWARD] << " "
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->final_run[i]->nb_element > 0)) {
             os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
@@ -804,24 +819,23 @@ ostream& CategoricalSequenceProcess::ascii_print(ostream &os , int process ,
     }
   }
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a CategoricalSequenceProcess object at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os                    stream,
- *  \param[in]     process               observation process index,
- *  \param[in]     empirical_observation pointer on the observation frequency distributions,
- *  \param[in]     marginal_distribution pointer on the marginal frequency distribution,
- *  \param[in]     characteristics       pointer on the observed sequences characteristics,
- *  \param[in]     forward               pointer on the forward sojourn time distributions.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet CategoricalSequenceProcess au format tableur.
+ *
+ *  arguments : stream, indice du processus d'observation,
+ *              pointeurs sur les lois d'observation empiriques,
+ *              la loi marginale empiriques empiriques,
+ *              sur les caracteristiques des sequences observees et
+ *              sur les lois de l'intervalle de temps residuel.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process ,
                                                        FrequencyDistribution **empirical_observation ,
@@ -830,8 +844,8 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
                                                        Forward **forward) const
 
 {
-  int i , j;
-  double scale[NB_STATE];
+  register int i , j;
+  double *pmass , scale[NB_STATE];
   const Distribution *pobservation[NB_STATE];
   Curves *smoothed_curves;
 
@@ -840,10 +854,12 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
     for (i = 0;i < nb_state;i++) {
       os << "\n" << STAT_word[STATW_STATE] << " " << i << "\t"
          << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
+      pmass = observation[i]->mass + observation[i]->offset;
       for (j = observation[i]->offset;j < observation[i]->nb_value;j++) {
-        if (observation[i]->mass[j] > 0.) {
-          os << STAT_word[STATW_OUTPUT] << "\t" << j << "\t" << observation[i]->mass[j] << endl;
+        if (*pmass > 0.) {
+          os << STAT_word[STATW_OUTPUT] << "\t" << j << "\t" << *pmass << endl;
         }
+        pmass++;
       }
 
       if ((empirical_observation) && (empirical_observation[i]->nb_element > 0)) {
@@ -966,7 +982,7 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
     }
 
     if (characteristics) {
-      smoothed_curves = new Curves(*(characteristics->index_value) , SMOOTHING);
+      smoothed_curves = new Curves(*(characteristics->index_value) , 's');
 
       os << "\n" << SEQ_label[SEQL_SMOOTHED_OBSERVED_PROBABILITIES] << endl;
       for (i = 0;i < nb_value;i++) {
@@ -1117,7 +1133,7 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
           }
           else {
             os << "\n" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-               << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
           }
 
           sojourn_time[i]->spreadsheet_parametric_characteristic_print(os , (sojourn_time[i]->ident == CATEGORICAL ? false : true));
@@ -1126,7 +1142,7 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
 
       if ((characteristics) && (i < characteristics->nb_value)) {
         os << "\n" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
         characteristics->sojourn_time[i]->spreadsheet_characteristic_print(os);
       }
 
@@ -1137,12 +1153,12 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->sojourn_time[i]->nb_element > 0)) {
           os << "\t" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if ((sojourn_time) && (sojourn_time[i])) {
           os << "\t" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->sojourn_time[i]->nb_element > 0)) {
             os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
@@ -1163,8 +1179,8 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
       }
 
       if ((forward) && (forward[i])) {
-        os << "\n" << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_FORWARD] << " "
-           << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
+        os << "\n" << STAT_label[STATL_STATE] << " " << i << " " << SEQ_label[SEQL_FORWARD] << " "
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
         forward[i]->spreadsheet_characteristic_print(os);
       }
 
@@ -1172,17 +1188,17 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
           (characteristics->initial_run)) {
         os << "\n" << SEQ_label[SEQL_INITIAL_RUN] << " - "
            << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
         characteristics->initial_run[i]->spreadsheet_characteristic_print(os);
 
         if (characteristics->initial_run[i]->nb_element > 0) {
           os << "\n\t" << SEQ_label[SEQL_INITIAL_RUN] << " - "
              << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 
           if ((forward) && (forward[i])) {
-            os << "\t" << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_FORWARD] << " "
-               << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION]
+            os << "\t" << STAT_label[STATL_STATE] << " " << i << " " << SEQ_label[SEQL_FORWARD] << " "
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION]
                << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION] << "\t" << STAT_label[STATL_CUMULATIVE] << " "
                << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
@@ -1201,7 +1217,7 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
       if ((characteristics) && (i < characteristics->nb_value)) {
         os << "\n" << SEQ_label[SEQL_FINAL_RUN] << " - "
            << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
         characteristics->final_run[i]->spreadsheet_characteristic_print(os);
       }
 
@@ -1212,12 +1228,12 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
             (characteristics->final_run[i]->nb_element > 0)) {
           os << "\t" << SEQ_label[SEQL_FINAL_RUN] << " - "
              << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if ((forward) && (forward[i])) {
-          os << "\t" << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_FORWARD] << " "
-             << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+          os << "\t" << STAT_label[STATL_STATE] << " " << i << " " << SEQ_label[SEQL_FORWARD] << " "
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->final_run[i]->nb_element > 0)) {
             os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
@@ -1377,22 +1393,19 @@ ostream& CategoricalSequenceProcess::spreadsheet_print(ostream &os , int process
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a CategoricalSequenceProcess object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] prefix                file prefix,
- *  \param[in] title                 figure title,
- *  \param[in] process               observation process index,
- *  \param[in] empirical_observation pointer on the observation frequency distributions,
- *  \param[in] marginal_distribution pointer on the marginal frequency distribution,
- *  \param[in] characteristics       pointer on the observed sequences characteristics,
- *  \param[in] length_distribution   pointer on the sequence length frequency distribution,
- *  \param[in] forward               pointer on the forward sojourn time distributions.
+ *  Sortie Gnuplot d'un objet CategoricalSequenceProcess.
  *
- *  \return                          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : prefixe des fichiers, titre des figures,
+ *              indice du processus d'observation,
+ *              pointeurs sur les lois d'observation empiriques,
+ *              la loi marginale empiriques,
+ *              les caracteristiques des sequences observees,
+ *              la loi empirique des longueurs des sequences et
+ *              les lois de l'intervalle de temps residuel.
+ *
+ *--------------------------------------------------------------*/
 
 bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *title , int process ,
                                             FrequencyDistribution **empirical_observation ,
@@ -1403,7 +1416,7 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
 
 {
   bool status = false , start;
-  int i , j , k , m;
+  register int i , j , k , m;
   int index_length , nb_histo , nb_dist , histo_index , dist_index , *dist_nb_value;
   double *scale;
   Curves *smoothed_curves;
@@ -1412,13 +1425,13 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
   ostringstream data_file_name[2];
 
 
-  // writing of the data files
+  // ecriture des fichiers de donnees
 
   if ((index_value) || (characteristics)) {
     if (characteristics) {
       index_length = characteristics->index_value->plot_length_computation();
       if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
-        smoothed_curves = new Curves(*(characteristics->index_value) , SMOOTHING);
+        smoothed_curves = new Curves(*(characteristics->index_value) , 's');
       }
       else {
         smoothed_curves = NULL;
@@ -1671,7 +1684,7 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
 
     if (status) {
 
-      // writing of the script files
+      // ecriture des fichiers de commandes et des fichiers d'impression
 
       for (i = 0;i < 2;i++) {
         ostringstream file_name[2];
@@ -2226,11 +2239,11 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
                          << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                          << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                          << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
-                         << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                         << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                          << "\" with impulses,\\" << endl;
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
                          << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
-                         << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+                         << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
                 sojourn_time[m]->plot_title_print(out_file);
                 out_file << "\" with linespoints" << endl;
                 j++;
@@ -2241,7 +2254,7 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
                          << MIN(pdist[k]->max * YSCALE , 1.) << "] \""
                          << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
                          << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
-                         << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+                         << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
                 sojourn_time[m]->plot_title_print(out_file);
                 out_file << "\" with linespoints" << endl;
               }
@@ -2275,7 +2288,7 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
                        << (int)(phisto[j]->max * YSCALE) + 1 << "] \""
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                        << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
-                       << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                       << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                        << "\" with impulses" << endl;
 
               if (phisto[j]->nb_value - 1 < TIC_THRESHOLD) {
@@ -2309,11 +2322,11 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
                          << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                          << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                          << " title \"" << SEQ_label[SEQL_INITIAL_RUN] << " - " << STAT_label[STATL_STATE]
-                         << " " << m << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                         << " " << m << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                          << "\" with impulses,\\" << endl;
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
-                         << " title \"" << STAT_label[STATL_STATE] << " " << m << " " << STAT_label[STATL_FORWARD]
-                         << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION]
+                         << " title \"" << STAT_label[STATL_STATE] << " " << m << " " << SEQ_label[SEQL_FORWARD]
+                         << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION]
                          << "\" with linespoints" << endl;
 
                 if (dist_nb_value[k] - 1 < TIC_THRESHOLD) {
@@ -2335,7 +2348,7 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
                          << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                          << " title \"" << SEQ_label[SEQL_INITIAL_RUN] << " - "
                          << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
-                         << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                         << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                          << "\" with impulses" << endl;
 
                 if (phisto[j]->nb_value - 1 < TIC_THRESHOLD) {
@@ -2370,11 +2383,11 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
                          << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                          << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                          << " title \"" << SEQ_label[SEQL_FINAL_RUN] << " - " << STAT_label[STATL_STATE]
-                         << " " << m << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                         << " " << m << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                          << "\" with impulses,\\" << endl;
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
-                         << " title \"" << STAT_label[STATL_STATE] << " " << m << " " << STAT_label[STATL_FORWARD]
-                         << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION]
+                         << " title \"" << STAT_label[STATL_STATE] << " " << m << " " << SEQ_label[SEQL_FORWARD]
+                         << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION]
                          << "\" with linespoints" << endl;
                 j++;
               }
@@ -2383,8 +2396,8 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
                 out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
                          << MIN(pdist[k]->max * YSCALE , 1.) << "] \""
                          << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
-                         << " title \"" << STAT_label[STATL_STATE] << " " << m << " " << STAT_label[STATL_FORWARD]
-                         << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION]
+                         << " title \"" << STAT_label[STATL_STATE] << " " << m << " " << SEQ_label[SEQL_FORWARD]
+                         << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION]
                          << "\" with linespoints" << endl;
               }
 
@@ -2418,7 +2431,7 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                        << " title \"" << SEQ_label[SEQL_FINAL_RUN] << " - "
                        << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
-                       << " " << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                       << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                        << "\" with impulses" << endl;
 
               if (phisto[j]->nb_value - 1 < TIC_THRESHOLD) {
@@ -2873,20 +2886,19 @@ bool CategoricalSequenceProcess::plot_print(const char *prefix , const char *tit
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a CategoricalSequenceProcess object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] plot                  reference on a MultiPlotSet object,
- *  \param[in] index                 MultiPlot index,
- *  \param[in] process               observation process index,
- *  \param[in] empirical_observation pointer on the observation frequency distributions,
- *  \param[in] marginal_distribution pointer on the marginal frequency distribution,
- *  \param[in] characteristics       pointer on the observed sequences characteristics,
- *  \param[in] length_distribution   pointer on the sequence length frequency distribution,
- *  \param[in] forward               pointer on the forward sojourn time distributions.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet CategoricalSequenceProcess.
+ *
+ *  arguments : reference sur un objet MultiPlotSet, indice du MultiPlot,
+ *              indice du processus d'observation,
+ *              pointeurs sur les lois d'observation empiriques,
+ *              la loi marginale empiriques,
+ *              les caracteristiques des sequences observees,
+ *              la loi empirique des longueurs des sequences et
+ *              les lois de l'intervalle de temps residuel.
+ *
+ *--------------------------------------------------------------*/
 
 void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index , int process ,
                                                 FrequencyDistribution **empirical_observation ,
@@ -2896,14 +2908,14 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
                                                 Forward **forward) const
 
 {
-  int i , j;
+  register int i , j;
   int index_length , dist_nb_value;
   double scale , max;
   Curves *smoothed_curves;
   ostringstream title , legend;
 
 
-  // computation of the number of plots
+  // calcul du nombre de vues
 
 /*  nb_plot_set = 0;
 
@@ -3036,12 +3048,12 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
     if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
 
-      // fit of smoothed intensities
+      // vue : ajustement intensite lissee
 
       plot.variable[index] = process;
       plot.viewpoint[index] = INTENSITY;
 
-      smoothed_curves = new Curves(*(characteristics->index_value) , SMOOTHING);
+      smoothed_curves = new Curves(*(characteristics->index_value) , 's');
 
       title.str("");
       if (process > 0) {
@@ -3088,7 +3100,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
       index++;
     }
 
-    // fit of intensities
+    // vue : ajustement intensite
 
     plot.variable[index] = process;
     plot.viewpoint[index] = INTENSITY;
@@ -3134,7 +3146,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     }
     index++;
 
-    // sequence length frequency distribution
+    // vue : loi empirique des longueurs des sequences
 
     plot.variable[index] = process;
     plot.viewpoint[index] = INTENSITY;
@@ -3163,7 +3175,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
   else {
 
-    // theoretical intensity
+    // vue : intensite theorique
 
     plot.variable[index] = process;
     plot.viewpoint[index] = INTENSITY;
@@ -3200,7 +3212,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     for (i = 0;i < nb_value;i++) {
       if ((first_occurrence) && (first_occurrence[i])) {
 
-        // fit of the distribution of the time to the 1st occurrence of a state/observation
+        // vue : ajustement loi du temps avant la 1ere occurrence d'un etat/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = FIRST_OCCURRENCE;
@@ -3258,7 +3270,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
       else if ((characteristics) && (i < characteristics->nb_value) &&
                (characteristics->first_occurrence[i]->nb_element > 0)) {
 
-        // frequency distribution of the time to the 1st occurrence of a state/observation
+        // vue : loi empirique du temps avant la 1ere occurrence d'un etat/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = FIRST_OCCURRENCE;
@@ -3298,7 +3310,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     for (i = 0;i < nb_value;i++) {
       if ((recurrence_time) && (recurrence_time[i])) {
 
-        // fit of the distribution of the recurrence time in a state/observation
+        // vue : ajustement loi empirique du temps de retour dans un etat/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = RECURRENCE_TIME;
@@ -3356,7 +3368,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
       else if ((characteristics) && (i < characteristics->nb_value) &&
                (characteristics->recurrence_time[i]->nb_element > 0)) {
 
-        // frequency distribution of the recurrence time in a state/observation
+        // vue : loi empirique du temps de retour dans un etat/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = RECURRENCE_TIME;
@@ -3396,7 +3408,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     for (i = 0;i < nb_value;i++) {
       if ((sojourn_time) && (sojourn_time[i])) {
 
-        // fit of the distribution of the sojourn time in a state/observation
+        // vue : ajustement loi du temps de sejour dans un etat/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = SOJOURN_TIME;
@@ -3423,7 +3435,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
           legend.str("");
           legend << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-                 << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           plot[index][0].legend = legend.str();
 
           plot[index][0].style = "impulses";
@@ -3442,7 +3454,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
         legend.str("");
         legend << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-               << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
         sojourn_time[i]->plot_title_print(legend);
         plot[index][j].legend = legend.str();
 
@@ -3455,7 +3467,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
       else if ((characteristics) && (i < characteristics->nb_value) &&
                (characteristics->sojourn_time[i]->nb_element > 0)) {
 
-        // frequency distribution of the sojourn time in a state/observation
+        // vue : loi empirique du temps de sejour dans un etat/observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = SOJOURN_TIME;
@@ -3480,7 +3492,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
         legend.str("");
         legend << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-               << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[index][0].legend = legend.str();
 
         plot[index][0].style = "impulses";
@@ -3494,7 +3506,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
           (characteristics->initial_run[i]->nb_element > 0)) {
         if ((forward) && (forward[i])) {
 
-          // fit of the distribution of the sojourn time in the first visited state
+          // vue : ajustement loi du temps de sejour residuel
 
           plot.variable[index] = process;
           plot.viewpoint[index] = SOJOURN_TIME;
@@ -3518,7 +3530,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
           legend.str("");
           legend << SEQ_label[SEQL_INITIAL_RUN] << " - "
                  << STAT_label[STATL_STATE] << " " << i << " "
-                 << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           plot[index][0].legend = legend.str();
 
           plot[index][0].style = "impulses";
@@ -3526,8 +3538,8 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
           characteristics->initial_run[i]->plotable_frequency_write(plot[index][0]);
 
           legend.str("");
-          legend << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_FORWARD] << " "
-                 << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+          legend << STAT_label[STATL_STATE] << " " << i << " " << SEQ_label[SEQL_FORWARD] << " "
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
           plot[index][1].legend = legend.str();
 
           plot[index][1].style = "linespoints";
@@ -3538,7 +3550,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
         else {
 
-          // frequency distribution of the sojourn time in the first visited state
+          // vue : loi empirique du temps de sejour dans le 1ere etat rencontre
 
           plot.variable[index] = process;
           plot.viewpoint[index] = SOJOURN_TIME;
@@ -3564,7 +3576,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
           legend.str("");
           legend << SEQ_label[SEQL_INITIAL_RUN] << " - "
                  << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-                 << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           plot[index][0].legend = legend.str();
 
           plot[index][0].style = "impulses";
@@ -3576,7 +3588,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
       if ((forward) && (forward[i])) {
 
-        // fit of the distribution of the sojourn time in the last visited state/observation
+        // vue : ajustement loi du temps de sejour dans le dernier etat/observation rencontre
 
         plot.variable[index] = process;
         plot.viewpoint[index] = SOJOURN_TIME;
@@ -3603,7 +3615,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
           legend.str("");
           legend << SEQ_label[SEQL_FINAL_RUN] << " - "
                  << STAT_label[STATL_STATE] << " " << i << " "
-                 << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           plot[index][0].legend = legend.str();
 
           plot[index][0].style = "impulses";
@@ -3622,8 +3634,8 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
         }
 
         legend.str("");
-        legend << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_FORWARD] << " "
-               << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+        legend << STAT_label[STATL_STATE] << " " << i << " " << SEQ_label[SEQL_FORWARD] << " "
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
         plot[index][j].legend = legend.str();
 
         plot[index][j].style = "linespoints";
@@ -3635,7 +3647,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
       else if ((characteristics) && (i < characteristics->nb_value) &&
                (characteristics->final_run[i]->nb_element > 0)) {
 
-        // frequency distribution of the sojourn time in the last visited state/observation
+        // vue : loi empirique du temps de sejour dans le dernier etat/observation rencontre
 
         plot.variable[index] = process;
         plot.viewpoint[index] = SOJOURN_TIME;
@@ -3661,7 +3673,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
         legend.str("");
         legend << SEQ_label[SEQL_FINAL_RUN] << " - "
                << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-               << STAT_label[STATL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[index][0].legend = legend.str();
 
         plot[index][0].style = "impulses";
@@ -3677,7 +3689,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     for (i = 0;i < nb_value;i++) {
       if (nb_run) {
 
-        // fit of the distribution of the number of runs of a state/observation per sequence
+        // vue : ajustement loi du nombre de series d'un etat/observation par sequence
 
         plot.variable[index] = process;
         plot.viewpoint[index] = COUNTING;
@@ -3748,7 +3760,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
                (characteristics->nb_run) &&
                (characteristics->nb_run[i]->nb_element > 0)) {
 
-        // frequency distribution of the number of runs of a state/observation per sequence
+        // vue : loi empirique du nombre de series d'un etat/observation par sequence
 
         plot.variable[index] = process;
         plot.viewpoint[index] = COUNTING;
@@ -3784,7 +3796,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
       if (nb_occurrence) {
 
-        // fit of the distribution of the number of occurrences of a state/observation per sequence
+        // vue : ajustement loi du nombre d'occurrences d'un etat/observation par sequence
 
         plot.variable[index] = process;
         plot.viewpoint[index] = COUNTING;
@@ -3855,7 +3867,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
                (characteristics->nb_occurrence) &&
                (characteristics->nb_occurrence[i]->nb_element > 0)) {
 
-        // frequency distribution of the number of occurrences of a state/observation per sequence
+        // vue : loi empirique du nombre d'occurrences d'un etat/observation par sequence
 
         plot.variable[index] = process;
         plot.viewpoint[index] = COUNTING;
@@ -3892,7 +3904,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
     if ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence)) {
 
-      // sequence length frequency distribution
+      // vue : loi empirique des longueurs des sequences
 
       plot.variable[index] = process;
       plot.viewpoint[index] = COUNTING;
@@ -3924,7 +3936,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     if (empirical_observation) {
       for (i = 0;i < nb_state;i++) {
 
-        // fit of observation distributions
+        // vue : ajustement loi d'observation
 
         plot.variable[index] = process;
         plot.viewpoint[index] = OBSERVATION;
@@ -3978,7 +3990,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
     else {
 
-      // observation distributions
+      // vue : lois d'observation
 
       plot.variable[index] = process;
       plot.viewpoint[index] = OBSERVATION;
@@ -4019,7 +4031,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     if (marginal_distribution) {
       if ((weight) && (mixture)) {
 
-        // fit of the mixture of observation distributions (theoretical weights)
+        // vue : ajustement melange de lois d'observation
 
         title.str("");
         title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process << " - "
@@ -4069,7 +4081,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
       if ((restoration_weight) && (restoration_mixture)) {
 
-        // fit of the mixture of observation distributions (restoration weights)
+        // vue : ajustement melange de lois d'observation (poids issus de la restauration)
 
         title.str("");
         if (process > 0) {

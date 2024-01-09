@@ -8,7 +8,7 @@
  *       File author(s): C. Nouguier & F. Boudon (frederic.boudon@cirad.fr) boudon
  *
  *       $Source$
- *       $Id$
+ *       $Id: tools_namespace.h 9869 2010-11-04 17:31:41Z dbarbeau $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *

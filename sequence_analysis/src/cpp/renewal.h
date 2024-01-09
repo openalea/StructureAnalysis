@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: renewal.h 18062 2015-04-23 10:49:51Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -40,9 +40,6 @@
 #define RENEWAL_H
 
 
-#include "stat_tool/curves.h"
-#include "stat_tool/distribution.h"
-
 
 namespace sequence_analysis {
 
@@ -50,25 +47,25 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Constants
+ *  Constantes :
  */
 
 
-  const int DEFAULT_TIME = 20;           // default observation period
-  const int MAX_TIME = 500;              // maximum observation period
-  const int PLOT_NEVENT_TIME = 10;       // maximum number of time to the nth event distributions
-                                         // plotted (Gnuplot output)
-  const int PLOT_NB_TIME = 5;            // maximum number of distributions of the number of events plotted
-                                         // with the mixture of the number of events distributions (Gnuplot output)
+  const int DEFAULT_TIME = 20;           // temps d'observation par defaut
+  const int MAX_TIME = 500;              // temps d'observation maximum
+  const int PLOT_NEVENT_TIME = 10;       // nombre maximum de lois du temps avant
+                                         // le n-eme evenement affichees (sortie Gnuplot)
+  const int PLOT_NB_TIME = 5;            // nombre maximum de lois du nombre d'evenements
+                                         // affichees dans le cas de melange (sortie Gnuplot)
 
-  const double RENEWAL_THRESHOLD = 0.99999;  // threshold on the cumulative distribution function for determining
-                                             // the upper bound of the support of the inter-event distribution
-  const double RB_THRESHOLD = 2000.;     // threshold for using the fast computation of the number of events distribution
-                                         // from a binomial inter-event distribution
-  const double RNB_THRESHOLD = 2000.;    // threshold for using the fast computation of the number of events distribution
-                                         // from a negative binomiale inter-event distribution
+  const double RENEWAL_THRESHOLD = 0.99999;  // seuil sur la fonction de repartition
+                                             // pour borner une loi
+  const double RB_THRESHOLD = 2000.;     // seuil pour utiliser le calcul rapide de la loi du
+                                         // nombre d'ev correspondant a une loi binomiale
+  const double RNB_THRESHOLD = 2000.;    // seuil pour utiliser le calcul rapide de la loi du
+                                         // nombre d'ev correspondant a une loi binomiale negative
 
-  enum renewal_distribution {
+  enum {
     INTER_EVENT ,
     WITHIN_OBSERVATION_PERIOD ,
     LENGTH_BIAS ,
@@ -78,30 +75,35 @@ namespace sequence_analysis {
     NB_EVENT_MIXTURE
   };
 
-  const double MIN_NB_EVENT = 0.4;       // minimum mean number of events
-  const double MIN_INTER_EVENT = 1.;     // minimum mean time interval between events
-  const double RENEWAL_INIT_PROBABILITY = 0.001;  // threshold for probability initialization
-  const int RENEWAL_COEFF = 10;          // rounding coefficient for the estimator
+  const double MIN_NB_EVENT = 0.4;       // nombre d'evenements moyen minimum
+  const double MIN_INTER_EVENT = 1.;     // temps moyen minimum entre 2 evenements
+  const double RENEWAL_INIT_PROBABILITY = 0.001;  // seuil pour l'initialisation de la probabilite
+  const double RENEWAL_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
+  const int RENEWAL_NB_ITER = 10000;     // nombre maximum d'iterations EM
+  const double RENEWAL_DIFFERENCE_WEIGHT = 0.5;  // poids par defaut de la penalisation
+                                               // (cas des differences 1ere ou 2nde)
+  const double RENEWAL_ENTROPY_WEIGHT = 0.05;  // poids par defaut de la penalisation (cas de l'entropie)
+  const int RENEWAL_COEFF = 10;          // coefficient arrondi estimateur
 
-  const double MEAN_COEFF = 2.;          // coefficient on the mean for compensating the length bias
+  const int NB_COMPLETE_INTERVAL = 3;    // nombre minimum d'intervalles de temps complets
+  const double MEAN_COEFF = 2.;          // coefficient sur la moyenne pour compenser le biais par la longueur
+  const double MAX_VALUE_COEFF = 10.;    // coefficient pour deduire la valeur maximum de la loi inter-evenement
 
-  const int RENEWAL_NB_ELEMENT = 1000000;  // maximum sample size for simulation
+  const int RENEWAL_NB_ELEMENT = 1000000;  // taille maximum de l'echantillon pour la simulation
 
 
 
 /****************************************************************
  *
- *  Class definition
+ *  Definition des classes :
  */
 
 
-  /// \brief Length-biased distribution
-
-  class LengthBias : public stat_tool::DiscreteParametric {
+  class LengthBias : public stat_tool::DiscreteParametric {  // loi biaisee par la longueur
 
   public :
 
-    LengthBias(int inb_value = 0 , stat_tool::discrete_parametric iident = stat_tool::CATEGORICAL ,
+    LengthBias(int inb_value = 0 , int iident = stat_tool::CATEGORICAL ,
                int iinf_bound = stat_tool::I_DEFAULT , int isup_bound = stat_tool::I_DEFAULT ,
                double iparameter = stat_tool::D_DEFAULT, double iprobability = stat_tool::D_DEFAULT)
     :stat_tool::DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability) {}
@@ -114,37 +116,34 @@ namespace sequence_analysis {
   };
 
 
-  /// \brief Backward recurrence time distribution
 
-  class Backward : public stat_tool::DiscreteParametric {
+  class Backward : public stat_tool::DiscreteParametric {  // loi de l'intervalle de temps apres le dernier evenement
 
   public :
 
-    Backward(int inb_value = 0 , stat_tool::discrete_parametric iident = stat_tool::CATEGORICAL ,
+    Backward(int inb_value = 0 , int iident = stat_tool::CATEGORICAL ,
              int iinf_bound = stat_tool::I_DEFAULT , int isup_bound = stat_tool::I_DEFAULT ,
              double iparameter = stat_tool::D_DEFAULT, double iprobability = stat_tool::D_DEFAULT)
     :stat_tool::DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability) {}
     Backward(const Backward &dist , int ialloc_nb_value = stat_tool::I_DEFAULT)
-    :stat_tool::DiscreteParametric(dist , stat_tool::DISTRIBUTION_COPY , ialloc_nb_value) {}
+    :stat_tool::DiscreteParametric(dist , 'c' , ialloc_nb_value) {}
 
     void computation(const stat_tool::DiscreteParametric &inter_event , const stat_tool::Distribution &time);
   };
 
 
-  /// \brief Number of events distribution
 
-  class NbEvent : public stat_tool::DiscreteParametric {
+  class NbEvent : public stat_tool::DiscreteParametric {  // loi du nombre d'evenements
 
   public :
 
-    stat_tool::process_type type;  ///< renewal process type (ORDINARY/EQUILIBRIUM)
-    int time;               ///< observation period
+    char type;              // 'o' : ordinaire, 'e' : en equilibre
+    int time;               // temps d'observation
 
-    NbEvent(stat_tool::process_type itype = stat_tool::EQUILIBRIUM , int itime = 0 , int inb_value = 0 ,
-            stat_tool::discrete_parametric iident = stat_tool::CATEGORICAL ,
+    NbEvent(char itype = 'v' , int itime = 0 , int inb_value = 0 , int iident = stat_tool::CATEGORICAL ,
             int iinf_bound = stat_tool::I_DEFAULT , int isup_bound = stat_tool::I_DEFAULT ,
             double iparameter = stat_tool::D_DEFAULT , double iprobability = stat_tool::D_DEFAULT);
-    NbEvent(stat_tool::process_type itype , int itime , stat_tool::DiscreteParametric &inter_event);
+    NbEvent(char itype , int itime , stat_tool::DiscreteParametric &inter_event);
     NbEvent(const NbEvent &nb_event , int ialloc_nb_value = stat_tool::I_DEFAULT);
 
     void binomial_computation();
@@ -155,43 +154,48 @@ namespace sequence_analysis {
   };
 
 
+
   class RenewalIterator;
   class TimeEvents;
   class RenewalData;
 
-  /// \brief Renewal process
 
-  class Renewal : public stat_tool::StatInterface {
+  class Renewal : public stat_tool::StatInterface {  // processus de renouvellement
 
     friend class RenewalIterator;
     friend class TimeEvents;
     friend class RenewalData;
 
+    friend Renewal* renewal_building(stat_tool::StatError &error , const stat_tool::DiscreteParametric &inter_event ,
+                                     char type, int time);
+    friend Renewal* renewal_ascii_read(stat_tool::StatError& error , const char *path ,
+                                       char type, int time,
+                                       double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const Renewal &renew)
     { return renew.ascii_write(os , renew.renewal_data , false , false); }
 
   private :
 
-    int nb_iterator;        ///< number of iterators pointing on the Renewal object
-    RenewalData *renewal_data;  ///< pointer on a RenewalData object
-    stat_tool::process_type type;  ///< renewal process type (ORDINARY/EQUILIBRIUM)
-    int nb_event_max;       ///< maximum number of events
-    stat_tool::Distribution *time;  ///< observation period distribution
-    stat_tool::DiscreteParametric *inter_event;  ///< inter-event distribution
-    LengthBias *length_bias;  ///< length-biased distribution
-    Backward *backward;     ///< backward recurrence time distribution
-    stat_tool::Forward *forward;  ///< forward recurrence time distribution
-    stat_tool::DiscreteParametric **nevent_time;  ///< time to the nth event distributions
-    NbEvent **nb_event;    ///< number of events distributions for the different observation periods
-    stat_tool::Distribution *mixture;  ///< mixture of the number of events distributions
-    stat_tool::Curves *index_event;  ///< no-event/event probabilities as a function of time
+    int nb_iterator;        // nombre d'iterateurs pointant sur l'objet
+    RenewalData *renewal_data;  // pointeur sur un objet RenewalData
+    char type;              // 'o' : ordinaire, 'e' : en equilibre
+    int nb_event_max;       // borne max sur le nombre d'evenements
+    stat_tool::Distribution *time;  // loi du temps d'observation
+    stat_tool::DiscreteParametric *inter_event;  // loi inter-evenement
+    LengthBias *length_bias;  // loi biaisee par la longueur
+    Backward *backward;     // loi de l'intervalle de temps apres le dernier evenement
+    stat_tool::Forward *forward;  // loi de l'intervalle de temps residuel
+    stat_tool::DiscreteParametric **nevent_time;  // lois du temps avant le n-eme evenement
+    NbEvent **nb_event;    // lois du nombre d'evenements
+                           // pour un temps d'observation donne
+    stat_tool::Distribution *mixture;  // melange de lois du nombre d'evenements
+    stat_tool::Curves *index_event;  // probabilites de non-evenement/evenement fonction du temps
 
     void init(int inf_bound , int sup_bound , double parameter , double probability);
-    void init(stat_tool::discrete_parametric ident , int inf_bound , int sup_bound ,
-              double parameter , double probability);
+    void init(int ident , int inf_bound , int sup_bound , double parameter , double probability);
     void copy(const Renewal &renew , bool data_flag = true);
     void remove();
-    void type_init(stat_tool::process_type itype);
+    void type_init(int itype);
 
     std::ostream& ascii_write(std::ostream &os , const RenewalData *timev ,
                               bool exhaustive , bool file_flag) const;
@@ -204,16 +208,15 @@ namespace sequence_analysis {
 
     void expectation_step(const TimeEvents &timev , stat_tool::Reestimation<double> *reestim) const;
     void expectation_step(const TimeEvents &timev , stat_tool::Reestimation<double> *inter_event_reestim ,
-                          stat_tool::Reestimation<double> *length_bias_reestim ,
-                          stat_tool::censoring_estimator estimator , bool combination = false ,
-                          stat_tool::duration_distribution_mean_estimator mean_estimator = stat_tool::COMPUTED) const;
+                          stat_tool::Reestimation<double> *length_bias_reestim , int estimator ,
+                          bool combination = false , int mean_computation_method = stat_tool::COMPUTED) const;
 
   public :
 
     Renewal();
-    Renewal(stat_tool::process_type itype , const stat_tool::FrequencyDistribution &htime ,
+    Renewal(char itype , const stat_tool::FrequencyDistribution &htime ,
             const stat_tool::DiscreteParametric &iinter_event);
-    Renewal(stat_tool::process_type itype , const stat_tool::Distribution &itime ,
+    Renewal(char itype , const stat_tool::Distribution &itime ,
             const stat_tool::DiscreteParametric &iinter_event);
     Renewal(const RenewalData &irenewal_data ,
             const stat_tool::DiscreteParametric &iinter_event);
@@ -223,42 +226,34 @@ namespace sequence_analysis {
     void conditional_delete();
     Renewal& operator=(const Renewal &renew);
 
-    stat_tool::DiscreteParametricModel* extract(stat_tool::StatError &error ,
-                                                renewal_distribution dist_type ,
+    stat_tool::DiscreteParametricModel* extract(stat_tool::StatError &error , int dist_type ,
                                                 int itime = stat_tool::I_DEFAULT) const;
-
-    static Renewal* building(stat_tool::StatError &error , const stat_tool::DiscreteParametric &inter_event ,
-                             stat_tool::process_type type = stat_tool::EQUILIBRIUM , int time = DEFAULT_TIME);
-
-    static Renewal* ascii_read(stat_tool::StatError& error , const std::string path ,
-                               stat_tool::process_type type = stat_tool::EQUILIBRIUM , int time = DEFAULT_TIME ,
-                               double cumul_threshold = RENEWAL_THRESHOLD);
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(stat_tool::StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(stat_tool::StatError &error , const std::string path) const;
+    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
-    void computation(bool inter_event_flag = true , stat_tool::process_type itype = stat_tool::DEFAULT_TYPE ,
+    void computation(bool inter_event_flag = true , char itype = 'v' ,
                      const stat_tool::Distribution *dtime = NULL);
 
     double likelihood_computation(const TimeEvents &timev) const;
 
-    RenewalData* simulation(stat_tool::StatError &error , stat_tool::process_type itype ,
+    RenewalData* simulation(stat_tool::StatError &error , char itype ,
                             const stat_tool::FrequencyDistribution &ihtime) const;
-    RenewalData* simulation(stat_tool::StatError &error , stat_tool::process_type itype ,
+    RenewalData* simulation(stat_tool::StatError &error , char itype ,
                             int nb_element , int itime) const;
-    RenewalData* simulation(stat_tool::StatError &error , stat_tool::process_type itype ,
+    RenewalData* simulation(stat_tool::StatError &error , char itype ,
                             int nb_element , const TimeEvents &itimev) const;
 
-    // class member access
+    // acces membres de la classe
 
     int get_nb_iterator() const { return nb_iterator; }
     RenewalData* get_renewal_data() const { return renewal_data; }
-    stat_tool::process_type get_type() const { return type; }
+    char get_type() const { return type; }
     stat_tool::Distribution* get_time() const { return time; }
     stat_tool::DiscreteParametric* get_inter_event() const { return inter_event; }
     LengthBias* get_length_bias() const { return length_bias; }
@@ -271,17 +266,23 @@ namespace sequence_analysis {
   };
 
 
-  /// \brief Renewal process iterator for asynchronous simulation
+  Renewal* renewal_building(stat_tool::StatError &error , const stat_tool::DiscreteParametric &inter_event ,
+                            char type = 'e' , int time = DEFAULT_TIME);
+  Renewal* renewal_ascii_read(stat_tool::StatError& error , const char *path ,
+                              char type = 'e' , int time = DEFAULT_TIME ,
+                              double cumul_threshold = RENEWAL_THRESHOLD);
 
-  class RenewalIterator {
+
+
+  class RenewalIterator {  // iterateur processus de renouvellement
 
   private :
 
-    Renewal *renewal;       ///< pointer on a Renewal object
-    int interval;           ///< time interval between events
-    int counter;            ///< counter
-    int length;             ///< sequence length
-    int *sequence;          ///< sequence of events
+    Renewal *renewal;       // pointeur sur un objet Renewal
+    int interval;           // intervalle de temps
+    int counter;            // compteur
+    int length;             // longueur de la sequence
+    int *sequence;          // sequence
 
     void copy(const RenewalIterator &iter);
 
@@ -293,9 +294,9 @@ namespace sequence_analysis {
     ~RenewalIterator();
     RenewalIterator& operator=(const RenewalIterator &iter);
 
-    void simulation(int ilength = 1 , stat_tool::process_type type = stat_tool::DEFAULT_TYPE);
+    void simulation(int ilength = 1 , char type = 'v');
 
-    // class member access
+    // acces membres de la classe
 
     Renewal* get_renewal() const { return renewal; }
     int get_interval() const { return interval; }
@@ -305,26 +306,29 @@ namespace sequence_analysis {
   };
 
 
-  /// \brief Triplets {observation period, number of events, frequency}
 
-  class TimeEvents : public stat_tool::StatInterface {
+  class TimeEvents : public stat_tool::StatInterface {  // echantillons {temps, nombre d'evenements, effectif}
 
     friend class stat_tool::FrequencyDistribution;
     friend class Renewal;
 
+    friend TimeEvents* time_events_ascii_read(stat_tool::StatError &error , const char *path);
+    friend TimeEvents* old_time_events_ascii_read(stat_tool::StatError &error , const char *path);
     friend std::ostream& operator<<(std::ostream &os , const TimeEvents &timev)
     { return timev.ascii_write(os , true); }
 
   protected :
 
-    int nb_element;         ///< sample size
-    int nb_class;           ///< number of classes
-    int *time;              ///< observation period
-    int *nb_event;          ///< number of events
-    int *frequency;         ///< frequency of each pair {observation period, number of events}
-    stat_tool::FrequencyDistribution *htime;  ///< observation period frequency distribution
-    stat_tool::FrequencyDistribution **hnb_event;  ///< number of events frequency distributions for the different observation periods
-    stat_tool::FrequencyDistribution *mixture;  ///< mixture of the number of events frequency distributions
+    int nb_element;         // effectif total
+    int nb_class;           // nombre de classes
+    int *time;              // temps d'observation
+    int *nb_event;          // nombre d'evenements
+    int *frequency;         // effectif de chacune des classes
+                            // {temps, nombre d'evenements}
+    stat_tool::FrequencyDistribution *htime;  // loi empirique du temps d'observation
+    stat_tool::FrequencyDistribution **hnb_event;  // lois empiriques du nombre d'evenements
+                                                   // pour un temps d'observation donne
+    stat_tool::FrequencyDistribution *mixture;  // loi empirique du nombre d'evenements
 
     void build_frequency_distribution();
     void build_sample();
@@ -333,11 +337,9 @@ namespace sequence_analysis {
     void merge(int nb_sample , const TimeEvents **ptimev);
     void remove();
 
-    std::ostream& ascii_write(std::ostream &os , bool exhaustive , stat_tool::process_type type) const;
-    std::ostream& ascii_file_write(std::ostream &os , bool exhaustive ,
-                                   stat_tool::process_type type = stat_tool::EQUILIBRIUM) const;
-    std::ostream& spreadsheet_write(std::ostream &os ,
-                                    stat_tool::process_type type = stat_tool::EQUILIBRIUM) const;
+    std::ostream& ascii_write(std::ostream &os , bool exhaustive , char type) const;
+    std::ostream& ascii_file_write(std::ostream &os , bool exhaustive , char type = 'v') const;
+    std::ostream& spreadsheet_write(std::ostream &os , char type = 'v') const;
 
     void nb_element_computation();
     double min_inter_event_computation() const;
@@ -353,9 +355,7 @@ namespace sequence_analysis {
     ~TimeEvents();
     TimeEvents& operator=(const TimeEvents &timev);
 
-    TimeEvents* merge(int nb_sample , const std::vector<TimeEvents> itimev) const;
-    stat_tool::DiscreteDistributionData* extract(stat_tool::StatError &error ,
-                                                 renewal_distribution histo_type ,
+    stat_tool::DiscreteDistributionData* extract(stat_tool::StatError &error , int histo_type ,
                                                  int itime = stat_tool::I_DEFAULT) const;
 
     TimeEvents* time_scaling(stat_tool::StatError &error , int scaling_coeff) const;
@@ -364,40 +364,27 @@ namespace sequence_analysis {
     TimeEvents* nb_event_select(stat_tool::StatError &error , int min_nb_event ,
                                 int max_nb_event) const;
 
-    static TimeEvents* building(stat_tool::StatError &error , stat_tool::FrequencyDistribution &nb_event , int itime);
-
-    static TimeEvents* ascii_read(stat_tool::StatError &error , const std::string path);
-    static TimeEvents* old_ascii_read(stat_tool::StatError &error , const std::string path);
-
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = true) const;
-    bool ascii_write(stat_tool::StatError &error , const std::string path , bool exhaustive = true) const;
-    bool spreadsheet_write(stat_tool::StatError &error , const std::string path) const;
+    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = true) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
     double information_computation() const;
 
-    Renewal* estimation(stat_tool::StatError &error , bool display , stat_tool::process_type type ,
-                        const stat_tool::DiscreteParametric &iinter_event ,
-                        stat_tool::estimation_criterion estimator = stat_tool::LIKELIHOOD ,
-                        int nb_iter = stat_tool::I_DEFAULT ,
-                        stat_tool::censoring_estimator equilibrium_estimator = stat_tool::COMPLETE_LIKELIHOOD ,
-                        stat_tool::duration_distribution_mean_estimator mean_estimator = stat_tool::COMPUTED ,
-                        double weight = stat_tool::D_DEFAULT ,
-                        stat_tool::penalty_type pen_type = stat_tool::SECOND_DIFFERENCE ,
-                        stat_tool::side_effect outside = stat_tool::ZERO) const;
-    Renewal* estimation(stat_tool::StatError &error , bool display , stat_tool::process_type type ,
-                        stat_tool::estimation_criterion estimator = stat_tool::LIKELIHOOD ,
-                        int nb_iter = stat_tool::I_DEFAULT ,
-                        stat_tool::censoring_estimator equilibrium_estimator = stat_tool::COMPLETE_LIKELIHOOD ,
-                        stat_tool::duration_distribution_mean_estimator mean_estimator = stat_tool::COMPUTED ,
-                        double weight = stat_tool::D_DEFAULT ,
-                        stat_tool::penalty_type pen_type = stat_tool::SECOND_DIFFERENCE ,
-                        stat_tool::side_effect outside = stat_tool::ZERO) const;
+    Renewal* estimation(stat_tool::StatError &error , std::ostream &os , char type ,
+                        const stat_tool::DiscreteParametric &iinter_event , int estimator = stat_tool::LIKELIHOOD ,
+                        int nb_iter = stat_tool::I_DEFAULT , int equilibrium_estimator = stat_tool::COMPLETE_LIKELIHOOD ,
+                        int mean_computation_method = stat_tool::COMPUTED , double weight = stat_tool::D_DEFAULT ,
+                        int penalty_type = stat_tool::SECOND_DIFFERENCE , int outside = stat_tool::ZERO) const;
+    Renewal* estimation(stat_tool::StatError &error , std::ostream &os , char type , int estimator = stat_tool::LIKELIHOOD ,
+                        int nb_iter = stat_tool::I_DEFAULT , int equilibrium_estimator = stat_tool::COMPLETE_LIKELIHOOD ,
+                        int mean_computation_method = stat_tool::COMPUTED , double weight = stat_tool::D_DEFAULT ,
+                        int penalty_type = stat_tool::SECOND_DIFFERENCE , int outside = stat_tool::ZERO) const;
 
-    // class member access
+    // acces membres de la classe
 
     int get_nb_element() const { return nb_element; }
     int get_nb_class() const { return nb_class; }
@@ -407,10 +394,14 @@ namespace sequence_analysis {
   };
 
 
-  /// \brief Data structure corresponding to a renewal process
+  TimeEvents* time_events_ascii_read(stat_tool::StatError &error , const char *path);
+  TimeEvents* old_time_events_ascii_read(stat_tool::StatError &error , const char *path);
+  TimeEvents* build_time_events(stat_tool::StatError &error , stat_tool::FrequencyDistribution &nb_event , int itime);
 
-  class RenewalData : public TimeEvents {
 
+
+  class RenewalData : public TimeEvents {  // donnees correspondant a
+                                           // un processus de renouvellement
     friend class Renewal;
     friend class Sequences;
 
@@ -419,16 +410,18 @@ namespace sequence_analysis {
 
   private :
 
-    Renewal *renewal;       ///< pointer on a Renewal object
-    stat_tool::process_type type;  ///< renewal process type (ORDINARY/EQUILIBRIUM)
-    int *length;            ///< sequence length
-    int **sequence;         ///< sequences of events
-    stat_tool::FrequencyDistribution *inter_event; ///< inter-event frequency distribution
-    stat_tool::FrequencyDistribution *within;  ///< frequency distribution of time intervals between events within the observation period
-    stat_tool::FrequencyDistribution *length_bias;  ///< length-biased frequency distribution
-    stat_tool::FrequencyDistribution *backward;  ///< backward recurrence time frequency distribution
-    stat_tool::FrequencyDistribution *forward;  ///< forward recurrence time frequency distribution
-    stat_tool::Curves *index_event;  ///< empirical no-event/event probabilities as a function of time
+    Renewal *renewal;       // pointeur sur un objet Renewal
+    char type;              // 'o' : ordinaire, 'e' : en equilibre
+    int *length;            // longueurs des sequences
+    int **sequence;         // sequences
+    stat_tool::FrequencyDistribution *inter_event; // intervalles de temps entre 2 evenements
+    stat_tool::FrequencyDistribution *within;  // intervalles de temps entre 2 evenements a l'interieur
+                                               // de la periode d'observation
+    stat_tool::FrequencyDistribution *length_bias;  // intervalles de temps entre 2 evenements
+                                                    // recouvrant une date d'observation
+    stat_tool::FrequencyDistribution *backward;  // intervalles de temps apres le dernier evenement
+    stat_tool::FrequencyDistribution *forward;  // intervalles de temps residuel
+    stat_tool::Curves *index_event;  // probabilites de non-evenement/evenement fonction du temps
 
     void copy(const RenewalData &timev , bool model_flag = true);
     void remove();
@@ -442,8 +435,8 @@ namespace sequence_analysis {
 
     RenewalData();
     RenewalData(int nb_element , int itime);
-    RenewalData(stat_tool::process_type itype , const Renewal &renew);
-    RenewalData(const TimeEvents &timev , stat_tool::process_type itype);
+    RenewalData(int itype , const Renewal &renew);
+    RenewalData(const TimeEvents &timev , int itype);
     RenewalData(int nb_sample , const RenewalData **itimev);
     RenewalData(const RenewalData &timev , bool model_flag = true)
     :TimeEvents(timev) { copy(timev , model_flag); }
@@ -451,37 +444,29 @@ namespace sequence_analysis {
     RenewalData& operator=(const RenewalData&);
 
     RenewalData* merge(stat_tool::StatError &error , int nb_sample , const RenewalData **itimev) const;
-    RenewalData* merge(stat_tool::StatError &error , int nb_sample , const std::vector<RenewalData> itimev) const;
-    stat_tool::DiscreteDistributionData* extract(stat_tool::StatError &error ,
-                                                 renewal_distribution histo_type ,
+    stat_tool::DiscreteDistributionData* extract(stat_tool::StatError &error , int histo_type ,
                                                  int itime = stat_tool::I_DEFAULT) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(stat_tool::StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(stat_tool::StatError &error , const std::string path) const;
+    bool ascii_write(stat_tool::StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(stat_tool::StatError &error , const char *path) const;
     bool plot_write(stat_tool::StatError &error , const char *prefix , const char *title = NULL) const;
     stat_tool::MultiPlotSet* get_plotable() const;
 
-    Renewal* estimation(stat_tool::StatError &error , bool display ,
+    Renewal* estimation(stat_tool::StatError &error , std::ostream &os ,
                         const stat_tool::DiscreteParametric &iinter_event ,
-                        stat_tool::estimation_criterion estimator = stat_tool::LIKELIHOOD ,
-                        int nb_iter = stat_tool::I_DEFAULT ,
-                        stat_tool::duration_distribution_mean_estimator mean_estimator = stat_tool::COMPUTED ,
-                        double weight = stat_tool::D_DEFAULT ,
-                        stat_tool::penalty_type pen_type = stat_tool::SECOND_DIFFERENCE ,
-                        stat_tool::side_effect outside = stat_tool::ZERO) const;
-    Renewal* estimation(stat_tool::StatError &error , bool display ,
-                        stat_tool::estimation_criterion estimator = stat_tool::LIKELIHOOD ,
-                        int nb_iter = stat_tool::I_DEFAULT ,
-                        stat_tool::duration_distribution_mean_estimator mean_estimator = stat_tool::COMPUTED ,
-                        double weight = stat_tool::D_DEFAULT ,
-                        stat_tool::penalty_type pen_type = stat_tool::SECOND_DIFFERENCE ,
-                        stat_tool::side_effect outside = stat_tool::ZERO) const;
+                        int estimator = stat_tool::LIKELIHOOD , int nb_iter = stat_tool::I_DEFAULT ,
+                        int mean_computation_method = stat_tool::COMPUTED , double weight = stat_tool::D_DEFAULT ,
+                        int penalty_type = stat_tool::SECOND_DIFFERENCE , int outside = stat_tool::ZERO) const;
+    Renewal* estimation(stat_tool::StatError &error , std::ostream &os , int estimator = stat_tool::LIKELIHOOD ,
+                        int nb_iter = stat_tool::I_DEFAULT , int mean_computation_method = stat_tool::COMPUTED ,
+                        double weight = stat_tool::D_DEFAULT , int penalty_type = stat_tool::SECOND_DIFFERENCE ,
+                        int outside = stat_tool::ZERO) const;
 
-    // class member access
+    // acces membres de la classe
 
     Renewal* get_renewal() const { return renewal; }
-    stat_tool::process_type get_type() const { return type; }
+    char get_type() const { return type; }
     int get_length(int index_seq) const { return length[index_seq]; }
     int get_sequence(int index_seq , int index) const
     { return sequence[index_seq][index]; }

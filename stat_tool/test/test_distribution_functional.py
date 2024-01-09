@@ -33,7 +33,7 @@
 #
 #########################################################################
 """
-__version__ = "$Id$"
+__version__ = "$Id: test_distribution_functional.py 9397 2010-08-10 10:50:07Z cokelaer $"
 
 
 from openalea.stat_tool.plot import DISABLE_PLOT

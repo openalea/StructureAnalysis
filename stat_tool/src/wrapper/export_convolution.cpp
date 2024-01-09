@@ -16,13 +16,15 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id$
+ *        $Id: export_convolution.cpp 18031 2015-04-23 07:13:15Z guedon $
  *
  *-----------------------------------------------------------------------------*/
 
 
 #include "wrapper_util.h"
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/distribution.h"
 #include "stat_tool/convolution.h"
 
 #include <boost/python.hpp>
@@ -50,7 +52,7 @@ public:
   {
     StatError error;
     Convolution *conv = NULL;
-    conv = Convolution::ascii_read(error, filename);
+    conv = convolution_ascii_read(error, filename);
 
     if (!conv)
       {
@@ -92,7 +94,7 @@ public:
           }
       }
 
-    conv = Convolution::building(error, nb_dist, dist.get());
+    conv = convolution_building(error, nb_dist, dist.get());
 
     if (!conv)
       stat_tool::wrap_util::throw_error(error);

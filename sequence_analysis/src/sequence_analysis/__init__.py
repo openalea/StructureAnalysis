@@ -1,5 +1,5 @@
 """Sequence Analysis init file"""
-__revision__ = "$Id$"
+__revision__ = "$Id: __init__.py 9407 2010-08-10 16:22:46Z cokelaer $"
 
 from openalea.stat_tool import *
 #import openalea.stat_tool._stat_tool
@@ -25,8 +25,6 @@ from compare import *
 
 
 from time_events import *
-# from top_parameters import *
-# from tops import *
 from sequences import *
 from hidden_semi_markov import *
 from hidden_variable_order_markov import *

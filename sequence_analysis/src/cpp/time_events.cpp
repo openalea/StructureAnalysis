@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: time_events.cpp 18079 2015-04-23 10:58:57Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -37,21 +37,27 @@
 
 
 #include <math.h>
-
-#include <string>
 #include <sstream>
 #include <iomanip>
 #include <iostream>
 
-#include <boost/tokenizer.hpp>
+#include "tool/rw_tokenizer.h"
+#include "tool/rw_cstring.h"
+#include "tool/rw_locale.h"
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "renewal.h"
 #include "sequence_label.h"
+#include "tool/config.h"
 
 using namespace std;
-using namespace boost;
 using namespace stat_tool;
 
 
@@ -59,23 +65,22 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of the observation period frequency distribution and
- *         the number of events frequency distributions on the basis of
- *         triplets {observation period, number of events, frequency}.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Construction des lois empiriques du temps et du nombre d'evenements
+ *  a partir des echantillons {temps, nombre d'evenements, effectif}.
+ *
+ *--------------------------------------------------------------*/
 
 void TimeEvents::build_frequency_distribution()
 
 {
-  int i;
+  register int i;
   int max_nb_event , *ptime , *pnb_event , *pfrequency;
 
 
-  // construction of the observation period frequency distribution and
-  // the number of events frequency distributions
+  // construction de la loi empirique des temps et
+  // creation des lois empiriques du nombre d'evenements
 
   htime = new FrequencyDistribution(time[nb_class - 1] + 1);
 
@@ -114,7 +119,7 @@ void TimeEvents::build_frequency_distribution()
   htime->mean_computation();
   htime->variance_computation();
 
-  // update of the number of events frequency distributions
+  // constrution des lois empiriques du nombre d'evenements
 
   ptime = time;
   pnb_event = nb_event;
@@ -143,18 +148,17 @@ void TimeEvents::build_frequency_distribution()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of the triplets {observation period, number of events, frequency}
- *         on the basis of the observation period frequency distribution and
- *         the number of events frequency distributions.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Construction des echantillons {temps, nombre d'evenements, effectif}
+ *  a partir des lois empiriques du temps et du nombre d'evenements.
+ *
+ *--------------------------------------------------------------*/
 
 void TimeEvents::build_sample()
 
 {
-  int i , j;
+  register int i , j;
   int *ptime , *pnb_event , *pfrequency , *hfrequency;
 
 
@@ -195,27 +199,27 @@ void TimeEvents::build_sample()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a TimeEvents object from pairs {observation period, number of events}.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_element number of pairs {observation period, number of events},
- *  \param[in] itime       pointer on the observation periods,
- *  \param[in] inb_event   pointer on the numbers of events.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet TimeEvents a partir d'echantillons
+ *  {temps, nombre d'evenements}.
+ *
+ *  argument : nombre d'echantillons {temps, nombre d'evenements},
+ *             pointeurs sur les temps et sur les nombres d'evenements.
+ *
+ *--------------------------------------------------------------*/
 
 void TimeEvents::build(int inb_element , int *itime , int *inb_event)
 
 {
-  int i , j , k;
+  register int i , j , k;
   int btime , min_time , max_time , bnb_event , min_nb_event , max_nb_event ,
       nb_selected , *ptime , *pnb_event , *selected_nb_event , *snb_event;
 
 
   nb_element = inb_element;
 
-  // computation of the maximum/minimum observation periods and the maximum/minimum numbers of events
+  // calcul temps maximum/minimum et nombre d'evenements maximum/minimum
 
   ptime = itime;
   pnb_event = inb_event;
@@ -257,8 +261,8 @@ void TimeEvents::build(int inb_element , int *itime , int *inb_event)
 
   selected_nb_event = new int[nb_element];
 
-  // sort of the pairs {observation period, number of events} first by increasing observation period
-  // then by increasing number of events
+  // tri des echantillons {temps, nombre d'evenements}
+  // par temps croissant puis par nombre d'evenements croissant
 
   btime = 0;
   nb_class = 0;
@@ -266,7 +270,7 @@ void TimeEvents::build(int inb_element , int *itime , int *inb_event)
 
   do {
 
-    // search for the minimum unselected observation period
+    // recherche du temps minimum courant
 
     ptime = itime;
     min_time = max_time;
@@ -278,7 +282,7 @@ void TimeEvents::build(int inb_element , int *itime , int *inb_event)
     }
     btime = min_time;
 
-    // extraction of the pairs corresponding to the selected observation period
+    // extraction des echantillons correspondant au temps courant
 
     ptime = itime;
     pnb_event = inb_event;
@@ -291,14 +295,14 @@ void TimeEvents::build(int inb_element , int *itime , int *inb_event)
       pnb_event++;
     }
 
-    // sort of the pairs corresponding to the selected observation period
+    // tri des echantillons correspondant au temps courant
 
     bnb_event = -1;
     j = 0;
 
     do {
 
-      // search for the minimum unselected number of events
+      // recherche du nombre d'evenements minimum courant
 
       snb_event = selected_nb_event;
       min_nb_event = max_nb_event;
@@ -310,7 +314,7 @@ void TimeEvents::build(int inb_element , int *itime , int *inb_event)
       }
       bnb_event = min_nb_event;
 
-      // constitution of the triplets {observation period, number of events, frequency}
+      // constitution de l'echantillon {temps, nombre d'evenements, effectif}
 
       time[nb_class] = btime;
       nb_event[nb_class] = bnb_event;
@@ -338,13 +342,13 @@ void TimeEvents::build(int inb_element , int *itime , int *inb_event)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the TimeEvents class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_class number of classes corresponding to fixed {observation period, number of events}.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe TimeEvents.
+ *
+ *  argument : nombre de classes.
+ *
+ *--------------------------------------------------------------*/
 
 TimeEvents::TimeEvents(int inb_class)
 
@@ -359,7 +363,7 @@ TimeEvents::TimeEvents(int inb_class)
   }
 
   else {
-    int i;
+    register int i;
     int *ptime , *pnb_event , *pfrequency;
 
     time = new int[nb_class];
@@ -383,19 +387,18 @@ TimeEvents::TimeEvents(int inb_class)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a TimeEvents object from a FrequencyDistribution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_event reference on a FrequencyDistribution object,
- *  \param[in] itime     observation period.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet TimeEvents a partir d'un objet FrequencyDistribution.
+ *
+ *  arguments : reference sur un objet FrequencyDistribution, temps d'observation.
+ *
+ *--------------------------------------------------------------*/
 
 TimeEvents::TimeEvents(FrequencyDistribution &inb_event, int itime)
 
 {
-  int i;
+  register int i;
   int *ptime , *pnb_event , *pfrequency;
 
 
@@ -412,7 +415,7 @@ TimeEvents::TimeEvents(FrequencyDistribution &inb_event, int itime)
 
   nb_element = inb_event.nb_element;
 
-  // constitution of the triplets {observation period, number of events, frequency}
+  // constitution des echantillons
 
   ptime = time;
   pnb_event = nb_event;
@@ -426,8 +429,7 @@ TimeEvents::TimeEvents(FrequencyDistribution &inb_event, int itime)
     }
   }
 
-  // construction of the observation period frequency distribution and
-  // the number of events frequency distributions
+  // construction des lois empiriques
 
   htime = new FrequencyDistribution(itime + 1);
 
@@ -448,22 +450,22 @@ TimeEvents::TimeEvents(FrequencyDistribution &inb_event, int itime)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a TimeEvents object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] timev reference on a TimeEvents object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet TimeEvents.
+ *
+ *  argument : reference sur un objet TimeEvents.
+ *
+ *--------------------------------------------------------------*/
 
 void TimeEvents::copy(const TimeEvents &timev)
 
 {
-  int i;
+  register int i;
   int *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
 
 
-  // copy of the triplets {observation period, number of events, frequency}
+  // copie des echantillons
 
   nb_element = timev.nb_element;
   nb_class = timev.nb_class;
@@ -485,8 +487,7 @@ void TimeEvents::copy(const TimeEvents &timev)
     *pfrequency++ = *tfrequency++;
   }
 
-  // copy of the observation period frequency distribution and
-  // the number of events frequency distributions
+  // copie des lois empiriques
 
   htime = new FrequencyDistribution(*(timev.htime));
 
@@ -509,19 +510,19 @@ void TimeEvents::copy(const TimeEvents &timev)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Merging of TimeEvents objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_sample number of TimeEvents objects,
- *  \param[in] ptimev    pointer on the TimeEvents objects.
- */
-/*--------------------------------------------------------------*/
+ *  Fusion d'objets TimeEvents.
+ *
+ *  argument : nombre d'objets TimeEvents,
+ *             pointeurs sur les objets TimeEvents.
+ *
+ *--------------------------------------------------------------*/
 
 void TimeEvents::merge(int nb_sample , const TimeEvents **ptimev)
 
 {
-  int i , j;
+  register int i , j;
   int nb_histo;
   const FrequencyDistribution **phisto;
 
@@ -533,14 +534,14 @@ void TimeEvents::merge(int nb_sample , const TimeEvents **ptimev)
 
   phisto = new const FrequencyDistribution*[nb_sample];
 
-  // merging of the observation period frequency distributions
+  // fusion des lois empiriques du temps d'observation
 
   for (i = 0;i < nb_sample;i++) {
     phisto[i] = ptimev[i]->htime;
   }
   htime = new FrequencyDistribution(nb_sample , phisto);
 
-  // merging of the number of events frequency distributions for a given observation period
+  // fusion des lois empiriques du nombre d'evenements
 
   hnb_event = new FrequencyDistribution*[htime->nb_value];
 
@@ -575,54 +576,16 @@ void TimeEvents::merge(int nb_sample , const TimeEvents **ptimev)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Merging of TimeEvents objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_sample number of TimeEvents objects,
- *  \param[in] itimev    pointer on the TimeEvents objects.
+ *  Destruction des champs d'un objet TimeEvents.
  *
- *  \return              TimeEvents object.
- */
-/*--------------------------------------------------------------*/
-
-TimeEvents* TimeEvents::merge(int nb_sample , const vector<TimeEvents> itimev) const
-
-{
-  int i;
-  TimeEvents *timev;
-  const TimeEvents **ptimev;
-
-
-  nb_sample++;
-  ptimev = new const TimeEvents*[nb_sample];
-
-  ptimev[0] = this;
-  for (i = 1;i < nb_sample;i++) {
-    ptimev[i] = new TimeEvents(itimev[i - 1]);
-  }
-
-  timev = new TimeEvents(nb_sample , ptimev);
-
-  for (i = 1;i < nb_sample;i++) {
-    delete ptimev[i];
-  }
-  delete [] ptimev;
-
-  return timev;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the data members of a TimeEvents object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 void TimeEvents::remove()
 
 {
-  int i;
+  register int i;
 
 
   delete [] time;
@@ -643,11 +606,11 @@ void TimeEvents::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the TimeEvents class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe TimeEvents.
+ *
+ *--------------------------------------------------------------*/
 
 TimeEvents::~TimeEvents()
 
@@ -656,15 +619,13 @@ TimeEvents::~TimeEvents()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the TimeEvents class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] timev reference on a TimeEvents object.
+ *  Operateur d'assignement de la classe TimeEvents.
  *
- *  \return          TimeEvents object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet TimeEvents.
+ *
+ *--------------------------------------------------------------*/
 
 TimeEvents& TimeEvents::operator=(const TimeEvents &timev)
 
@@ -678,20 +639,17 @@ TimeEvents& TimeEvents::operator=(const TimeEvents &timev)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of the number of events frequency distribution for a given observation period or
- *         of the mixture the number of events frequency distributions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] histo_type frequency distribution type (NB_EVENT/NB_EVENT_MIXTURE),
- *  \param[in] itime      observation period.
+ *  Extraction de la loi empirique du nombre d'evenements pour
+ *  un temps d'observation donne.
  *
- *  \return               DiscreteDistributionData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, type de loi empirique,
+ *              temps d'observation.
+ *
+ *--------------------------------------------------------------*/
 
-DiscreteDistributionData* TimeEvents::extract(StatError &error , renewal_distribution histo_type ,
+DiscreteDistributionData* TimeEvents::extract(StatError &error , int histo_type ,
                                               int itime) const
 
 {
@@ -718,22 +676,19 @@ DiscreteDistributionData* TimeEvents::extract(StatError &error , renewal_distrib
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Change of the time unit of a TimeEvents object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] scaling_coeff scaling factor.
+ *  Changement de l'unite de temps d'un objet TimeEvents.
  *
- *  \return                  TimeEvents object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, facteur d'echelle.
+ *
+ *--------------------------------------------------------------*/
 
 TimeEvents* TimeEvents::time_scaling(StatError &error , int scaling_coeff) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   int *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
   TimeEvents *timev;
 
@@ -775,25 +730,22 @@ TimeEvents* TimeEvents::time_scaling(StatError &error , int scaling_coeff) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of triplets {observation period, number of events, frequency} on
- *         an observation period criterion.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] min_time minimum observation period,
- *  \param[in] max_time maximum observation period.
+ *  Selection d'echantillons {temps, nombre d'evenements}
+ *  sur un critere de temps d'observation.
  *
- *  \return             TimeEvents object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError,
+ *              bornes sur le temps d'observation.
+ *
+ *--------------------------------------------------------------*/
 
 TimeEvents* TimeEvents::time_select(StatError &error , int min_time ,
                                     int max_time) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   int bnb_class , *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
   TimeEvents *timev;
 
@@ -812,7 +764,7 @@ TimeEvents* TimeEvents::time_select(StatError &error , int min_time ,
 
   if (status) {
 
-    // computation of the number of classes
+    // calcul du nombre de classes
 
     ttime = time;
     bnb_class = 0;
@@ -824,7 +776,7 @@ TimeEvents* TimeEvents::time_select(StatError &error , int min_time ,
       ttime++;
     }
 
-    // copy of the selected triplets
+    // copie des echantillons selectionnes
 
     timev = new TimeEvents(bnb_class);
 
@@ -863,23 +815,22 @@ TimeEvents* TimeEvents::time_select(StatError &error , int min_time ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of triplets {observation period, number of events, frequency} on
- *         a number of events criterion.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error        reference on a StatError object,
- *  \param[in] min_nb_event minimum number of events,
- *  \param[in] max_nb_event maximum number of events.
- */
-/*--------------------------------------------------------------*/
+ *  Selection d'echantillons {temps, nombre d'evenements}
+ *  sur un critere de nombre d'evenements.
+ *
+ *  arguments : reference sur un objet StatError,
+ *              bornes sur le nombre d'evenements.
+ *
+ *--------------------------------------------------------------*/
 
 TimeEvents* TimeEvents::nb_event_select(StatError &error , int min_nb_event ,
                                         int max_nb_event) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   int bnb_class , *ptime , *pnb_event , *pfrequency , *ttime , *tnb_event , *tfrequency;
   TimeEvents *timev;
 
@@ -898,7 +849,7 @@ TimeEvents* TimeEvents::nb_event_select(StatError &error , int min_nb_event ,
 
   if (status) {
 
-    // computation of the number of classes
+    // calcul du nombre de classes
 
     tnb_event = nb_event;
     bnb_class = 0;
@@ -910,7 +861,7 @@ TimeEvents* TimeEvents::nb_event_select(StatError &error , int min_nb_event ,
       tnb_event++;
     }
 
-    // copy of the selected triplets
+    // copie des echantillons selectionnes
 
     timev = new TimeEvents(bnb_class);
 
@@ -949,19 +900,16 @@ TimeEvents* TimeEvents::nb_event_select(StatError &error , int min_nb_event ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a TimeEvents object from a FrequencyDistribution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] nb_event reference on a FrequencyDistribution object,
- *  \param[in] itime    observation period.
+ *  Construction d'un objet TimeEvents a partir d'un objet FrequencyDistribution.
  *
- *  \return             TimeEvents object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : references sur un objet StatError et sur un objet FrequencyDistribution,
+ *              temps d'observation.
+ *
+ *--------------------------------------------------------------*/
 
-TimeEvents* TimeEvents::building(StatError &error , FrequencyDistribution &nb_event , int itime)
+TimeEvents* build_time_events(StatError &error , FrequencyDistribution &nb_event , int itime)
 
 {
   bool status = true;
@@ -971,7 +919,7 @@ TimeEvents* TimeEvents::building(StatError &error , FrequencyDistribution &nb_ev
   timev = NULL;
   error.init();
 
-  if ((nb_event.nb_value == 1) || (itime / (nb_event.nb_value - 1) < MIN_INTER_EVENT)) {
+  if (itime / (nb_event.nb_value - 1) < MIN_INTER_EVENT) {
     status = false;
     error.update(SEQ_error[SEQR_SHORT_OBSERVATION_TIME]);
   }
@@ -988,30 +936,28 @@ TimeEvents* TimeEvents::building(StatError &error , FrequencyDistribution &nb_ev
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a TimeEvents object from a file whose format is:
- *         one triplet {observation period > 0, number of events >= 0, frequency >= 0} per line.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Construction d'un objet TimeEvents a partir d'un fichier.
+ *  Format : n lignes de la forme (temps > 0) (nombre d'evenements >= 0)
+ *           (effectif >= 0).
  *
- *  \return          TimeEvents object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
+TimeEvents* time_events_ascii_read(StatError &error , const char *path)
 
 {
-  string buffer;
+  RWLocaleSnapshot locale("en");
+  RWCString buffer , token;
   size_t position;
-  typedef tokenizer<char_separator<char>> tokenizer;
-  char_separator<char> separator(" \t");
   bool status , lstatus;
-  int i , j;
-  int line , nb_class , nb_element , value , time , nb_event;
+  register int i , j;
+  int line , nb_class , nb_element;
+  long value , time , nb_event;
   TimeEvents *timev;
-  ifstream in_file(path.c_str());
+  ifstream in_file(path);
 
 
   timev = NULL;
@@ -1023,8 +969,8 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
 
   else {
 
-    // 1st pass: analysis of each line format and search for
-    // the number of triplets {observation period, number of events, frequency}
+    // 1ere passe : analyse des lignes du fichier et recherche
+    // du nombre d'echantillons {temps, nombre d'evenements, effectif}
 
     status = true;
     line = 0;
@@ -1033,34 +979,27 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
     nb_class = 0;
     nb_element = 0;
 
-    while (getline(in_file , buffer)) {
+    while (buffer.readLine(in_file , false)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.find('#');
-      if (position != string::npos) {
-        buffer.erase(position);
+      position = buffer.first('#');
+      if (position != RW_NPOS) {
+        buffer.remove(position);
       }
       i = 0;
 
-      tokenizer tok_buffer(buffer , separator);
+      RWCTokenizer next(buffer);
 
-      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+      while (!((token = next()).isNull())) {
         if (i <= 2) {
-          lstatus = true;
+          lstatus = locale.stringToNum(token , &value);
 
-/*          try {
-            value = stoi(*token);   in C++ 11
-          }
-          catch(invalid_argument &arg) {
-            lstatus = false;
-          } */
-          value = atoi(token->c_str());
-
-          // test observation period > 0, number of events >= 0, frequency >= 0
+          // test entier strictement positif (temps) ou
+          // entier positif ou nul (nombre d'evenements, effectif)
 
           if ((lstatus) && (((i == 0) && (value <= 0)) ||
                ((i > 0) && (value < 0)))) {
@@ -1075,7 +1014,7 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
           else {
             switch (i) {
 
-            // test ordered samples (observation period)
+            // test echantillons ordonnes (temps)
 
             case 0 : {
               if (value < time) {
@@ -1093,7 +1032,7 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
               break;
             }
 
-            // test ordered samples (number of events)
+            // test echantillons ordonnes (nombre d'evenements)
 
             case 1 : {
               if (value <= nb_event) {
@@ -1120,7 +1059,7 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
         i++;
       }
 
-      // test 3 items per line
+      // test trois valeurs par ligne
 
       if ((i > 0) && (i != 3)) {
         status = false;
@@ -1133,11 +1072,11 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
       error.update(STAT_parsing[STATP_EMPTY_SAMPLE]);
     }
 
-    // 2nd pass: data reading
+    // 2eme passe : lecture du fichier
 
     if (status) {
 //      in_file.close();
-//      in_file.open(path.c_str() , ios::in);
+//      in_file.open(path , ios::in);
       in_file.clear();
       in_file.seekg(0,ios::beg);
 
@@ -1146,28 +1085,27 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
 
       i = 0;
 
-      while (getline(in_file , buffer)) {
-        position = buffer.find('#');
-        if (position != string::npos) {
-          buffer.erase(position);
+      while (buffer.readLine(in_file , false)) {
+        position = buffer.first('#');
+        if (position != RW_NPOS) {
+          buffer.remove(position);
         }
         j = 0;
 
-        tokenizer tok_buffer(buffer , separator);
+        RWCTokenizer next(buffer);
 
-        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+        while (!((token = next()).isNull())) {
+          locale.stringToNum(token , &value);
+
           switch (j) {
           case 0 :
-//            timev->time[i] = stoi(*token);   in C++ 11
-            timev->time[i] = atoi(token->c_str());
+            timev->time[i] = value;
             break;
           case 1 :
-//            timev->nb_event[i] = stoi(*token);   in C++ 11
-            timev->nb_event[i] = atoi(token->c_str());
+            timev->nb_event[i] = value;
             break;
           case 2 :
-//            timev->frequency[i] = stoi(*token);   in C++ 11
-            timev->frequency[i] = atoi(token->c_str());
+            timev->frequency[i] = value;
             break;
           }
 
@@ -1187,30 +1125,27 @@ TimeEvents* TimeEvents::ascii_read(StatError &error , const string path)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a TimeEvents object from a file whose format is:
- *         one pair {observation period > 0, number of events >= 0} per line.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Construction d'un objet TimeEvents a partir d'un fichier.
+ *  Format : n lignes de la forme (temps > 0) (nombre d'evenements >= 0).
  *
- *  \return          TimeEvents object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
+TimeEvents* old_time_events_ascii_read(StatError &error , const char *path)
 
 {
-  string buffer;
+  RWLocaleSnapshot locale("en");
+  RWCString buffer , token;
   size_t position;
-  typedef tokenizer<char_separator<char>> tokenizer;
-  char_separator<char> separator(" \t");
   bool status , lstatus;
-  int i , j;
-  int line , nb_element , value , *time , *nb_event;
+  register int i , j;
+  int line , nb_element , *ptime , *pnb_event;
+  long value;
   TimeEvents *timev;
-  ifstream in_file(path.c_str());
+  ifstream in_file(path);
 
 
   timev = NULL;
@@ -1222,41 +1157,34 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
 
   else {
 
-    // 1st pass: analysis of each line format and search for
-    // the number of pairs {observation period, number of events}
+    // 1ere passe : analyse des lignes du fichier et recherche
+    // du nombre d'echantillons {temps, nombre d'evenements}
 
     status = true;
     line = 0;
     nb_element = 0;
 
-    while (getline(in_file , buffer)) {
+    while (buffer.readLine(in_file , false)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.find('#');
-      if (position != string::npos) {
-        buffer.erase(position);
+      position = buffer.first('#');
+      if (position != RW_NPOS) {
+        buffer.remove(position);
       }
       i = 0;
 
-      tokenizer tok_buffer(buffer , separator);
+      RWCTokenizer next(buffer);
 
-      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+      while (!((token = next()).isNull())) {
         if (i <= 1) {
-          lstatus = true;
+          lstatus = locale.stringToNum(token , &value);
 
-/*          try {
-            value = stoi(*token);   in C++ 11
-          }
-          catch(invalid_argument &arg) {
-            lstatus = false;
-          } */
-          value = atoi(token->c_str());
-
-          // test observation period > 0, number of events >= 0
+          // test entier strictement positif (temps) ou
+          // entier positif ou nul (nombre d'evenements)
 
           if ((lstatus) && (((i == 0) && ((value <= 0) || (value > MAX_TIME))) ||
                ((i == 1) && (value < 0)))) {
@@ -1272,7 +1200,7 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
         i++;
       }
 
-      // test 2 items per line
+      // test deux valeurs par ligne
 
       if (i > 0) {
         if (i != 2) {
@@ -1288,36 +1216,36 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
       error.update(STAT_parsing[STATP_FORMAT] , line);
     }
 
-    // 2nd pass: data reading
+    // 2eme passe : lecture du fichier
 
     if (status) {
 //      in_file.close();
-//      in_file.open(path.c_str() , ios::in);
+//      in_file.open(path , ios::in);
         in_file.clear();
         in_file.seekg(0,ios::beg);
 
-      time = new int[nb_element];
-      nb_event = new int[nb_element];
+      ptime = new int[nb_element];
+      pnb_event = new int[nb_element];
       i = 0;
 
-      while (getline(in_file , buffer)) {
-        position = buffer.find('#');
-        if (position != string::npos) {
-          buffer.erase(position);
+      while (buffer.readLine(in_file , false)) {
+        position = buffer.first('#');
+        if (position != RW_NPOS) {
+          buffer.remove(position);
         }
         j = 0;
 
-        tokenizer tok_buffer(buffer , separator);
+        RWCTokenizer next(buffer);
 
-        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+        while (!((token = next()).isNull())) {
+          locale.stringToNum(token , &value);
+
           switch (j) {
           case 0 :
-//            time[i] = stoi(*token);   in C++ 11
-            time[i] = atoi(token->c_str());
+            ptime[i] = value;
             break;
           case 1 :
-//            nb_event[i] = stoi(*token);   in C++ 11
-            nb_event[i] = atoi(token->c_str());
+            pnb_event[i] = value;
             break;
           }
 
@@ -1327,10 +1255,10 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
         i++;
       }
 
-      timev = new TimeEvents(nb_element , time , nb_event);
+      timev = new TimeEvents(nb_element , ptime , pnb_event);
 
-      delete [] time;
-      delete [] nb_event;
+      delete [] ptime;
+      delete [] pnb_event;
     }
   }
 
@@ -1338,13 +1266,13 @@ TimeEvents* TimeEvents::old_ascii_read(StatError &error , const string path)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing on a single line of a TimeEvents object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture sur une ligne d'un objet TimeEvents.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& TimeEvents::line_write(ostream &os) const
 
@@ -1357,20 +1285,18 @@ ostream& TimeEvents::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a TimeEvents object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level,
- *  \param[in]     type       renewal process type (ORDINARY/EQUILIBRIUM).
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet TimeEvents.
+ *
+ *  arguments : stream, flag niveau de detail, type de processus.
+ *
+ *--------------------------------------------------------------*/
 
-ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , process_type type) const
+ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , char type) const
 
 {
-  int i;
+  register int i;
 
 
   if ((htime->variance > 0.) && (exhaustive)) {
@@ -1398,7 +1324,7 @@ ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , process_type ty
 
       switch (type) {
 
-      case ORDINARY : {
+      case 'o' : {
         os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << hnb_event[i]->nb_element
            << " (" << 1. / (hnb_event[i]->mean + 1.) << ")" << endl;
 
@@ -1408,7 +1334,7 @@ ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , process_type ty
         break;
       }
 
-      case EQUILIBRIUM : {
+      case 'e' : {
         os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << ": " << hnb_event[i]->frequency[0]
            << " (" << hnb_event[i]->frequency[0] / (hnb_event[i]->nb_element * (hnb_event[i]->mean + 1.))
            << ")" << endl;
@@ -1440,7 +1366,7 @@ ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , process_type ty
 
     switch (type) {
 
-    case ORDINARY : {
+    case 'o' : {
       os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << mixture->nb_element
          << " (" << 1. / (mixture->mean + 1.) << ")" << endl;
 
@@ -1450,7 +1376,7 @@ ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , process_type ty
       break;
     }
 
-    case EQUILIBRIUM : {
+    case 'e' : {
       os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << ": " << mixture->frequency[0]
          << " (" << mixture->frequency[0] / (mixture->nb_element * (mixture->mean + 1.))
          << ")" << endl;
@@ -1476,36 +1402,34 @@ ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive , process_type ty
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a TimeEvents object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet TimeEvents.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& TimeEvents::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  return ascii_write(os , exhaustive , DEFAULT_TYPE);
+  return ascii_write(os , exhaustive , 'v');
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a TimeEvents object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level,
- *  \param[in]     type       renewal process type (ORDINARY/EQUILIBRIUM).
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet TimeEvents dans un fichier.
+ *
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail, type de processus.
+ *
+ *--------------------------------------------------------------*/
 
-ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_type type) const
+ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , char type) const
 
 {
-  int i;
+  register int i;
   int max_frequency , *pfrequency , width[3];
 
 
@@ -1517,7 +1441,7 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_ty
     htime->ascii_print(os , true);
   }
 
-  // computation of the column widths
+  // calcul des largeurs des colonnes
 
   if (exhaustive) {
     width[0] = column_width(time[nb_class - 1]);
@@ -1562,7 +1486,7 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_ty
 
       switch (type) {
 
-      case ORDINARY : {
+      case 'o' : {
         os << "\n# " << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << hnb_event[time[i]]->nb_element
            << " (" << 1. / (hnb_event[time[i]]->mean + 1.) << ")" << endl;
 
@@ -1572,7 +1496,7 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_ty
         break;
       }
 
-      case EQUILIBRIUM : {
+      case 'e' : {
         os << "\n# " << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << ": " << hnb_event[time[i]]->frequency[0]
            << " (" << hnb_event[time[i]]->frequency[0] / (hnb_event[time[i]]->nb_element * (hnb_event[time[i]]->mean + 1.))
            << ")" << endl;
@@ -1595,7 +1519,7 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_ty
       }
     }
 
-    // writing of the triplets (observation period, number of events, frequency)
+    // ecriture des echantillons (temps, nombre d'evenements)
 
     if (exhaustive) {
       os << setw(width[0]) << time[i];
@@ -1610,7 +1534,7 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_ty
 
     switch (type) {
 
-    case ORDINARY : {
+    case 'o' : {
       os << "\n# " << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << mixture->nb_element
          << " (" << 1. / (mixture->mean + 1.) << ")" << endl;
 
@@ -1620,7 +1544,7 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_ty
       break;
     }
 
-    case EQUILIBRIUM : {
+    case 'e' : {
       os << "\n# " << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << ": " << mixture->frequency[0]
          << " (" << mixture->frequency[0] / (mixture->nb_element * (mixture->mean + 1.))
          << ")" << endl;
@@ -1646,24 +1570,21 @@ ostream& TimeEvents::ascii_file_write(ostream &os , bool exhaustive , process_ty
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a TimeEvents object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet TimeEvents dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool TimeEvents::ascii_write(StatError &error , const string path ,
+bool TimeEvents::ascii_write(StatError &error , const char *path ,
                              bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -1682,19 +1603,18 @@ bool TimeEvents::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a TimeEvents object at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os   stream,
- *  \param[in]     type renewal process type (ORDINARY/EQUILIBRIUM).
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet TimeEvents au format tableur.
+ *
+ *  argument : stream, type de processus.
+ *
+ *--------------------------------------------------------------*/
 
-ostream& TimeEvents::spreadsheet_write(ostream &os , process_type type) const
+ostream& TimeEvents::spreadsheet_write(ostream &os , char type) const
 
 {
-  int i;
+  register int i;
 
 
   if (htime->variance > 0.) {
@@ -1722,7 +1642,7 @@ ostream& TimeEvents::spreadsheet_write(ostream &os , process_type type) const
 
       switch (type) {
 
-      case ORDINARY : {
+      case 'o' : {
         os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << "\t" << hnb_event[i]->nb_element
            << "\t" << 1. / (hnb_event[i]->mean + 1.) << endl;
 
@@ -1732,7 +1652,7 @@ ostream& TimeEvents::spreadsheet_write(ostream &os , process_type type) const
         break;
       }
 
-      case EQUILIBRIUM : {
+      case 'e' : {
         os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << "\t" << hnb_event[i]->frequency[0] << "\t"
            << hnb_event[i]->frequency[0] / (hnb_event[i]->nb_element * (hnb_event[i]->mean + 1.)) << endl;
 
@@ -1761,7 +1681,7 @@ ostream& TimeEvents::spreadsheet_write(ostream &os , process_type type) const
 
     switch (type) {
 
-    case ORDINARY : {
+    case 'o' : {
       os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << "\t" << mixture->nb_element
          << "\t" << 1. / (mixture->mean + 1.) << endl;
 
@@ -1771,7 +1691,7 @@ ostream& TimeEvents::spreadsheet_write(ostream &os , process_type type) const
       break;
     }
 
-    case EQUILIBRIUM : {
+    case 'e' : {
       os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << "\t" << mixture->frequency[0] << "\t"
          << mixture->frequency[0] / (mixture->nb_element * (mixture->mean + 1.)) << endl;
 
@@ -1796,22 +1716,19 @@ ostream& TimeEvents::spreadsheet_write(ostream &os , process_type type) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a TimeEvents object in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet TimeEvents dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool TimeEvents::spreadsheet_write(StatError &error , const string path) const
+bool TimeEvents::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -1830,24 +1747,21 @@ bool TimeEvents::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a TimeEvents object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title.
+ *  Sortie Gnuplot d'un objet TimeEvents.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool TimeEvents::plot_write(StatError &error , const char *prefix ,
                             const char *title) const
 
 {
   bool status;
-  int i , j , k;
+  register int i , j , k;
   int nb_histo;
   const FrequencyDistribution **phisto;
   ostringstream data_file_name;
@@ -1855,7 +1769,7 @@ bool TimeEvents::plot_write(StatError &error , const char *prefix ,
 
   error.init();
 
-  // writing of data file
+  // ecriture du fichier de donnees
 
   data_file_name << prefix << ".dat";
 
@@ -1892,7 +1806,7 @@ bool TimeEvents::plot_write(StatError &error , const char *prefix ,
     error.update(STAT_error[STATR_FILE_PREFIX]);
   }
 
-  // writing of script files
+  // ecriture du fichier de commandes et du fichier d'impression
 
   else {
     for (i = 0;i < 2;i++) {
@@ -2015,18 +1929,16 @@ bool TimeEvents::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a TimeEvents object.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet TimeEvents.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* TimeEvents::get_plotable() const
 
 {
-  int i , j , k , m;
+  register int i , j , k , m;
   int nb_plot_set , nb_histo , max_nb_value , max_frequency;
   double shift;
   const FrequencyDistribution *phisto[2] , **merged_histo;
@@ -2047,7 +1959,7 @@ MultiPlotSet* TimeEvents::get_plotable() const
   i = 0;
   if (htime->variance > 0.) {
 
-    // observation period frequency distribution
+    // vue : loi empirique des temps d'observation
 
     plot[i].xrange = Range(0 , htime->nb_value - 1);
     plot[i].yrange = Range(0 , ceil(htime->max * YSCALE));
@@ -2071,7 +1983,7 @@ MultiPlotSet* TimeEvents::get_plotable() const
     i++;
   }
 
-  // number of events frequency distribution for each observation period
+  // vue : lois de comptage pour chaque temps d'observation
 
   nb_histo = 0;
   max_nb_value = 0;
@@ -2081,7 +1993,7 @@ MultiPlotSet* TimeEvents::get_plotable() const
     if (htime->frequency[j] > 0) {
       nb_histo++;
 
-      // computation of the maximum number of values and the maximum frequency
+      // calcul du nombre de valeurs maximum et de la frequence maximum
 
       if (hnb_event[j]->nb_value > max_nb_value) {
         max_nb_value = hnb_event[j]->nb_value;
@@ -2136,7 +2048,7 @@ MultiPlotSet* TimeEvents::get_plotable() const
   if (htime->variance > 0.) {
     i++;
 
-    // superimposed number of events frequency distributions
+    // vue : lois empiriques de comptage superposees
 
     merged_histo = new const FrequencyDistribution*[nb_histo];
 
@@ -2204,18 +2116,16 @@ MultiPlotSet* TimeEvents::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Search for the minimum mean time interval betweeen 2 events.
+/*--------------------------------------------------------------*
  *
- *  \return minimum mean time interval betweeen 2 events.
- */
-/*--------------------------------------------------------------*/
+ *  Recherche du temps minimum moyen entre 2 evenements.
+ *
+ *--------------------------------------------------------------*/
 
 double TimeEvents::min_inter_event_computation() const
 
 {
-  int i;
+  register int i;
   int *ptime , *pnb_event;
   double ratio , min_ratio;
 
@@ -2240,16 +2150,16 @@ double TimeEvents::min_inter_event_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the sample size of a TimeEvents object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de l'effectif total d'un objet TimeEvents.
+ *
+ *--------------------------------------------------------------*/
 
 void TimeEvents::nb_element_computation()
 
 {
-  int i;
+  register int i;
   int *pfrequency;
 
 
@@ -2261,18 +2171,18 @@ void TimeEvents::nb_element_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Default constructor of the RenewalData class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par defaut de la classe RenewalData.
+ *
+ *--------------------------------------------------------------*/
 
 RenewalData::RenewalData()
 
 {
   renewal = NULL;
 
-  type = EQUILIBRIUM;
+  type = 'v';
 
   length = NULL;
   sequence = NULL;
@@ -2287,21 +2197,20 @@ RenewalData::RenewalData()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the RenewalData class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_element sample size,
- *  \param[in] itime      observation period.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe RenewalData.
+ *
+ *  arguments : nombre de fenetres d'observation, temps entre 2 dates d'observation.
+ *
+ *--------------------------------------------------------------*/
 
 RenewalData::RenewalData(int nb_element , int itime)
 
 {
   renewal = NULL;
 
-  type = EQUILIBRIUM;
+  type = 'e';
 
   length = new int[nb_element];
   sequence = new int*[nb_element];
@@ -2316,16 +2225,16 @@ RenewalData::RenewalData(int nb_element , int itime)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a RenewalData object from a TimeEvents object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] timev reference on a TimeEvents object,
- *  \param[in] itype renewal process type (ORDINARY/EQUILIBRIUM).
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe RenewalData.
+ *
+ *  arguments : reference sur un objet TimeEvents,
+ *              type de processus ('o' : ordinaire, 'e' : en equilibre).
+ *
+ *--------------------------------------------------------------*/
 
-RenewalData::RenewalData(const TimeEvents &timev , process_type itype)
+RenewalData::RenewalData(const TimeEvents &timev , int itype)
 :TimeEvents(timev)
 
 {
@@ -2346,16 +2255,16 @@ RenewalData::RenewalData(const TimeEvents &timev , process_type itype)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a RenewalData object from a Renewal object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] itype renewal process type (ORDINARY/EQUILIBRIUM),
- *  \param[in] renew reference on a Renewal object.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe RenewalData.
+ *
+ *  arguments : type de processus ('o' : ordinaire, 'e' : en equilibre),
+ *              reference sur un objet Renewal.
+ *
+ *--------------------------------------------------------------*/
 
-RenewalData::RenewalData(process_type itype , const Renewal &renew)
+RenewalData::RenewalData(int itype , const Renewal &renew)
 
 {
   renewal = NULL;
@@ -2375,19 +2284,19 @@ RenewalData::RenewalData(process_type itype , const Renewal &renew)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor by merging of the RenewalData class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_sample number of RenewalData objects,
- *  \param[in] itimev    pointer on the RenewalData objects.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe RenewalData.
+ *
+ *  argument : nombre d'objets RenewalData,
+ *             pointeurs sur les objets RenewalData.
+ *
+ *--------------------------------------------------------------*/
 
 RenewalData::RenewalData(int nb_sample , const RenewalData **itimev)
 
 {
-  int i , j , k;
+  register int i , j , k;
   const TimeEvents **ptimev;
 
 
@@ -2426,19 +2335,19 @@ RenewalData::RenewalData(int nb_sample , const RenewalData **itimev)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a RenewalData object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] timev      reference on a RenewalData object,
- *  \param[in] model_flag flag copy of the Renewal object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet RenewalData.
+ *
+ *  arguments : reference sur un objet RenewalData,
+ *              flag copie de l'objet Renewal.
+ *
+ *--------------------------------------------------------------*/
 
 void RenewalData::copy(const RenewalData &timev , bool model_flag)
 
 {
-  int i , j;
+  register int i , j;
   int *psequence , *csequence;
 
 
@@ -2487,11 +2396,11 @@ void RenewalData::copy(const RenewalData &timev , bool model_flag)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the data members of a RenewalData object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet RenewalData.
+ *
+ *--------------------------------------------------------------*/
 
 void RenewalData::remove()
 
@@ -2501,7 +2410,7 @@ void RenewalData::remove()
   delete [] length;
 
   if (sequence) {
-    int i;
+    register int i;
 
     for (i = 0;i < nb_element;i++) {
       delete [] sequence[i];
@@ -2519,11 +2428,11 @@ void RenewalData::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the RenewalData class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe RenewalData.
+ *
+ *--------------------------------------------------------------*/
 
 RenewalData::~RenewalData()
 
@@ -2532,15 +2441,13 @@ RenewalData::~RenewalData()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the RenewalData class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] timev reference on a RenewalData object.
+ *  Operateur d'assignement de la classe RenewalData.
  *
- *  \return          RenewalData object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet RenewalData.
+ *
+ *--------------------------------------------------------------*/
 
 RenewalData& RenewalData::operator=(const RenewalData &timev)
 
@@ -2557,24 +2464,21 @@ RenewalData& RenewalData::operator=(const RenewalData &timev)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Merging of RenewalData objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] nb_sample number of RenewalData objects,
- *  \param[in] itimev    pointer on the RenewalData objects.
+ *  Fusion d'objets RenewalData.
  *
- *  \return              RenewalData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, nombre d'objets RenewalData,
+ *              pointeurs sur les objets RenewalData.
+ *
+ *--------------------------------------------------------------*/
 
 RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
                                 const RenewalData **itimev) const
 
 {
   bool status = true;
-  int i , j , k , m;
+  register int i , j , k , m;
   int *psequence , *csequence;
   const FrequencyDistribution **phisto;
   RenewalData *timev;
@@ -2606,7 +2510,7 @@ RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
 
     timev = new RenewalData(nb_sample , ptimev);
 
-    // copy of the sequences of events
+    // copie des sequences
 
     i = 0;
     for (j = 0;j < nb_sample;j++) {
@@ -2651,7 +2555,7 @@ RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
     }
     timev->forward = new FrequencyDistribution(nb_sample , phisto);
 
-    timev->build_index_event(timev->type == ORDINARY ? 0 : 1);
+    timev->build_index_event(timev->type == 'o' ? 0 : 1);
 
     delete [] phisto;
     delete [] ptimev;
@@ -2661,56 +2565,16 @@ RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Merging of RenewalData objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] nb_sample number of RenewalData objects,
- *  \param[in] itimev    RenewalData objects.
+ *  Extraction d'une loi empirique.
  *
- *  \return              RenewalData object.
- */
-/*--------------------------------------------------------------*/
-
-RenewalData* RenewalData::merge(StatError &error , int nb_sample ,
-                                const vector<RenewalData> itimev) const
-
-{
-  int i;
-  RenewalData *timev;
-  const RenewalData **ptimev;
-
-
-  ptimev = new const RenewalData*[nb_sample];
-  for (i = 0;i < nb_sample;i++) {
-    ptimev[i] = new RenewalData(itimev[i]);
-  }
-
-  timev = merge(error , nb_sample , ptimev);
-
-  for (i = 0;i < nb_sample;i++) {
-    delete ptimev[i];
-  }
-  delete [] ptimev;
-
-  return timev;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of a frequency distribution.
+ *  arguments : reference sur un objet StatError, type de loi empirique,
+ *              temps d'observation.
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] histo_type frequency distribution type,
- *  \param[in] itime      observation period.
- *
- *  \return               DiscreteDistributionData object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
-DiscreteDistributionData* RenewalData::extract(StatError &error , renewal_distribution histo_type ,
+DiscreteDistributionData* RenewalData::extract(StatError &error , int histo_type ,
                                                int itime) const
 
 {
@@ -2833,30 +2697,28 @@ DiscreteDistributionData* RenewalData::extract(StatError &error , renewal_distri
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a RenewalData object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level,
- *  \param[in]     file_flag  flag file.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet RenewalData.
+ *
+ *  arguments : stream, flag niveau de detail, flag fichier.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag) const
 
 {
-  int i , j;
+  register int i , j;
   int nb_value , max , width[2];
-  ios_base::fmtflags format_flags;
+  long old_adjust;
 
 
-  format_flags = os.setf(ios::right , ios::adjustfield);
+  old_adjust = os.setf(ios::right , ios::adjustfield);
 
-  // writing of the inter-event frequency distribution,
-  // the frequency distribution of time intervals between events within the observation period,
-  // the length-biased frequency distribution,
-  // the backward and forward recurrence time frequency distributions
+  // ecriture des lois empiriques des intervalles de temps entre 2 evenements,
+  // des intervalles de temps a l'interieur de la periode d'observation,
+  // des intervalles de temps entre 2 evenements recouvrant une date d'observation,
+  // des intervalles de temps apres le dernier evenement et des intervalles de temps residuel
 
   if (inter_event) {
     os << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
@@ -2873,7 +2735,7 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
     if (file_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+    os << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     within->ascii_characteristic_print(os , false , file_flag);
   }
 
@@ -2891,7 +2753,7 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
     if (file_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+    os << SEQ_label[SEQL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
        << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     backward->ascii_characteristic_print(os , false , file_flag);
 
@@ -2899,7 +2761,7 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
     if (file_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+    os << SEQ_label[SEQL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
        << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     forward->ascii_characteristic_print(os , false , file_flag);
 
@@ -2938,12 +2800,12 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
     if (inter_event) {
       os << " | " << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     }
-    os << " | " << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+    os << " | " << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     if (length_bias) {
       os << " | " << SEQ_label[SEQL_LENGTH_BIASED] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     }
-    os << " | " << STAT_label[STATL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME]
-       << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " | " << STAT_label[STATL_FORWARD]
+    os << " | " << SEQ_label[SEQL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME]
+       << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " | " << SEQ_label[SEQL_FORWARD]
        << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 
     for (i = 0;i < nb_value;i++) {
@@ -2996,14 +2858,16 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
   }
 
   os << "\n";
-  if (file_flag) {
-    ascii_file_write(os , exhaustive , type);
-  }
-  else {
+  switch (file_flag) {
+  case false :
     TimeEvents::ascii_write(os , exhaustive , type);
+    break;
+  case true :
+    ascii_file_write(os , exhaustive , type);
+    break;
   }
 
-  // writing of no-event/event probabilities as a function of time
+  // ecriture des probabilites de non-evenement/evenement fonction du temps
 
   if (exhaustive) {
     os << "\n";
@@ -3016,7 +2880,7 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
 
     index_event->ascii_print(os , file_flag);
 
-    // writing of the sequences of events
+    // ecriture des sequences d'evenements
 
     os << "\n";
     if (file_flag) {
@@ -3045,20 +2909,19 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive , bool file_flag
     }
   }
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a RenewalData object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet RenewalData.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& RenewalData::ascii_write(ostream &os , bool exhaustive) const
 
@@ -3074,26 +2937,23 @@ ostream& RenewalData::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a RenewalData object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet RenewalData dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool RenewalData::ascii_write(StatError &error , const string path ,
+bool RenewalData::ascii_write(StatError &error , const char *path ,
                               bool exhaustive) const
 
 {
   bool status = false;
 
 
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
   error.init();
 
@@ -3117,25 +2977,26 @@ bool RenewalData::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a RenewalData object at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un processus de renouvellement et de la structure
+ *  de donnees associee au format tableur.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& RenewalData::spreadsheet_write(ostream &os) const
 
 {
-  int i;
+  register int i;
   int nb_value;
 
 
-  // writing of the inter-event frequency distribution,
-  // the frequency distribution of time intervals between events within the observation period,
-  // the length-biased frequency distribution,
-  // the backward and forward recurrence time frequency distributions
+  // ecriture des loi empiriques des intervalles de temps entre 2 evenements,
+  // des intervalles de temps a l'interieur de la periode d'observation
+  // des intervalles de temps entre 2 evenements recouvrant une date d'observation,
+  // des intervalles de temps apres le dernier evenement et des intervalles de temps residuel
 
   if (inter_event) {
     os << "\n" << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
@@ -3144,18 +3005,18 @@ ostream& RenewalData::spreadsheet_write(ostream &os) const
        << sqrt(inter_event->variance) / inter_event->mean << endl;
   }
 
-  os << "\n" << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+  os << "\n" << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
   within->spreadsheet_characteristic_print(os);
 
   if (length_bias) {
     os << "\n" << SEQ_label[SEQL_LENGTH_BIASED] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     length_bias->spreadsheet_characteristic_print(os);
   }
-  os << "\n" << STAT_label[STATL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+  os << "\n" << SEQ_label[SEQL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
      << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
   backward->spreadsheet_characteristic_print(os);
 
-  os << "\n" << STAT_label[STATL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+  os << "\n" << SEQ_label[SEQL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
      << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
   forward->spreadsheet_characteristic_print(os);
 
@@ -3174,12 +3035,12 @@ ostream& RenewalData::spreadsheet_write(ostream &os) const
   if (inter_event) {
     os << "\t" << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   }
-  os << "\t" << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+  os << "\t" << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   if (length_bias) {
     os << " \t" << SEQ_label[SEQL_LENGTH_BIASED] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   }
-  os << "\t" << STAT_label[STATL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME]
-     << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t" << STAT_label[STATL_FORWARD]
+  os << "\t" << SEQ_label[SEQL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME]
+     << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t" << SEQ_label[SEQL_FORWARD]
      << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 
   for (i = 0;i < nb_value;i++) {
@@ -3218,7 +3079,7 @@ ostream& RenewalData::spreadsheet_write(ostream &os) const
   os << "\n";
   TimeEvents::spreadsheet_write(os);
 
-  // writing of no-event/event probabilities as a function of time
+  // ecriture des probabilites de non-evenement/evenement fonction du temps
 
   os << "\n\t" << SEQ_label[SEQL_OBSERVED] << " " << SEQ_label[SEQL_NO_EVENT_PROBABILITY]
      << "\t" << SEQ_label[SEQL_OBSERVED] << " " << SEQ_label[SEQL_EVENT_PROBABILITY]
@@ -3230,24 +3091,21 @@ ostream& RenewalData::spreadsheet_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a RenewalData object in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet RenewalData dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool RenewalData::spreadsheet_write(StatError &error , const string path) const
+bool RenewalData::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status = false;
 
 
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
   error.init();
 
@@ -3271,17 +3129,14 @@ bool RenewalData::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a RenewalData object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title.
+ *  Sortie Gnuplot d'un objet RenewalData.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool RenewalData::plot_write(StatError &error , const char *prefix ,
                              const char *title) const
@@ -3297,13 +3152,13 @@ bool RenewalData::plot_write(StatError &error , const char *prefix ,
   }
 
   else {
-    int i , j , k;
+    register int i , j , k;
     int nb_histo;
     const FrequencyDistribution **phisto;
     ostringstream data_file_name[2];
 
 
-    // writing of the data files
+    // ecriture des fichiers de donnees
 
     data_file_name[0] << prefix << 0 << ".dat";
 
@@ -3362,7 +3217,7 @@ bool RenewalData::plot_write(StatError &error , const char *prefix ,
       data_file_name[1] << prefix << 1 << ".dat";
       index_event->plot_print((data_file_name[1].str()).c_str());
 
-      // writing of the script files
+      // ecriture du fichier de commandes et du fichier d'impression
 
       for (i = 0;i < 2;i++) {
         j = 1;
@@ -3431,7 +3286,7 @@ bool RenewalData::plot_write(StatError &error , const char *prefix ,
           out_file << "plot [0:" << within->nb_value - 1 << "] [0:"
                    << (int)(within->max * YSCALE) + 1 << "] \""
                    << label((data_file_name[0].str()).c_str()) << "\" using " << j++
-                   << " title \"" << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " "
+                   << " title \"" << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " "
                    << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
           if (within->nb_value - 1 < TIC_THRESHOLD) {
@@ -3484,7 +3339,7 @@ bool RenewalData::plot_write(StatError &error , const char *prefix ,
         out_file << "plot [0:" << backward->nb_value - 1 << "] [0:"
                  << (int)(backward->max * YSCALE) + 1 << "] \""
                  << label((data_file_name[0].str()).c_str()) << "\" using " << j++
-                 << " title \"" << STAT_label[STATL_BACKWARD] << " "
+                 << " title \"" << SEQ_label[SEQL_BACKWARD] << " "
                  << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses" << endl;
 
@@ -3510,7 +3365,7 @@ bool RenewalData::plot_write(StatError &error , const char *prefix ,
         out_file << "plot [0:" << forward->nb_value - 1 << "] [0:"
                  << (int)(forward->max * YSCALE) + 1 << "] \""
                  << label((data_file_name[0].str()).c_str()) << "\" using " << j++
-                 << " title \"" << STAT_label[STATL_FORWARD] << " "
+                 << " title \"" << SEQ_label[SEQL_FORWARD] << " "
                  << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses" << endl;
 
@@ -3643,13 +3498,11 @@ bool RenewalData::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a RenewalData object.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet RenewalData.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* RenewalData::get_plotable() const
 
@@ -3662,7 +3515,7 @@ MultiPlotSet* RenewalData::get_plotable() const
   }
 
   else {
-    int i , j , k , m;
+    register int i , j , k , m;
     int nb_plot_set , nb_histo , max_nb_value , max_frequency;
     double shift;
     const FrequencyDistribution *phisto[2] , **merged_histo;
@@ -3688,7 +3541,7 @@ MultiPlotSet* RenewalData::get_plotable() const
     i = 0;
     if (inter_event) {
 
-      // inter-event frequency distribution
+      // vue : loi inter-evenement empirique
 
       plot[i].xrange = Range(0 , inter_event->nb_value - 1);
       plot[i].yrange = Range(0 , ceil(inter_event->max * YSCALE));
@@ -3712,7 +3565,7 @@ MultiPlotSet* RenewalData::get_plotable() const
 
       if (within->nb_element > 0) {
         legend.str("");
-        legend << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+        legend << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[i][1].legend = legend.str();
 
         plot[i][1].style = "impulses";
@@ -3725,8 +3578,9 @@ MultiPlotSet* RenewalData::get_plotable() const
 
     if ((within->nb_element > 0) || (length_bias)) {
 
-      // frequency distribution of time intervals between events within the observation period and
-      // length-biased frequency distribution
+      // vue : lois empiriques de l'intervalle de temps entre 2 evenements a l'interieur
+      // de la periode d'observation et de l'intervalle de temps entre 2 evenements
+      // recouvrant une date d'observation
 
       nb_histo = 0;
       max_nb_value = 0;
@@ -3769,7 +3623,7 @@ MultiPlotSet* RenewalData::get_plotable() const
       j = 0;
       if (within->nb_element > 0) {
         legend.str("");
-        legend << STAT_label[STATL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+        legend << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[i][j].legend = legend.str();
 
         plot[i][j].style = "impulses";
@@ -3795,7 +3649,8 @@ MultiPlotSet* RenewalData::get_plotable() const
       i++;
     }
 
-    // backward and forward recurrence time frequency distributions
+    // vue : lois empiriques de l'intervalle de temps apres le dernier evenement et
+    // de l'intervalle de temps residuel
 
     max_nb_value = MAX(backward->nb_value , forward->nb_value);
     max_frequency = MAX(backward->max , forward->max);
@@ -3813,7 +3668,7 @@ MultiPlotSet* RenewalData::get_plotable() const
     plot[i].resize(2);
 
     legend.str("");
-    legend << STAT_label[STATL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+    legend << SEQ_label[SEQL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
            << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[i][0].legend = legend.str();
 
@@ -3822,7 +3677,7 @@ MultiPlotSet* RenewalData::get_plotable() const
     backward->plotable_frequency_write(plot[i][0]);
 
     legend.str("");
-    legend << STAT_label[STATL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+    legend << SEQ_label[SEQL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
            << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[i][1].legend = legend.str();
 
@@ -3837,7 +3692,7 @@ MultiPlotSet* RenewalData::get_plotable() const
 
     if (htime->variance > 0.) {
 
-      // observation period frequency distribution
+      // vue : loi empirique des temps d'observation
 
       plot[i].xrange = Range(0 , htime->nb_value - 1);
       plot[i].yrange = Range(0 , ceil(htime->max * YSCALE));
@@ -3861,7 +3716,7 @@ MultiPlotSet* RenewalData::get_plotable() const
       i++;
     }
 
-    // number of events frequency distribution for each observation period
+    // vue : lois de comptage pour chaque temps d'observation
 
     if (htime->variance > 0.) {
       title.str("");
@@ -3869,7 +3724,7 @@ MultiPlotSet* RenewalData::get_plotable() const
       plot[i].title = title.str();
     }
 
-    // computation of the maximum number of values and the maximum frequency
+    // calcul du nombre de valeurs maximum et de la frequence maximum
 
     nb_histo = 0;
     max_nb_value = 0;
@@ -3937,7 +3792,7 @@ MultiPlotSet* RenewalData::get_plotable() const
 
     if (htime->variance > 0.) {
 
-      // superimposed number of events frequency distributions
+      // vue : lois empiriques de comptage superposees
 
       merged_histo = new const FrequencyDistribution*[nb_histo];
 
@@ -4006,7 +3861,7 @@ MultiPlotSet* RenewalData::get_plotable() const
       i++;
     }
 
-    // no-event/event probabilities as a function of time
+    // vue : probabilites de non-evenement/evenement fonction du temps
 
     plot[i].xrange = Range(0 , index_event->length - 1);
     plot[i].yrange = Range(0. , 1.);
@@ -4038,18 +3893,18 @@ MultiPlotSet* RenewalData::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of no-event/event probabilities as a function of time.
+/*--------------------------------------------------------------*
  *
- *  \param[in] offset shift (0/1).
- */
-/*--------------------------------------------------------------*/
+ *  Extraction des probabilites de non-evenement/evenement fonction du temps.
+ *
+ *  argument : decalage (0/1).
+ *
+ *--------------------------------------------------------------*/
 
 void RenewalData::build_index_event(int offset)
 
 {
-  int i , j;
+  register int i , j;
   int frequency[2];
 
 

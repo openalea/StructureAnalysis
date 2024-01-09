@@ -8,7 +8,7 @@
  *       File author(s): Ch. Godin (christophe.godin@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: template-scanner.l 3254 2007-06-06 08:27:11Z pradal $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *

@@ -4,7 +4,7 @@
 
 .. todo:: check the AddVariable option (sequences) and sequences cases
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_cluster.py 9885 2010-11-06 18:19:34Z cokelaer $"
 
 import os
 from openalea.sequence_analysis.sequences import Sequences
@@ -71,7 +71,7 @@ class TestHistogram(_HistoCase):
         self.data = self.create_data()
 
     def create_data(self):
-        return Histogram(str(get_shared_data( 'fagus1.his')))
+        return Histogram(get_shared_data( 'fagus1.his'))
 
 
 class TestConvolution( _HistoCase):
@@ -81,7 +81,7 @@ class TestConvolution( _HistoCase):
         self.data = self.create_data()
 
     def create_data(self):
-        conv = Convolution(str(get_shared_data('test_convolution1.conv')))
+        conv = Convolution(get_shared_data('test_convolution1.conv'))
         return conv.simulate(1000)
 
 
@@ -92,7 +92,7 @@ class TestCompound(_HistoCase):
         self.data = self.create_data()
 
     def create_data(self):
-        comp = Compound(str(get_shared_data('test_compound1.cd')))
+        comp = Compound(get_shared_data('test_compound1.cd'))
         return comp.simulate(1000)
 
 
@@ -148,7 +148,7 @@ class TestSequences1(_Cluster):
         self.data = self.create_data()
 
     def create_data(self):
-        data = Sequences(str(get_shared_data('sequences1.seq')))
+        data = Sequences(get_shared_data('sequences1.seq'))
         return data
 
     def test_cluster_step(self):
@@ -173,19 +173,19 @@ class TestSequencesn(_Cluster):
         self.data = self.create_data()
 
     def create_data(self):
-        data = Sequences(str(get_shared_data('sequences2.seq')))
+        data = Sequences(get_shared_data('sequences2.seq'))
         return data
 
     def test_cluster_step(self):
         data = self.data
-        mode = True
+        mode = False
         cluster1 = data.cluster_step(1, 2, mode)
         cluster2 = Cluster(data, "Step", 1, 2)
         assert str(cluster1) == str(cluster2)
 
     def test_cluster_limit(self):
         data = self.data
-        cluster1 = data.cluster_limit(1, [2 ], True)
+        cluster1 = data.cluster_limit(1, [2 ], False)
         cluster2 = Cluster(data, "Limit", 1, [2])
         assert str(cluster1) == str(cluster2)
 

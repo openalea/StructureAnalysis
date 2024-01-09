@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id: discrete_mixture.h 18442 2015-07-29 09:35:54Z guedon $
+ *       $Id: discrete_mixture.h 17991 2015-04-23 06:46:12Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -40,9 +40,6 @@
 #define DISCRETE_MIXTURE_H
 
 
-#include "stat_tools.h"
-#include "distribution.h"
-
 
 namespace stat_tool {
 
@@ -50,45 +47,48 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constants
+ *  Constantes :
  */
 
 
-  const int DISCRETE_MIXTURE_NB_COMPONENT = 100;   // maximum number of components
+  const int DISCRETE_MIXTURE_NB_COMPONENT = 100;   // nombre maximum de composantes
 
-  const double NEGATIVE_BINOMIAL_PARAMETER = 20.;  // initial parameter for a negative binomial distribution
-  const double MIN_WEIGHT_STEP = 0.1;    // minimum step for weight initialization
-  const double MAX_WEIGHT_STEP = 0.5;    // maximum step for weight initialization
-  const int DISCRETE_MIXTURE_COEFF = 2;           // rounding coefficient for the estimator
-  const double DISCRETE_MIXTURE_LIKELIHOOD_DIFF = 1.e-5;  // threshold for stopping the EM iterations
-  const int DISCRETE_MIXTURE_NB_ITER = 500;        // maximum number of EM iterations
+  const double NEGATIVE_BINOMIAL_PARAMETER = 20.;  // parametre initial pour une loi binomiale negative
+  const double MIN_WEIGHT_STEP = 0.1;    // pas minimum d'initialisation des poids
+  const double MAX_WEIGHT_STEP = 0.5;    // pas maximum d'initialisation des poids
+  const int MIXTURE_COEFF = 2;           // coefficient arrondi estimateur
+  const double DISCRETE_MIXTURE_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
+  const int DISCRETE_MIXTURE_NB_ITER = 500;        // nombre maximum d'iterations EM
 
 
 
 /****************************************************************
  *
- *  Class definition
+ *  Definition des classes :
  */
 
 
   class DiscreteMixtureData;
 
-  /// \brief Mixture of discrete distributions
 
-  class DiscreteMixture : public StatInterface , public Distribution {
+  class DiscreteMixture : public StatInterface , public Distribution {  // melange de lois discretes
 
     friend class FrequencyDistribution;
     friend class DiscreteMixtureData;
 
+    friend DiscreteMixture* discrete_mixture_building(StatError &error , int nb_component , double *weight ,
+                                                      const DiscreteParametric **component);
+    friend DiscreteMixture* discrete_mixture_ascii_read(StatError &error , const char *path ,
+                                                        double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const DiscreteMixture &mixt)
     { return mixt.ascii_write(os , mixt.mixture_data , false , false); }
 
   private :
 
-    DiscreteMixtureData *mixture_data;  ///< pointer on a DiscreteMixtureData object
-    int nb_component;       ///< number of components
-    DiscreteParametric *weight;  ///< weight distribution
-    DiscreteParametric **component; ///< components
+    DiscreteMixtureData *mixture_data;  // pointeur sur un objet DiscreteMixtureData
+    int nb_component;       // nombre de composantes
+    DiscreteParametric *weight;  // poids de chaque composante
+    DiscreteParametric **component; // composantes
 
     void copy(const DiscreteMixture &mixt , bool data_flag = true);
     void remove();
@@ -116,7 +116,6 @@ namespace stat_tool {
     DiscreteMixture(int inb_component , double *pweight , const DiscreteParametric **pcomponent);
     DiscreteMixture(const DiscreteMixture &mixt , bool *component_flag , int inb_value);
     DiscreteMixture(int inb_component , const DiscreteParametric **pcomponent);
-    DiscreteMixture(int inb_component , vector<double> iweight , const std::vector<DiscreteParametric> icomponent);
     DiscreteMixture(const DiscreteMixture &mixt , bool data_flag = true)
     :Distribution(mixt) { copy(mixt , data_flag); }
     ~DiscreteMixture();
@@ -125,18 +124,11 @@ namespace stat_tool {
     DiscreteParametricModel* extract(StatError &error , int index) const;
     DiscreteMixtureData* extract_data(StatError &error) const;
 
-    static DiscreteMixture* building(StatError &error , int nb_component , double *weight ,
-                                     const DiscreteParametric **component);
-    static DiscreteMixture* building(StatError &error , int nb_component , std::vector<double> weight ,
-                                     const std::vector<DiscreteParametric> component);
-    static DiscreteMixture* ascii_read(StatError &error , const std::string path ,
-                                       double cumul_threshold = CUMUL_THRESHOLD);
-
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -145,7 +137,7 @@ namespace stat_tool {
     double likelihood_computation(const DiscreteMixtureData &mixt_histo) const;
     DiscreteMixtureData* simulation(StatError &error , int nb_element) const;
 
-    // class member access
+    // acces membres de la classe
 
     DiscreteMixtureData* get_mixture_data() const { return mixture_data; }
     int get_nb_component() const { return nb_component; }
@@ -154,10 +146,15 @@ namespace stat_tool {
   };
 
 
-  /// \brief Data structure corresponding to a mixture of discrete distributions
+  DiscreteMixture* discrete_mixture_building(StatError &error , int nb_component , double *weight ,
+                                             const DiscreteParametric **component);
+  DiscreteMixture* discrete_mixture_ascii_read(StatError &error , const char *path ,
+                                               double cumul_threshold = CUMUL_THRESHOLD);
 
-  class DiscreteMixtureData : public StatInterface , public FrequencyDistribution {
 
+
+  class DiscreteMixtureData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
+                                                                                     // a un melange de lois discretes
     friend class FrequencyDistribution;
     friend class DiscreteMixture;
 
@@ -166,10 +163,10 @@ namespace stat_tool {
 
   private :
 
-    DiscreteMixture *mixture;  ///< pointer on a DiscreteMixture object
-    int nb_component;       ///< number of components
-    FrequencyDistribution *weight;  ///< weight frequency distribution
-    FrequencyDistribution **component;  ///< component frequency distributions
+    DiscreteMixture *mixture;  // pointeur sur un objet DiscreteMixture
+    int nb_component;       // nombre de composantes
+    FrequencyDistribution *weight;  // loi empirique des poids
+    FrequencyDistribution **component;  // composantes empiriques
 
     void copy(const DiscreteMixtureData &mixt_histo , bool model_flag = true);
     void remove();
@@ -190,14 +187,14 @@ namespace stat_tool {
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     double information_computation() const;
 
-    // class member access
+    // acces membres de la classe
 
     DiscreteMixture* get_mixture() const { return mixture; }
     int get_nb_component() const { return nb_component; }

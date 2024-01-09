@@ -3,7 +3,7 @@
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_data_transform.py 9885 2010-11-06 18:19:34Z cokelaer $"
 
 
 from openalea.sequence_analysis import get_shared_data
@@ -22,7 +22,7 @@ from tools import runTestClass
 class TestRemoveRun():
 
     def __init__(self):
-        self.data = Sequences(str(get_shared_data("sequences1.seq")))
+        self.data = Sequences(get_shared_data("sequences1.seq"))
 
     def _test_sequences_1(self):
 
@@ -53,7 +53,7 @@ class TestRemoveRun():
             assert True
 
     def _test_sequences_2(self):
-        seq1 = Sequences(str(get_shared_data("sequences2.seq")))
+        seq1 = Sequences(get_shared_data("sequences2.seq"))
         seq2 = seq1.remove_run(1, 0,"e",2)
         seq3 = RemoveRun(seq1,1, 0,"e",2)
         assert str(seq3)==str(seq2)
@@ -73,13 +73,13 @@ def test_discrete_sequences():
 
 def test_compute_state_sequence():
     from openalea.sequence_analysis import HiddenSemiMarkov
-    seq = Sequences(str(get_shared_data( "wij1.seq")))
-    hsmc0 = HiddenSemiMarkov(str(get_shared_data(  "wij1.hsc")))
+    seq = Sequences(get_shared_data( "wij1.seq"))
+    hsmc0 = HiddenSemiMarkov(get_shared_data(  "wij1.hsc"))
     ComputeStateSequences(seq, hsmc0, Algorithm="ForwardBackward", Characteristics=True)
 
 
 def test_transition_count():
-    seq = Sequences(str(get_shared_data( "wij1.seq")))
+    seq = Sequences(get_shared_data( "wij1.seq"))
     TransitionCount(seq, 5, Begin=True, Estimator="MaximumLikelihood",
                     Filename = "ASCII")
 
@@ -111,7 +111,7 @@ def test_select_step():
     #
     #########################################################################
     """
-    seq1 = Sequences(str(get_shared_data( "well_log_filtered.seq")))
+    seq1 = Sequences(get_shared_data( "well_log_filtered.seq"))
     Plot(seq1, ViewPoint="Data")
     Plot(seq1)
 

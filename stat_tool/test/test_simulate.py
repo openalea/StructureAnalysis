@@ -1,5 +1,5 @@
 """simulate tests"""
-__version__ = "$Id$"
+__version__ = "$Id: test_simulate.py 9028 2010-06-01 08:17:28Z cokelaer $"
 
 from openalea.stat_tool.mixture import Mixture
 from openalea.stat_tool.convolution import Convolution

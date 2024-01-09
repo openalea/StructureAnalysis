@@ -2,7 +2,7 @@
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_semi_markov.py 9885 2010-11-06 18:19:34Z cokelaer $"
 
 
 from openalea.stat_tool import _stat_tool
@@ -18,7 +18,7 @@ from tools import runTestClass
 
 
 def SemiMarkovData():
-    sm =  SemiMarkov(str(get_shared_data('test_semi_markov.dat')))
+    sm =  SemiMarkov(get_shared_data('test_semi_markov.dat'))
     ret = Simulate(sm, 1, 1000, True)
     return sm
 
@@ -30,14 +30,14 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           str(get_shared_data("test_semi_markov.dat")),
+                           get_shared_data("test_semi_markov.dat"),
                            SemiMarkov)
 
     def build_data(self):
         """todo: check identifier output. should be a list """
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        sm =  SemiMarkov(str(get_shared_data('test_semi_markov.dat')))
+        sm =  SemiMarkov(get_shared_data('test_semi_markov.dat'))
 
 
         return sm

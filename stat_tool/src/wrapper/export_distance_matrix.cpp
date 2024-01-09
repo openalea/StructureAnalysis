@@ -16,7 +16,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id$
+ *        $Id: export_distance_matrix.cpp 18032 2015-04-23 07:13:59Z guedon $
  *
  *-----------------------------------------------------------------------------*/
 
@@ -25,6 +25,7 @@
 #include "wrapper_util.h"
 #include "export_base.h"
 
+#include "stat_tool/stat_tools.h"
 #include "stat_tool/distance_matrix.h"
 
 #include <boost/python.hpp>
@@ -57,28 +58,27 @@ public:
     Clusters *ret;
     StatError error;
 
-    bool display = true;
-    //std::stringstream output;
+    std::stringstream output;
     int nb_proto = len(prototype);
 
-    //ostringstream error_message;
+    ostringstream error_message;
 
     if (nb_proto != 0)
       {
         stat_tool::wrap_util::auto_ptr_array<int> protos(new int[nb_proto]);
         for (int i = 0; i < nb_proto; i++)
           protos[i] = extract<int> (prototype[i]);
-        ret = dm.partitioning(error, display, nb_cluster, protos.get(),
+        ret = dm.partitioning(error, output, nb_cluster, protos.get(),
             initialization, algorithm);
       }
     else
       {
         int *protos = 0;
-        ret = dm.partitioning(error, display, nb_cluster, protos,
+        ret = dm.partitioning(error, output, nb_cluster, protos,
             initialization, algorithm);
       }
 
-    //cout << output.str() << endl;
+    cout << output.str() << endl;
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
@@ -92,9 +92,7 @@ public:
     Clusters *ret;
     StatError error;
 
-    // std::stringstream output;
-    bool display = true;
-
+    std::stringstream output;
     int nb_cluster = len(clusters);
     int* cluster_nb_pattern;
     int** cluster_pattern;
@@ -130,7 +128,7 @@ public:
         delete[] cluster_pattern;
       }
 
-    ret = dm.partitioning(error, display, nb_cluster, cluster_nb_pattern,
+    ret = dm.partitioning(error, output, nb_cluster, cluster_nb_pattern,
         cluster_pattern);
 
     // Free memory
@@ -147,22 +145,20 @@ public:
   }
 
   static std::string
-  hierarchical_clustering(const DistanceMatrix& dm, hierarchical_strategy algorithm,
-      linkage criterion, const char*path, output_format format)
+  hierarchical_clustering(const DistanceMatrix& dm, int algorithm,
+      int criterion, const char*path, char format)
   {
     StatError error;
-    //std::stringstream output;
-    bool display = true;
-
+    std::stringstream output;
     bool ret;
 
-    ret = dm.hierarchical_clustering(error, display, algorithm, criterion, path,
+    ret = dm.hierarchical_clustering(error, output, algorithm, criterion, path,
         format);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    return string();
+    return output.str();
 
   }
 
@@ -173,7 +169,7 @@ public:
     StatError error;
 
     // not implemented. see vectors.cpp for an exmaple.
-    // data = DistanceMatrix::ascii_read(error, filename);
+    //data = distance_matrix_ascii_read(error, filename);
 
     if (data)
       {
@@ -274,7 +270,7 @@ public:
         cout << error_message.str() << endl;
         return -1;
       }
-
+    
     if (i < row_max && j < column_max && i >= 0 && j >= 0)
       ret = input.get_substitution_distance(i, j);
     else
@@ -286,9 +282,9 @@ public:
       }
     return ret;
   }
-
-
-
+  
+  
+  
   static double
   get_transposition_distance(DistanceMatrix &input, int i, int j)
   {
@@ -318,8 +314,8 @@ public:
       }
     return ret;
   }
-
-
+  
+  
   static double
   get_insertion_distance(DistanceMatrix &input, int i, int j)
   {
@@ -348,7 +344,7 @@ public:
       }
     return ret;
   }
-
+  
   static double
   get_distance(DistanceMatrix &input, int i, int j)
   {
@@ -557,7 +553,7 @@ class_distance_matrix()
       args("index"), "todo")
   .def("get_column_identifier", &CLASS::get_column_identifier,
       args("index"), "todo")
-
+  
   .def("get_nb_substitution", WRAP::get_nb_substitution,
       args("irow", "icolumn"), "returns nb of substitution between element i,j where i in [0, nbrow] and j in [0,nbcolum]")
   .def("get_nb_deletion", WRAP::get_nb_deletion,
@@ -649,7 +645,7 @@ void
 class_dendrogram()
 {
   class_<Dendrogram, bases<StatInterface> > ("_Dendrogram", "Dendrogram", no_init)
-  .def(init <const DistanceMatrix &, cluster_scale>())
+  .def(init <const DistanceMatrix &, int>())
 
   .def(self_ns::str(self)) // __str__
 ;
@@ -676,8 +672,8 @@ Dendrogram();
    int get_parent(int cluster) const { return parent[cluster]; }
    int get_child(int cluster , int index) const { return child[cluster][index]; }
    double get_child_distance(int cluster) const { return child_distance[cluster]; }
-   double get_within_cluster_distance(int cluster) const { return within_cluster_distance[cluster]; }
-   double get_between_cluster_distance(int cluster) const { return between_cluster_distance[cluster]; }
-   double get_max_within_cluster_distance(int cluster) const { return max_within_cluster_distance[cluster]; }
-   double get_min_between_cluster_distance(int cluster) const { return min_between_cluster_distance[cluster]; }
+   double get_intra_cluster_distance(int cluster) const { return intra_cluster_distance[cluster]; }
+   double get_inter_cluster_distance(int cluster) const { return inter_cluster_distance[cluster]; }
+   double get_max_intra_cluster_distance(int cluster) const { return max_intra_cluster_distance[cluster]; }
+   double get_min_inter_cluster_distance(int cluster) const { return min_inter_cluster_distance[cluster]; }
 */

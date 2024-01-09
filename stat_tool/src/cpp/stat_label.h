@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: stat_label.h 18019 2015-04-23 07:05:38Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -46,17 +46,15 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Key word identifiers (file format)
+ *  Identificateurs des mots cles (format des fichiers) :
  */
 
 
-  enum stat_tool_keyword {
+  enum {
     STATW_INF_BOUND ,
     STATW_SUP_BOUND ,
     STATW_PARAMETER ,
     STATW_PROBABILITY ,
-    STATW_NO_SEGMENT ,
-    STATW_SEQUENCE_LENGTH ,
 
     STATW_SHAPE ,
     STATW_SCALE ,
@@ -67,7 +65,6 @@ namespace stat_tool {
     STATW_CONCENTRATION ,
     STATW_INTERCEPT ,
     STATW_SLOPE ,
-    STATW_AUTOREGRESSIVE_COEFF ,
 
     STATW_MIXTURE ,
     STATW_CONVOLUTION ,
@@ -86,7 +83,7 @@ namespace stat_tool {
     STATW_VARIABLES ,
 
     STATW_DISTANCE ,
-    STATW_CATEGORIES ,
+    STATW_SYMBOLS ,
     STATW_PERIOD ,
 
     STATW_STATES ,
@@ -98,19 +95,15 @@ namespace stat_tool {
 
     STATW_OUTPUT_PROCESS ,
     STATW_OUTPUT_PROCESSES ,
-
-    STATW_NONPARAMETRIC ,   // for ascending compatibility
-
+    STATW_NONPARAMETRIC ,   // pour compatibilite ascendante
     STATW_CATEGORICAL ,
-
-    STATW_PARAMETRIC ,   // for ascending compatibility
-
+    STATW_PARAMETRIC ,   // pour compatibilite ascendante
     STATW_DISCRETE_PARAMETRIC ,
     STATW_CONTINUOUS_PARAMETRIC ,
     STATW_OBSERVATION_DISTRIBUTION ,
     STATW_OBSERVATION_MODEL ,
 
-    STATW_OBSERVATION_PROBABILITIES ,  // for ascending compatibility
+    STATW_OBSERVATION_PROBABILITIES ,  // pour compatibilite ascendante
 
     STATW_OUTPUT
   };
@@ -132,11 +125,11 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Label identifiers
+ *  Identificateurs des labels :
  */
 
 
-  enum stat_tool_label {
+  enum {
     STATL_LINE ,
     STATL_WORD ,
 
@@ -146,13 +139,8 @@ namespace stat_tool {
     STATL_MODEL ,
 
     STATL_MEAN ,
-    STATL_MEDIAN ,
-    STATL_MODE ,
     STATL_VARIANCE ,
     STATL_STANDARD_DEVIATION ,
-    STATL_QUANTILE ,
-    STATL_LOWER_QUARTILE ,
-    STATL_UPPER_QUARTILE ,
     STATL_MEAN_ABSOLUTE_DEVIATION ,
     STATL_VARIATION_COEFF ,
     STATL_VARIANCE_MEAN_RATIO ,
@@ -212,7 +200,6 @@ namespace stat_tool {
     STATL_MATCHING ,
     STATL_CONCENTRATION ,
     STATL_CURVE ,
-
     STATL_MIXTURE ,
     STATL_WEIGHT ,
     STATL_COMPONENT ,
@@ -229,22 +216,16 @@ namespace stat_tool {
     STATL_SURVIVAL_PROBABILITY ,
     STATL_FREQUENCY ,
 
-    STATL_BACKWARD ,
-    STATL_FORWARD ,
-    STATL_OBSERVATION_INTER_EVENT ,
-    STATL_SOJOURN_TIME ,
-
     STATL_FREQUENCY_DISTRIBUTION ,
     STATL_FREQUENCY_DISTRIBUTIONS ,
     STATL_HISTOGRAM ,
-    STATL_BIN_WIDTH ,
     STATL_SAMPLE ,
     STATL_SAMPLE_SIZE ,
     STATL_DISSIMILARITIES ,
 
     STATL_INFORMATION_RATIO ,
     STATL_CLUSTERING_STEP ,
-    STATL_CATEGORY ,
+    STATL_SYMBOL ,
 
     STATL_VECTOR ,
     STATL_VECTORS ,
@@ -261,8 +242,6 @@ namespace stat_tool {
     STATL_LIMIT_CORRELATION_COEFF ,
     STATL_SPEARMAN_LIMIT_RANK_CORRELATION_COEFF ,
     STATL_KENDALL_LIMIT_RANK_CORRELATION_COEFF ,
-    STATL_SUP_NORM_DISTANCE ,
-    STATL_OVERLAP ,
 
     STATL_CONTINGENCY_TABLE ,
     STATL_DEVIATION_TABLE ,
@@ -282,9 +261,7 @@ namespace stat_tool {
     STATL_RESPONSE_VARIABLE ,
     STATL_CORRELATION_COEFF ,
     STATL_R_SQUARED ,
-//    STATL_REGRESSION_VARIATION_TOTAL_VARIATION ,
-    STATL_DETERMINATION_COEFF ,
-    STATL_NULL_AUTOREGRESSIVE_COEFF_95_CONFIDENCE_LIMIT ,
+    STATL_REGRESSION_VARIATION_TOTAL_VARIATION ,
     STATL_RESIDUAL ,
     STATL_STANDARDIZED_RESIDUAL ,
     STATL_LINEAR ,
@@ -361,12 +338,12 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Identifiers of error messages for lexical analysis of files
+ *  Identificateurs des messages d'erreur pour l'analyse des fichiers :
  */
 
 
-  enum stat_tool_parsing {
-    STATP_KEYWORD ,
+  enum {
+    STATP_KEY_WORD ,
     STATP_FORMAT ,
 
     STATP_DISTRIBUTION_NAME ,
@@ -395,7 +372,7 @@ namespace stat_tool {
     STATP_VARIABLE_INDEX ,
     STATP_VARIABLE_TYPE ,
 
-    STATP_NB_CATEGORY ,
+    STATP_NB_SYMBOL ,
     STATP_LOCAL_DISTANCE ,
     STATP_TRIANGLE_INEQUALITY ,
     STATP_PERIOD_VALUE ,
@@ -426,11 +403,11 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Identifiers of error messages
+ *  Identificateurs des messages d'erreur de traitement :
  */
 
 
-  enum stat_tool_error {
+  enum {
     STATR_FILE_NAME ,
     STATR_FILE_PREFIX ,
     STATR_EMPTY_SAMPLE ,
@@ -447,13 +424,6 @@ namespace stat_tool {
     STATR_VALUE_RANGE ,
     STATR_MIN_INF_BOUND ,
     STATR_ESTIMATION_FAILURE ,
-
-    STATR_NB_COMPLETE_INTERVAL_TOO_SMALL ,
-    STATR_COMPLETE_MIN_VALUE ,
-    STATR_FORWARD_MIN_VALUE ,
-    STATR_NO_EVENT_MIN_VALUE ,
-    STATR_MEAN_ESTIMATION ,
-    STATR_INTER_EVENT_SUPPORT ,
 
     STATR_DISTRIBUTION_INDEX ,
     STATR_FREQUENCY_DISTRIBUTION_INDEX ,
@@ -485,26 +455,24 @@ namespace stat_tool {
     STATR_SMALLER_THAN ,
     STATR_GREATER_THAN ,
     STATR_NOT_ALLOWED ,
-    STATR_NB_CATEGORY ,
-    STATR_NON_CONSECUTIVE_CATEGORIES ,
-    STATR_MISSING_CATEGORY ,
+    STATR_NB_SYMBOL ,
+    STATR_NON_CONSECUTIVE_SYMBOLS ,
+    STATR_MISSING_SYMBOL ,
     STATR_CLUSTER_LIMIT ,
     STATR_INFORMATION_RATIO ,
     STATR_NULL_INFORMATION ,
     STATR_SCALING_COEFF ,
-    STATR_VALUE ,
     STATR_MIN_VALUE ,
     STATR_MAX_VALUE ,
 
     STATR_MARGINAL_FREQUENCY_DISTRIBUTION ,
     STATR_MARGINAL_HISTOGRAM ,
-    STATR_HISTOGRAM_BIN_WIDTH ,
+    STATR_HISTOGRAM_STEP ,
     STATR_HISTOGRAM_MIN_VALUE ,
     STATR_BAD ,
     STATR_NB_VECTOR ,
     STATR_NB_VARIABLE ,
     STATR_NB_SELECTED_VARIABLE ,
-    STATR_NB_SUMMED_VARIABLE ,
     STATR_VARIABLE_TYPE ,
     STATR_VARIABLE_INDEX ,
     STATR_VARIABLE_INDICES ,

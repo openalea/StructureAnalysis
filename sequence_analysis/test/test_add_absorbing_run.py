@@ -4,7 +4,7 @@
 
 .. todo:: markov case ? 
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_add_absorbing_run.py 9885 2010-11-06 18:19:34Z cokelaer $"
 
 from openalea.sequence_analysis.sequences import Sequences
 from openalea.sequence_analysis.semi_markov import SemiMarkov

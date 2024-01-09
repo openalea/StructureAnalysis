@@ -2,7 +2,7 @@
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_hidden_variable_order_markov.py 9401 2010-08-10 12:24:59Z cokelaer $"
 
 
 from openalea.stat_tool import _stat_tool
@@ -27,14 +27,14 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           str(get_shared_data("dupreziana21.hc")),
+                           get_shared_data("dupreziana21.hc"),
                            HiddenVariableOrderMarkov)
 
     def build_data(self):
         """todo: check identifier output. should be a list """
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        hvom =  HiddenVariableOrderMarkov(str(get_shared_data('dupreziana21.hc')))
+        hvom =  HiddenVariableOrderMarkov(get_shared_data('dupreziana21.hc'))
 
         return hvom
 

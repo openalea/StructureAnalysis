@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: discrete_parametric_process.cpp 17994 2015-04-23 06:47:30Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -39,32 +39,34 @@
 #include <sstream>
 #include <iomanip>
 
-#include <boost/tokenizer.hpp>
+#include "tool/rw_tokenizer.h"
+#include "tool/rw_cstring.h"
+#include "tool/rw_locale.h"
+#include "tool/config.h"
 
+#include "stat_tools.h"
 #include "markovian.h"
 #include "stat_label.h"
 
 using namespace std;
-using namespace boost;
 
 
 namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the DiscreteParametricProcess class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_state number of states,
- *  \param[in] inb_value number of values.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe DiscreteParametricProcess.
+ *
+ *  arguments : nombre d'etats, nombre de valeurs.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , int inb_value)
 
 {
-  int i;
+  register int i;
 
 
   nb_state = inb_state;
@@ -96,19 +98,18 @@ DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , int inb_val
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the DiscreteParametricProcess class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_state    number of states,
- *  \param[in] pobservation pointer on the observation distributions.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe DiscreteParametricProcess.
+ *
+ *  arguments : nombre d'etats, lois d'observation.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , DiscreteParametric **pobservation)
 
 {
-  int i;
+  register int i;
 
 
   nb_state = inb_state;
@@ -122,7 +123,7 @@ DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , DiscretePar
 
   observation = new DiscreteParametric*[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = new DiscreteParametric(*pobservation[i] , DISTRIBUTION_COPY , nb_value);
+    observation[i] = new DiscreteParametric(*pobservation[i] , 'c' , nb_value);
   }
 
   weight = NULL;
@@ -132,18 +133,18 @@ DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , DiscretePar
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a DiscreteParametricProcess object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] process reference on a DiscreteParametricProcess object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet DiscreteParametricProcess.
+ *
+ *  argument : reference sur un objet DiscreteParametricProcess.
+ *
+ *--------------------------------------------------------------*/
 
 void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process)
 
 {
-  int i;
+  register int i;
 
 
   nb_state = process.nb_state;
@@ -151,7 +152,7 @@ void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process)
 
   observation = new DiscreteParametric*[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = new DiscreteParametric(*(process.observation[i]) , DISTRIBUTION_COPY , nb_value);
+    observation[i] = new DiscreteParametric(*(process.observation[i]) , 'c' , nb_value);
   }
 
   if ((process.weight) && (process.mixture)) {
@@ -174,17 +175,17 @@ void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the data members of a DiscreteParametricProcess object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet DiscreteParametricProcess.
+ *
+ *--------------------------------------------------------------*/
 
 void DiscreteParametricProcess::remove()
 
 {
   if (observation) {
-    int i;
+    register int i;
 
     for (i = 0;i < nb_state;i++) {
       delete observation[i];
@@ -206,11 +207,11 @@ void DiscreteParametricProcess::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the DiscreteParametricProcess class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe DiscreteParametricProcess.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametricProcess::~DiscreteParametricProcess()
 
@@ -219,15 +220,13 @@ DiscreteParametricProcess::~DiscreteParametricProcess()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the DiscreteParametricProcess class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] process reference on a DiscreteParametricProcess object.
+ *  Operateur d'assignement de la classe DiscreteParametricProcess.
  *
- *  \return            DiscreteParametricProcess object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet DiscreteParametricProcess.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametricProcess& DiscreteParametricProcess::operator=(const DiscreteParametricProcess &process)
 
@@ -241,33 +240,27 @@ DiscreteParametricProcess& DiscreteParametricProcess::operator=(const DiscretePa
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Analysis of the format of discrete parametric observation distributions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error           reference on a StatError object,
- *  \param[in] in_file         stream,
- *  \param[in] line            reference on the file line index,
- *  \param[in] nb_state        number of states,
- *  \param[in] model           model type,
- *  \param[in] cumul_threshold threshold on the cumulative distribution functions.
+ *  Analyse du format des lois d'observation.
  *
- *  \return                    DiscreteParametricProcess object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream,
+ *              reference sur l'indice de la ligne lue, nombre d'etats,
+ *              type de modele, seuil sur la fonction de repartition.
+ *
+ *--------------------------------------------------------------*/
 
-DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error , ifstream &in_file ,
-                                                              int &line , int nb_state ,
-                                                              model_type model , double cumul_threshold)
+DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstream &in_file ,
+                                                        int &line , int nb_state ,
+                                                        int model , double cumul_threshold)
 
 {
-  string buffer;
+  RWLocaleSnapshot locale("en");
+  RWCString buffer , token;
   size_t position;
-  typedef tokenizer<char_separator<char>> tokenizer;
-  char_separator<char> separator(" \t");
   bool status = true , lstatus;
-  int i , j;
-  int index;
+  register int i , j;
+  long index;
   DiscreteParametric **dist;
   DiscreteParametricProcess *process;
 
@@ -280,42 +273,42 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
   }
 
   for (i = 0;i < nb_state;i++) {
-    while (getline(in_file , buffer)) {
+    while (buffer.readLine(in_file , false)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.find('#');
-      if (position != string::npos) {
-        buffer.erase(position);
+      position = buffer.first('#');
+      if (position != RW_NPOS) {
+        buffer.remove(position);
       }
       j = 0;
 
-      tokenizer tok_buffer(buffer , separator);
+      RWCTokenizer next(buffer);
 
-      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+      while (!((token = next()).isNull())) {
         switch (j) {
 
-        // test COMPONENT/STATE keyword
+        // test mot cle COMPONENT / STATE
 
         case 0 : {
           switch (model) {
 
           case MIXTURE : {
-            if (*token != STAT_word[STATW_COMPONENT]) {
+            if (token != STAT_word[STATW_COMPONENT]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEYWORD] ,
+              error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
                                       STAT_word[STATW_COMPONENT] , line , j + 1);
             }
             break;
           }
 
           case HIDDEN_MARKOV : {
-            if (*token != STAT_word[STATW_STATE]) {
+            if (token != STAT_word[STATW_STATE]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEYWORD] ,
+              error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
                                       STAT_word[STATW_STATE] , line , j + 1);
             }
             break;
@@ -324,19 +317,10 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
           break;
         }
 
-        // test component/state index
+        // test indice de la composante / de l'etat
 
         case 1 : {
-          lstatus = true;
-
-/*          try {
-            index = stoi(*token);   in C++ 11
-          }
-          catch(invalid_argument &arg) {
-            lstatus = false;
-          } */
-          index = atoi(token->c_str());
-
+          lstatus = locale.stringToNum(token , &index);
           if ((lstatus) && (index != i)) {
             lstatus = false;
           }
@@ -356,12 +340,12 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
           break;
         }
 
-        // test OBSERVATION_DISTRIBUTION keyword
+        // test mot cle OBSERVATION_DISTRIBUTION
 
         case 2 : {
-          if (*token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) {
+          if (token != STAT_word[STATW_OBSERVATION_DISTRIBUTION]) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OBSERVATION_DISTRIBUTION] , line , j + 1);
+            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_OBSERVATION_DISTRIBUTION] , line , j + 1);
           }
           break;
         }
@@ -376,7 +360,7 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
           error.update(STAT_parsing[STATP_FORMAT] , line);
         }
 
-        dist[i] = DiscreteParametric::parsing(error , in_file , line ,
+        dist[i] = discrete_parametric_parsing(error , in_file , line ,
                                               UNIFORM , cumul_threshold);
         if (!dist[i]) {
           status = false;
@@ -385,8 +369,7 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
         break;
       }
     }
-
-    if ((j == 0) && (!dist[i])) {
+    if ((!dist[i]) && (j==0)) {
       status = false;
       error.update(STAT_parsing[STATP_FORMAT] , line);
     }
@@ -405,25 +388,22 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a DiscreteParametricProcess object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os                    stream,
- *  \param[in]     empirical_observation pointer on the observation frequency distributions,
- *  \param[in]     marginal_distribution pointer on the marginal frequency distribution,
- *  \param[in]     exhaustive            flag detail level,
- *  \param[in]     file_flag             flag file,
- *  \param[in]     model                 model type.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet DiscreteParametricProcess.
+ *
+ *  arguments : stream, pointeurs sur les lois d'observation et
+ *              la loi marginale empiriques, flag niveau de detail,
+ *              flag fichier, type de modele.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribution **empirical_observation ,
                                                 FrequencyDistribution *marginal_distribution ,
-                                                bool exhaustive , bool file_flag , model_type model) const
+                                                bool exhaustive , bool file_flag , int model) const
 
 {
-  int i , j;
+  register int i , j;
   double scale[NB_STATE];
   const Distribution *pobservation[NB_STATE];
 
@@ -503,12 +483,12 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
 
   if ((!empirical_observation) && (exhaustive)) {
     int buff , width[3];
-    ios_base::fmtflags format_flags;
+    long old_adjust;
 
  
-    format_flags = os.setf(ios::right , ios::adjustfield);
+    old_adjust = os.setf(ios::right , ios::adjustfield);
 
-    // computation of the column widths
+   // calcul des largeurs des colonnes
 
     width[0] = column_width(nb_value - 1);
 
@@ -588,7 +568,7 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
       os << endl;
     }
 
-    os.setf(format_flags , ios::adjustfield);
+    os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
   }
 
   if (marginal_distribution) {
@@ -761,23 +741,20 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a DiscreteParametricProcess object at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os                    stream,
- *  \param[in]     empirical_observation pointer on the observation frequency distributions,
- *  \param[in]     marginal_distribution pointer on the marginal frequency distribution,
- *  \param[in]     model                 model type.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet DiscreteParametricProcess au format tableur.
+ *
+ *  arguments : stream, pointeurs sur les lois d'observation et
+ *              la loi marginale empiriques, type de modele.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDistribution **empirical_observation ,
-                                                      FrequencyDistribution *marginal_distribution ,
-                                                      model_type model) const
+                                                      FrequencyDistribution *marginal_distribution , int model) const
 
 {
-  int i , j;
+  register int i , j;
   double scale[NB_STATE];
   const Distribution *pobservation[NB_STATE];
 
@@ -1011,29 +988,24 @@ ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDis
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a DiscreteParametricProcess object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] prefix                file prefix,
- *  \param[in] title                 figure title,
- *  \param[in] process               observation process index,
- *  \param[in] empirical_observation pointer on  the observation frequency distributions,
- *  \param[in] marginal_distribution pointer on the marginal frequency distribution,
- *  \param[in] model                 model type.
+ *  Sortie Gnuplot d'un objet DiscreteParametricProcess.
  *
- *  \return                          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : prefixe des fichiers, titre des figures,
+ *              indice du processus d'observation,
+ *              pointeurs sur les lois d'observation et
+ *              la loi marginale empiriques, type de modele.
+ *
+ *--------------------------------------------------------------*/
 
 bool DiscreteParametricProcess::plot_print(const char *prefix , const char *title , int process ,
                                            FrequencyDistribution **empirical_observation ,
-                                           FrequencyDistribution *marginal_distribution ,
-                                           model_type model) const
+                                           FrequencyDistribution *marginal_distribution , int model) const
 
 {
   bool status;
-  int i , j , k , m;
+  register int i , j , k , m;
   int nb_dist , *dist_nb_value;
   double max , *scale;
   const Distribution **pdist;
@@ -1041,7 +1013,7 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
   ostringstream data_file_name[3 * NB_STATE + 1];
 
 
-  // writing of the data files
+  // ecriture des fichiers de donnees
 
   nb_dist = 0;
   if (empirical_observation) {
@@ -1139,7 +1111,7 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
       }
     }
 
-    // writing of the script files
+    // ecriture du fichier de commandes et du fichier d'impression
 
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
@@ -1392,26 +1364,24 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a DiscreteParametricProcess object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] plot                  reference on a MultiPlotSet object,
- *  \param[in] index                 MultiPlot index,
- *  \param[in] process               observation process index,
- *  \param[in] empirical_observation pointer on the observation frequency distributions,
- *  \param[in] marginal_distribution pointer on the marginal frequency distribution,
- *  \param[in] model                 model type.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet DiscreteParametricProcess.
+ *
+ *  arguments : reference sur un objet MultiPlotSet, indice du MultiPlot,
+ *              indice du processus d'observation,
+ *              pointeurs sur les lois d'observation et
+ *              la loi marginale empiriques, type de modele.
+ *
+ *--------------------------------------------------------------*/
 
 void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index , int process ,
                                                FrequencyDistribution **empirical_observation ,
                                                FrequencyDistribution *marginal_distribution ,
-                                               model_type model) const
+                                               int model) const
 
 {
-  int i , j;
+  register int i , j;
   double scale , max;
   ostringstream title , legend;
 
@@ -1421,7 +1391,7 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
   if (empirical_observation) {
     for (i = 0;i < nb_state;i++) {
 
-      // fit of observation distribution
+      // vue : ajustement loi d'observation
 
       plot.variable[index] = process;
 //      plot.viewpoint[index] = OBSERVATION;
@@ -1490,7 +1460,7 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
 
   else {
 
-    // observation distributions
+    // vue : lois d'observation
 
     title.str("");
     title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
@@ -1535,7 +1505,7 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
   if (marginal_distribution) {
     if ((weight) && (mixture)) {
 
-      // fit of the mixture of observation distributions (theoretical weights)
+      // vue : ajustement melange de lois d'observation
 
       title.str("");
       title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process << " - "
@@ -1589,7 +1559,7 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
 
       index++;
 
-      // cumulative distribution functions
+      // fonctions de repartition
 
       title.str("");
       title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process << " - "
@@ -1628,7 +1598,7 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
 
     if ((restoration_weight) && (restoration_mixture)) {
 
-      // fit of the mixture of observation distributions (restoration weights)
+      // vue : ajustement melange de lois d'observation (poids deduits de la restauration)
 
       title.str("");
       if (process > 0) {
@@ -1684,7 +1654,7 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
 
       index++;
 
-      // cumulative distribution functions
+      // fonctions de repartition
 
       title.str("");
       if (process > 0) {
@@ -1726,16 +1696,16 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the support of the observation process.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul du nombre de valeurs du processus d'observation.
+ *
+ *--------------------------------------------------------------*/
 
 void DiscreteParametricProcess::nb_value_computation()
 
 {
-  int i;
+  register int i;
 
 
   nb_value = observation[0]->nb_value;
@@ -1747,19 +1717,17 @@ void DiscreteParametricProcess::nb_value_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Permutation of observation distributions. The permutation validity
- *         should be checked by the calling function.
+/*--------------------------------------------------------------*
  *
- *  \param[in] permut permutation.
- */
-/*--------------------------------------------------------------*/
+ *  Application d'une permutation des etats. La validite de la 
+ *  permutation doit etre verifiee par la procedure appelante.
+ *
+ *--------------------------------------------------------------*/
 
 void DiscreteParametricProcess::state_permutation(int *permut) const
 
 {
-  int i;
+  register int i;
   DiscreteParametric **pobservation;
 
 
@@ -1775,19 +1743,17 @@ void DiscreteParametricProcess::state_permutation(int *permut) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the number of free parameters of a discrete
- *         parametric observation process.
+/*--------------------------------------------------------------*
  *
- *  \return number of free parameters.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul du nombre de parametres independants d'un processus
+ *  d'observation discret parametrique.
+ *
+ *--------------------------------------------------------------*/
 
 int DiscreteParametricProcess::nb_parameter_computation() const
 
 {
-  int i;
+  register int i;
   int nb_parameter = 0;
 
 
@@ -1802,21 +1768,18 @@ int DiscreteParametricProcess::nb_parameter_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the mean of a mixture of discrete parametric 
- *         observation distributions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] pweight pointer on the weight distribution.
+ *  Calcul de la moyenne d'un melange de lois d'observation discretes parametriques.
  *
- *  \return            mixture mean.
- */
-/*--------------------------------------------------------------*/
+ *  argument : loi des poids.
+ *
+ *--------------------------------------------------------------*/
 
 double DiscreteParametricProcess::mean_computation(Distribution *pweight) const
 
 {
-  int i;
+  register int i;
   double mean;
 
 
@@ -1829,22 +1792,18 @@ double DiscreteParametricProcess::mean_computation(Distribution *pweight) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the variance of a mixture of discrete parametric 
- *         observation distributions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] pweight pointer on the weight distribution,
- *  \param[in] mean    mean.
+ *  Calcul de la variance d'un melange de lois d'observation discretes parametriques.
  *
- *  \return            mixture variance.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : loi des poids, moyenne.
+ *
+ *--------------------------------------------------------------*/
 
 double DiscreteParametricProcess::variance_computation(Distribution *pweight , double mean) const
 
 {
-  int i;
+  register int i;
   double variance , component_mean;
 
 
@@ -1863,20 +1822,18 @@ double DiscreteParametricProcess::variance_computation(Distribution *pweight , d
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of a mixture of discrete parametric observation distributions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] pweight pointer on the weight distribution.
+ *  Calcul d'un melange de lois d'observation.
  *
- *  \return            mixture of discrete parametric observation distributions.
- */
-/*--------------------------------------------------------------*/
+ *  argument : loi des poids.
+ *
+ *--------------------------------------------------------------*/
 
 Distribution* DiscreteParametricProcess::mixture_computation(Distribution *pweight)
 
 {
-  int i , j;
+  register int i , j;
   Distribution *mixture;
 
 
@@ -1913,17 +1870,16 @@ Distribution* DiscreteParametricProcess::mixture_computation(Distribution *pweig
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Initialization of discrete parametric observation distributions
- *         using perturbation.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Initialisation des lois d'observation par perturbation.
+ *
+ *--------------------------------------------------------------*/
 
 void DiscreteParametricProcess::init()
 
 {
-  int i , j;
+  register int i , j;
   double noise_proba , *pmass;
 
 

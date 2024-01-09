@@ -10,13 +10,13 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: estimate.py 15183 2013-11-06 10:35:50Z jbdurand $
     
 .. warning:: sequence analysis package also contains an estimate module and
     function
 """
 
-__version__ = "$Id$"
+__version__ = "$Id: estimate.py 15183 2013-11-06 10:35:50Z jbdurand $"
 
 import error
 import interface
@@ -237,12 +237,12 @@ class EstimateFunctions(object):
 
         if not NbComponent: # "FIXED"
             imixt = _DiscreteMixture(pcomponent)
-            ret = histo.discrete_mixture_estimation1(imixt, estimate, MinInfBound,
+            ret = histo.mixture_estimation1(imixt, estimate, MinInfBound,
                                             InfBoundStatus, DistInfBoundStatus)
 
             return ret
         else:  # "ESTIMATED"
-            ret = histo.discrete_mixture_estimation2(ident, MinInfBound, InfBoundStatus,
+            ret = histo.mixture_estimation2(ident, MinInfBound, InfBoundStatus,
                                             DistInfBoundStatus, Penalty)
             return ret
 

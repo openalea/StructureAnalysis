@@ -21,10 +21,17 @@
 
 #include "wrapper_util.h"
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/sequence_label.h"
+#include "tool/config.h"
 
 #include <boost/python.hpp>
 #include <boost/python/extract.hpp>
@@ -121,8 +128,8 @@ void class_correlation() {
 
   class_<Correlation, bases<StatInterface> >
   ("_Correlation", "Correlation")
-    .def(init<correlation_type, int, int, int>())
-    .def(init<int, int, bool, correlation_type>())
+    .def(init<int, int, int, int>())
+    .def(init<int, int, bool, int>())
     .def(init<Correlation>())
 
     .def(self_ns::str(self)) //__str__
@@ -132,7 +139,7 @@ void class_correlation() {
     .def("get_variable_type", &Correlation::get_variable_type, args("index"))
     .def("get_variable1", &Correlation::get_variable1, args("index"))
     .def("get_variable2", &Correlation::get_variable2, args("index"))
-    .def("get_theoretical_function", &Correlation::get_theoretical_function, args("lag"))
+    .def("get_white_noise", &Correlation::get_white_noise, args("lag"))
 
     .def("white_noise_correlation_dist", WRAP::white_noise_correlation_dist, args("dist"), "todo")
     .def("white_noise_correlation_order", WRAP::white_noise_correlation_order, args("order"), "todo")

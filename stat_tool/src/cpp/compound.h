@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: compound.h 17979 2015-04-23 06:37:30Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -40,9 +40,6 @@
 #define COMPOUND_H
 
 
-#include "stat_tools.h"
-#include "distribution.h"
-
 
 namespace stat_tool {
 
@@ -50,45 +47,47 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constants
+ *  Constantes :
  */
 
 
-  const double COMPOUND_THRESHOLD = 0.99999;  // threshold on the cumulative distribution function
-                                              // for determining the upper bound of the support
+  const double COMPOUND_THRESHOLD = 0.99999;  // seuil sur la fonction de repartition
+                                              // pour borner une loi
 
-  const double COMPOUND_INIT_PROBABILITY = 0.001;  // threshold for probability initialization
-  const double COMPOUND_LIKELIHOOD_DIFF = 1.e-5;  // threshold for stopping EM iterations
-  const int COMPOUND_NB_ITER = 10000;    // maximum number of EM iterations
-  const double COMPOUND_DIFFERENCE_WEIGHT = 0.5;  // default penalty weight (1st- or 2nd-order difference cases)
-  const double COMPOUND_ENTROPY_WEIGHT = 0.1;  // default penalty weight (entropy case)
-  const int COMPOUND_COEFF = 10;         // rounding coefficient for the estimator
+  const double COMPOUND_INIT_PROBABILITY = 0.001;  // seuil pour l'initialisation de la probabilite
+  const double COMPOUND_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
+  const int COMPOUND_NB_ITER = 10000;    // nombre maximum d'iterations EM
+  const double COMPOUND_DIFFERENCE_WEIGHT = 0.5;  // poids par defaut de la penalisation
+                                                  // (cas des differences 1ere ou 2nde)
+  const double COMPOUND_ENTROPY_WEIGHT = 0.1;  // poids par defaut de la penalisation (cas de l'entropie)
+  const int COMPOUND_COEFF = 10;         // coefficient arrondi estimateur
 
 
 
 /****************************************************************
  *
- *  Class definition
+ *  Definition des classes :
  */
 
 
   class CompoundData;
 
-  /// \brief Compound distribution
 
-  class Compound : public StatInterface , public Distribution {
+  class Compound : public StatInterface , public Distribution {  // loi composee
 
     friend class FrequencyDistribution;
     friend class CompoundData;
 
+    friend Compound* compound_ascii_read(StatError &error , const char *path ,
+                                         double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const Compound &compound)
     { return compound.ascii_write(os , compound.compound_data , false , false); }
 
   private :
 
-    CompoundData *compound_data;  ///< pointer on a CompoundData object
-    DiscreteParametric *sum_distribution;  ///< sum distribution
-    DiscreteParametric *distribution;  ///< basis distribution
+    CompoundData *compound_data;  // pointeur sur un objet CompoundData
+    DiscreteParametric *sum_distribution;  // loi de la somme
+    DiscreteParametric *distribution;  // loi elementaire
 
     void copy(const Compound &compound , bool data_flag = true);
 
@@ -109,8 +108,7 @@ namespace stat_tool {
     Compound();
     Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist ,
              double cumul_threshold = COMPOUND_THRESHOLD);
-    Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist ,
-             compound_distribution type);
+    Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist , char type);
     Compound(const Compound &compound , bool data_flag = true)
     :Distribution(compound) { copy(compound , data_flag); }
     ~Compound();
@@ -118,14 +116,11 @@ namespace stat_tool {
 
     CompoundData* extract_data(StatError &error) const;
 
-    static Compound* ascii_read(StatError &error , const std::string path ,
-                                double cumul_threshold = COMPOUND_THRESHOLD);
-
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -134,7 +129,7 @@ namespace stat_tool {
                      bool sum_flag = true , bool dist_flag = true);
     CompoundData* simulation(StatError &error , int nb_element) const;
 
-    // class member access
+    // acces membres de la classe
 
     CompoundData* get_compound_data() const { return compound_data; }
     DiscreteParametric* get_sum_distribution() const { return sum_distribution; }
@@ -142,9 +137,13 @@ namespace stat_tool {
   };
 
 
-  /// \brief Data structure corresponding to a compound distribution
+  Compound* compound_ascii_read(StatError &error , const char *path ,
+                                double cumul_threshold = COMPOUND_THRESHOLD);
 
-  class CompoundData : public StatInterface , public FrequencyDistribution {
+
+
+  class CompoundData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
+                                                                              // a une loi composee
     friend class FrequencyDistribution;
     friend class Compound;
 
@@ -153,9 +152,9 @@ namespace stat_tool {
 
   private :
 
-    Compound *compound;     ///< pointer on a Compound object
-    FrequencyDistribution *sum_frequency_distribution;   ///< sum frequency distribution
-    FrequencyDistribution *frequency_distribution;   ///< basis frequency distribution
+    Compound *compound;     // pointeur sur un objet Compound
+    FrequencyDistribution *sum_frequency_distribution;   // loi empirique de la somme
+    FrequencyDistribution *frequency_distribution;   // loi empirique elementaire
 
     void copy(const CompoundData &compound_histo , bool model_flag = true);
 
@@ -169,17 +168,17 @@ namespace stat_tool {
     ~CompoundData();
     CompoundData& operator=(const CompoundData &compound_histo);
 
-    DiscreteDistributionData* extract(StatError &error , compound_distribution type) const;
+    DiscreteDistributionData* extract(StatError &error , char type) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    // class member access
+    // acces membres de la classe
 
     Compound* get_compound() const { return compound; }
     FrequencyDistribution* get_sum_frequency_distribution() const { return sum_frequency_distribution; }

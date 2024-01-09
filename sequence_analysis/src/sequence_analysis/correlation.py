@@ -10,9 +10,9 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: correlation.py 15827 2014-02-19 16:17:45Z jbdurand $
 """
-__version__ = "$Id$"
+__version__ = "$Id: correlation.py 15827 2014-02-19 16:17:45Z jbdurand $"
 
 
 import openalea.stat_tool.interface as interface

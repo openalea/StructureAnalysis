@@ -16,7 +16,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id$
+ *        $Id: stat_tool_wrap.cpp 18041 2015-04-23 07:17:30Z guedon $
  *
  *-----------------------------------------------------------------------------*/
 
@@ -91,6 +91,9 @@ BOOST_PYTHON_MODULE(_stat_tool)
 
   class_mixture();
   class_mixture_data();
+
+  class_multivariate_mixture();
+  class_multivariate_mixture_data();
 
   class_convolution();
   class_convolution_data();

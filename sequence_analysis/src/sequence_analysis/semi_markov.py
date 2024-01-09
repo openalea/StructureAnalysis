@@ -12,7 +12,7 @@
     :Code: mature
     :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
-    :Revision: $Id$
+    :Revision: $Id: semi_markov.py 9478 2010-08-31 16:33:16Z cokelaer $
     :Usage: >>> from openalea.sequence_analysis.semi_markov import * 
 
 
@@ -20,7 +20,7 @@
     
     from openalea.sequence_analysis.semi_markov import * 
 """
-__version__ = "$Id$"
+__version__ = "$Id: semi_markov.py 9478 2010-08-31 16:33:16Z cokelaer $"
 
 import os
 import openalea.stat_tool.interface as interface

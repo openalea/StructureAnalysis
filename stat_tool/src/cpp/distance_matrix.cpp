@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: distance_matrix.cpp 17995 2015-04-23 06:54:49Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -36,13 +36,14 @@
 
 
 
-#include <string>
-#include <vector>
 #include <sstream>
 #include <iomanip>
 #include <cstring>
 #include <string.h>
 
+#include "tool/config.h"
+
+#include "stat_tools.h"
 #include "distance_matrix.h"
 #include "stat_label.h"
 
@@ -53,11 +54,11 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Default constructor of the DistanceMatrix class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par defaut de la classe DistanceMatrix.
+ *
+ *--------------------------------------------------------------*/
 
 DistanceMatrix::DistanceMatrix()
 
@@ -86,20 +87,18 @@ DistanceMatrix::DistanceMatrix()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the DistanceMatrix class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_pattern         number of individuals,
- *  \param[in] ilabel             label,
- *  \param[in] pattern_identifier individual identifiers,
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe DistanceMatrix.
+ *
+ *  arguments : nombre de formes, label, identificateurs des formes,
+ *
+ *--------------------------------------------------------------*/
 
 DistanceMatrix::DistanceMatrix(int nb_pattern , const char *ilabel , int *pattern_identifier)
 
 {
-  int i , j;
+  register int i , j;
 
 
   nb_row = nb_pattern;
@@ -163,26 +162,22 @@ DistanceMatrix::DistanceMatrix(int nb_pattern , const char *ilabel , int *patter
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the DistanceMatrix class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_pattern         number of individuals,
- *  \param[in] irow_identifier    row identifier,
- *  \param[in] icolumn_identifier column identifier,
- *  \param[in] ilabel             label,
- *  \param[in] pattern_identifier individual identifiers,
- *  \param[in] substitution_flag  flag substitution edit operation,
- *  \param[in] transposition_flag flag transposition edit operation.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe DistanceMatrix.
+ *
+ *  arguments : nombre de formes, identificateurs de ligne et de colonne, label,
+ *              identificateurs des formes, flags operations de substitution et
+ *              de transposition.
+ *
+ *--------------------------------------------------------------*/
 
 DistanceMatrix::DistanceMatrix(int nb_pattern , int irow_identifier , int icolumn_identifier ,
                                const char *ilabel , int *pattern_identifier ,
                                bool substitution_flag , bool transposition_flag)
 
 {
-  int i , j;
+  register int i , j;
 
 
   nb_row = (irow_identifier == I_DEFAULT ? nb_pattern : 1);
@@ -317,26 +312,25 @@ DistanceMatrix::DistanceMatrix(int nb_pattern , int irow_identifier , int icolum
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the DistanceMatrix class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist_matrix reference on a DistanceMatrix object,
- *  \param[in] inb_pattern number of selected individuals,
- *  \param[in] iidentifier identifiers of selected individuals,
- *  \param[in] keep        flag for keeping or rejecting the selected individuals.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe DistanceMatrix.
+ *
+ *  arguments : reference sur un objet DistanceMatrix,
+ *              nombre et identificateurs des formes selectionnees,
+ *              flag pour conserver ou rejeter les formes selectionnees.
+ *
+ *--------------------------------------------------------------*/
 
 DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int inb_pattern ,
                                int *iidentifier , bool keep)
 
 {
-  int i , j , k;
+  register int i , j , k;
   int nb_pattern , dnb_pattern , *didentifier , *index , *rindex , *cindex;
 
 
-  // computation of line and row identifiers corresponding to the selected individuals
+  // calcul des identificateurs des lignes et des colonnes correspondant aux formes selectionnees
 
   dnb_pattern = MAX(dist_matrix.nb_row , dist_matrix.nb_column);
   if (dist_matrix.nb_row > 1) {
@@ -346,22 +340,20 @@ DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int inb_patte
     didentifier = dist_matrix.column_identifier;
   }
 
-  nb_pattern = (keep ? inb_pattern : dnb_pattern - inb_pattern);
+  switch (keep) {
+  case false :
+    nb_pattern = dnb_pattern - inb_pattern;
+    break;
+  case true :
+    nb_pattern = inb_pattern;
+    break;
+  }
 
   index = new int[nb_pattern];
 
-  if (keep) {
-    for (i = 0;i < inb_pattern;i++) {
-      for (j = 0;j < dnb_pattern;j++) {
-        if (iidentifier[i] == didentifier[j]) {
-          index[i] = j;
-          break;
-        }
-      }
-    }
-  }
+  switch (keep) {
 
-  else {
+  case false : {
     i = 0;
     for (j = 0;j < dnb_pattern;j++) {
       for (k = 0;k < inb_pattern;k++) {
@@ -374,6 +366,20 @@ DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int inb_patte
         index[i++] = j;
       }
     }
+    break;
+  }
+
+  case true : {
+    for (i = 0;i < inb_pattern;i++) {
+      for (j = 0;j < dnb_pattern;j++) {
+        if (iidentifier[i] == didentifier[j]) {
+          index[i] = j;
+          break;
+        }
+      }
+    }
+    break;
+  }
   }
 
   if (dist_matrix.nb_row == 1) {
@@ -392,7 +398,7 @@ DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int inb_patte
     cindex = index;
   }
 
-  // copy of informations for the selected individuals
+  // copie des informations correspondants aux formes selectionnees
 
   nb_row = (dist_matrix.nb_row == 1 ? 1 : nb_pattern);
   nb_column = (dist_matrix.nb_column == 1 ? 1 : nb_pattern);
@@ -513,21 +519,19 @@ DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int inb_patte
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the DistanceMatrix class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist_matrix reference on a DistanceMatrix object,
- *  \param[in] nb_cluster  number of clusters,
- *  \param[in] ilabel      label.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe DistanceMatrix.
+ *
+ *  arguments : reference sur un objet DistanceMatrix, nombre de groupes, label.
+ *
+ *--------------------------------------------------------------*/
 
 DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int nb_cluster ,
                                const char *ilabel)
 
 {
-  int i , j;
+  register int i , j;
 
 
   nb_row = nb_cluster;
@@ -646,19 +650,19 @@ DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int nb_cluste
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a DistanceMatrix object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist_matrix reference on a DistanceMatrix object,
- *  \param[in] transform   matrix transform (COPY/SYMMETRIZATION/UNNORMALIZATION).
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet DistanceMatrix.
+ *
+ *  arguments : reference sur un objet DistanceMatrix,
+ *              transformation de la matrice ('s' :  symetrisation, 'u' : denormalisation).
+ *
+ *--------------------------------------------------------------*/
 
-void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , matrix_transform transform)
+void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , char transform)
 
 {
-  int i , j;
+  register int i , j;
 
 
   nb_row = dist_matrix.nb_row;
@@ -684,7 +688,7 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , matrix_transform t
   for (i = 0;i < nb_row;i++) {
     switch (transform) {
 
-    case SYMMETRIZATION : {
+    case 's' : {
       distance[i][i] = dist_matrix.distance[i][i];
       length[i][i] = dist_matrix.length[i][i];
       for (j = i + 1;j < nb_column;j++) {
@@ -702,7 +706,7 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , matrix_transform t
       break;
     }
 
-    case UNNORMALIZATION : {
+    case 'u' : {
       for (j = 0;j < nb_column;j++) {
         if ((dist_matrix.distance[i][j] != -D_INF) && (dist_matrix.length[i][j] > 0)) {
           distance[i][j] = dist_matrix.distance[i][j] / dist_matrix.length[i][j];
@@ -726,7 +730,7 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , matrix_transform t
     }
   }
 
-  if (transform != UNNORMALIZATION) {
+  if (transform != 'u') {
     if ((dist_matrix.deletion_distance) && (dist_matrix.nb_deletion)) {
       deletion_distance = new double*[nb_row];
       nb_deletion = new int*[nb_row];
@@ -738,7 +742,7 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , matrix_transform t
       for (i = 0;i < nb_row;i++) {
         switch (transform) {
 
-        case SYMMETRIZATION : {
+        case 's' : {
           deletion_distance[i][i] = dist_matrix.deletion_distance[i][i];
           nb_deletion[i][i] = dist_matrix.nb_deletion[i][i];
           for (j = i + 1;j < nb_column;j++) {
@@ -783,7 +787,7 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , matrix_transform t
       for (i = 0;i < nb_row;i++) {
         switch (transform) {
 
-        case SYMMETRIZATION : {
+        case 's' : {
           insertion_distance[i][i] = dist_matrix.insertion_distance[i][i];
           nb_insertion[i][i] = dist_matrix.nb_insertion[i][i];
           for (j = i + 1;j < nb_column;j++) {
@@ -826,7 +830,7 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , matrix_transform t
       for (i = 0;i < nb_row;i++) {
         switch (transform) {
 
-        case SYMMETRIZATION : {
+        case 's' : {
           nb_match[i][i] = dist_matrix.nb_match[i][i];
           for (j = i + 1;j < nb_column;j++) {
             if ((dist_matrix.distance[i][j] != -D_INF) && (dist_matrix.distance[j][i] != -D_INF)) {
@@ -865,7 +869,7 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , matrix_transform t
       for (i = 0;i < nb_row;i++) {
         switch (transform) {
 
-        case SYMMETRIZATION : {
+        case 's' : {
           substitution_distance[i][i] = dist_matrix.substitution_distance[i][i];
           nb_substitution[i][i] = dist_matrix.nb_substitution[i][i];
           for (j = i + 1;j < nb_column;j++) {
@@ -910,7 +914,7 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , matrix_transform t
       for (i = 0;i < nb_row;i++) {
         switch (transform) {
 
-        case SYMMETRIZATION : {
+        case 's' : {
           transposition_distance[i][i] = dist_matrix.transposition_distance[i][i];
           nb_transposition[i][i] = dist_matrix.nb_transposition[i][i];
           for (j = i + 1;j < nb_column;j++) {
@@ -963,16 +967,16 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , matrix_transform t
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the data members of a DistanceMatrix object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet DistanceMatrix.
+ *
+ *--------------------------------------------------------------*/
 
 void DistanceMatrix::remove()
 
 {
-  int i;
+  register int i;
 
 
   delete [] row_identifier;
@@ -1059,11 +1063,11 @@ void DistanceMatrix::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the DistanceMatrix class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe DistanceMatrix.
+ *
+ *--------------------------------------------------------------*/
 
 DistanceMatrix::~DistanceMatrix()
 
@@ -1072,15 +1076,13 @@ DistanceMatrix::~DistanceMatrix()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the DistanceMatrix class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist_matrix reference on a DistanceMatrix object.
+ *  Operateur d'assignement de la classe DistanceMatrix.
  *
- *  \return                DistanceMatrix object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet DistanceMatrix.
+ *
+ *--------------------------------------------------------------*/
 
 DistanceMatrix& DistanceMatrix::operator=(const DistanceMatrix &dist_matrix)
 
@@ -1094,25 +1096,22 @@ DistanceMatrix& DistanceMatrix::operator=(const DistanceMatrix &dist_matrix)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of individuals by their identifiers.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error       reference on a StatError object,
- *  \param[in] inb_pattern number of individuals,
- *  \param[in] iidentifier individual identifiers,
- *  \param[in] keep        flag for keeping or rejecting the selected individuals.
+ *  Selection de formes par l'identificateur.
  *
- *  \return                DistanceMatrix object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, nombre de formes,
+ *              identificateurs des formes, flag pour conserver ou rejeter
+ *              les formes selectionnees.
+ *
+ *--------------------------------------------------------------*/
 
 DistanceMatrix* DistanceMatrix::select_individual(StatError &error , int inb_pattern ,
                                                   int *iidentifier , bool keep) const
 
 {
   bool status = true , *selected_pattern;
-  int i , j;
+  register int i , j;
   int nb_pattern , max_identifier , *identifier;
   DistanceMatrix *dist_matrix;
 
@@ -1192,36 +1191,13 @@ DistanceMatrix* DistanceMatrix::select_individual(StatError &error , int inb_pat
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of individuals by their identifiers.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error       reference on a StatError object,
- *  \param[in] inb_pattern number of individuals,
- *  \param[in] iidentifier individual identifiers,
- *  \param[in] keep        flag for keeping or rejecting the selected individuals,
+ *  Symetrisation d'une matrice des distances.
  *
- *  \return                DistanceMatrix object.
- */
-/*--------------------------------------------------------------*/
-
-DistanceMatrix* DistanceMatrix::select_individual(StatError &error , int inb_pattern ,
-                                                  vector<int> iidentifier , bool keep) const
-
-{
-  return select_individual(error , inb_pattern , iidentifier.data() , keep);
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Symmetrization of a distance matrix.
+ *  argument : reference sur un objet StatError.
  *
- *  \param[in] error reference on a StatError object.
- *
- *  \return          DistanceMatrix object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 DistanceMatrix* DistanceMatrix::symmetrize(StatError &error) const
 
@@ -1236,28 +1212,26 @@ DistanceMatrix* DistanceMatrix::symmetrize(StatError &error) const
     error.update(STAT_error[STATR_SYMMETRICAL_MATRIX]);
   }
   else {
-    dist_matrix = new DistanceMatrix(*this , SYMMETRIZATION);
+    dist_matrix = new DistanceMatrix(*this , 's');
   }
 
   return dist_matrix;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Unnormalization of a distance matrix.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Denormalisation d'une matrice des distances.
  *
- *  \return          DistanceMatrix object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
 
 DistanceMatrix* DistanceMatrix::unnormalize(StatError &error) const
 
 {
   bool status = false;
-  int i , j;
+  register int i , j;
   DistanceMatrix *dist_matrix;
 
 
@@ -1286,20 +1260,20 @@ DistanceMatrix* DistanceMatrix::unnormalize(StatError &error) const
   }
 
   if (status) {
-    dist_matrix = new DistanceMatrix(*this , UNNORMALIZATION);
+    dist_matrix = new DistanceMatrix(*this , 'u');
   }
 
   return dist_matrix;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing on a single line of a DistanceMatrix object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture sur une ligne d'un objet DistanceMatrix.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DistanceMatrix::line_write(ostream &os) const
 
@@ -1311,22 +1285,21 @@ ostream& DistanceMatrix::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of distance matrix properties.
+/*--------------------------------------------------------------*
  *
- *  \param[in]     normalized_distance pointer on the normalized distance matrix,
- *  \param[in,out] os                  stream,
- *  \param[in]     format              output format (ASCII/SPREADSHEET).
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des proprietes d'une matrice de distances.
+ *
+ *  arguments : pointeur sur les distances mormalisees, stream,
+ *              format de sortie ('a' : ASCII, 's' : Spreadsheet).
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DistanceMatrix::property_print(double **normalized_distance ,
-                                        ostream &os , output_format format) const
+                                        ostream &os , char format) const
 
 {
   bool status = true;
-  int i , j , k;
+  register int i , j , k;
   int nb_combination , nb_symmetry , nb_triangle_inequality;
 
 
@@ -1341,7 +1314,7 @@ ostream& DistanceMatrix::property_print(double **normalized_distance ,
 
   if (status) {
 
-    // symmetry
+    // symetrie
 
     nb_combination = 0;
     nb_symmetry = 0;
@@ -1356,12 +1329,12 @@ ostream& DistanceMatrix::property_print(double **normalized_distance ,
             nb_symmetry++;
 
             switch (format) {
-            case ASCII :
+            case 'a' :
               os << label << " " << row_identifier[i] << ", "
                  << label << " " << row_identifier[j] << ": "
                  << STAT_error[STATR_SYMMETRY] << endl;
               break;
-            case SPREADSHEET :
+            case 's' :
               os << label << " " << row_identifier[i] << "\t"
                  << label << " " << row_identifier[j] << "\t"
                  << STAT_error[STATR_SYMMETRY] << endl;
@@ -1373,17 +1346,17 @@ ostream& DistanceMatrix::property_print(double **normalized_distance ,
     }
 
     switch (format) {
-    case ASCII :
+    case 'a' :
       os << "\n" << STAT_label[STATL_SYMMETRY_RATE] << ": "
          << (double)(nb_combination - nb_symmetry) / (double)nb_combination << endl;
       break;
-    case SPREADSHEET :
+    case 's' :
       os << "\n" << STAT_label[STATL_SYMMETRY_RATE] << "\t"
          << (double)(nb_combination - nb_symmetry) / (double)nb_combination << endl;
       break;
     }
 
-    // triangular inequality
+    // inegalite triangulaire
 
     if (nb_row > 2) {
       nb_combination = 0;
@@ -1403,13 +1376,13 @@ ostream& DistanceMatrix::property_print(double **normalized_distance ,
                 nb_triangle_inequality++;
 
                 switch (format) {
-                case ASCII :
+                case 'a' :
                   os << label << " " << row_identifier[i] << ", "
                      << label << " " << row_identifier[k] << ", "
                      << label << " " << row_identifier[j] << ": "
                      << STAT_error[STATR_TRIANGLE_INEQUALITY] << endl;
                   break;
-                case SPREADSHEET :
+                case 's' :
                   os << label << " " << row_identifier[i] << "\t"
                      << label << " " << row_identifier[k] << "\t"
                      << label << " " << row_identifier[j] << "\t"
@@ -1423,11 +1396,11 @@ ostream& DistanceMatrix::property_print(double **normalized_distance ,
       }
 
       switch (format) {
-      case ASCII :
+      case 'a' :
         os << "\n" << STAT_label[STATL_TRIANGLE_INEQUALITY_RATE] << ": "
            << (double)(nb_combination - nb_triangle_inequality) / (double)nb_combination << endl;
         break;
-      case SPREADSHEET :
+      case 's' :
         os << "\n" << STAT_label[STATL_TRIANGLE_INEQUALITY_RATE] << "\t"
            << (double)(nb_combination - nb_triangle_inequality) / (double)nb_combination << endl;
         break;
@@ -1439,22 +1412,18 @@ ostream& DistanceMatrix::property_print(double **normalized_distance ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Summation of the terms of an integer-valued matrix.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_row    number of rows,
- *  \param[in] nb_column number of columns,
- *  \param[in] value     pointer on the integer-valued matrix.
+ *  Cumul des termes d'une matrice entiere.
  *
- *  \return              summation of terms.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : nombres de lignes et de colonnes, pointeur sur les valeurs.
+ *
+ *--------------------------------------------------------------*/
 
 int cumul_computation(int nb_row , int nb_column , int **value)
 
 {
-  int i , j;
+  register int i , j;
   int cumul = 0;
 
 
@@ -1468,21 +1437,18 @@ int cumul_computation(int nb_row , int nb_column , int **value)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Summation of the terms of a distance vector.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dim      vector dimension,
- *  \param[in] distance pointer on the distance vector.
+ *  Cumul des termes d'un vecteur de distances.
  *
- *  \return             cumulative distance.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : dimension, pointeur sur les distances.
+ *
+ *--------------------------------------------------------------*/
 
 double cumul_distance_computation(int dim , double *distance)
 
 {
-  int i;
+  register int i;
   double cumul_distance = 0.;
 
 
@@ -1500,23 +1466,19 @@ double cumul_distance_computation(int dim , double *distance)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Sort of individuals by increasing distances.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_pattern        number of individuals,
- *  \param[in] distance          distances,
- *  \param[in] nb_sorted_pattern number of sorted individuals.
+ *  Tri des formes par distance croissante.
  *
- *  \return                      sorted individual indices.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : nombre de formes, distances, nombre de formes triees.
+ *
+ *--------------------------------------------------------------*/
 
 int* pattern_sort(int nb_pattern , double *distance , int nb_sorted_pattern)
 
 {
   bool *selected_pattern;
-  int i , j;
+  register int i , j;
   int *index;
   double min_distance;
 
@@ -1550,28 +1512,27 @@ int* pattern_sort(int nb_pattern , double *distance , int nb_sorted_pattern)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a DistanceMatrix object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet DistanceMatrix.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  int i , j;
+  register int i , j;
   int dim , max_identifier , buff , cumul_nb_deletion , cumul_nb_insertion , cumul_nb_match ,
       cumul_nb_substitution , cumul_nb_transposition , cumul_nb_operation , *cumul_length ,
       *index , width[2];
+  long old_adjust;
   double cumul_deletion_distance , cumul_insertion_distance , cumul_substitution_distance ,
          cumul_transposition_distance , *distance_vector , *cumul_distance , **normalized_distance;
-  ios_base::fmtflags format_flags;
 
 
-  format_flags = os.setf(ios::right , ios::adjustfield);
+  old_adjust = os.setf(ios::right , ios::adjustfield);
 
   normalized_distance = new double*[nb_row];
   for (i = 0;i < nb_row;i++) {
@@ -1584,7 +1545,7 @@ ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
     }
   }
 
-  // sort by increasing distances
+  // tri par distance croissante
 
   dim = MAX(nb_row , nb_column);
   distance_vector = new double[dim];
@@ -1620,7 +1581,7 @@ ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
 
   index = pattern_sort(dim , distance_vector , I_DEFAULT);
 
-  // computation of the column width
+  // calcul des largeurs des colonnes
 
   max_identifier = 0;
   for (i = 0;i < nb_row;i++) {
@@ -1646,7 +1607,7 @@ ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
   }
   width[1] += ASCII_SPACE;
 
-  // writing of the distance matrix
+  // ecriture de la matrice des distances
 
   os << STAT_label[STATL_DISTANCE] << " " << STAT_label[STATL_MATRIX] << endl;
 
@@ -1684,7 +1645,7 @@ ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
 
   if ((nb_row > 1) && (nb_row == nb_column)) {
     if (exhaustive) {
-      property_print(normalized_distance , os , ASCII);
+      property_print(normalized_distance , os , 'a');
     }
 
     os << "\n" << STAT_label[STATL_CUMUL_DISTANCE] << " " << STAT_label[STATL_REFERENCE] << " " << label << endl;
@@ -1846,30 +1807,27 @@ ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
     }
   }
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a DistanceMatrix object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet DistanceMatrix dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool DistanceMatrix::ascii_write(StatError &error , const string path ,
+bool DistanceMatrix::ascii_write(StatError &error , const char *path ,
                                  bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -1888,18 +1846,18 @@ bool DistanceMatrix::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a DistanceMatrix object at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet DistanceMatrix au format tableur.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DistanceMatrix::spreadsheet_write(ostream &os) const
 
 {
-  int i , j;
+  register int i , j;
   int dim , cumul_nb_deletion , cumul_nb_insertion , cumul_nb_match ,
       cumul_nb_substitution , cumul_nb_transposition , cumul_nb_operation ,
       *cumul_length , *index;
@@ -1918,7 +1876,7 @@ ostream& DistanceMatrix::spreadsheet_write(ostream &os) const
     }
   }
 
-  // sort by increasing distances
+  // tri par distance croissante
 
   dim = MAX(nb_row , nb_column);
   distance_vector = new double[dim];
@@ -1954,7 +1912,7 @@ ostream& DistanceMatrix::spreadsheet_write(ostream &os) const
 
   index = pattern_sort(dim , distance_vector , I_DEFAULT);
 
-  // writing of the distance matrix
+  // ecriture de la matrice des distances
 
   os << STAT_label[STATL_DISTANCE] << " " << STAT_label[STATL_MATRIX] << endl;
 
@@ -2114,22 +2072,19 @@ ostream& DistanceMatrix::spreadsheet_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a DistanceMatrix object in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet DistanceMatrix dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool DistanceMatrix::spreadsheet_write(StatError &error , const string path) const
+bool DistanceMatrix::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -2148,17 +2103,14 @@ bool DistanceMatrix::spreadsheet_write(StatError &error , const string path) con
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a DistanceMatrix object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title.
+ *  Sortie Gnuplot d'un objet DistanceMatrix.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
                                 const char *title) const
@@ -2175,7 +2127,7 @@ bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
   }
 
   else {
-    int i , j;
+    register int i , j;
     int plot_nb_pattern , *index;
     double *plot_distance;
     ostringstream data_file_name;
@@ -2184,7 +2136,7 @@ bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
     plot_nb_pattern = MAX(nb_row , nb_column);
     plot_distance = new double[plot_nb_pattern];
 
-    // sort by increasing distances
+    // tri par distance croissante
 
     if (nb_row == 1) {
       for (i = 0;i < nb_column;i++) {
@@ -2222,7 +2174,7 @@ bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
 
     else {
 
-      // writing of the data file
+      // ecriture du fichier de donnees
 
       data_file_name << prefix << ".dat";
       ofstream out_data_file((data_file_name.str()).c_str());
@@ -2243,7 +2195,7 @@ bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
           }
         }
 
-        // writing of the script files
+        // ecriture du fichier de commandes et du fichier d'impression
 
         for (i = 0;i < 2;i++) {
           ostringstream file_name[2];
@@ -2326,15 +2278,13 @@ bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a DistanceMatrix object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Sortie graphique d'un objet DistanceMatrix.
  *
- *  \return          MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* DistanceMatrix::get_plotable(StatError &error) const
 
@@ -2350,13 +2300,13 @@ MultiPlotSet* DistanceMatrix::get_plotable(StatError &error) const
   }
 
   else {
-    int i;
+    register int i;
     int plot_nb_pattern , *index;
     double *plot_distance;
     ostringstream title , legend , identifier;
 
 
-    // sort by increasing distances
+    // tri par distance croissante
 
     plot_nb_pattern = MAX(nb_row , nb_column);
     plot_distance = new double[plot_nb_pattern];
@@ -2460,13 +2410,11 @@ MultiPlotSet* DistanceMatrix::get_plotable(StatError &error) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a DistanceMatrix object.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet DistanceMatrix.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* DistanceMatrix::get_plotable() const
 
@@ -2479,13 +2427,11 @@ MultiPlotSet* DistanceMatrix::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Test of the symmetry of a distance matrix.
+/*--------------------------------------------------------------*
  *
- *  \return flag symmetric matrix or not.
- */
-/*--------------------------------------------------------------*/
+ *  Test de la symetrie de la matrice des distances.
+ *
+ *--------------------------------------------------------------*/
 
 bool DistanceMatrix::test_symmetry() const
 
@@ -2494,7 +2440,7 @@ bool DistanceMatrix::test_symmetry() const
 
 
   if ((nb_row > 1) && (nb_row == nb_column)) {
-    int i , j;
+    register int i , j;
     double normalized_distance[2];
 
 
@@ -2526,25 +2472,15 @@ bool DistanceMatrix::test_symmetry() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Update of a DistanceMatrix object with the result of the alignment of 2 structures.
+/*--------------------------------------------------------------*
  *
- *  \param[in] irow_identifier         row identifier (1st individual),
- *  \param[in] icolumn_identifier      column identifier (2nd individual),
- *  \param[in] idistance               distance,
- *  \param[in] alignment_length        alignment length,
- *  \param[in] ideletion_distance      deletion distance,
- *  \param[in] inb_deletion            number of deletions,
- *  \param[in] iinsertion_distance     insertion distance,
- *  \param[in] inb_insertion           number of insertions,
- *  \param[in] inb_match               number of matches,
- *  \param[in] isubstitution_distance  substitution distance,
- *  \param[in] inb_substitution        number of substitutions,
- *  \param[in] itransposition_distance transposition distance,
- *  \param[in] inb_transposition       number of transpositions.
- */
-/*--------------------------------------------------------------*/
+ *  Mise a jour d'un objet DistanceMatrix avec le resultat d'un alignement.
+ *
+ *  arguments : identificateurs des 2 formes, distance, longueur de l'alignement,
+ *              distances et nombres d'elisions, d'insertions, nombre de matchs,
+ *              distances et nombres de substitutions et de transpositions.
+ *
+ *--------------------------------------------------------------*/
 
 void DistanceMatrix::update(int irow_identifier , int icolumn_identifier , double idistance ,
                             int alignment_length , double ideletion_distance , int inb_deletion ,
@@ -2554,7 +2490,7 @@ void DistanceMatrix::update(int irow_identifier , int icolumn_identifier , doubl
 
 {
   if (idistance != -D_INF) {
-    int i , j;
+    register int i , j;
 
 
     for (i = 0;i < nb_row;i++) {
@@ -2590,23 +2526,20 @@ void DistanceMatrix::update(int irow_identifier , int icolumn_identifier , doubl
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Update of a DistanceMatrix object with the result of a comparison.
+/*--------------------------------------------------------------*
  *
- *  \param[in] irow_identifier    row identifier (1st individual),
- *  \param[in] icolumn_identifier column identifier (2nd individual),
- *  \param[in] idistance          distance,
- *  \param[in] ilength            length.
- */
-/*--------------------------------------------------------------*/
+ *  Mise a jour d'un objet DistanceMatrix avec le resultat d'une comparaison.
+ *
+ *  arguments : identificateurs des 2 formes, distance, longueur.
+ *
+ *--------------------------------------------------------------*/
 
 void DistanceMatrix::update(int irow_identifier , int icolumn_identifier ,
                             double idistance , int ilength)
 
 {
   if (idistance != -D_INF) {
-    int i , j;
+    register int i , j;
 
 
     for (i = 0;i < nb_row;i++) {
@@ -2626,21 +2559,18 @@ void DistanceMatrix::update(int irow_identifier , int icolumn_identifier ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of a cumulative length.
+/*--------------------------------------------------------------*
  *
- *  \param[in] row_flag    flag on the rows,
- *  \param[in] column_flag flag on the columns.
+ *  Calcul d'une longueur cumulee.
  *
- *  \return                cumulative length.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : flags sur les lignes et sur les colonnes.
+ *
+ *--------------------------------------------------------------*/
 
 int DistanceMatrix::cumul_length_computation(bool *row_flag , bool *column_flag) const
 
 {
-  int i , j;
+  register int i , j;
   int cumul_length = 0;
 
 
@@ -2658,21 +2588,18 @@ int DistanceMatrix::cumul_length_computation(bool *row_flag , bool *column_flag)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of a cumulative distance.
+/*--------------------------------------------------------------*
  *
- *  \param[in] row_flag    flag on the rows,
- *  \param[in] column_flag flag on the columns.
+ *  Calcul d'une distance cumulee.
  *
- *  \return                cumulative distance.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : flags sur les lignes et sur les colonnes.
+ *
+ *--------------------------------------------------------------*/
 
 double DistanceMatrix::cumul_distance_computation(bool *row_flag , bool *column_flag) const
 
 {
-  int i , j;
+  register int i , j;
   double cumul_distance = 0.;
 
 

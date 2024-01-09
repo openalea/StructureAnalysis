@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: distribution.cpp 17997 2015-04-23 06:55:51Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -37,10 +37,11 @@
 
 
 #include <math.h>
-
 #include <sstream>
 #include <iomanip>
 #include <cstring>
+
+#include "tool/config.h"
 
 #include "stat_tools.h"
 #include "curves.h"
@@ -53,19 +54,18 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of the probability mass function.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist      reference on a Distribution object,
- *  \param[in] inb_value number of values.
- */
-/*--------------------------------------------------------------*/
+ *  Copie des probabilites de chaque valeur.
+ *
+ *  arguments : reference sur un objet Distribution, nombre de valeurs.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::mass_copy(const Distribution &dist , int inb_value)
 
 {
-  int i;
+  register int i;
 
 
   if ((inb_value != I_DEFAULT) && (inb_value < dist.nb_value)) {
@@ -82,19 +82,19 @@ void Distribution::mass_copy(const Distribution &dist , int inb_value)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Distribution object in the case where the number of
- *         allocated values is the same for the 2 Distribution objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist reference on a Distribution object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Distribution dans le cas ou le nombre
+ *  de valeurs allouees est le meme pour les deux objets.
+ *
+ *  arguments : reference sur un objet Distribution.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::equal_size_copy(const Distribution &dist)
 
 {
-  int i;
+  register int i;
 
 
   nb_value = dist.nb_value;
@@ -113,13 +113,13 @@ void Distribution::equal_size_copy(const Distribution &dist)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Initialization of a Distribution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_value number of values.
- */
-/*--------------------------------------------------------------*/
+ *  Initialisation d'un objet Distribution.
+ *
+ *  argument : nombre de valeurs.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::init(int inb_value)
 
@@ -140,7 +140,7 @@ void Distribution::init(int inb_value)
   }
 
   else {
-    int i;
+    register int i;
 
 
     mass = new double[nb_value];
@@ -154,13 +154,13 @@ void Distribution::init(int inb_value)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Distribution class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_value number of values.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Distribution.
+ *
+ *  argument : nombre de valeurs.
+ *
+ *--------------------------------------------------------------*/
 
 Distribution::Distribution(int inb_value)
 
@@ -169,19 +169,18 @@ Distribution::Distribution(int inb_value)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Distribution class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_value number of values,
- *  \param[in] imass     probability mass function.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Distribution.
+ *
+ *  arguments : nombre de valeurs, masses de probabilite.
+ *
+ *--------------------------------------------------------------*/
 
 Distribution::Distribution(int inb_value , double *imass)
 
 {
-  int i;
+  register int i;
 
 
   nb_value = inb_value;
@@ -206,20 +205,19 @@ Distribution::Distribution(int inb_value , double *imass)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a Distribution object from an initial
- *         Distribution object applying a scaling operation.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist          reference on a Distribution object,
- *  \param[in] scaling_coeff scaling factor.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet Distribution a partir d'un objet
+ *  Distribution initial avec changement d'echelle.
+ *
+ *  arguments : reference sur un objet Distribution, facteur d'echelle.
+ *
+ *--------------------------------------------------------------*/
 
 Distribution::Distribution(const Distribution &dist , double scaling_coeff)
 
 {
-  int i , j;
+  register int i , j;
   int min , max;
 
 
@@ -263,13 +261,13 @@ Distribution::Distribution(const Distribution &dist , double scaling_coeff)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a Distribution object from a FrequencyDistribution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo reference on a FrequencyDistribution object.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet Distribution a partir d'un objet FrequencyDistribution.
+ *
+ *  argument : reference sur un objet FrequencyDistribution.
+ *
+ *--------------------------------------------------------------*/
 
 Distribution::Distribution(const FrequencyDistribution &histo)
 
@@ -287,19 +285,18 @@ Distribution::Distribution(const FrequencyDistribution &histo)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Distribution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist            reference on a Distribution object,
- *  \param[in] ialloc_nb_value number of allocated values.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Distribution.
+ *
+ *  arguments : reference sur un objet Distribution, nombre de valeurs allouees.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::copy(const Distribution &dist , int ialloc_nb_value)
 
 {
-  int i;
+  register int i;
 
 
   nb_value = dist.nb_value;
@@ -331,13 +328,13 @@ void Distribution::copy(const Distribution &dist , int ialloc_nb_value)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Distribution object with renormalization.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist reference on a Distribution object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Distribution avec renormalisation.
+ *
+ *  argument : reference sur un objet Distribution.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::normalization_copy(const Distribution &dist)
 
@@ -347,7 +344,7 @@ void Distribution::normalization_copy(const Distribution &dist)
   }
 
   else {
-    int i;
+    register int i;
 
 
     nb_value = dist.nb_value;
@@ -373,25 +370,24 @@ void Distribution::normalization_copy(const Distribution &dist)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy constructor of the Distribution class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist            reference on a Distribution object,
- *  \param[in] transform       type of transform (DISTRIBUTION_COPY/NORMALIZATION),
- *  \param[in] ialloc_nb_value number of allocated values.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur par copie de la classe Distribution.
+ *
+ *  arguments : reference sur un objet Distribution, type de transformation
+ *              ('c' : copie , 'n' : copie avec renormalisation),
+ *              nombre de valeurs allouees.
+ *
+ *--------------------------------------------------------------*/
 
-Distribution::Distribution(const Distribution &dist , distribution_transformation transform ,
-                           int ialloc_nb_value)
+Distribution::Distribution(const Distribution &dist , char transform , int ialloc_nb_value)
 
 {
   switch (transform) {
-  case DISTRIBUTION_COPY :
+  case 'c' :
     copy(dist , ialloc_nb_value);
     break;
-  case NORMALIZATION :
+  case 'n' :
     normalization_copy(dist);
     break;
   default :
@@ -401,29 +397,27 @@ Distribution::Distribution(const Distribution &dist , distribution_transformatio
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the Distribution class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe Distribution.
+ *
+ *--------------------------------------------------------------*/
 
 Distribution::~Distribution()
 
 {
-  delete [] mass;
-  delete [] cumul;
+    delete [] mass;
+    delete [] cumul;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the Distribution class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist reference on a Distribution object.
+ *  Operateur d'assignement de la classe Distribution.
  *
- *  \return         Distribution object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet Distribution.
+ *
+ *--------------------------------------------------------------*/
 
 Distribution& Distribution::operator=(const Distribution &dist)
 
@@ -439,21 +433,19 @@ Distribution& Distribution::operator=(const Distribution &dist)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Equality operator of the Distribution class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] dist reference on a Distribution object.
+ *  Operateur d'egalite de la classe Distribution.
  *
- *  \return         equality or not of the discrete distributions.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet Distribution.
+ *
+ *--------------------------------------------------------------*/
 
 bool Distribution::operator==(const Distribution &dist) const
 
 {
   bool status = true;
-  int i;
+  register int i;
 
 
   if ((offset != dist.offset) || (nb_value != dist.nb_value)) {
@@ -473,15 +465,13 @@ bool Distribution::operator==(const Distribution &dist) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the characteristics of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os           stream,
- *  \param[in]     shape        flag on the writing of the shape characteristics,
- *  \param[in]     comment_flag flag comment.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des caracteristiques d'une loi.
+ *
+ *  arguments : stream, flag ecriture des parametres de forme, flag commentaire.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Distribution::ascii_characteristic_print(ostream &os , bool shape , bool comment_flag) const
 
@@ -490,22 +480,9 @@ ostream& Distribution::ascii_characteristic_print(ostream &os , bool shape , boo
     if (comment_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_MEAN] << ": " << mean << "   ";
-    if (complement == 0.) {
-      os << STAT_label[STATL_MEDIAN] << ": " << quantile_computation() << "   ";
-    }
-    os << STAT_label[STATL_MODE] << ": " << mode_computation() << endl;
-
-    if (comment_flag) {
-      os << "# ";
-    }
-    os << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
-       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance);
-    if ((complement == 0.) && (variance > 0.)) {
-      os << "   " << STAT_label[STATL_LOWER_QUARTILE] << ": " << quantile_computation(0.25)
-         << "   " << STAT_label[STATL_UPPER_QUARTILE] << ": " << quantile_computation(0.75);
-    }
-    os << endl;
+    os << STAT_label[STATL_MEAN] << ": " << mean << "   "
+       << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
 
     if ((shape) && (variance > 0.)) {
       if (comment_flag) {
@@ -520,15 +497,13 @@ ostream& Distribution::ascii_characteristic_print(ostream &os , bool shape , boo
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the column width for an integer value.
+/*--------------------------------------------------------------*
  *
- *  \param[in] value value.
+ *  Calcul de la largeur d'une colonne d'entiers.
  *
- *  \return          column width.
- */
-/*--------------------------------------------------------------*/
+ *  argument : valeur.
+ *
+ *--------------------------------------------------------------*/
 
 int column_width(int value)
 
@@ -539,16 +514,13 @@ int column_width(int value)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the column width for integer values.
+/*--------------------------------------------------------------*
  *
- *  \param[in] min_value minimum value,
- *  \param[in] max_value maximum value.
+ *  Calcul de la largeur d'une colonne d'entiers.
  *
- *  \return              column width.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : valeur minimum, valeur maximum.
+ *
+ *--------------------------------------------------------------*/
 
 int column_width(int min_value , int max_value)
 
@@ -575,28 +547,25 @@ int column_width(int min_value , int max_value)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the column width for real values.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_value number of values,
- *  \param[in] value    pointer on the values,
- *  \param[in] scale    scaling factor.
+ *  Calcul de la largeur d'une colonne de reels.
  *
- *  \return             column width.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : nombre de valeurs, pointeur sur les valeurs reelles,
+ *              facteur d'echelle.
+ *
+ *--------------------------------------------------------------*/
 
 int column_width(int nb_value , const double *value , double scale)
 
 {
-  int i;
+  register int i;
   int width , max_width = 0;
 
 
   for (i = 0;i < nb_value;i++) {
     ostringstream ostring;
-    ostring << value[i] * scale;
+    ostring << *value++ * scale;
     width = (ostring.str()).size();
     if (width > max_width) {
       max_width = width;
@@ -607,32 +576,30 @@ int column_width(int nb_value , const double *value , double scale)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a discrete distribution and a frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os            stream,
- *  \param[in]     comment_flag  flag comment,
- *  \param[in]     cumul_flag    flag on the writing of the cumulative distribution functions,
- *  \param[in]     nb_value_flag flag on the computation of the number of values,
- *  \param[in]     histo         pointer on a frequency distribution.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'une loi et d'une loi empirique.
+ *
+ *  arguments : stream, flag commentaire, flags sur l'ecriture de la fonction
+ *              de repartition et sur le calcul du nombre de valeurs,
+ *              pointeur sur une loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_flag ,
                                    bool nb_value_flag , const FrequencyDistribution *histo) const
 
 {
-  int i;
+  register int i;
   int ascii_nb_value = nb_value , width[5];
+  long old_adjust;
   double scale , *histo_cumul , *pcumul;
-  ios_base::fmtflags format_flags;
 
 
-  format_flags = os.setf(ios::right , ios::adjustfield);
+  old_adjust = os.setf(ios::right , ios::adjustfield);
 
-  // computation of the scaling factor, the cumulative distribution function deduced from
-  // the frequency distribution and the number of values
+  // calcul du facteur d'echelle, de la fonction de repartition deduite de
+  // la loi empirique et du nombre de valeurs
 
   if (histo) {
     scale = histo->nb_element / (1. - complement);
@@ -656,7 +623,7 @@ ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_
     }
   }
 
-  // computation of column widths
+  // calcul des largeurs des colonnes
 
   width[0] = column_width(ascii_nb_value - 1);
   if (histo) {
@@ -670,7 +637,7 @@ ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_
     width[4] = column_width(ascii_nb_value , cumul , 1.) + ASCII_SPACE;
   }
 
-  // writing of the probability mass function or of the empirical and theoretical frequency distributions
+  // ecriture des probabilites de chaque valeur
 
   for (i = 0;i < ascii_nb_value;i++) {
     if (comment_flag) {
@@ -688,8 +655,6 @@ ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_
     }
 
     os << setw(width[2]) << mass[i] * scale;
-
-   // writing of the empirical and theoretical cumulative distribution functions
 
     if (cumul_flag) {
       if (histo) {
@@ -710,44 +675,40 @@ ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_
     delete [] histo_cumul;
   }
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a family of discrete distributions and a frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os           stream,
- *  \param[in]     nb_dist      number of distributions,
- *  \param[in]     dist         pointer on the discrete distributions,
- *  \param[in]     dist_scale   scaling factors,
- *  \param[in]     comment_flag flag comment,
- *  \param[in]     cumul_flag   flag on the writing of the cumulative distribution functions,
- *  \param[in]     histo        pointer on a frequency distribution,
- *  \param[in]     mass_first   flag on the distribution order.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'une famille de lois et d'une loi empirique.
+ *
+ *  arguments : stream, nombre de lois, pointeurs sur les lois,
+ *              facteurs d'echelle, flag commentaire,
+ *              flag sur l'ecriture de la fonction de repartition,
+ *              pointeur sur une loi empirique, flag sur l'ordre des lois.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distribution **dist ,
                                    double *dist_scale , bool comment_flag , bool cumul_flag ,
                                    const FrequencyDistribution *histo , bool mass_first) const
 
 {
-  int i , j;
+  register int i , j;
   int ascii_nb_value = nb_value , *width;
+  long old_adjust;
   double scale , *histo_cumul;
-  ios_base::fmtflags format_flags;
 
 
-  format_flags = os.setf(ios::right , ios::adjustfield);
+  old_adjust = os.setf(ios::right , ios::adjustfield);
 
   width = new int[nb_dist + 5];
 
-  // computation of the scaling factor, the cumulative distribution function deduced from
-  // the frequency distribution and the number of values
+  // calcul du facteur d'echelle, de la fonction de repartition deduite de
+  // la loi empirique et du nombre de valeurs
 
   if (histo) {
     scale = histo->nb_element / (1. - complement);
@@ -766,7 +727,7 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
     }
   }
 
-  // computation of the column widths
+  // calcul des largeurs des colonnes
 
   width[0] = column_width(ascii_nb_value - 1);
   if (histo) {
@@ -783,8 +744,7 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
     width[nb_dist + 4] = column_width(nb_value , cumul , 1.) + ASCII_SPACE;
   }
 
-  // writing of the probability mass functions or the empirical and theoretical frequency distributions and
-  // the empirical and theoretical cumulative distribution functions
+  // ecriture des probabilites et de la fonction de repartition
 
   for (i = 0;i < ascii_nb_value;i++) {
     if (comment_flag) {
@@ -850,41 +810,30 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
     delete [] histo_cumul;
   }
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the characteristics of a discrete distribution at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os    stream,
- *  \param[in]     shape flag on the writing of the shape characteristics.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des caracteristiques d'une loi au format tableur.
+ *
+ *  arguments : stream, flag ecriture des parametres de forme.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Distribution::spreadsheet_characteristic_print(ostream &os , bool shape) const
 
 {
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    os << STAT_label[STATL_MEAN] << "\t" << mean << "\t\t";
-    if (complement == 0.) {
-      os << STAT_label[STATL_MEDIAN] << "\t" << quantile_computation() << "\t\t";
-    }
-    os << STAT_label[STATL_MODE] << "\t" << mode_computation() << endl;
-
-    os << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
-       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance);
-    if ((complement == 0.) && (variance > 0.)) {
-      os << "\t\t" << STAT_label[STATL_LOWER_QUARTILE] << "\t" << quantile_computation(0.25)
-         << "\t\t" << STAT_label[STATL_UPPER_QUARTILE] << "\t" << quantile_computation(0.75);
-    }
-    os << endl;
+    os << STAT_label[STATL_MEAN] << "\t" << mean << "\t"
+       << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t"
+       << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
 
     if ((shape) && (variance > 0.)) {
-      os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation() << "\t\t"
+      os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation() << "\t"
          << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << kurtosis_computation() << endl;
     }
   }
@@ -893,24 +842,22 @@ ostream& Distribution::spreadsheet_characteristic_print(ostream &os , bool shape
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a discrete distribution and a frequency distribution at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os                 stream,
- *  \param[in]     cumul_flag         flag on the writing of the cumulative distribution functions,
- *  \param[in]     concentration_flag flag on the writing of the concentration functions,
- *  \param[in]     nb_value_flag      flag on the computation of the number of values,
- *  \param[in]     histo              pointer on a frequency distribution.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'une loi et d'une loi empirique au format tableur.
+ *
+ *  arguments : stream, flags sur l'ecriture de la fonction de repartition et
+ *              de la fonction de concentration, flag sur le calcul du nombre de valeurs,
+ *              pointeur sur une loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Distribution::spreadsheet_print(ostream &os , bool cumul_flag ,
                                          bool concentration_flag , bool nb_value_flag ,
                                          const FrequencyDistribution *histo) const
 
 {
-  int i;
+  register int i;
   int spreadsheet_nb_value = nb_value;
   double scale , *pcumul , *histo_cumul , *concentration , *histo_concentration;
 
@@ -919,8 +866,8 @@ ostream& Distribution::spreadsheet_print(ostream &os , bool cumul_flag ,
     concentration_flag = false;
   }
 
-  // computation of the scaling factor, the cumulative distribution function deduced from
-  // the frequency distribution, the concentration functions and the number of values
+  // calcul du facteur d'echelle, de la fonction de repartition deduite de
+  // la loi empirique, des fonctions de concentration et du nombre de valeurs
 
   if (histo) {
     scale = histo->nb_element / (1. - complement);
@@ -951,8 +898,7 @@ ostream& Distribution::spreadsheet_print(ostream &os , bool cumul_flag ,
     }
   }
 
-  // writing of the probability mass function or the empirical and theoretical frequency distributions and
-  // the empirical and theoretical cumulative distribution and concentration functions
+  // ecriture des probabilites, des fonctions de repartition et de concentration
 
   for (i = 0;i < spreadsheet_nb_value;i++) {
     os << i;
@@ -1007,33 +953,29 @@ ostream& Distribution::spreadsheet_print(ostream &os , bool cumul_flag ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a family of discrete distributions and a frequency distribution
- *         at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     nb_dist    number of distributions,
- *  \param[in]     dist       pointer on the discrete distributions,
- *  \param[in]     dist_scale scaling factors,
- *  \param[in]     cumul_flag flag on the writing of the cumulative distribution functions,
- *  \param[in]     histo      pointer on a frequency distribution,
- *  \param[in]     mass_first flag on the distribution order.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'une famille de lois et d'une loi empirique au format tableur.
+ *
+ *  arguments : stream, nombre de lois, pointeurs sur les lois,
+ *              facteurs d'echelle, flag sur l'ecriture de la fonction
+ *              de repartition, pointeur sur une loi empirique,
+ *              flag sur l'ordre des lois.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Distribution::spreadsheet_print(ostream &os , int nb_dist , const Distribution **dist ,
                                          double *dist_scale , bool cumul_flag ,
                                          const FrequencyDistribution *histo , bool mass_first) const
 
 {
-  int i , j;
+  register int i , j;
   int spreadsheet_nb_value = nb_value;
   double scale , *histo_cumul;
 
 
-  // computation of the scaling factor, the cumulative distribution function deduced from
-  // the frequency distribution and the number of values
+  // calcul du facteur d'echelle, de la fonction de repartition deduite de
+  // la loi empirique et du nombre de valeurs
 
   if (histo) {
     scale = histo->nb_element / (1. - complement);
@@ -1052,8 +994,7 @@ ostream& Distribution::spreadsheet_print(ostream &os , int nb_dist , const Distr
     }
   }
 
-  // writing of the probability mass functions or the empirical and theoretical frequency distributions and
-  // the empirical and theoretical cumulative distribution functions
+  // ecriture des probabilites de chaque valeur
 
   for (i = 0;i < spreadsheet_nb_value;i++) {
     os << i;
@@ -1109,15 +1050,13 @@ ostream& Distribution::spreadsheet_print(ostream &os , int nb_dist , const Distr
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the number of plotted values (Gnuplot output).
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo pointer a frequency distribution.
+ *  Calcul du nombre de valeurs a afficher (sortie Gnuplot).
  *
- *  \return          number of plotted values.
- */
-/*--------------------------------------------------------------*/
+ *  argument : pointeur sur une loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
 int Distribution::plot_nb_value_computation(const FrequencyDistribution *histo) const
 
@@ -1141,24 +1080,21 @@ int Distribution::plot_nb_value_computation(const FrequencyDistribution *histo) 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a discrete distribution at the Gnuplot format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] path          file path,
- *  \param[in] concentration pointer on the concentration function,
- *  \param[in] scale         scaling factor.
+ *  Ecriture d'une loi au format Gnuplot.
  *
- *  \return                  error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : path, pointeur sur la fonction de concentration,
+ *              facteur d'echelle.
+ *
+ *--------------------------------------------------------------*/
 
 bool Distribution::plot_print(const char *path , double *concentration ,
                               double scale) const
 
 {
   bool status = false;
-  int i;
+  register int i;
   ofstream out_file(path);
 
 
@@ -1186,23 +1122,19 @@ bool Distribution::plot_print(const char *path , double *concentration ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a discrete distribution and a frequency distribution
- *         at the Gnuplot format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] path  file path,
- *  \param[in] histo pointer on a frequency distribution.
+ *  Ecriture d'une loi et d'une loi empirique au format Gnuplot.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : path, pointeur sur une loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
 bool Distribution::plot_print(const char *path , const FrequencyDistribution *histo) const
 
 {
   bool status = false;
-  int i;
+  register int i;
   double scale;
   ofstream out_file(path);
 
@@ -1210,7 +1142,7 @@ bool Distribution::plot_print(const char *path , const FrequencyDistribution *hi
   if (out_file) {
     status = true;
 
-    // computation of the scaling factor
+    // calcul du facteur d'echelle
 
     if (histo) {
       scale = histo->nb_element / (1. - complement);
@@ -1219,7 +1151,7 @@ bool Distribution::plot_print(const char *path , const FrequencyDistribution *hi
       scale = 1.;
     }
 
-    // writing of the probability mass function or the empirical and theoretical frequency distributions
+    // ecriture des frequences et des probabilites de chaque valeur
 
     for (i = 0;i < nb_value;i++) {
       if (histo) {
@@ -1239,22 +1171,16 @@ bool Distribution::plot_print(const char *path , const FrequencyDistribution *hi
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a family of a discrete distributions and a family of
- *         frequency distributions at the Gnuplot format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] path          file path,
- *  \param[in] nb_dist       number of distributions,
- *  \param[in] dist          pointer on the discrete distributions,
- *  \param[in] scale         scaling factors,
- *  \param[in] dist_nb_value number of values of the distributions,
- *  \param[in] nb_histo      number of frequency distributions,
- *  \param[in] histo         pointer on the frequency distributions.
+ *  Ecriture d'une famille de lois et d'une famille de lois empiriques
+ *  au format Gnuplot.
  *
- *  \return                  error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : path, nombre de lois, pointeurs sur les lois,
+ *              facteurs d'echelle, nombre de valeurs des lois,
+ *              nombre de lois empiriques, pointeurs sur les lois empiriques.
+ *
+ *--------------------------------------------------------------*/
 
 bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                 double *scale , int *dist_nb_value , int nb_histo ,
@@ -1262,7 +1188,7 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
 
 {
   bool status = false;
-  int i , j;
+  register int i , j;
   int plot_nb_value = 0;
   ofstream out_file(path);
 
@@ -1270,7 +1196,7 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
   if (out_file) {
     status = true;
 
-    // computation of the number of values
+    // calcul du nombre de valeurs
 
     if (histo) {
       for (i = 0;i < nb_histo;i++) {
@@ -1296,7 +1222,7 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
       }
     }
 
-    // writing of the probability mass functions or the empirical and theoretical frequency distributions
+    // ecriture des frequences et des probabilites de chaque valeur
 
     for (i = 0;i < plot_nb_value;i++) {
       if (histo) {
@@ -1340,27 +1266,23 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of family of cumulative distribution functions for their matching
- *         at the Gnuplot format
+/*--------------------------------------------------------------*
  *
- *  \param[in] path     file path,
- *  \param[in] nb_cumul number of cumulative distribution functions,
- *  \param[in] offset   pointer on the lowest values,
- *  \param[in] nb_value pointer on the number of values,
- *  \param[in] cumul    pointer on the cumulative distribution functions.
+ *  Ecriture d'une famille de fonctions de repartition en vue du matching
+ *  au format Gnuplot
  *
- *  \return             error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : path, nombre de fonctions de repartition,
+ *              pointeurs sur les plus petites valeurs, les nombres de valeurs et
+ *              les fonctions de repartition.
+ *
+ *--------------------------------------------------------------*/
 
 bool cumul_matching_plot_print(const char *path , int nb_cumul , int *offset ,
                                int *nb_value , double **cumul)
 
 {
   bool status = false;
-  int i , j;
+  register int i , j;
   int plot_offset , plot_nb_value;
   ofstream out_file(path);
 
@@ -1401,15 +1323,13 @@ bool cumul_matching_plot_print(const char *path , int nb_cumul , int *offset ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of a file name label (Gnuplot output).
+/*--------------------------------------------------------------*
  *
- *  \param[in] file_name file name.
+ *  Extraction du label d'un nom de fichier.
  *
- *  \return              label.
- */
-/*--------------------------------------------------------------*/
+ *  argument : nom d'un fichier.
+ *
+ *--------------------------------------------------------------*/
 
 char* label(const char *file_name)
 
@@ -1435,22 +1355,17 @@ char* label(const char *file_name)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of family of a discrete distributions using Gnuplot:
- *         - probability mass functions and cumulative distribution functions,
- *         - matching of cumulative distribution functions,
- *         - concentration curves.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error   reference on a StatError object,
- *  \param[in] prefix  file prefix,
- *  \param[in] nb_dist number of distributions,
- *  \param[in] idist   pointer on the discrete distributions,
- *  \param[in] title   figure title.
+ *  Sortie Gnuplot d'une famille de lois :
+ *  - lois et fonctions de repartition,
+ *  - mise en correspondance des fonctions de repartition,
+ *  - courbes de concentration.
  *
- *  \return            error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              nombre de lois, pointeurs sur les lois, titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dist ,
                               const Distribution **idist , const char *title) const
@@ -1468,7 +1383,7 @@ bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dis
 
   else {
     bool cumul_concentration_flag;
-    int i , j , k;
+    register int i , j , k;
     int plot_nb_value , max_nb_value , max_range , reference_matching ,
         reference_concentration , *poffset , *pnb_value;
     double max , min_complement , **pcumul , **concentration;
@@ -1484,7 +1399,7 @@ bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dis
       dist[i] = idist[i - 1];
     }
 
-    // writing of the data files
+    // ecriture des fichiers de donnees
 
     data_file_name = new ostringstream[nb_dist + 1];
 
@@ -1510,12 +1425,12 @@ bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dis
       pnb_value[i] = dist[i]->nb_value;
       pcumul[i] = dist[i]->cumul;
 
-      // computation of the concentration functions
+      // calcul des fonctions de concentration
 
       concentration[i] = dist[i]->concentration_function_computation();
 
-      // computation of the maximum number of values, the largest support and
-      // the maximum probability
+      // calcul du nombre de valeurs maximum, de l'etendue maximum et
+      // de la probabilite maximum
 
       plot_nb_value = dist[i]->plot_nb_value_computation();
       if (plot_nb_value > max_nb_value) {
@@ -1561,7 +1476,7 @@ bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dis
 
     if (status) {
 
-      // writing of the script files
+      // ecriture du fichier de commandes et du fichier d'impression
 
       for (i = 0;i < 2;i++) {
         ostringstream file_name[2];
@@ -1590,7 +1505,7 @@ bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dis
         }
         out_file << "\n\n";
 
-        // probability mass functions
+        // lois
 
         if (MAX(max_nb_value , 2) - 1 < TIC_THRESHOLD) {
           out_file << "set xtics 0,1" << endl;
@@ -1618,7 +1533,7 @@ bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dis
 
         if (cumul_concentration_flag) {
 
-          // cumulative distribution functions
+          // fonctions de repartition
 
           if (i == 0) {
             out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
@@ -1651,8 +1566,8 @@ bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dis
             out_file << "set xtics autofreq" << endl;
           }
 
-          // matching of the cumulative distribution functions taking as reference
-          // the distribution with the largest support
+          // mise en correspondance des fonctions de repartition en prenant
+          // comme reference la loi dont l'etendue est la plus grande
 
           if (nb_dist > 1) {
             if (i == 0) {
@@ -1689,7 +1604,7 @@ bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dis
             out_file << "unset grid\n" << "set xtics autofreq\n" << "set ytics autofreq" << endl;
           }
 
-          // concentration curves
+          // courbes de concentration
 
           if (i == 0) {
             out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
@@ -1741,19 +1656,19 @@ bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dis
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the probability mass function.
+/*--------------------------------------------------------------*
  *
- *  \param[in] plot  reference on a SinglePlot object,
- *  \param[in] scale scaling factor (default value: 1).
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'une loi.
+ *
+ *  arguments : reference sur un objet SinglePlot,
+ *              facteur d'echelle (valeur par defaut : 1).
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::plotable_mass_write(SinglePlot &plot , double scale) const
 
 {
-  int i;
+  register int i;
 
 
   for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
@@ -1766,18 +1681,18 @@ void Distribution::plotable_mass_write(SinglePlot &plot , double scale) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the cumulative discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] plot reference on a SinglePlot object.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture de la fonction de repartition d'une loi.
+ *
+ *  argument : reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::plotable_cumul_write(SinglePlot &plot) const
 
 {
-  int i;
+  register int i;
 
 
   for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
@@ -1786,21 +1701,20 @@ void Distribution::plotable_cumul_write(SinglePlot &plot) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the matching of the cumulative distribution function with
- *         the cumulative distribution function of a reference distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] plot           reference on a SinglePlot object
- *  \param[in] reference_dist reference on the reference distribution.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture de la mise en correspondance d'une fonction de repartition avec
+ *  la fonction de repartition d'une loi de reference.
+ *
+ *  argument : reference sur un objet SinglePlot et sur la loi de reference.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::plotable_cumul_matching_write(SinglePlot &plot ,
                                                  const Distribution &reference_dist) const
 
 {
-  int i;
+  register int i;
 
 
   plot.add_point(0. , 0.);
@@ -1816,18 +1730,18 @@ void Distribution::plotable_cumul_matching_write(SinglePlot &plot ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the concentration curve deduced from a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] plot reference on a SinglePlot object.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture de la courbe de concentration d'une loi.
+ *
+ *  argument : reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::plotable_concentration_write(SinglePlot &plot) const
 
 {
-  int i;
+  register int i;
   double *concentration;
 
 
@@ -1842,24 +1756,22 @@ void Distribution::plotable_concentration_write(SinglePlot &plot) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of family of a discrete distributions:
- *         - probability mass functions and cumulative distribution functions,
- *         - matching of cumulative distribution functions,
- *         - concentration curves.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error   reference on a StatError object,
- *  \param[in] nb_dist number of distributions,
- *  \param[in] idist   pointer on the discrete distributions.
+ *  Sortie graphique d'une famille de lois :
+ *  - lois et fonctions de repartition,
+ *  - mise en correspondance des fonctions de repartition,
+ *  - courbes de concentration.
  *
- *  \return            MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError,
+ *              nombre de lois, pointeurs sur les lois.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* Distribution::get_plotable_distributions(StatError &error , int nb_dist ,
                                                        const Distribution **idist) const
 
+// usage : plot[vue][distribution]
 {
   MultiPlotSet *plot_set;
 
@@ -1872,7 +1784,7 @@ MultiPlotSet* Distribution::get_plotable_distributions(StatError &error , int nb
   }
 
   else {
-    int i , j , k;
+    register int i , j , k;
     int plot_nb_value , xmax , max_range , cumul_concentration_nb_dist ,
         nb_plot_set , reference_matching;
     double ymax , min_complement;
@@ -1896,8 +1808,8 @@ MultiPlotSet* Distribution::get_plotable_distributions(StatError &error , int nb
 
     for (i = 0;i < nb_dist;i++) {
 
-      // computation of the maximum number of values, the largest support and
-      // the maximum probability
+      // calcul du nombre de valeurs maximum, de l'etendue maximum et
+      // de la probabilite maximum
 
       plot_nb_value = dist[i]->plot_nb_value_computation();
       if (plot_nb_value > xmax) {
@@ -1938,7 +1850,7 @@ MultiPlotSet* Distribution::get_plotable_distributions(StatError &error , int nb
     }
     plot.border = "15 lw 0";
 
-    // probability mass functions
+    // 1ere vue : lois
 
     plot[0].xrange = Range(0 , MAX(xmax , 2) - 1);
     plot[0].yrange = Range(0. , MIN(ymax * YSCALE , 1.));
@@ -1965,7 +1877,7 @@ MultiPlotSet* Distribution::get_plotable_distributions(StatError &error , int nb
 
     if (cumul_concentration_nb_dist > 0) {
 
-      // cumulative distribution functions
+      // 2eme vue : fonctions de repartition
 
       plot[1].xrange = Range(0 , xmax - 1);
       plot[1].yrange = Range(0. , 1. - min_complement);
@@ -1994,8 +1906,8 @@ MultiPlotSet* Distribution::get_plotable_distributions(StatError &error , int nb
         }
       }
 
-      // matching of cumulative distribution functions taking as reference
-      // the distribution with the largest support
+      // 3eme vue : mise en correspondance des fonctions de repartition en prenant
+      // comme reference la loi dont l'etendue est la plus grande
 
       if (nb_dist > 1) {
         title.str("");
@@ -2035,7 +1947,7 @@ MultiPlotSet* Distribution::get_plotable_distributions(StatError &error , int nb
         i = 2;
       }
 
-      // concentration curves
+      // 4eme vue : courbes de concentration
 
       plot[i].xrange = Range(0. , 1. - min_complement);
       plot[i].yrange = Range(0. , 1. - min_complement);
@@ -2077,13 +1989,11 @@ MultiPlotSet* Distribution::get_plotable_distributions(StatError &error , int nb
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'une loi
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* Distribution::get_plotable() const
 
@@ -2094,14 +2004,13 @@ MultiPlotSet* Distribution::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the survival rates from a discrete distribution and
- *         writing of the result.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul des taux de survie a partir d'une loi et ecriture du resultat.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Distribution::survival_ascii_write(ostream &os) const
 
@@ -2127,23 +2036,20 @@ ostream& Distribution::survival_ascii_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation ofs survival rates from a discrete distribution and
- *         writing of the result in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Calcul des taux de survie a partir d'une loi et
+ *  ecriture du resultat dans un fichier.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool Distribution::survival_ascii_write(StatError &error , const string path) const
+bool Distribution::survival_ascii_write(StatError &error , const char *path) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -2162,23 +2068,20 @@ bool Distribution::survival_ascii_write(StatError &error , const string path) co
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of survival rates from a discrete distribution and
- *         writing of the result in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Calcul des taux de survie a partir d'une loi et ecriture
+ *  du resultat dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool Distribution::survival_spreadsheet_write(StatError &error , const string path) const
+bool Distribution::survival_spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
   Curves *survival_rate;
 
 
@@ -2211,23 +2114,20 @@ bool Distribution::survival_spreadsheet_write(StatError &error , const string pa
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a discrete distribution and the associated survivor function
- *         at the Gnuplot format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] path     file path,
- *  \param[in] survivor pointer on the survivor function.
+ *  Ecriture d'une loi et de la fonction de survie associee
+ *  au format Gnuplot.
  *
- *  \return             error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : path, pointeur sur la fonction de survie.
+ *
+ *--------------------------------------------------------------*/
 
 bool Distribution::survival_plot_print(const char *path , double *survivor) const
 
 {
   bool status = false;
-  int i;
+  register int i;
   ofstream out_file(path);
 
 
@@ -2243,18 +2143,14 @@ bool Distribution::survival_plot_print(const char *path , double *survivor) cons
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the survival rates from a discrete distribution and
- *         plot of the result using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title.
+ *  Calcul des taux de survie a partir d'une loi et sortie Gnuplot du resultat.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool Distribution::survival_plot_write(StatError &error , const char *prefix ,
                                        const char *title) const
@@ -2271,13 +2167,13 @@ bool Distribution::survival_plot_write(StatError &error , const char *prefix ,
   }
 
   else {
-    int i;
+    register int i;
     double *survivor;
     Curves *survival_rate;
     ostringstream data_file_name[2];
 
 
-    // writing of the data files
+    // ecriture des fichiers de donnees
 
     data_file_name[0] << prefix << 0 << ".dat";
     survivor = survivor_function_computation();
@@ -2296,7 +2192,7 @@ bool Distribution::survival_plot_write(StatError &error , const char *prefix ,
       data_file_name[1] << prefix << 1 << ".dat";
       survival_rate->plot_print((data_file_name[1].str()).c_str());
 
-      // writing of the script files
+      // ecriture du fichier de commandes et du fichier d'impression
 
       for (i = 0;i < 2;i++) {
         ostringstream file_name[2];
@@ -2325,7 +2221,7 @@ bool Distribution::survival_plot_write(StatError &error , const char *prefix ,
         }
         out_file << "\n\n";
 
-        // probability mass function and survivor function
+        // loi et fonction de survie
 
         if (nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics 0,1" << endl;
@@ -2347,7 +2243,7 @@ bool Distribution::survival_plot_write(StatError &error , const char *prefix ,
         }
         out_file << endl;
 
-        // survival rates
+        // taux de survie
 
         if (survival_rate->length - 1 < TIC_THRESHOLD) {
           out_file << "set xtics 0,1" << endl;
@@ -2378,18 +2274,18 @@ bool Distribution::survival_plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation and writing of the survivor function of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] plot reference on a SinglePlot object.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul et ecriture de la fonction de survie d'une loi.
+ *
+ *  argument : reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::plotable_survivor_write(SinglePlot &plot) const
 
 {
-  int i;
+  register int i;
   double *survivor;
 
 
@@ -2403,16 +2299,13 @@ void Distribution::plotable_survivor_write(SinglePlot &plot) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of survival rates from a discrete distribution and
- *         plot of the result.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Calcul des taux de survie a partir d'une loi et sortie graphique du resultat.
  *
- *  \return          MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* Distribution::survival_get_plotable(StatError &error) const
 
@@ -2428,7 +2321,7 @@ MultiPlotSet* Distribution::survival_get_plotable(StatError &error) const
   }
 
   else {
-    int i , j;
+    register int i , j;
     int xmax;
     Curves *survival_rate;
     ostringstream legend;
@@ -2440,7 +2333,7 @@ MultiPlotSet* Distribution::survival_get_plotable(StatError &error) const
     plot.title = "Survival analysis";
     plot.border = "15 lw 0";
 
-    // probability mass function and survivor function
+    // 1ere vue : loi et fonction de survie
 
     xmax = nb_value - 1;
     if ((cumul[xmax] > 1. - DOUBLE_ERROR) &&
@@ -2474,7 +2367,7 @@ MultiPlotSet* Distribution::survival_get_plotable(StatError &error) const
 
     plotable_survivor_write(plot[0][1]);
 
-    // survival rates
+    // 2eme vue : taux de survie
 
     survival_rate = new Curves(*this);
 
@@ -2502,18 +2395,18 @@ MultiPlotSet* Distribution::survival_get_plotable(StatError &error) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Display of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Visualisation d'une loi.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Distribution::print(ostream &os) const
 
 {
-  int i;
+  register int i;
 
 
   ascii_characteristic_print(os);
@@ -2540,37 +2433,33 @@ ostream& Distribution::print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Display of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os   stream,
- *  \param[in]     dist reference on a Distribution object.
- */
-/*--------------------------------------------------------------*/
+ *  Visualisation d'une distribution.
+ *
+ *  arguments : stream, reference sur un objet Distribution.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& operator<<(ostream &os , const Distribution &dist)
 
 {
-  streamsize nb_digits;
-
-
-  nb_digits = os.precision(5);
+  os.precision(5);
 
   os << endl;
   dist.print(os);
 
-  os.precision(nb_digits);
+  os.precision(6);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the number of possible values from 0.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul du nombre de valeurs prises par une v.a..
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::nb_value_computation()
 
@@ -2587,11 +2476,11 @@ void Distribution::nb_value_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the number of values of null probability from 0.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul du nombre de valeurs de probabilite nulle a partir de 0.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::offset_computation()
 
@@ -2608,16 +2497,16 @@ void Distribution::offset_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of the probability at the mode of a discrete distribution.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la valeur de probabilite maximum.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::max_computation()
 
 {
-  int i;
+  register int i;
 
 
   max = 0.;
@@ -2629,52 +2518,17 @@ void Distribution::max_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of the mode of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \return mode.
- */
-/*--------------------------------------------------------------*/
-
-double Distribution::mode_computation() const
-
-{
-  int i;
-  double max_mass , mode;
-
-
-  max_mass = 0.;
-  for (i = offset;i < nb_value;i++) {
-    if (mass[i] > max_mass) {
-      max_mass = mass[i];
-      mode = i;
-    }
-  }
-
-  i = mode;
-  while (mass[i + 1] == mass[i]) {
-    i++;
-  }
-  if (i > mode) {
-    mode = (i + mode) / 2.;
-  }
-
-  return mode;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the mean of a discrete distribution.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la moyenne d'une loi.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::mean_computation()
 
 {
   if (cumul[nb_value - 1] > 0.) {
-    int i;
+    register int i;
 
 
     mean = 0.;
@@ -2686,60 +2540,26 @@ void Distribution::mean_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of a quantile of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] icumul value of the cumulative distribution function.
+ *  Calcul de la variance d'une loi.
  *
- *  \return           quantile.
- */
-/*--------------------------------------------------------------*/
-
-double Distribution::quantile_computation(double icumul) const
-
-{
-  int i;
-  double quantile = D_DEFAULT;
-
-
-  if ((complement == 0.) && (icumul <= cumul[nb_value - 1])) {
-    for (i = offset;i < nb_value;i++) {
-      if (cumul[i] >= icumul) {
-        quantile = i;
-        if (cumul[i] == icumul) {
-          quantile += 0.5;
-        }
-        break;
-      }
-    }
-  }
-
-  return quantile;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the variance of a discrete distribution.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 void Distribution::variance_computation()
 
 {
   if (mean != D_DEFAULT) {
-    int i;
+    register int i;
     double diff;
-    long double square_sum;
 
 
-    square_sum = 0.;
+    variance = 0.;
     for (i = offset;i < nb_value;i++) {
       diff = i - mean;
-      square_sum += mass[i] * diff * diff;
+      variance += mass[i] * diff * diff;
     }
-    variance = square_sum / cumul[nb_value - 1];
+    variance /= cumul[nb_value - 1];
 
     if (variance < 0.) {
       variance = 0.;
@@ -2748,61 +2568,57 @@ void Distribution::variance_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the mean absolute deviation of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] location location measure (e.g. mean or median).
+ *  Calcul de l'ecart absolu moyen d'une loi.
  *
- *  \return              mean absolute deviation.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
-double Distribution::mean_absolute_deviation_computation(double location) const
+double Distribution::mean_absolute_deviation_computation() const
 
 {
-  int i;
-  double mean_absolute_deviation;
+  register int i;
+  double mean_absolute_deviation = D_DEFAULT;
 
 
-  mean_absolute_deviation = 0.;
-  for (i = offset;i < nb_value;i++) {
-    mean_absolute_deviation += mass[i] * fabs(i - location);
+  if (mean != D_DEFAULT) {
+    mean_absolute_deviation = 0.;
+    for (i = offset;i < nb_value;i++) {
+      mean_absolute_deviation += mass[i] * fabs(i - mean);
+    }
+    mean_absolute_deviation /= cumul[nb_value - 1];
+
+    if (mean_absolute_deviation < 0.) {
+      mean_absolute_deviation = 0.;
+    }
   }
-  mean_absolute_deviation /= cumul[nb_value - 1];
 
   return mean_absolute_deviation;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the coefficient of skewness of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \return coefficient of skewness.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul du coefficient d'asymetrie d'une loi.
+ *
+ *--------------------------------------------------------------*/
 
 double Distribution::skewness_computation() const
 
 {
-  int i;
+  register int i;
   double skewness = D_INF , diff;
-  long double cube_sum;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
+    skewness = 0.;
+
     if (variance > 0.) {
-      cube_sum = 0.;
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        cube_sum += mass[i] * diff * diff * diff;
+        skewness += mass[i] * diff * diff * diff;
       }
-      skewness = cube_sum / (cumul[nb_value - 1] * pow(variance , 1.5));
-    }
-
-    else {
-      skewness = 0.;
+      skewness /= (cumul[nb_value - 1] * pow(variance , 1.5));
     }
   }
 
@@ -2810,35 +2626,32 @@ double Distribution::skewness_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the excess kurtosis of a discrete distribution:
- *         excess kurtosis = coefficient of kurtosis - 3.
+/*--------------------------------------------------------------*
  *
- *  \return excess kurtosis.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de l'exces d'applatissement d'une loi :
+ *  exces d'applatissement = coefficient d'applatissement - 3.
+ *
+ *--------------------------------------------------------------*/
 
 double Distribution::kurtosis_computation() const
 
 {
-  int i;
+  register int i;
   double kurtosis = D_INF , diff;
-  long double power_sum;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
-    if (variance > 0.) {
-      power_sum = 0.;
-      for (i = offset;i < nb_value;i++) {
-        diff = i - mean;
-        power_sum += mass[i] * diff * diff * diff * diff;
-      }
-      kurtosis = power_sum / (cumul[nb_value - 1] * variance * variance) - 3.;
+    if (variance == 0.) {
+      kurtosis = -2.;
     }
 
     else {
-      kurtosis = -2.;
+      kurtosis = 0.;
+      for (i = offset;i < nb_value;i++) {
+        diff = i - mean;
+        kurtosis += mass[i] * diff * diff * diff * diff;
+      }
+      kurtosis = kurtosis / (cumul[nb_value - 1] * variance * variance) - 3.;
     }
   }
 
@@ -2846,18 +2659,16 @@ double Distribution::kurtosis_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the information quantity of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \return information quantity.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la quantite d'information d'une loi.
+ *
+ *--------------------------------------------------------------*/
 
 double Distribution::information_computation() const
 
 {
-  int i;
+  register int i;
   double information = D_INF;
 
 
@@ -2880,18 +2691,16 @@ double Distribution::information_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the sum of squared first-order differences.
+/*--------------------------------------------------------------*
  *
- *  \return sum of squared first-order differences.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la somme des carres des differences premieres.
+ *
+ *--------------------------------------------------------------*/
 
 double Distribution::first_difference_norm_computation() const
 
 {
-  int i;
+  register int i;
   double first_difference_norm , buff;
 
 
@@ -2907,18 +2716,16 @@ double Distribution::first_difference_norm_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the sum of squared second-order differences.
+/*--------------------------------------------------------------*
  *
- *  \return sum of squared second-order differences.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la somme des carres des differences secondes.
+ *
+ *--------------------------------------------------------------*/
 
 double Distribution::second_difference_norm_computation() const
 
 {
-  int i;
+  register int i;
   double second_difference_norm , buff;
 
 
@@ -2941,20 +2748,19 @@ double Distribution::second_difference_norm_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the cumulative distribution function of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_value number of values,
- *  \param[in] pmass    pointer on the probability mass function,
- *  \param[in] pcumul   pointer on the cumulative distribution function.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la fonction de repartition d'une loi discrete.
+ *
+ *  arguments : nombre de valeurs, pointeurs sur les probabilites et
+ *              sur la fonction de repartition correspondante.
+ *
+ *--------------------------------------------------------------*/
 
 void cumul_computation(int nb_value , const double *pmass , double *pcumul)
 
 {
-  int i;
+  register int i;
 
 
   *pcumul = *pmass;
@@ -2965,16 +2771,16 @@ void cumul_computation(int nb_value , const double *pmass , double *pcumul)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the cumulative distribution function of a discrete distribution.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la fonction de repartition d'une loi discrete.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::cumul_computation()
 
 {
-  int i;
+  register int i;
 
 
   for (i = 0;i < offset;i++) {
@@ -2984,18 +2790,16 @@ void Distribution::cumul_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the survivor function of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \return survivor function.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la fonction de survie d'une loi discrete.
+ *
+ *--------------------------------------------------------------*/
 
 double* Distribution::survivor_function_computation() const
 
 {
-  int i;
+  register int i;
   double *survivor_function;
 
 
@@ -3012,18 +2816,16 @@ double* Distribution::survivor_function_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the concentration function of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \return concentration function.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la fonction de concentration d'une loi discrete.
+ *
+ *--------------------------------------------------------------*/
 
 double* Distribution::concentration_function_computation() const
 
 {
-  int i;
+  register int i;
   double *concentration_function;
 
 
@@ -3047,18 +2849,16 @@ double* Distribution::concentration_function_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the coefficient of concentration of a discrete distribution.
+/*--------------------------------------------------------------*
  *
- *  \return coefficient of concentration.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul du coefficient de concentration d'une loi discrete.
+ *
+ *--------------------------------------------------------------*/
 
 double Distribution::concentration_computation() const
 
 {
-  int i;
+  register int i;
   double concentration = D_DEFAULT , *concentration_function;
 
 
@@ -3098,18 +2898,16 @@ double Distribution::concentration_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the distance between 2 discrete distributions (1 - overlap).
+/*--------------------------------------------------------------*
  *
- *  \return overlap distance.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la distance entre deux lois discretes (1 - recouvrement entre les 2 lois).
+ *
+ *--------------------------------------------------------------*/
 
 double Distribution::overlap_distance_computation(const Distribution &dist) const
 
 {
-  int i;
+  register int i;
   double overlap;
 
 
@@ -3122,20 +2920,19 @@ double Distribution::overlap_distance_computation(const Distribution &dist) cons
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the log-probability mass function.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_value number of values,
- *  \param[in] pmass    pointer on the probability mass function,
- *  \param[in] plog     pointer on the log-probability mass function.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul des logarithmes des probabilites de chaque valeur.
+ *
+ *  arguments : nombre de valeurs, pointeurs sur les probabilites et
+ *              sur la fonction transformee par log correspondante.
+ *
+ *--------------------------------------------------------------*/
 
 void log_computation(int nb_value , const double *pmass , double *plog)
 
 {
-  int i;
+  register int i;
 
 
   for (i = 0;i < nb_value;i++) {
@@ -3151,11 +2948,11 @@ void log_computation(int nb_value , const double *pmass , double *plog)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Ccomputation of the log-probability mass function.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des logarithmes des probabilites de chaque valeur.
+ *
+ *--------------------------------------------------------------*/
 
 void Distribution::log_computation()
 

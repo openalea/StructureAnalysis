@@ -3,7 +3,7 @@
 
 author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 """
-__version__ = "$Id$"
+__version__ = "$Id: tools.py 11452 2011-11-25 15:49:11Z jbdurand $"
 
 
 from openalea.stat_tool import Simulate

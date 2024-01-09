@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: frequency_distribution2.cpp 18002 2015-04-23 06:57:18Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -38,19 +38,19 @@
 
 #include <limits.h>
 #include <math.h>
-
-#include <string>
-#include <vector>
 #include <sstream>
 #include <iomanip>
 
-#include <boost/tokenizer.hpp>
+#include "tool/rw_tokenizer.h"
+#include "tool/rw_cstring.h"
+#include "tool/rw_locale.h"
+#include "tool/config.h"
 
+#include "stat_tools.h"
 #include "distribution.h"
 #include "stat_label.h"
 
 using namespace std;
-using namespace boost;
 
 
 namespace stat_tool {
@@ -61,29 +61,26 @@ extern bool cumul_matching_plot_print(const char *path , int nb_cumul , int *off
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the results of a comparison of frequency distributions.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os            stream,
- *  \param[in]     nb_histo      number of frequency distributions,
- *  \param[in]     ihisto        pointer on the frequency distributions,
- *  \param[in]     type          variable type (NOMINAL/ORDINAL/NUMERIC),
- *  \param[in]     dissimilarity dissimilarities.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des resultats d'une comparaison de lois empiriques.
+ *
+ *  arguments : stream, nombre de lois empiriques, pointeurs sur les lois empiriques,
+ *              type de variable (SYMBOLIC/ORDINAL/NUMERIC), dissimilarites.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_histo ,
                                                           const FrequencyDistribution **ihisto ,
-                                                          variable_type type , double **dissimilarity) const
+                                                          int type , double **dissimilarity) const
 
 {
-  int i , j;
+  register int i , j;
   int max_nb_value , buff , width[3];
+  long old_adjust;
   double information , **cumul;
   Test *test;
   const FrequencyDistribution **histo;
-  ios_base::fmtflags format_flags;
 
 
   nb_histo++;
@@ -94,21 +91,21 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
     histo[i] = ihisto[i - 1];
   }
 
-  format_flags = os.setf(ios::right , ios::adjustfield);
+  old_adjust = os.setf(ios::right , ios::adjustfield);
 
-  // writing of the frequency distribution characteristics
+  // ecriture des caracteristiques des lois empiriques
 
   for (i = 0;i < nb_histo;i++) {
     os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1  << " - ";
 
-    if (type == NOMINAL) {
+    if (type == SYMBOLIC) {
       os << STAT_label[STATL_SAMPLE_SIZE] << ": " << histo[i]->nb_element << endl;
     }
 
     else {
       histo[i]->ascii_characteristic_print(os , true);
 
-      os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << histo[i]->mean_absolute_deviation_computation(histo[i]->mean);
+      os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": " << histo[i]->mean_absolute_deviation_computation();
       if (histo[i]->mean > 0.) {
         os << "   " << STAT_label[STATL_CONCENTRATION_COEFF] << ": " << histo[i]->concentration_computation();
       }
@@ -126,7 +123,7 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
     cumul[i] = histo[i]->cumul_computation();
   }
 
-  // computation of the column widths
+  // calcul des largeurs des colonnes
 
   max_nb_value = histo[0]->nb_value;
   for (i = 1;i < nb_histo;i++) {
@@ -155,7 +152,7 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
   }
   width[2] += ASCII_SPACE;
 
-  // writing of the frequency distributions and the cumulative distribution functions
+  // ecriture des lois empiriques et des fonctions de repartition
 
   os << "  ";
   for (i = 0;i < nb_histo;i++) {
@@ -193,7 +190,7 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
   }
   delete [] cumul;
 
-  // computation of the column widths
+  // calcul des largeurs des colonnes
 
   width[0] = column_width(nb_histo);
 
@@ -206,7 +203,7 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
   }
   width[1] += ASCII_SPACE;
 
-  // writing of the pairwise dissimilarity matrix between frequency distributions
+  // ecriture de la matrice des dissimilarites entre lois empiriques
 
   os << "\n" << STAT_label[STATL_DISSIMILARITIES] << " between "
      << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS] << endl;
@@ -226,7 +223,7 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
     os << endl;
   }
 
-  // analysis of variance
+  // analyse de variance
 
   switch (type) {
 
@@ -309,7 +306,7 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
   }
   }
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   delete [] histo;
 
@@ -317,28 +314,23 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the results of a comparison of frequency distributions in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] path          file path,
- *  \param[in] nb_histo      number of frequency distributions,
- *  \param[in] ihisto        pointer on the frequency distributions,
- *  \param[in] type          variable type (NOMINAL/ORDINAL/NUMERIC),
- *  \param[in] dissimilarity dissimilarities.
+ *  Ecriture des resultats d'une comparaison de lois empiriques dans un fichier.
  *
- *  \return                  error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path, nombre de lois empiriques,
+ *              pointeurs sur les lois empiriques, type de variable (SYMBOLIC/ORDINAL/NUMERIC),
+ *              dissimilarites.
+ *
+ *--------------------------------------------------------------*/
 
-bool FrequencyDistribution::dissimilarity_ascii_write(StatError &error , const string path ,
+bool FrequencyDistribution::dissimilarity_ascii_write(StatError &error , const char *path ,
                                                       int nb_histo , const FrequencyDistribution **ihisto ,
-                                                      variable_type type , double **dissimilarity) const
+                                                      int type , double **dissimilarity) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -357,34 +349,29 @@ bool FrequencyDistribution::dissimilarity_ascii_write(StatError &error , const s
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the results of a comparison of frequency distributions in a file
- *         at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] path          file path,
- *  \param[in] nb_histo      number of frequency distributions,
- *  \param[in] ihisto        pointer on the frequency distributions,
- *  \param[in] type          variable type (NOMINAL/ORDINAL/NUMERIC),
- *  \param[in] dissimilarity dissimilarities.
+ *  Ecriture des resultats d'une comparaison de lois empiriques dans un fichier
+ *  au format tableur.
  *
- *  \return                  error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path, nombre de lois empiriques,
+ *              pointeurs sur les lois empiriques, type de variable (SYMBOLIC/ORDINAL/NUMERIC),
+ *              dissimilarites.
+ *
+ *--------------------------------------------------------------*/
 
-bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , const string path ,
+bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , const char *path ,
                                                             int nb_histo , const FrequencyDistribution **ihisto ,
-                                                            variable_type type , double **dissimilarity) const
+                                                            int type , double **dissimilarity) const
 
 {
   bool status;
-  int i , j;
+  register int i , j;
   int max_nb_value;
   double information , **cumul , **concentration;
   Test *test;
   const FrequencyDistribution **histo;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -405,19 +392,19 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
       histo[i] = ihisto[i - 1];
     }
 
-    // writing of the frequency distribution characteristics
+    // ecriture des caracteristiques des lois empiriques
 
     for (i = 0;i < nb_histo;i++) {
       out_file << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1  << "\t";
 
-      if (type == NOMINAL) {
+      if (type == SYMBOLIC) {
         out_file << STAT_label[STATL_SAMPLE_SIZE] << "\t" << histo[i]->nb_element << endl;
       }
 
       else {
         histo[i]->spreadsheet_characteristic_print(out_file , true);
 
-        out_file << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << histo[i]->mean_absolute_deviation_computation(histo[i]->mean);
+        out_file << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << histo[i]->mean_absolute_deviation_computation();
         if (histo[i]->mean > 0.) {
           out_file << "\t\t" << STAT_label[STATL_CONCENTRATION_COEFF] << "\t" << histo[i]->concentration_computation();
         }
@@ -430,14 +417,14 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
                << information / histo[i]->nb_element << "\n" << endl;
     }
 
-    // writing of the frequency distributions, cumulative distribution functions and concentration curves
+    // ecriture des lois empiriques, des fonctions de repartition et des courbes de concentration
 
     cumul = new double*[nb_histo];
     for (i = 0;i < nb_histo;i++) {
       cumul[i] = histo[i]->cumul_computation();
     }
 
-    if (type != NOMINAL) {
+    if (type != SYMBOLIC) {
       concentration = new double*[nb_histo];
       for (i = 0;i < nb_histo;i++) {
         concentration[i] = histo[i]->concentration_function_computation();
@@ -459,9 +446,9 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
                << i + 1 << " " << STAT_label[STATL_FUNCTION];
     }
 
-    if (type != NOMINAL) {
+    if (type != SYMBOLIC) {
       for (i = 0;i < nb_histo;i++) {
-        if (histo[i]->variance > 0.) {
+        if (histo[i]->mean > 0.) {
           out_file << "\t" << STAT_label[STATL_CONCENTRATION] << " " << STAT_label[STATL_FUNCTION] << " "
                    << i + 1;
         }
@@ -484,9 +471,9 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
         }
       }
 
-      if (type != NOMINAL) {
+      if (type != SYMBOLIC) {
         for (j = 0;j < nb_histo;j++) {
-          if (histo[j]->variance > 0.) {
+          if (histo[j]->mean > 0.) {
             out_file << "\t";
             if (i < histo[j]->nb_value) {
               out_file << concentration[j][i];
@@ -502,14 +489,14 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
     }
     delete [] cumul;
 
-    if (type != NOMINAL) {
+    if (type != SYMBOLIC) {
       for (i = 0;i < nb_histo;i++) {
         delete [] concentration[i];
       }
       delete [] concentration;
     }
 
-    // writing of the pairwise dissimilarity matrix between frequency distributions
+    // ecriture de la matrice des dissimilarites entre lois empiriques
 
     out_file << "\n" << STAT_label[STATL_DISSIMILARITIES] << " between "
              << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS] << "\n\n";
@@ -527,7 +514,7 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
       out_file << endl;
     }
 
-    // analysis of variance
+    // analyse de variance
 
     switch (type) {
 
@@ -607,21 +594,18 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Kruskal-Wallis test (analysis of variance on ranks).
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_histo number of frequency distributions,
- *  \param[in] ihisto   pointer on the frequency distributions.
+ *  Test de Kruskal-Wallis (analyse de variance dans le cas ordinal).
  *
- *  \return             Test object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : nombre de lois empiriques, pointeurs sur les lois empiriques.
+ *
+ *--------------------------------------------------------------*/
 
 Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyDistribution **ihisto) const
 
 {
-  int i , j;
+  register int i , j;
   int *pfrequency;
   double correction , value , sum , *rank;
   const FrequencyDistribution **histo;
@@ -639,7 +623,7 @@ Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyD
 
   merged_histo = new FrequencyDistribution(nb_histo , histo);
 
-  // computation of the correction term for ties
+  // calcul du terme de correction pour les ex-aequo
 
   pfrequency = merged_histo->frequency + merged_histo->offset;
   correction = 0.;
@@ -650,11 +634,11 @@ Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyD
     pfrequency++;
   }
 
-  // rank computation
+  // calcul des rangs
 
   rank = merged_histo->rank_computation();
 
-  // computation of the Kruskal-Wallis statistic
+  // calcul de la statistique de Kruskal-Wallis
 
   value = 0.;
   for (i = 0;i < nb_histo;i++) {
@@ -681,29 +665,23 @@ Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyD
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Comparison of frequency distributions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] display  flag for displaying comparison outputs,
- *  \param[in] nb_histo number of frequency distributions,
- *  \param[in] ihisto   pointer on the frequency distributions,
- *  \param[in] type     variable type (NOMINAL/ORDINAL/NUMERIC),
- *  \param[in] path     file path,
- *  \param[in] format   file format (ASCII/SPREADSHEET).
+ *  Comparaison de lois empiriques.
  *
- *  \return             error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, nombre de lois empiriques,
+ *              pointeurs sur les lois empiriques, type de variable (SYMBOLIC/ORDINAL/NUMERIC),
+ *              path, format de fichier ('a' : ASCII, 's' : Spreadsheet).
+ *
+ *--------------------------------------------------------------*/
 
-bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_histo ,
-                                       const FrequencyDistribution **ihisto , variable_type type ,
-                                       const string path , output_format format) const
+bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_histo ,
+                                       const FrequencyDistribution **ihisto , int type ,
+                                       const char *path , char format) const
 
 {
   bool status = true;
-  int i , j , k , m;
+  register int i , j , k , m;
   int max_nb_value , distance = 1;
   double **dissimilarity;
   Distribution **dist;
@@ -744,11 +722,11 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
 
     merged_histo = new FrequencyDistribution(nb_histo , histo);
 
-    // rank computation
+    // calcul des rangs
 
     rank = merged_histo->rank_computation();
 
-    // computation of the mean rank for each frequency distribution
+    // calcul des rangs moyens pour chaque loi empirique
 
     rank_mean = new double[nb_histo];
 
@@ -768,7 +746,7 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
       }
     }
 
-    // computation of the column widths
+    // calcul des largeurs des colonnes
 
     width[0] = column_width(nb_histo);
 
@@ -781,26 +759,26 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
     }
     width[1] += ASCII_SPACE;
 
-    // writing of the pairwise dissimilarity matrix between frequency distributions
+    // ecriture de la matrice des dissimilarites entre lois empiriques
 
-    cout << "\n" << STAT_label[STATL_DISSIMILARITIES] << " between "
-         << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS] << endl;
+    os << "\n" << STAT_label[STATL_DISSIMILARITIES] << " between "
+       << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS] << endl;
 
-    cout << "\n           ";
+    os << "\n           ";
     for (i = 0;i < nb_histo;i++) {
-      cout << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1;
+      os << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1;
     }
-    cout << endl;
+    os << endl;
 
     for (i = 0;i < nb_histo;i++) {
-      cout << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " ";
-      cout << setw(width[0]) << i + 1 << " ";
+      os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " ";
+      os << setw(width[0]) << i + 1 << " ";
       for (j = 0;j < nb_histo;j++) {
-        cout << setw(width[1]) << dissimilarity[i][j];
+        os << setw(width[1]) << dissimilarity[i][j];
       }
-      cout << endl;
+      os << endl;
     }
-    cout << endl;
+    os << endl;
 
     delete merged_histo;
     delete [] rank;
@@ -816,7 +794,7 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
 
       for (k = MIN(histo[i]->offset , histo[j]->offset);k < MAX(histo[i]->nb_value , histo[j]->nb_value);k++) {
         for (m = k + 1;m < MAX(histo[i]->nb_value , histo[j]->nb_value);m++) {
-          if (type == NOMINAL) {
+          if (type == SYMBOLIC) {
             dissimilarity[i][j] += fabs(dist[i]->mass[k] * dist[j]->mass[m] -
                                         dist[i]->mass[m] * dist[j]->mass[k]);
           }
@@ -831,7 +809,7 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
         }
       }
 
-      if (type == NOMINAL) {
+      if (type == SYMBOLIC) {
         dissimilarity[j][i] = dissimilarity[i][j];
       }
       else {
@@ -840,17 +818,17 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
     }
   }
 
-  if (display) {
-    dissimilarity_ascii_write(cout , nb_histo - 1 , ihisto , type , dissimilarity);
-  }
+# ifdef MESSAGE
+  dissimilarity_ascii_write(os , nb_histo - 1 , ihisto , type , dissimilarity);
+# endif
 
-  if (!path.empty()) {
+  if (path) {
     switch (format) {
-    case ASCII :
+    case 'a' :
       status = dissimilarity_ascii_write(error , path , nb_histo - 1 , ihisto ,
                                          type , dissimilarity);
       break;
-    case SPREADSHEET :
+    case 's' :
       status = dissimilarity_spreadsheet_write(error , path , nb_histo - 1 , ihisto ,
                                                type , dissimilarity);
       break;
@@ -870,58 +848,15 @@ bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Comparison of frequency distributions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] display  flag for displaying comparison outputs,
- *  \param[in] nb_histo number of frequency distributions,
- *  \param[in] ihisto   pointer on the frequency distributions,
- *  \param[in] type     variable type (NOMINAL/ORDINAL/NUMERIC),
- *  \param[in] path     file path,
- *  \param[in] format   file format (ASCII/SPREADSHEET).
+ *  Test F de comparaison des variances de 2 lois empiriques.
  *
- *  \return             error status.
- */
-/*--------------------------------------------------------------*/
-
-bool FrequencyDistribution::comparison(StatError &error , bool display , int nb_histo ,
-                                       const vector<FrequencyDistribution> ihisto , variable_type type ,
-                                       const string path , output_format format) const
-
-{
-  bool status;
-  int i;
-  const FrequencyDistribution **histo;
-
-
-  histo = new const FrequencyDistribution*[nb_histo];
-  for (i = 0;i < nb_histo;i++) {
-    histo[i] = new FrequencyDistribution(ihisto[i]);
-  }
-
-  status = comparison(error , display , nb_histo , histo , type , path , format);
-
-  for (i = 0;i < nb_histo;i++) {
-    delete histo[i];
-  }
-  delete [] histo;
-
-  return status;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief F test of variance comparison.
+ *  arguments : stream, reference sur une loi empirique.
  *
- *  \param[in] display flag for displaying the test results,
- *  \param[in] histo   reference on a frequency distribution.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
-void FrequencyDistribution::F_comparison(bool display , const FrequencyDistribution &histo) const
+void FrequencyDistribution::F_comparison(ostream &os , const FrequencyDistribution &histo) const
 
 {
   if ((nb_element > 1) && (histo.nb_element > 1)) {
@@ -939,25 +874,24 @@ void FrequencyDistribution::F_comparison(bool display , const FrequencyDistribut
 
     test->F_critical_probability_computation();
 
-    if (display) {
-      cout << *test;
-    }
+#   ifdef MESSAGE
+    os << *test;
+#   endif
 
     delete test;
   }
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Student's t test of mean comparison.
+/*--------------------------------------------------------------*
  *
- *  \param[in] display flag for displaying the test results,
- *  \param[in] histo   reference on a frequency distribution.
- */
-/*--------------------------------------------------------------*/
+ *  Test t de comparaison des moyennes de 2 lois empiriques.
+ *
+ *  arguments : stream, reference sur une loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
-void FrequencyDistribution::t_comparison(bool display , const FrequencyDistribution &histo) const
+void FrequencyDistribution::t_comparison(ostream &os , const FrequencyDistribution &histo) const
 
 {
   int df;
@@ -977,9 +911,9 @@ void FrequencyDistribution::t_comparison(bool display , const FrequencyDistribut
 
     test->t_critical_probability_computation();
 
-    if (display) {
-      cout << *test;
-    }
+#   ifdef MESSAGE
+    os << *test;
+#   endif
 
     delete test;
   }
@@ -995,7 +929,7 @@ void FrequencyDistribution::t_comparison(bool display , const FrequencyDistribut
 
     test->t_critical_probability_computation();
 
-    cout << "\n" << *test;
+    os << "\n" << *test;
 
     delete test;
   }
@@ -1004,24 +938,21 @@ void FrequencyDistribution::t_comparison(bool display , const FrequencyDistribut
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Wilcoxon-Mann-Whitney test of distribution comparison.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error   reference on a StatError object,
- *  \param[in] display flag for displaying the test results,
- *  \param[in] ihisto  reference on a frequency distribution.
+ *  Test de comparaison de Wilcoxon-Mann-Whitney.
  *
- *  \return            error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream,
+ *              reference sur une loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
-bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , bool display ,
+bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , ostream &os ,
                                                              const FrequencyDistribution &ihisto) const
 
 {
   bool status;
-  int i;
+  register int i;
   int nb_equal , min , max , *pfrequency;
   double correction , value , nb_sup , mean , variance , *rank;
   const FrequencyDistribution **histo;
@@ -1044,7 +975,7 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
 
     merged_histo = new FrequencyDistribution(2 , histo);
 
-    // computation of the correction term for ties
+    // calcul du terme de correction pour les ex-aequo
 
     pfrequency = merged_histo->frequency + merged_histo->offset;
     correction = 0.;
@@ -1055,11 +986,11 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
       pfrequency++;
     }
 
-    // rank computation
+    // calcul des rangs
 
     rank = merged_histo->rank_computation();
 
-    // computation of the Wilcoxon-Mann-Whitney statistic
+    // calcul de la statistique de Wilcoxon
 
     value = 0.;
     for (i = histo[0]->offset;i < histo[0]->nb_value;i++) {
@@ -1070,7 +1001,7 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
 
     mean = histo[0]->nb_element * ((double)merged_histo->nb_element + 1) / 2.;
 
-    // continuity correction
+    // correction de continuite
 
     if (value < mean) {
       value += 0.5;
@@ -1100,18 +1031,18 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
       }
     }
 
-    if (display) {
-      cout << STAT_label[STATL_TWO_SIDED] << " " << STAT_label[STATL_WILCOXON_MANN_WHITNEY_TEST];
-      cout << *test;
+#   ifdef MESSAGE
+    os << STAT_label[STATL_TWO_SIDED] << " " << STAT_label[STATL_WILCOXON_MANN_WHITNEY_TEST];
+    os << *test;
 
-      cout << STAT_label[STATL_MANN_WHITNEY_INFERIOR_PROBABILITY] << " = "
-           << (histo[0]->nb_element * (double)histo[1]->nb_element - nb_equal / 2. - nb_sup) /
-              (histo[0]->nb_element * (double)histo[1]->nb_element) << "   "
-           << STAT_label[STATL_MANN_WHITNEY_EQUAL_PROBABILITY] << " = "
-           << nb_equal / (histo[0]->nb_element * (double)histo[1]->nb_element) << "   "
-           << STAT_label[STATL_MANN_WHITNEY_SUPERIOR_PROBABILITY] << " = "
-           << (nb_sup - nb_equal / 2.) / (histo[0]->nb_element * (double)histo[1]->nb_element) << endl;
-    }
+    os << STAT_label[STATL_MANN_WHITNEY_INFERIOR_PROBABILITY] << " = "
+       << (histo[0]->nb_element * (double)histo[1]->nb_element - nb_equal / 2. - nb_sup) /
+          (histo[0]->nb_element * (double)histo[1]->nb_element) << "   "
+       << STAT_label[STATL_MANN_WHITNEY_EQUAL_PROBABILITY] << " = "
+       << nb_equal / (histo[0]->nb_element * (double)histo[1]->nb_element) << "   "
+       << STAT_label[STATL_MANN_WHITNEY_SUPERIOR_PROBABILITY] << " = "
+       << (nb_sup - nb_equal / 2.) / (histo[0]->nb_element * (double)histo[1]->nb_element) << endl;
+#   endif
 
     delete [] histo;
     delete merged_histo;
@@ -1124,23 +1055,18 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a family of frequency distributions using Gnuplot:
- *         - frequency distributions and cumulative frequencies,
- *         - probability mass functions and cumulative distribution functions,
- *         - matching of cumulative distribution functions,
- *         - concentration curves.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] prefix   file prefix,
- *  \param[in] nb_histo number of frequency distributions,
- *  \param[in] ihisto   pointer on the frequency distributions,
- *  \param[in] title    figure title.
+ *  Sortie Gnuplot d'une famille de lois empiriques :
+ *  - histogrammes seuls et histogrammes etages,
+ *  - lois et fonctions de repartition,
+ *  - mise en correspondance des fonctions de repartition,
+ *  - courbes de concentration.
  *
- *  \return             error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              nombre de lois empiriques, pointeurs sur les lois empiriques, titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , int nb_histo ,
                                        const FrequencyDistribution **ihisto , const char *title) const
@@ -1158,7 +1084,7 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
 
   else {
     bool cumul_concentration_flag;
-    int i , j , k;
+    register int i , j , k;
     int max_nb_value , max_frequency , max_range , reference_matching ,
         reference_concentration , *poffset , *pnb_value;
     double max_mass , shift , **cumul , **concentration;
@@ -1174,7 +1100,7 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
       histo[i] = ihisto[i - 1];
     }
 
-    // writing of the data files
+    // ecriture des fichiers de donnees
 
     data_file_name = new ostringstream[nb_histo + 2];
 
@@ -1218,13 +1144,13 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
         poffset[i] = histo[i]->offset;
         pnb_value[i] = histo[i]->nb_value;
 
-        // computation of the cumulative distribution functions and concentration curves
+        // calcul des fonctions de repartition et de concentration
 
         cumul[i] = histo[i]->cumul_computation();
         concentration[i] = histo[i]->concentration_function_computation();
 
-        // computation of the maximum number of values, the largest support,
-        // the maximum frequency and the maximum probability
+        // calcul du nombre de valeurs maximum, de l'etendue maximum,
+        // de la frequence maximum et de la probabilite maximum
 
         if (histo[i]->nb_value > max_nb_value) {
           max_nb_value = histo[i]->nb_value;
@@ -1282,7 +1208,7 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
 
     if (status) {
 
-      // writing of the script files
+      // ecriture du fichier de commandes et du fichier d'impression
 
       for (i = 0;i < 2;i++) {
         ostringstream file_name[2];
@@ -1311,7 +1237,7 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
         }
         out_file << "\n\n";
 
-        // shifted frequency distributions
+        // histogrammes decales
 
         if (MAX(max_nb_value , 2) < TIC_THRESHOLD) {
           out_file << "set xtics 0,1" << endl;
@@ -1344,7 +1270,7 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
 
         if (nb_histo > 1) {
 
-          // cumulative frequencies
+          // histogrammes etages
 
           if (i == 0) {
             out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
@@ -1377,7 +1303,7 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
             out_file << "set ytics autofreq" << endl;
           }
 
-          // probability mass functions
+          // lois
 
           if (i == 0) {
             out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
@@ -1406,7 +1332,7 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
 
         if (cumul_concentration_flag) {
 
-          // cumulative distribution functions
+          // fonctions de repartition
 
           if (i == 0) {
             out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
@@ -1440,8 +1366,8 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
             out_file << "set xtics autofreq" << endl;
           }
 
-          // matching of cumulative distribution functions taking as reference
-          // the distribution with the largest support
+          // mise en correspondance des fonctions de repartition en prenant
+          // comme reference la loi empirique dont l'etendue est la plus grande
 
           if (nb_histo > 1) {
             if (i == 0) {
@@ -1479,7 +1405,7 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
             out_file << "unset grid\n" << "set xtics autofreq\n" << "set ytics autofreq" << endl;
           }
 
-          // concentration curves
+          // courbes de concentration
 
           if (i == 0) {
             out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
@@ -1539,21 +1465,18 @@ bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , i
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a family of frequency distributions:
- *         - frequency distributions and cumulative frequencies,
- *         - probability mass functions and cumulative distribution functions,
- *         - matching of cumulative distribution functions,
- *         - concentration curves.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] nb_histo number of frequency distributions,
- *  \param[in] ihisto   pointer on the frequency distributions.
+ *  Sortie graphique d'une famille de lois empiriques :
+ *  - histogrammes seuls et histogrammes etages,
+ *  - lois et fonctions de repartition,
+ *  - mise en correspondance des fonctions de repartition,
+ *  - courbes de concentration.
  *
- *  \return             plots.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, nombre de lois empiriques,
+ *              pointeurs sur les lois empiriques, titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatError &error , int nb_histo ,
                                                                           const FrequencyDistribution **ihisto) const
@@ -1570,7 +1493,7 @@ MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatEr
   }
 
   else {
-    int i , j , k;
+    register int i , j , k;
     int max_nb_value , max_frequency , cumul_concentration_nb_histo , max_range ,
         reference_matching , nb_plot_set;
     double max_mass , shift , **cumul;
@@ -1596,12 +1519,12 @@ MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatEr
 
     for (i = 0;i < nb_histo;i++) {
 
-      // computation of the cumulative distribution functions
+      // calcul des fonctions de repartition
 
       cumul[i] = histo[i]->cumul_computation();
 
-      // computation of the maximum number of values, the largest support,
-      // the maximum frequency and the maximum probability
+      // calcul du nombre de valeurs maximum, de l'etendue maximum,
+      // de la frequence maximum et de la probabilite maximum
 
       if (histo[i]->nb_value > max_nb_value) {
         max_nb_value = histo[i]->nb_value;
@@ -1634,7 +1557,7 @@ MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatEr
       }
     }
 
-    // number of views
+    // nombre de fenetres
 
     plot_set = new MultiPlotSet(nb_plot_set);
     MultiPlotSet &plot = *plot_set;
@@ -1651,7 +1574,7 @@ MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatEr
 
     plot.border = "15 lw 0";
 
-    // shifted frequency distributions
+    // 1ere vue : histogrammes decales
 
     plot[0].xrange = Range(0 , MAX(max_nb_value , 2));
     plot[0].yrange = Range(0 , ceil(max_frequency * YSCALE));
@@ -1690,7 +1613,7 @@ MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatEr
 
     if (nb_histo > 1) {
 
-      // cumulative frequencies
+      // 2eme vue : histogrammes etages
 
       merged_histo = new const FrequencyDistribution*[nb_histo];
       merged_histo[nb_histo - 1] = new FrequencyDistribution(*histo[nb_histo - 1]);
@@ -1728,7 +1651,7 @@ MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatEr
       }
       delete [] merged_histo;
 
-      // probability mass functions
+      // 3eme vue : lois
 
       plot[2].xrange = Range(0 , MAX(max_nb_value , 2) - 1);
       plot[2].yrange = Range(0 , MIN(max_mass * YSCALE , 1.));
@@ -1758,7 +1681,7 @@ MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatEr
 
     if (cumul_concentration_nb_histo > 0) {
 
-      // cumulative distribution functions
+      // 4eme vue : fonctions de repartition
 
       plot[i].xrange = Range(0 , max_nb_value - 1);
       plot[i].yrange = Range(0. , 1.);
@@ -1790,8 +1713,8 @@ MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatEr
 
       i++;
 
-      // matching of cumulative distribution functions taking as reference
-      // the distribution with the largest support
+      // 5eme vue : mise en correspondance des fonctions de repartition en prenant
+      // comme reference la loi empirique dont l'etendue est la plus grande
 
       if (nb_histo > 1) {
         title.str("");
@@ -1830,7 +1753,7 @@ MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatEr
         i++;
       }
 
-      // concentration curves
+      // 6eme vue : courbes de concentration
 
       plot[i].xrange = Range(0. , 1.);
       plot[i].yrange = Range(0. , 1.);
@@ -1878,13 +1801,11 @@ MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatEr
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'une loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* FrequencyDistribution::get_plotable() const
 
@@ -1895,15 +1816,15 @@ MultiPlotSet* FrequencyDistribution::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a DiscreteDistributionData object from
- *         a FrequencyDistribution and a Distribution objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo reference on a FrequencyDistribution object,
- *  \param[in] dist  pointer on a Distribution object.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet DiscreteDistributionData a partir
+ *  d'un objet FrequencyDistribution et d'un objet Distribution.
+ *
+ *  arguments : reference sur un objet FrequencyDistribution,
+ *              pointeur sur un objet Distribution.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteDistributionData::DiscreteDistributionData(const FrequencyDistribution &histo ,
                                                    const Distribution *dist)
@@ -1919,15 +1840,15 @@ DiscreteDistributionData::DiscreteDistributionData(const FrequencyDistribution &
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a DiscreteDistributionData object from
- *         a FrequencyDistribution and a DiscreteParametric objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo reference on a FrequencyDistribution object,
- *  \param[in] dist  pointer on a DiscreteParametric object.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet DiscreteDistributionData a partir
+ *  d'un objet FrequencyDistribution et d'un objet DiscreteParametric.
+ *
+ *  arguments : reference sur un objet FrequencyDistribution,
+ *              pointeur sur un objet DiscreteParametric.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteDistributionData::DiscreteDistributionData(const FrequencyDistribution &histo ,
                                                    const DiscreteParametric *dist)
@@ -1943,14 +1864,14 @@ DiscreteDistributionData::DiscreteDistributionData(const FrequencyDistribution &
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor by copy of the DiscreteDistributionData class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo      reference on a DiscreteDistributionData object,
- *  \param[in] model_flag flag copy of the included DiscreteParametricModel object.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur par copie de la classe DiscreteDistributionData.
+ *
+ *  arguments : reference sur un objet DiscreteDistributionData,
+ *              flag copie de l'objet DiscreteParametricModel.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteDistributionData::DiscreteDistributionData(const DiscreteDistributionData &histo ,
                                                    bool model_flag)
@@ -1966,11 +1887,11 @@ DiscreteDistributionData::DiscreteDistributionData(const DiscreteDistributionDat
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the DiscreteDistributionData class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe DiscreteDistributionData.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteDistributionData::~DiscreteDistributionData()
 
@@ -1979,15 +1900,13 @@ DiscreteDistributionData::~DiscreteDistributionData()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the DiscreteDistributionData class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo reference on a DiscreteDistributionData object.
+ *  Operateur d'assignement de la classe DiscreteDistributionData.
  *
- *  \return          DiscreteDistributionData object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet DiscreteDistributionData.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteDistributionData& DiscreteDistributionData::operator=(const DiscreteDistributionData &histo)
 
@@ -2009,16 +1928,13 @@ DiscreteDistributionData& DiscreteDistributionData::operator=(const DiscreteDist
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of the DiscreteParametricModel object included in
- *         a DiscreteDistributionData object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Extraction de la partie "modele" d'un objet DiscreteDistributionData.
  *
- *  \return          DiscreteParametricModel object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametricModel* DiscreteDistributionData::extract_model(StatError &error) const
 
@@ -2042,28 +1958,28 @@ DiscreteParametricModel* DiscreteDistributionData::extract_model(StatError &erro
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a FrequencyDistribution object from a file.
- *         Format: n rows with ordered value and associated frequency.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
- */
-/*--------------------------------------------------------------*/
+ *  Construction d'un objet FrequencyDistribution a partir d'un fichier.
+ *  Format : n lignes de la forme (valeur) (frequence).
+ *  Les valeurs sont ordonnees.
+ *
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error , const string path)
+DiscreteDistributionData* frequency_distribution_ascii_read(StatError &error , const char *path)
 
 {
-  string buffer;
+  RWLocaleSnapshot locale("en");
+  RWCString buffer , token;
   size_t position;
-  typedef tokenizer<char_separator<char>> tokenizer;
-  char_separator<char> separator(" \t");
   bool status , lstatus;
-  int i;
-  int line , nb_element , value , index , max_index;
+  register int i;
+  int line , nb_element;
+  long value , index , max_index;
   DiscreteDistributionData *histo;
-  ifstream in_file(path.c_str());
+  ifstream in_file(path);
 
 
   histo = NULL;
@@ -2075,40 +1991,31 @@ DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error 
 
   else {
 
-    // 1st pass: search for the number of possible values and format checking
+    // 1ere passe : analyse des lignes et recherche du nombre de valeurs
 
     status = true;
     line = 0;
     max_index = -1;
     nb_element = 0;
 
-    while (getline(in_file , buffer)) {
+    while (buffer.readLine(in_file , false)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.find('#');
-      if (position != string::npos) {
-        buffer.erase(position);
+      position = buffer.first('#');
+      if (position != RW_NPOS) {
+        buffer.remove(position);
       }
       i = 0;
 
-      tokenizer tok_buffer(buffer , separator);
+      RWCTokenizer next(buffer);
 
-      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
-        if (i <= 1) {
-          lstatus = true;
-
-/*          try {
-            value = stoi(*token);   in C++ 11
-          }
-          catch(invalid_argument &arg) {
-            lstatus = false;
-          } */
-          value = atoi(token->c_str());
-
+      while (!((token = next()).isNull())) {
+          if (i <= 1) {
+          lstatus = locale.stringToNum(token , &value);
           if ((lstatus) && (value < 0)) {
             lstatus = false;
           }
@@ -2121,7 +2028,7 @@ DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error 
           else {
             switch (i) {
 
-            // test ordered values
+            // test valeurs ordonnees
 
             case 0 : {
               if (value <= max_index) {
@@ -2153,7 +2060,7 @@ DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error 
         i++;
       }
 
-      // test 2 items per line
+      // test deux valeurs par ligne
 
       if ((i > 0) && (i != 2)) {
         status = false;
@@ -2166,35 +2073,34 @@ DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error 
       error.update(STAT_parsing[STATP_EMPTY_SAMPLE]);
     }
 
-    // 2nd pass: file reading
+    // 2eme passe : lecture du fichier
 
     if (status) {
 //      in_file.close();
-//      in_file.open(path.c_str() , ios::in);
+//      in_file.open(path , ios::in);
 
       in_file.clear();
       in_file.seekg(0 , ios::beg);
 
       histo = new DiscreteDistributionData(max_index + 1);
 
-      while (getline(in_file , buffer)) {
-        position = buffer.find('#');
-        if (position != string::npos) {
-          buffer.erase(position);
+      while (buffer.readLine(in_file , false)) {
+        position = buffer.first('#');
+        if (position != RW_NPOS) {
+          buffer.remove(position);
         }
         i = 0;
 
-        tokenizer tok_buffer(buffer , separator);
+        RWCTokenizer next(buffer);
 
-        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+        while (!((token = next()).isNull())) {
           switch (i) {
           case 0 :
-//            index = stoi(*token);   in C++ 11
-            index = atoi(token->c_str());
+            locale.stringToNum(token , &index);
             break;
           case 1 :
-//            histo->frequency[index] = stoi(*token);   in C++ 11
-            histo->frequency[index] = atoi(token->c_str());
+            locale.stringToNum(token , &value);
+            histo->frequency[index] = value;
             break;
           }
 
@@ -2219,13 +2125,13 @@ DiscreteDistributionData* DiscreteDistributionData::ascii_read(StatError &error 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing on a single line of a DiscreteDistributionData object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture sur une ligne d'un objet DiscreteDistributionData.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteDistributionData::line_write(ostream &os) const
 
@@ -2242,15 +2148,13 @@ ostream& DiscreteDistributionData::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a DiscreteDistributionData object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level,
- *  \param[in]     file_flag  flag file.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet DiscreteDistributionData.
+ *
+ *  arguments : stream, flag niveau de detail, flag fichier.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteDistributionData::ascii_write(ostream &os , bool exhaustive ,
                                                bool file_flag) const
@@ -2267,14 +2171,13 @@ ostream& DiscreteDistributionData::ascii_write(ostream &os , bool exhaustive ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a DiscreteDistributionData object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet DiscreteDistributionData.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& DiscreteDistributionData::ascii_write(ostream &os , bool exhaustive) const
 
@@ -2283,24 +2186,21 @@ ostream& DiscreteDistributionData::ascii_write(ostream &os , bool exhaustive) co
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a DiscreteDistributionData object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet DiscreteDistributionData dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool DiscreteDistributionData::ascii_write(StatError &error , const string path ,
+bool DiscreteDistributionData::ascii_write(StatError &error , const char *path ,
                                            bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -2319,22 +2219,19 @@ bool DiscreteDistributionData::ascii_write(StatError &error , const string path 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a DiscreteDistributionData object in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet DiscreteDistributionData dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool DiscreteDistributionData::spreadsheet_write(StatError &error , const string path) const
+bool DiscreteDistributionData::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -2358,7 +2255,7 @@ bool DiscreteDistributionData::spreadsheet_write(StatError &error , const string
       out_file << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       spreadsheet_characteristic_print(out_file , true);
 
-      out_file << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << mean_absolute_deviation_computation(mean);
+      out_file << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << mean_absolute_deviation_computation();
       if (mean > 0.) {
         out_file << "\t\t" << STAT_label[STATL_CONCENTRATION_COEFF] << "\t" << concentration_computation();
       }
@@ -2381,17 +2278,14 @@ bool DiscreteDistributionData::spreadsheet_write(StatError &error , const string
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a DiscreteDistributionData object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title.
+ *  Sortie Gnuplot d'un objet DiscreteDistributionData.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool DiscreteDistributionData::plot_write(StatError &error , const char *prefix ,
                                           const char *title) const
@@ -2412,13 +2306,11 @@ bool DiscreteDistributionData::plot_write(StatError &error , const char *prefix 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a DiscreteDistributionData object.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet DiscreteDistributionData.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* DiscreteDistributionData::get_plotable() const
 

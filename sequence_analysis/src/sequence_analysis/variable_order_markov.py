@@ -12,11 +12,11 @@
     :Code: mature
     :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
-    :Revision: $Id$
+    :Revision: $Id: variable_order_markov.py 9885 2010-11-06 18:19:34Z cokelaer $
     :Usage: >>> from openalea.sequence_analysis import *
 
 """
-__version__ = "$Id$"
+__version__ = "$Id: variable_order_markov.py 9885 2010-11-06 18:19:34Z cokelaer $"
 
 import os
 import openalea.stat_tool.interface as interface

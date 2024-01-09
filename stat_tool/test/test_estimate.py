@@ -3,7 +3,7 @@
 :Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__version__ = "$Id$"
+__version__ = "$Id: test_estimate.py 9397 2010-08-10 10:50:07Z cokelaer $"
 
 
 from openalea.stat_tool import distribution

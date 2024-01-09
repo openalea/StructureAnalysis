@@ -10,9 +10,9 @@
     :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: hidden_variable_order_markov.py 9465 2010-08-30 08:46:21Z cokelaer $
 """
-__version__ = "$Id$"
+__version__ = "$Id: hidden_variable_order_markov.py 9465 2010-08-30 08:46:21Z cokelaer $"
 
 import os
 

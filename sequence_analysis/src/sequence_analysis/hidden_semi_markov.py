@@ -9,14 +9,14 @@
     :Code: mature
     :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
-    :Revision: $Id$
+    :Revision: $Id: hidden_semi_markov.py 9465 2010-08-30 08:46:21Z cokelaer $
     :Usage: >>> from openalea.sequence_analysis import *
 
 .. testsetup::
 
     from openalea.sequence_analysis import *
 """
-__version__ = "$Id$"
+__version__ = "$Id: hidden_semi_markov.py 9465 2010-08-30 08:46:21Z cokelaer $"
 
 import os
 import openalea.stat_tool.interface as interface

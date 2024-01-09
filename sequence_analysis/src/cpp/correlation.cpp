@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: correlation.cpp 18049 2015-04-23 09:42:18Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -37,17 +37,22 @@
 
 
 #include <math.h>
-
-#include <string>
 #include <sstream>
 #include <iomanip>
 
 #include <boost/math/distributions/normal.hpp>
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "sequences.h"
 #include "sequence_label.h"
+#include "tool/config.h"
 
 using namespace std;
 using namespace boost::math;
@@ -58,11 +63,11 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Default constructor of the Correlation class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par defaut de la classe Correlation.
+ *
+ *--------------------------------------------------------------*/
 
 Correlation::Correlation()
 
@@ -74,29 +79,25 @@ Correlation::Correlation()
   variable1 = NULL;
   variable2 = NULL;
 
-  function_type = VOID;
-  theoretical_function = NULL;
+  white_noise = NULL;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Correlation class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] itype      correlation coefficient type (PEARSON/SPEARMAN/KENDALL),
- *  \param[in] max_lag    maximum lag,
- *  \param[in] ivariable1 1st variable index,
- *  \param[in] ivariable2 2nd variable index.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Correlation.
+ *
+ *  arguments : type, decalage maximum, variables.
+ *
+ *--------------------------------------------------------------*/
 
-Correlation::Correlation(correlation_type itype , int max_lag , int ivariable1 , int ivariable2)
+Correlation::Correlation(int itype , int max_lag , int ivariable1 , int ivariable2)
 :Curves(1 , max_lag + 1 , true , false)
 
 {
   type = itype;
 
-  variable_type = new correlation_variable_type[1];
+  variable_type = new int[1];
   variable_type[0] = OBSERVED_VALUE;
 
   variable1 = new int[1];
@@ -104,55 +105,51 @@ Correlation::Correlation(correlation_type itype , int max_lag , int ivariable1 ,
   variable1[0] = ivariable1;
   variable2[0] = ivariable2;
 
-  function_type = VOID;
-  theoretical_function = NULL;
+  white_noise = NULL;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Correlation class by merging.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_curve      number of correlation functions,
- *  \param[in] ilength        maximum lag,
- *  \param[in] frequency_flag flag on the frequencies,
- *  \param[in] itype          correlation coefficient type (PEARSON/SPEARMAN/KENDALL).
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Correlation.
+ *
+ *  arguments : nombre de fonctions de correlation, nombre de points,
+ *              flag sur les frequences, type.
+ *
+ *--------------------------------------------------------------*/
 
-Correlation::Correlation(int inb_curve , int ilength , bool frequency_flag , correlation_type itype)
+Correlation::Correlation(int inb_curve , int ilength , bool frequency_flag , int itype)
 :Curves(inb_curve , ilength , frequency_flag , false)
 
 {
   type = itype;
 
-  variable_type = new correlation_variable_type[nb_curve];
+  variable_type = new int[nb_curve];
 
   variable1 = new int[nb_curve];
   variable2 = new int[nb_curve];
 
-  function_type = VOID;
-  theoretical_function = NULL;
+  white_noise = NULL;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Correlation object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] correl reference on a Correlation object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Correlation.
+ *
+ *  argument : reference sur un objet Correlation.
+ *
+ *--------------------------------------------------------------*/
 
 void Correlation::copy(const Correlation &correl)
 
 {
-  int i;
+  register int i;
 
 
   type = correl.type;
 
-  variable_type = new correlation_variable_type[nb_curve];
+  variable_type = new int[nb_curve];
   for (i = 0;i < nb_curve;i++) {
     variable_type[i] = correl.variable_type[i];
   }
@@ -164,25 +161,23 @@ void Correlation::copy(const Correlation &correl)
     variable2[i] = correl.variable2[i];
   }
 
-  function_type = correl.function_type;
-
-  if (correl.theoretical_function) {
-    theoretical_function = new double[length];
+  if (correl.white_noise) {
+    white_noise = new double[length];
     for (i = 0;i < length;i++) {
-      theoretical_function[i] = correl.theoretical_function[i];
+      white_noise[i] = correl.white_noise[i];
     }
   }
   else {
-    theoretical_function = NULL;
+    white_noise = NULL;
   }
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the data members of a Correlation object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet Correlation.
+ *
+ *--------------------------------------------------------------*/
 
 void Correlation::remove()
 
@@ -192,15 +187,15 @@ void Correlation::remove()
   delete [] variable1;
   delete [] variable2;
 
-  delete [] theoretical_function;
+  delete [] white_noise;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the Correlation class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe Correlation.
+ *
+ *--------------------------------------------------------------*/
 
 Correlation::~Correlation()
 
@@ -209,15 +204,13 @@ Correlation::~Correlation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the Correlation class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] correl reference on a Correlation object.
+ *  Operateur d'assignement de la classe Correlation.
  *
- *  \return           Correlation object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet Correlation.
+ *
+ *--------------------------------------------------------------*/
 
 Correlation& Correlation::operator=(const Correlation &correl)
 
@@ -234,24 +227,21 @@ Correlation& Correlation::operator=(const Correlation &correl)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Merging of Correlation objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] nb_correl number of Correlation objects,
- *  \param[in] icorrel   pointer on the Correlation objects.
+ *  Fusion d'objets Correlation.
  *
- *  \return              Correlation object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, nombre d'objets Correlation,
+ *              pointeurs sur les objets Correlation.
+ *
+ *--------------------------------------------------------------*/
 
 Correlation* Correlation::merge(StatError &error , int nb_correl ,
                                 const Correlation **icorrel) const
 
 {
   bool status = true;
-  int i , j , k , m;
+  register int i , j , k , m;
   int inb_curve , *pfrequency;
   Correlation *correl;
   const Correlation **pcorrel;
@@ -368,18 +358,18 @@ Correlation* Correlation::merge(StatError &error , int nb_correl ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing on a single line of a Correlation object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture sur une ligne d'un objet Correlation.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Correlation::line_write(ostream &os) const
 
 {
-  int i;
+  register int i;
   int autocorrelation , cross_correlation;
 
 
@@ -430,28 +420,27 @@ ostream& Correlation::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Correlation object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet Correlation.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Correlation::ascii_write(ostream &os , bool exhaustive) const
 
 {
   bool autocorrelation , cross_correlation;
-  int i , j;
+  register int i , j;
   int *width;
   double standard_normal_value , *confidence_limit;
-  ios_base::fmtflags format_flags;
+  long old_adjust;
 
 
-  format_flags = os.setf(ios::right , ios::adjustfield);
+  old_adjust = os.setf(ios::right , ios::adjustfield);
 
-  // computation of the confidence limits
+  // calcul des limites de confiance
 
   if (frequency) {
     normal dist;
@@ -518,7 +507,7 @@ ostream& Correlation::ascii_write(ostream &os , bool exhaustive) const
   }
   os << SEQ_label[SEQL_CORRELATION_FUNCTION];
 
-  // computation of the column widths
+  // calcul des largeurs des colonnes
 
   width = new int[nb_curve + 4];
 
@@ -528,8 +517,8 @@ ostream& Correlation::ascii_write(ostream &os , bool exhaustive) const
   }
 
   i = nb_curve + 1;
-  if (theoretical_function) {
-    width[i++] = column_width(length , theoretical_function) + ASCII_SPACE;
+  if (white_noise) {
+    width[i++] = column_width(length , white_noise) + ASCII_SPACE;
   }
   if (frequency) {
     width[i++] = column_width(length - offset , confidence_limit + offset) + ASCII_SPACE;
@@ -565,17 +554,9 @@ ostream& Correlation::ascii_write(ostream &os , bool exhaustive) const
     }
   }
 
-  if (theoretical_function) {
-    switch (function_type) {
-    case AUTOREGRESSIVE :
-      os << " | " << SEQ_label[SEQL_AUTOREGRESSIVE_MODEL];
-      break;
-    case WHITE_NOISE :
-      os << " | " << SEQ_label[SEQL_WHITE_NOISE];
-      break;
-    }
+  if (white_noise) {
+    os << " | " << SEQ_label[SEQL_WHITE_NOISE];
   }
-
   if (frequency) {
     os << " | " << SEQ_label[SEQL_RANDOMNESS_95_CONFIDENCE_LIMIT]
        << " | " << STAT_label[STATL_FREQUENCY];
@@ -589,8 +570,8 @@ ostream& Correlation::ascii_write(ostream &os , bool exhaustive) const
     }
 
     j = nb_curve + 1;
-    if (theoretical_function) {
-      os << setw(width[j++]) << theoretical_function[i];
+    if (white_noise) {
+      os << setw(width[j++]) << white_noise[i];
     }
     if (frequency) {
       os << setw(width[j++]) << confidence_limit[i];
@@ -604,29 +585,26 @@ ostream& Correlation::ascii_write(ostream &os , bool exhaustive) const
   }
   delete [] width;
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Correlation object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet Correlation dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool Correlation::ascii_write(StatError &error , const string path , bool exhaustive) const
+bool Correlation::ascii_write(StatError &error , const char *path , bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -645,24 +623,21 @@ bool Correlation::ascii_write(StatError &error , const string path , bool exhaus
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Correlation object in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet Correlation dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool Correlation::spreadsheet_write(StatError &error , const string path) const
+bool Correlation::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status , autocorrelation , cross_correlation;
-  int i , j;
+  register int i , j;
   double standard_normal_value , confidence_limit;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -746,17 +721,9 @@ bool Correlation::spreadsheet_write(StatError &error , const string path) const
       }
     }
 
-    if (theoretical_function) {
-      switch (function_type) {
-      case AUTOREGRESSIVE :
-        out_file << "\t" << SEQ_label[SEQL_AUTOREGRESSIVE_MODEL];
-        break;
-      case WHITE_NOISE :
-        out_file << "\t" << SEQ_label[SEQL_WHITE_NOISE];
-        break;
-      }
+    if (white_noise) {
+      out_file << "\t" << SEQ_label[SEQL_WHITE_NOISE];
     }
-
     if (frequency) {
       out_file << "\t" << SEQ_label[SEQL_RANDOMNESS_95_CONFIDENCE_LIMIT]
                << "\t" << SEQ_label[SEQL_RANDOMNESS_95_CONFIDENCE_LIMIT]
@@ -775,8 +742,8 @@ bool Correlation::spreadsheet_write(StatError &error , const string path) const
         out_file << "\t" << point[j][i];
       }
 
-      if (theoretical_function) {
-        out_file << "\t" << theoretical_function[i];
+      if (white_noise) {
+        out_file << "\t" << white_noise[i];
       }
 
       if (frequency) {
@@ -805,23 +772,19 @@ bool Correlation::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Correlation object and the associated confidence limits
- *         at the Gnuplot format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] path             file path,
- *  \param[in] confidence_limit confidence limits.
+ *  Ecriture d'un objet Correlation et des limites de confiance au format Gnuplot.
  *
- *  \return                     error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : path, limites de confiance.
+ *
+ *--------------------------------------------------------------*/
 
 bool Correlation::plot_print(const char *path , double *confidence_limit) const
 
 {
   bool status = false;
-  int i , j;
+  register int i , j;
   ofstream out_file(path);
 
 
@@ -832,8 +795,8 @@ bool Correlation::plot_print(const char *path , double *confidence_limit) const
       for (j = 0;j < nb_curve;j++) {
         out_file << point[j][i] << " ";
       }
-      if (theoretical_function) {
-        out_file << theoretical_function[i] << " ";
+      if (white_noise) {
+        out_file << white_noise[i] << " ";
       }
       if (frequency) {
         out_file << confidence_limit[i] << " " << -confidence_limit[i] << " "
@@ -847,31 +810,28 @@ bool Correlation::plot_print(const char *path , double *confidence_limit) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a Correlation object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title.
+ *  Sortie Gnuplot d'un objet Correlation.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool Correlation::plot_write(StatError &error , const char *prefix ,
                              const char *title) const
 
 {
   bool status , autocorrelation , cross_correlation;
-  int i , j;
+  register int i , j;
   double standard_normal_value , *confidence_limit = NULL;
   ostringstream data_file_name;
 
 
   error.init();
 
-  // computation of the confidence limits
+  // calcul des limites de confiance
 
   if (frequency) {
     normal dist;
@@ -895,7 +855,7 @@ bool Correlation::plot_write(StatError &error , const char *prefix ,
     }
   }
 
-  // writing of the data file
+  // ecriture du fichier de donnees
 
   data_file_name << prefix << ".dat";
   status = plot_print((data_file_name.str()).c_str() , confidence_limit);
@@ -910,7 +870,7 @@ bool Correlation::plot_write(StatError &error , const char *prefix ,
 
   else {
 
-    // writing of the script files
+    // ecriture du fichier de commandes et du fichier d'impression
 
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
@@ -1023,17 +983,9 @@ bool Correlation::plot_write(StatError &error , const char *prefix ,
       }
 
       j = nb_curve + 1;
-      if (theoretical_function) {
-        out_file << ",\\\n\"" << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \"";
-        switch (function_type) {
-        case AUTOREGRESSIVE :
-          out_file << SEQ_label[SEQL_AUTOREGRESSIVE_MODEL];
-          break;
-        case WHITE_NOISE :
-          out_file << SEQ_label[SEQL_WHITE_NOISE];
-          break;
-        }
-        out_file << "\" with linespoints";
+      if (white_noise) {
+        out_file << ",\\\n\"" << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \""
+                 << SEQ_label[SEQL_WHITE_NOISE] << "\" with linespoints";
       }
       if (frequency) {
         out_file << ",\\\n\"" << label((data_file_name.str()).c_str()) << "\" using " << j++
@@ -1092,19 +1044,17 @@ bool Correlation::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a Correlation object.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet Correlation.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* Correlation::get_plotable() const
 
 {
   bool autocorrelation , cross_correlation;
-  int i , j;
+  register int i , j;
   int nb_plot;
   double standard_normal_value , *confidence_limit = NULL;
   ostringstream title , legend;
@@ -1162,7 +1112,7 @@ MultiPlotSet* Correlation::get_plotable() const
 
   plot.border = "15 lw 0";
 
-  // correlation function
+  // 1ere vue : fonctions de correlation
 
   plot[0].xrange = Range(0 , length - 1);
   plot[0].yrange = Range(-1., 1.);
@@ -1174,11 +1124,11 @@ MultiPlotSet* Correlation::get_plotable() const
   }
 
   nb_plot = nb_curve;
-  if (theoretical_function) {
+  if (white_noise) {
     nb_plot++;
   }
 
-  // computation of the confidence limits
+  // calcul des limites de confiance
 
   if (frequency) {
     normal dist;
@@ -1243,20 +1193,13 @@ MultiPlotSet* Correlation::get_plotable() const
   }
 
   i = nb_curve;
-  if (theoretical_function) {
-    switch (function_type) {
-    case AUTOREGRESSIVE :
-      plot[0][i].legend = SEQ_label[SEQL_AUTOREGRESSIVE_MODEL];
-      break;
-    case WHITE_NOISE :
-      plot[0][i].legend = SEQ_label[SEQL_WHITE_NOISE];
-      break;
-    }
+  if (white_noise) {
+    plot[0][i].legend = SEQ_label[SEQL_WHITE_NOISE];
 
     plot[0][i].style = "linespoints";
 
     for (j = 0;j < length;j++) {
-      plot[0][i].add_point(j , theoretical_function[j]);
+      plot[0][i].add_point(j , white_noise[j]);
     }
     i++;
   }
@@ -1275,7 +1218,7 @@ MultiPlotSet* Correlation::get_plotable() const
       plot[0][i].add_point(j , -confidence_limit[j]);
     }
 
-    // frequencies
+    // 2eme vue : frequences
 
     plot[1].xrange = Range(0 , length - 1);
     plot[1].yrange = Range(0 , frequency[0]);
@@ -1303,29 +1246,27 @@ MultiPlotSet* Correlation::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of a correlation function on the basis of a Sequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] correl          reference on a Correlation object,
- *  \param[in] variable1       1st variable index,
- *  \param[in] variable2       2nd variable index,
- *  \param[in] normalization   normalization (APPROXIMATED/EXACT),
- *  \param[in] individual_mean flag mean computation by individual or globally.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul d'une fonction de correlation a partir d'un objet Sequences.
+ *
+ *  arguments : reference sur un objet Correlation, indices des variables,
+ *              normalisation (APPROXIMATED/EXACT), calcul des moyennes par individu ou non.
+ *
+ *--------------------------------------------------------------*/
 
 void Sequences::correlation_computation(Correlation &correl , int variable1 , int variable2 ,
-                                        correlation_normalization normalization , bool individual_mean) const
+                                        int normalization , bool individual_mean) const
 
 {
   if (correl.type == PEARSON) {
-    int i , j , k;
-    int max_lag = correl.length - 1;
-    double variance1 , variance2 , diff , norm , *mean1 , *mean2;
+    register int i , j , k;
+    int max_lag = correl.length - 1 , *pisequence1 , *pisequence2 , *pfrequency;
+    double *prsequence1 , *prsequence2;
+    double variance1 , variance2 , diff , norm , *mean1 , *mean2 , *ppoint;
 
 
-    // computation of means and variances
+    // calcul des moyennes et des variances
 
 /*    mean1 = mean_computation(variable1);
 
@@ -1349,14 +1290,16 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
 
       if (type[variable1] != REAL_VALUE) {
         for (i = 0;i < nb_sequence;i++) {
+          pisequence1 = int_sequence[i][variable1];
           mean1[i] = 0.;
           for (j = 0;j < length[i];j++) {
-            mean1[i] += int_sequence[i][variable1][j];
+            mean1[i] += *pisequence1++;
           }
           mean1[i] /= length[i];
 
+          pisequence1 = int_sequence[i][variable1];
           for (j = 0;j < length[i];j++) {
-            diff = int_sequence[i][variable1][j] - mean1[i];
+            diff = *pisequence1++ - mean1[i];
             variance1 += diff * diff;
           }
         }
@@ -1364,14 +1307,16 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
 
       else {
         for (i = 0;i < nb_sequence;i++) {
+          prsequence1 = real_sequence[i][variable1];
           mean1[i] = 0.;
           for (j = 0;j < length[i];j++) {
-            mean1[i] += real_sequence[i][variable1][j];
+            mean1[i] += *prsequence1++;
           }
           mean1[i] /= length[i];
 
+          prsequence1 = real_sequence[i][variable1];
           for (j = 0;j < length[i];j++) {
-            diff = real_sequence[i][variable1][j] - mean1[i];
+            diff = *prsequence1++ - mean1[i];
             variance1 += diff * diff;
           }
         }
@@ -1389,14 +1334,16 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
 
         if (type[variable2] != REAL_VALUE) {
           for (i = 0;i < nb_sequence;i++) {
+            pisequence2 = int_sequence[i][variable2];
             mean2[i] = 0.;
             for (j = 0;j < length[i];j++) {
-              mean2[i] += int_sequence[i][variable2][j];
+              mean2[i] += *pisequence2++;
             }
             mean2[i] /= length[i];
 
+            pisequence2 = int_sequence[i][variable2];
             for (j = 0;j < length[i];j++) {
-              diff = int_sequence[i][variable2][j] - mean2[i];
+              diff = *pisequence2++ - mean2[i];
               variance2 += diff * diff;
             }
           }
@@ -1404,14 +1351,16 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
 
         else {
           for (i = 0;i < nb_sequence;i++) {
+            prsequence2 = real_sequence[i][variable2];
             mean2[i] = 0.;
             for (j = 0;j < length[i];j++) {
-              mean2[i] += real_sequence[i][variable2][j];
+              mean2[i] += *prsequence2++;
             }
             mean2[i] /= length[i];
 
+            prsequence2 = real_sequence[i][variable2];
             for (j = 0;j < length[i];j++) {
-              diff = real_sequence[i][variable2][j] - mean2[i];
+              diff = *prsequence2++ - mean2[i];
               variance2 += diff * diff;
             }
           }
@@ -1446,63 +1395,77 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
       norm *= (cumul_length - 1);
     }
 
-    // computation of the correlation coefficients
+    // calcul des coefficients de correlation
+
+    ppoint = correl.point[0];
+    pfrequency = correl.frequency;
 
     for (i = 0;i <= max_lag;i++) {
-      correl.point[0][i] = 0.;
-      correl.frequency[i] = 0;
+      *ppoint = 0.;
+      *pfrequency = 0;
 
       for (j = 0;j < nb_sequence;j++) {
         if (length[j] > i) {
+          if (type[variable1] != REAL_VALUE) {
+            pisequence1 = int_sequence[j][variable1];
+          }
+          else {
+            prsequence1 = real_sequence[j][variable1];
+          }
+
+          if (type[variable2] != REAL_VALUE) {
+            pisequence2 = int_sequence[j][variable2] + i;
+          }
+          else {
+            prsequence2 = real_sequence[j][variable2] + i;
+          }
+
           if ((type[variable1] != REAL_VALUE) && (type[variable2] != REAL_VALUE)) {
-            for (k = i;k < length[j];k++) {
-              correl.point[0][i] += (int_sequence[j][variable1][k] - mean1[j]) *
-                                    (int_sequence[j][variable2][k - i] - mean2[j]);
+            for (k = 0;k < length[j] - i;k++) {
+              *ppoint += (*pisequence1++ - mean1[j]) * (*pisequence2++ - mean2[j]);
             }
           }
           else if ((type[variable1] != REAL_VALUE) && (type[variable2] == REAL_VALUE)) {
-            for (k = i;k < length[j];k++) {
-              correl.point[0][i] += (int_sequence[j][variable1][k] - mean1[j]) *
-                                    (real_sequence[j][variable2][k - i] - mean2[j]);
+            for (k = 0;k < length[j] - i;k++) {
+              *ppoint += (*pisequence1++ - mean1[j]) * (*prsequence2++ - mean2[j]);
             }
           }
           else if ((type[variable1] == REAL_VALUE) && (type[variable2] != REAL_VALUE)) {
-            for (k = i;k < length[j];k++) {
-              correl.point[0][i] += (real_sequence[j][variable1][k] - mean1[j]) *
-                                    (int_sequence[j][variable2][k - i] - mean2[j]);
+            for (k = 0;k < length[j] - i;k++) {
+              *ppoint += (*prsequence1++ - mean1[j]) * (*pisequence2++ - mean2[j]);
             }
           }
 //          else if ((type[variable1] == REAL_VALUE) && (type[variable2] == REAL_VALUE)) {
           else {
-            for (k = i;k < length[j];k++) {
-              correl.point[0][i] += (real_sequence[j][variable1][k] - mean1[j]) *
-                                    (real_sequence[j][variable2][k - i] - mean2[j]);
+            for (k = 0;k < length[j] - i;k++) {
+              *ppoint += (*prsequence1++ - mean1[j]) * (*prsequence2++ - mean2[j]);
             }
           }
      
-          correl.frequency[i] += length[j] - i;
+          *pfrequency += length[j] - i;
         }
       }
 
       switch (normalization) {
       case APPROXIMATED :
-        correl.point[0][i] /= norm;
+        *ppoint++ /= norm;
         break;
       case EXACT :
-        correl.point[0][i] *= cumul_length / (correl.frequency[i] * norm);
+        *ppoint++ *= cumul_length / (*pfrequency * norm);
         break;
       }
 
-//      if (correl.frequency[i] <= CORRELATION_MIN_FREQUENCY) {
-      if (correl.frequency[i] <= cumul_length * CORRELATION_FREQUENCY_RATIO) {
+//      if (*pfrequency++ <= CORRELATION_MIN_FREQUENCY) {
+      if (*pfrequency++ <= cumul_length * FREQUENCY_RATIO) {
         correl.length = i + 1;
         break;
       }
     }
 
     if (normalization == APPROXIMATED) {
+      pfrequency = correl.frequency;
       for (i = 0;i < correl.length;i++) {
-        correl.frequency[i] = cumul_length;
+        *pfrequency++ = cumul_length;
       }
     }
 
@@ -1511,12 +1474,12 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
   }
 
   else if (correl.type == SPEARMAN) {
-    int i , j , k;
-    int max_lag = correl.length - 1 , *pfrequency;
-    double main_term , correction , norm , rank_mean , *rank[2];
+    register int i , j , k;
+    int max_lag = correl.length - 1 , *pisequence1 , *pisequence2 , *pfrequency;
+    double main_term , correction , norm , rank_mean , *ppoint , *rank[2];
 
 
-    // computation of the main term and the correction term for tied values
+    // calcul du terme principal et des termes de correction pour les ex-aequo
 
     main_term = cumul_length * ((double)cumul_length * (double)cumul_length - 1);
 
@@ -1548,7 +1511,7 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
       norm *= sqrt(main_term - correction);
     }
 
-    // rank computation
+    // calcul des rangs
 
     rank_mean = (double)(cumul_length + 1) / 2.;
 
@@ -1566,43 +1529,48 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
       rank[1] = marginal_distribution[variable2]->rank_computation();
     }
 
-    // computation of the correlation coefficients
+    // calcul des coefficients de correlation
+
+    ppoint = correl.point[0];
+    pfrequency = correl.frequency;
 
     for (i = 0;i <= max_lag;i++) {
-      correl.point[0][i] = 0.;
-      correl.frequency[i] = 0;
+      *ppoint = 0.;
+      *pfrequency = 0;
 
-      // computation of the centered rank differences
+      // calcul des differences de rangs centrees
 
       for (j = 0;j < nb_sequence;j++) {
         if (length[j] > i) {
-          for (k = i;k < length[j];k++) {
-            correl.point[0][i] += (rank[0][int_sequence[j][variable1][k]] - rank_mean) *
-                                  (rank[1][int_sequence[j][variable2][k - i]] - rank_mean);
+          pisequence1 = int_sequence[j][variable1];
+          pisequence2 = int_sequence[j][variable2] + i;
+          for (k = 0;k < length[j] - i;k++) {
+            *ppoint += (rank[0][*pisequence1++] - rank_mean) * (rank[1][*pisequence2++] - rank_mean);
           }
-          correl.frequency[i] += length[j] - i;
+          *pfrequency += length[j] - i;
         }
       }
 
       switch (normalization) {
       case APPROXIMATED :
-        correl.point[0][i] /= norm;
+        *ppoint++ /= norm;
         break;
       case EXACT :
-        correl.point[0][i] *= cumul_length / (correl.frequency[i] * norm);
+        *ppoint++ *= cumul_length / (*pfrequency * norm);
         break;
       }
 
-//      if (correl.frequency[i] <= CORRELATION_MIN_FREQUENCY) {
-      if (correl.frequency[i] <= cumul_length * CORRELATION_FREQUENCY_RATIO) {
+//      if (*pfrequency++ <= CORRELATION_MIN_FREQUENCY) {
+      if (*pfrequency++ <= cumul_length * FREQUENCY_RATIO) {
         correl.length = i + 1;
         break;
       }
     }
 
     if (normalization == APPROXIMATED) {
+      pfrequency = correl.frequency;
       for (i = 0;i < correl.length;i++) {
-        correl.frequency[i] = cumul_length;
+        *pfrequency++ = cumul_length;
       }
     }
 
@@ -1612,8 +1580,10 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
   }
 
   else {
-    int i , j , k;
-    int max_lag = correl.length - 1 , nb_vector , **int_vector;
+    register int i , j , k;
+    int max_lag = correl.length - 1 , nb_vector , *pisequence1 , *pisequence2 ,
+        *pfrequency , **int_vector;
+    double *ppoint;
     Vectors *vec;
 
 
@@ -1622,39 +1592,45 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
       int_vector[i] = new int[2];
     }
 
+    ppoint = correl.point[0];
+    pfrequency = correl.frequency;
+
     for (i = 0;i <= max_lag;i++) {
 
-      // constitution of the vector sample
+      // constitution de l'echantillon de vecteurs
 
       nb_vector = 0;
       for (j = 0;j < nb_sequence;j++) {
         if (length[j] > i) {
-          for (k = i;k < length[j];k++) {
-            int_vector[nb_vector][0] = int_sequence[j][variable1][k];
-            int_vector[nb_vector][1] = int_sequence[j][variable2][k - i];
+          pisequence1 = int_sequence[j][variable1];
+          pisequence2 = int_sequence[j][variable2] + i;
+          for (k = 0;k < length[j] - i;k++) {
+            int_vector[nb_vector][0] = *pisequence1++;
+            int_vector[nb_vector][1] = *pisequence2++;
             nb_vector++;
           }
         }
       }
-      correl.frequency[i] = nb_vector;
+
+      *pfrequency = nb_vector;
 
       vec = new Vectors(nb_vector , NULL , 2 , int_vector);
 
-      // computation of the correlation coefficient
+      // calcul du coefficient de correlation
 
       switch (correl.type) {
       case SPEARMAN2 :
-        correl.point[0][i] = vec->spearman_rank_single_correlation_computation();
+        *ppoint++ = vec->spearman_rank_single_correlation_computation();
         break;
       case KENDALL :
-        correl.point[0][i] = vec->kendall_rank_single_correlation_computation();
+        *ppoint++ = vec->kendall_rank_single_correlation_computation();
         break;
       }
 
       delete vec;
 
-//      if (correl.frequency[i] <= CORRELATION_MIN_FREQUENCY) {
-      if (correl.frequency[i] <= cumul_length * CORRELATION_FREQUENCY_RATIO) {
+//      if (*pfrequency++ <= CORRELATION_MIN_FREQUENCY) {
+      if (*pfrequency++ <= cumul_length * FREQUENCY_RATIO) {
         correl.length = i + 1;
         break;
       }
@@ -1668,26 +1644,19 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of a correlation function on the basis of a Sequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error           reference on a StatError object,
- *  \param[in] variable1       1st variable index,
- *  \param[in] variable2       2nd variable index,
- *  \param[in] itype           correlation coefficient type (PEARSON/SPEARMAN/KENDALL),
- *  \param[in] max_lag         maximum lag,
- *  \param[in] normalization   normalization (APPROXIMATED/EXACT),
- *  \param[in] individual_mean flag mean computation by individual or globally.
+ *  Calcul d'une fonction de correlation a partir d'un objet Sequences.
  *
- *  \return                    Correlation object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indices des variables,
+ *              type de coefficient (PEARSON/SPEARMAN/KENDALL), decalage maximum,
+ *              normalisation (APPROXIMATED/EXACT), calcul des moyennes par individu ou non.
+ *
+ *--------------------------------------------------------------*/
 
-Correlation* Sequences::correlation_computation(StatError &error , int variable1 , int variable2 ,
-                                                correlation_type itype , int max_lag ,
-                                                correlation_normalization normalization ,
-                                                bool individual_mean) const
+Correlation* Sequences::correlation_computation(StatError &error , int variable1 ,
+                                                int variable2 , int itype , int max_lag ,
+                                                int normalization , bool individual_mean) const
 
 {
   bool status = true;
@@ -1777,7 +1746,7 @@ Correlation* Sequences::correlation_computation(StatError &error , int variable1
       max_lag = max_length - 1;
     }
 
-    // construction of the correlation function
+    // creation de la fonction de correlation
 
 //    correl = new Correlation(itype , max_lag , variable1 + 1 , variable2 + 1);
     correl = new Correlation((itype == SPEARMAN2 ? SPEARMAN : itype) , max_lag , variable1 + 1 , variable2 + 1);
@@ -1788,87 +1757,22 @@ Correlation* Sequences::correlation_computation(StatError &error , int variable1
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the theoretical autocorrelation function of a first-order
- *         autoregressive model.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error               reference on a StatError object,
- *  \param[in] autoregressive_coef autoregressive coefficient.
+ *  Calcul de la fonction de correlation theorique d'un bruit blanc
+ *  pour une filtre donne.
  *
- *  \return                        error status.
- */
-/*--------------------------------------------------------------*/
-
-bool Correlation::autoregressive_model_autocorrelation(StatError &error , double autoregressive_coeff)
-
-{
-  bool status = true;
-  int i;
-
-
-  error.init();
-
-  if ((type != PEARSON) || (offset != 0)) {
-    status = false;
-    ostringstream correction_message;
-    correction_message << SEQ_label[SEQL_PEARSON] << " "
-                       << SEQ_label[SEQL_CORRELATION_FUNCTION];
-    error.correction_update(SEQ_error[SEQR_CORRELATION_COEFF_TYPE] , (correction_message.str()).c_str());
-  }
-
-  else {
-    for (i = 0;i < nb_curve;i++) {
-      if ((point[i][0] < 1. - DOUBLE_ERROR) || (point[i][0] > 1. + DOUBLE_ERROR)) {
-        status = false;
-        ostringstream error_message;
-        error_message << SEQ_label[SEQL_CORRELATION_FUNCTION] << " " << i + 1  << " "
-                      << SEQ_error[SEQR_INCOMPATIBLE_CORRELATION_FUNCTION];
-        error.update((error_message.str()).c_str());
-      }
-    }
-  }
-
-  if ((autoregressive_coeff < -1.) || (autoregressive_coeff > 1.)) {
-     status = false;
-     error.update(SEQ_error[SEQR_AUTOREGRESSIVE_COEFF]);
-  }
-
-  if (status) {
-    delete [] theoretical_function;
-    function_type = AUTOREGRESSIVE;
-    theoretical_function = new double[length];
-
-    theoretical_function[0] = 1.;
-    for (i = 1;i < length;i++) {
-      theoretical_function[i] = theoretical_function[i - 1] * autoregressive_coeff;
-    }
-  }
-
-  return status;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the theoretical correlation function of a white noise
- *         for a given filter.
+ *  arguments : reference sur un objet StatError, taille du filtre, filtre,
+ *              flag calcul du filtre correspondant aux residus.
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] nb_point filter width,
- *  \param[in] filter   filter,
- *  \param[in] residual flag computation of the filter corresponding to the residuals.
- *
- *  \return             error status.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 bool Correlation::white_noise_correlation(StatError &error , int nb_point , double *filter ,
                                           int residual)
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
   double variance;
 
 
@@ -1882,15 +1786,13 @@ bool Correlation::white_noise_correlation(StatError &error , int nb_point , doub
     error.correction_update(SEQ_error[SEQR_CORRELATION_COEFF_TYPE] , (correction_message.str()).c_str());
   }
 
-  else {
-    for (i = 1;i < nb_curve;i++) {
-      if ((point[i][0] < point[0][0] - DOUBLE_ERROR) || (point[i][0] > point[0][0] + DOUBLE_ERROR)) {
-        status = false;
-        ostringstream error_message;
-        error_message << SEQ_label[SEQL_CORRELATION_FUNCTION] << " " << i + 1  << " "
-                      << SEQ_error[SEQR_INCOMPATIBLE_CORRELATION_FUNCTION];
-        error.update((error_message.str()).c_str());
-      }
+  for (i = 1;i < nb_curve;i++) {
+    if ((point[i][0] < point[0][0] - DOUBLE_ERROR) || (point[i][0] > point[0][0] + DOUBLE_ERROR)) {
+      status = false;
+      ostringstream error_message;
+      error_message << SEQ_label[SEQL_CORRELATION_FUNCTION] << " " << i + 1  << " "
+                    << SEQ_error[SEQR_INCOMPATIBLE_CORRELATION_FUNCTION];
+      error.update((error_message.str()).c_str());
     }
   }
 
@@ -1902,26 +1804,25 @@ bool Correlation::white_noise_correlation(StatError &error , int nb_point , doub
       filter[nb_point / 2]++;
     }
 
-    delete [] theoretical_function;
-    function_type = WHITE_NOISE;
-    theoretical_function = new double[length];
+    delete [] white_noise;
+    white_noise = new double[length];
 
     variance = 0.;
     for (i = 0;i < nb_point;i++) {
       variance += filter[i] * filter[i];
     }
 
-    theoretical_function[0] = point[0][0];
+    white_noise[0] = point[0][0];
     for (i = 1;i < MIN(nb_point , length);i++) {
-      theoretical_function[i] = 0.;
+      white_noise[i] = 0.;
       for (j = 0;j < nb_point - i;j++) {
-        theoretical_function[i] += filter[i + j] * filter[j];
+        white_noise[i] += filter[i + j] * filter[j];
       }
-      theoretical_function[i] = theoretical_function[i] * point[0][0] / variance;
+      white_noise[i] = white_noise[i] * point[0][0] / variance;
     }
 
     for (i = nb_point;i < length;i++) {
-      theoretical_function[i] = 0.;
+      white_noise[i] = 0.;
     }
   }
 
@@ -1929,17 +1830,14 @@ bool Correlation::white_noise_correlation(StatError &error , int nb_point , doub
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the theoretical correlation function of a white noise
- *         for a given filter.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] dist  symmetric discrete distribution.
+ *  Calcul de la fonction de correlation theorique d'un bruit blanc
+ *  pour une filtre donne.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, loi symmetrique.
+ *
+ *--------------------------------------------------------------*/
 
 bool Correlation::white_noise_correlation(StatError &error , const Distribution &dist)
 
@@ -1970,23 +1868,20 @@ bool Correlation::white_noise_correlation(StatError &error , const Distribution 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the theoretical correlation function of a white noise
- *         for a differentiation.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] order differentiation order.
+ *  Calcul de la fonction de correlation theorique d'un bruit blanc
+ *  pour une differenciation.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, ordre de la differenciation.
+ *
+ *--------------------------------------------------------------*/
 
 bool Correlation::white_noise_correlation(StatError &error , int order)
 
 {
   bool status = true;
-  int i;
+  register int i;
   double *filter;
 
 
@@ -2006,7 +1901,7 @@ bool Correlation::white_noise_correlation(StatError &error , int order)
     }
 
 #   ifdef DEBUG
-    cout << "\nfilter : ";
+    cout << "\nfiltre : ";
     for (i = 0;i <= order;i++) {
       cout << filter[i] << " ";
     }
@@ -2022,25 +1917,22 @@ bool Correlation::white_noise_correlation(StatError &error , int order)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of a partial autocorrelation function on the basis of a Sequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] itype    correlation coefficient type (PEARSON/KENDALL),
- *  \param[in] max_lag  maximum lag.
+ *  Calcul d'une fonction d'autocorrelation partielle a partir d'un objet Sequences.
  *
- *  \return             Correlation object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              type de coefficient (PEARSON/KENDALL), decalage maximum.
+ *
+ *--------------------------------------------------------------*/
 
 Correlation* Sequences::partial_autocorrelation_computation(StatError &error , int variable ,
-                                                            correlation_type itype , int max_lag) const
+                                                            int itype , int max_lag) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
+  int *pfrequency , *cfrequency;
   double sum , denom , *ppoint , *cpoint1 , *cpoint2 , *aux_correl , *paux_correl ,
          *aux , *paux1 , *paux2;
   Correlation *correl , *partial_correl;
@@ -2089,31 +1981,33 @@ Correlation* Sequences::partial_autocorrelation_computation(StatError &error , i
       max_lag = max_length - 1;
     }
 
-    // construction of the autocorrelation function
+    // construction de la fonction de d'autocorrelation
 
     correl = correlation_computation(error , variable + 1 , variable + 1 , itype ,
                                      max_lag , APPROXIMATED);
     max_lag = correl->length - 1;
 
-    // construction of the partial autocorrelation function
+    // creation de la fonction d'autocorrelation partielle
 
     partial_correl = new Correlation(itype , max_lag , variable + 1 , variable + 1);
     partial_correl->offset = 1;
 
-    // computation of partial correlation coefficients
+    // calcul des coefficients de correlation partiels
 
     paux_correl = new double[max_lag + 1];
     aux_correl = new double[max_lag];
 
     ppoint = partial_correl->point[0];
     cpoint2 = correl->point[0] + 1;
+    pfrequency = partial_correl->frequency;
+    cfrequency = correl->frequency;
 
     *ppoint++ = 0.;
-    partial_correl->frequency[0] = correl->frequency[0];
+    *pfrequency++ = *cfrequency++;
 
     denom = 1.;
     for (i = 1;i <= max_lag;i++) {
-      partial_correl->frequency[i] = correl->frequency[i];
+      *pfrequency++ = *cfrequency++;
 
       cpoint1 = correl->point[0] + i;
 //      cpoint2 = correl->point[0] + 1;

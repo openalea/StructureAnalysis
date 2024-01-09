@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: distribution.h 17998 2015-04-23 06:56:11Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -40,28 +40,28 @@
 #define DISTRIBUTION_H
 
 
-#include "stat_tools.h"
-
 
 namespace stat_tool {
 
 
   class DiscreteDistributionData;
 
-  /// \brief Discrete parametric distribution
 
-  class DiscreteParametricModel : public StatInterface , public DiscreteParametric {
+  class DiscreteParametricModel : public StatInterface , public DiscreteParametric {  // loi discrete parametrique
 
-    friend class Distribution;  // Hack for Windows
+    friend class Distribution;  // Hack pour Windows
     friend class FrequencyDistribution;
     friend class DiscreteDistributionData;
 
+    friend DiscreteParametricModel* discrete_parametric_ascii_read(StatError &error ,
+                                                                   const char *path ,
+                                                                   double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const DiscreteParametricModel &dist)
     { return dist.ascii_write(os , dist.frequency_distribution , false , false); }
 
   private :
 
-    DiscreteDistributionData *frequency_distribution;  // pointer on a DiscreteDistributionData object
+    DiscreteDistributionData *frequency_distribution;  // pointeur sur un objet DiscreteDistributionData
 
     std::ostream& ascii_write(std::ostream &os , const DiscreteDistributionData *histo ,
                               bool exhaustive , bool file_flag) const;
@@ -72,14 +72,13 @@ namespace stat_tool {
 
   public :
 
-    DiscreteParametricModel(int inb_value = 0 , discrete_parametric iident = CATEGORICAL ,
-                            int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
-                            double iparameter = D_DEFAULT, double iprobability = D_DEFAULT)
+    DiscreteParametricModel(int inb_value = 0 , int iident = CATEGORICAL ,
+                     int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
+                     double iparameter = D_DEFAULT, double iprobability = D_DEFAULT)
     :DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability)
     { frequency_distribution = NULL; }
-    DiscreteParametricModel(discrete_parametric iident , int iinf_bound , int isup_bound ,
-                            double iparameter , double iprobability ,
-                            double cumul_threshold = CUMUL_THRESHOLD)
+    DiscreteParametricModel(int iident , int iinf_bound , int isup_bound , double iparameter ,
+                            double iprobability , double cumul_threshold = CUMUL_THRESHOLD)
     :DiscreteParametric(iident , iinf_bound , isup_bound , iparameter , iprobability , cumul_threshold)
     { frequency_distribution = NULL; }
     DiscreteParametricModel(const FrequencyDistribution &histo);
@@ -95,14 +94,11 @@ namespace stat_tool {
 
     DiscreteDistributionData* extract_data(StatError &error) const;
 
-    static DiscreteParametricModel* ascii_read(StatError &error , const std::string path ,
-                                               double cumul_threshold = CUMUL_THRESHOLD);
-
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -112,9 +108,12 @@ namespace stat_tool {
   };
 
 
-  // \brief Frequency distribution
+  DiscreteParametricModel* discrete_parametric_ascii_read(StatError &error , const char *path ,
+                                                        double cumul_threshold = CUMUL_THRESHOLD);
 
-  class DiscreteDistributionData : public StatInterface , public FrequencyDistribution {
+
+
+  class DiscreteDistributionData : public StatInterface , public FrequencyDistribution {  // loi discrete empirique
 
     friend class DiscreteParametricModel;
 
@@ -123,7 +122,7 @@ namespace stat_tool {
 
   private :
 
-    DiscreteParametricModel *distribution;  // pointer on a DiscreteParametricModel object
+    DiscreteParametricModel *distribution;  // pointeur sur un objet DiscreteParametricModel
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool file_flag) const;
 
@@ -137,9 +136,8 @@ namespace stat_tool {
     :FrequencyDistribution(histo) { distribution = NULL; }
     DiscreteDistributionData(int inb_element , int *pelement)
     :FrequencyDistribution(inb_element , pelement) { distribution = NULL; }
-    DiscreteDistributionData(const FrequencyDistribution &histo ,
-                             frequency_distribution_transformation transform ,
-                             int param , rounding mode = FLOOR)
+    DiscreteDistributionData(const FrequencyDistribution &histo , char transform ,
+                             int param , int mode = FLOOR)
     :FrequencyDistribution(histo , transform , param , mode) { distribution = NULL; }
     DiscreteDistributionData(int nb_histo , const FrequencyDistribution **phisto)
     :FrequencyDistribution(nb_histo , phisto) { distribution = NULL; }
@@ -151,13 +149,11 @@ namespace stat_tool {
 
     DiscreteParametricModel* extract_model(StatError &error) const;
 
-    static DiscreteDistributionData* ascii_read(StatError &error , const std::string path);
-
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 

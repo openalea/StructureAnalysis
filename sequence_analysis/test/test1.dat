@@ -1,0 +1,292 @@
+1 VARIABLE
+
+VARIABLE 1 : INT   (minimum value: 0, maximum value: 2)
+
+marginal frequency distribution - sample size: 52
+mean: 0.846154   variance: 0.564103   standard deviation: 0.751068
+
+   | frequency
+0  19
+1  22
+2  11
+
+   | observed value 0 | observed value 1 | observed value 2 | frequency
+ 0  0.5  0.5  0  2
+ 1    1    0  0  2
+ 2    1    0  0  2
+ 3  0.5  0.5  0  2
+ 4    0    1  0  2
+ 5  0.5  0.5  0  2
+ 6    0    0  1  2
+ 7    1    0  0  2
+ 8    0    0  1  2
+ 9    0    0  1  2
+10    0    0  1  2
+11    0    1  0  2
+12    0    1  0  2
+13  0.5  0.5  0  2
+14    0    1  0  2
+15    1    0  0  2
+16    0    1  0  2
+17  0.5  0.5  0  2
+18  0.5  0.5  0  2
+19  0.5  0.5  0  2
+20    1    0  0  2
+21  0.5  0.5  0  2
+22    0    1  0  1
+23    0    1  0  1
+24    1    0  0  1
+25    0    1  0  1
+26    0    0  1  1
+27    0    0  1  1
+28    0    0  1  1
+29    0    1  0  1
+
+time up to the first occurrence of value 0 frequency distribution - sample size: 2
+mean: 0.5   variance: 0.5   standard deviation: 0.707107
+
+   | time up to the first occurrence of value 0 frequency distribution
+0  1
+1  1
+
+time up to the first occurrence of value 1 frequency distribution - sample size: 2
+mean: 1.5   variance: 4.5   standard deviation: 2.12132
+
+   | time up to the first occurrence of value 1 frequency distribution
+0  1
+1  0
+2  0
+3  1
+
+time up to the first occurrence of value 2 frequency distribution - sample size: 2
+mean: 6   variance: 0   standard deviation: 0
+
+   | time up to the first occurrence of value 2 frequency distribution
+0  0
+1  0
+2  0
+3  0
+4  0
+5  0
+6  2
+
+value 0 recurrence time frequency distribution - sample size: 17
+mean: 2.58824   variance: 4.50735   standard deviation: 2.12305
+
+   | value 0 recurrence time frequency distribution
+0  0
+1  8
+2  3
+3  1
+4  2
+5  1
+6  1
+7  0
+8  1
+
+value 1 recurrence time frequency distribution - sample size: 20
+mean: 2.1   variance: 3.14737   standard deviation: 1.77408
+
+   | value 1 recurrence time frequency distribution
+0   0
+1  11
+2   5
+3   0
+4   2
+5   0
+6   1
+7   1
+
+value 2 recurrence time frequency distribution - sample size: 9
+mean: 2.88889   variance: 24.3611   standard deviation: 4.9357
+
+   | value 2 recurrence time frequency distribution
+ 0  0
+ 1  6
+ 2  2
+ 3  0
+ 4  0
+ 5  0
+ 6  0
+ 7  0
+ 8  0
+ 9  0
+10  0
+11  0
+12  0
+13  0
+14  0
+15  0
+16  1
+
+value 0 sojourn time frequency distribution - sample size: 10
+mean: 1.4   variance: 0.711111   standard deviation: 0.843274
+
+   | value 0 sojourn time frequency distribution
+0  0
+1  8
+2  0
+3  2
+
+final run - value 0 sojourn time frequency distribution - sample size: 1
+mean: 5   variance: 0   standard deviation: 0
+
+   | final run - value 0 sojourn time frequency distribution
+0  0
+1  0
+2  0
+3  0
+4  0
+5  1
+
+value 1 sojourn time frequency distribution - sample size: 10
+mean: 2.1   variance: 1.43333   standard deviation: 1.19722
+
+   | value 1 sojourn time frequency distribution
+0  0
+1  4
+2  3
+3  1
+4  2
+
+final run - value 1 sojourn time frequency distribution - sample size: 1
+mean: 1   variance: 0   standard deviation: 0
+
+   | final run - value 1 sojourn time frequency distribution
+0  0
+1  1
+
+value 2 sojourn time frequency distribution - sample size: 5
+mean: 2.2   variance: 1.2   standard deviation: 1.09545
+
+   | value 2 sojourn time frequency distribution
+0  0
+1  2
+2  0
+3  3
+
+final run - value 2 sojourn time frequency distribution - sample size: 0
+
+number of runs of value 0 per sequence frequency distribution - sample size: 2
+mean: 5.5   variance: 0.5   standard deviation: 0.707107
+
+   | number of runs of value 0 per sequence frequency distribution
+0  0
+1  0
+2  0
+3  0
+4  0
+5  1
+6  1
+
+number of runs of value 1 per sequence frequency distribution - sample size: 2
+mean: 5.5   variance: 12.5   standard deviation: 3.53553
+
+   | number of runs of value 1 per sequence frequency distribution
+0  0
+1  0
+2  0
+3  1
+4  0
+5  0
+6  0
+7  0
+8  1
+
+number of runs of value 2 per sequence frequency distribution - sample size: 2
+mean: 2.5   variance: 0.5   standard deviation: 0.707107
+
+   | number of runs of value 2 per sequence frequency distribution
+0  0
+1  0
+2  1
+3  1
+
+number of occurrences of value 0 per sequence frequency distribution - sample size: 2
+mean: 9.5   variance: 4.5   standard deviation: 2.12132
+
+   | number of occurrences of value 0 per sequence frequency distribution
+ 0  0
+ 1  0
+ 2  0
+ 3  0
+ 4  0
+ 5  0
+ 6  0
+ 7  0
+ 8  1
+ 9  0
+10  0
+11  1
+
+number of occurrences of value 1 per sequence frequency distribution - sample size: 2
+mean: 11   variance: 32   standard deviation: 5.65685
+
+   | number of occurrences of value 1 per sequence frequency distribution
+ 0  0
+ 1  0
+ 2  0
+ 3  0
+ 4  0
+ 5  0
+ 6  0
+ 7  1
+ 8  0
+ 9  0
+10  0
+11  0
+12  0
+13  0
+14  0
+15  1
+
+number of occurrences of value 2 per sequence frequency distribution - sample size: 2
+mean: 5.5   variance: 4.5   standard deviation: 2.12132
+
+   | number of occurrences of value 2 per sequence frequency distribution
+0  0
+1  0
+2  0
+3  0
+4  1
+5  0
+6  0
+7  1
+
+sequence length frequency distribution - sample size: 2
+mean: 26   variance: 32   standard deviation: 5.65685
+
+   | sequence length frequency distribution
+ 0  0
+ 1  0
+ 2  0
+ 3  0
+ 4  0
+ 5  0
+ 6  0
+ 7  0
+ 8  0
+ 9  0
+10  0
+11  0
+12  0
+13  0
+14  0
+15  0
+16  0
+17  0
+18  0
+19  0
+20  0
+21  0
+22  1
+23  0
+24  0
+25  0
+26  0
+27  0
+28  0
+29  0
+30  1
+
+cumulative length: 52

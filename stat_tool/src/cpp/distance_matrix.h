@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: distance_matrix.h 17996 2015-04-23 06:55:31Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -40,69 +40,48 @@
 #define DISTANCE_MATRIX_H
 
 
-#include "stat_tools.h"
-
 
 namespace stat_tool {
 
 
 /****************************************************************
  *
- *  Constants
+ *  Constantes :
  */
 
-  const int ASCII_NB_INDIVIDUAL = 10;    // maximum number of individuals for displaying the results of
-                                         // individual alignments
-  const double PLOT_YMARGIN = 0.1;       // y axis margin for the plotting of distances
+  const int ASCII_NB_INDIVIDUAL = 10;    // nombre d'individus maximum pour afficher sous forme
+                                         // de resultats d'alignement
+  const double PLOT_YMARGIN = 0.1;       // marge en Y pour l'affichage des distances
 
-  const double DISTANCE_ROUNDNESS = 1.e-12;  // distance rounding
+  const double DISTANCE_ROUNDNESS = 1.e-12;  // arrondi sur une distance
 
-  const int GLOBAL_NB_ITER = 20;         // number of iterations when the clusters are globally computed
-  const int PARTITIONING_NB_ITER_1 = 50;  // maximum number of iterations
-  const int PARTITIONING_NB_ITER_2 = 20;  // maximum number of iterations
+  const int GLOBAL_NB_ITER = 20;         // nombre d'iterations ou les groupes
+                                         // sont recalculees globalement
+  const int PARTITIONING_NB_ITER_1 = 50;  // nombre maximum d'iterations
+  const int PARTITIONING_NB_ITER_2 = 20;  // nombre maximum d'iterations
 
-  enum matrix_transform {
-    COPY ,
-    SYMMETRIZATION ,
-    UNNORMALIZATION
-  };
-
-  enum hierarchical_strategy {
-    AGGLOMERATIVE ,
-    DIVISIVE ,
-    ORDERING
-  };
-
-  enum linkage {
+  enum {
     NEAREST_NEIGHBOR ,
     FARTHEST_NEIGHBOR ,
-    AVERAGE_NEIGHBOR
+    AVERAGING
   };
 
-  enum cluster_scale {
+  enum {
     CHILD_CLUSTER_DISTANCE ,
     DIAMETER
-  };
-
-  enum isolation_scale {
-    INDIVIDUAL ,
-    CLUSTER_SCALE
   };
 
 
 
 /****************************************************************
  *
- *  Class definition
+ *  Definition de la classe :
  */
-
 
   class Clusters;
   class Dendrogram;
 
-  /// \brief Distance matrix
-
-  class DistanceMatrix : public StatInterface {
+  class DistanceMatrix : public StatInterface {  // matrice des distances
 
     friend class Clusters;
     friend class Dendrogram;
@@ -112,29 +91,29 @@ namespace stat_tool {
 
   protected :
 
-    int nb_row;             ///< number of rows
-    int nb_column;          ///< number of columns
-    int *row_identifier;    ///< row identifiers
-    int *column_identifier;  ///< column identifiers
-    double **distance;      ///< distances
-    int **length;           ///< lengths
-    double **deletion_distance;  ///< deletion distances
-    int **nb_deletion;      ///< numbers of deletions
-    double **insertion_distance;  ///< insertion distances
-    int **nb_insertion;     ///< numbers of insertions
-    int **nb_match;         ///< numbers of matches
-    double **substitution_distance;  ///< substitution distances
-    int **nb_substitution;  ///< numbers of substitutions
-    double **transposition_distance;  ///< transposition distances
-    int **nb_transposition;  ///< numbers of transpositions
-    int label_size;         ///< label size
-    char *label;            ///< label
+    int nb_row;             // nombre de lignes
+    int nb_column;          // nombre de colonnes
+    int *row_identifier;    // identificateurs des lignes
+    int *column_identifier;  // identificateurs des colonnes
+    double **distance;      // distances
+    int **length;           // longueurs
+    double **deletion_distance;  // distances d'elision
+    int **nb_deletion;      // nombres d'elisions
+    double **insertion_distance;  // distance d'insertion
+    int **nb_insertion;     // nombres d'insertions
+    int **nb_match;         // nombres de matchs
+    double **substitution_distance;  // distances de substitution
+    int **nb_substitution;  // nombres de substitutions
+    double **transposition_distance;  // distances de transposition
+    int **nb_transposition;  // nombres de transpositions
+    int label_size;         // taille du label
+    char *label;            // label
 
-    void copy(const DistanceMatrix &dist_matrix , matrix_transform transform = COPY);
+    void copy(const DistanceMatrix &dist_matrix , char transform = 'c');
     void remove();
 
     std::ostream& property_print(double **normalized_distance , std::ostream &os ,
-                                 output_format format) const;
+                                 char format) const;
 
     int cumul_length_computation(bool *row_flag , bool *column_flag) const;
     double cumul_distance_computation(bool *row_flag , bool *column_flag) const;
@@ -152,24 +131,22 @@ namespace stat_tool {
                    int *iidentifier , bool keep = true);
     DistanceMatrix(const DistanceMatrix &dist_matrix , int nb_cluster ,
                    const char *ilabel);
-    DistanceMatrix(const DistanceMatrix &dist_matrix , matrix_transform transform = COPY)
+    DistanceMatrix(const DistanceMatrix &dist_matrix , char transform = 'c')
     { copy(dist_matrix , transform); }
     ~DistanceMatrix();
     DistanceMatrix& operator=(const DistanceMatrix &dist_matrix);
 
     DistanceMatrix* select_individual(StatError &error , int inb_pattern ,
-                                      int *iidentifier , bool keep = true) const;
-    DistanceMatrix* select_individual(StatError &error , int inb_pattern ,
-                                      std::vector<int> iidentifier , bool keep = true) const;
+                                       int *iidentifier , bool keep = true) const;
     DistanceMatrix* symmetrize(StatError &error) const;
     DistanceMatrix* unnormalize(StatError &error) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
     std::ostream& spreadsheet_write(std::ostream &os) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -182,21 +159,19 @@ namespace stat_tool {
                 double itransposition_distance = 0. , int inb_transposition = 0);
     void update(int irow_identifier , int icolumn_identifier , double idistance , int ilength);
 
-    Clusters* partitioning(StatError &error , bool display , int nb_cluster ,
+    Clusters* partitioning(StatError &error , std::ostream &os , int nb_cluster ,
                            int *prototype = NULL , int initialization = 1 , int algorithm = 1) const;
-    Clusters* partitioning(StatError &error , bool display , int nb_cluster ,
+    Clusters* partitioning(StatError &error , std::ostream &os , int nb_cluster ,
                            int *cluster_nb_pattern , int **cluster_pattern) const;
 
-    Dendrogram* agglomerative_hierarchical_clustering(hierarchical_strategy strategy ,
-                                                      linkage criterion = AVERAGE_NEIGHBOR) const;
+    Dendrogram* agglomerative_hierarchical_clustering(int algorithm , int criterion = AVERAGING) const;
     Dendrogram* divisive_hierarchical_clustering() const;
 
-    bool hierarchical_clustering(StatError &error , bool display ,
-                                 hierarchical_strategy strategy = AGGLOMERATIVE ,
-                                 linkage criterion = AVERAGE_NEIGHBOR ,
-                                 const std::string path = "" , output_format format = ASCII) const;
+    bool hierarchical_clustering(StatError &error , std::ostream &os ,
+                                 int algorithm = AGGLOMERATIVE , int criterion = AVERAGING ,
+                                 const char *path = NULL , char format = 'a') const;
 
-    // class member access
+    // acces membres de la classe
 
     int get_nb_row() const { return nb_row; }
     int get_nb_column() const { return nb_column; }
@@ -240,9 +215,8 @@ namespace stat_tool {
   };
 
 
-  /// \brief Partitioning clustering results
 
-  class Clusters : public DistanceMatrix {
+  class Clusters : public DistanceMatrix {  // resultats du clustering par partitionnement
 
     friend class DistanceMatrix;
 
@@ -251,13 +225,13 @@ namespace stat_tool {
 
   private :
 
-    DistanceMatrix *distance_matrix;  ///< pointer on a DistanceMatrix object
-    int nb_pattern;         ///< number of individuals
-    int nb_cluster;         ///< number of clusters
-    int *cluster_nb_pattern;  ///< cluster sizes
-    int *assignment;        ///< individual assignments
-    double **pattern_distance;  ///< individual-cluster distances
-    int **pattern_length;   ///< individual lengths
+    DistanceMatrix *distance_matrix;  // pointeur sur un objet DistanceMatrix
+    int nb_pattern;         // nombre de formes
+    int nb_cluster;         // nombre de groupes
+    int *cluster_nb_pattern;  // effectifs des groupes
+    int *assignment;        // affectations des formes
+    double **pattern_distance;  // distances d'une forme a un groupe
+    int **pattern_length;   // longueurs niveau forme
 
     void copy(const Clusters &clusters);
     void remove();
@@ -272,8 +246,7 @@ namespace stat_tool {
 
     double max_within_cluster_distance_computation(double **normalized_distance , int cluster) const;
     double min_between_cluster_distance_computation(double **normalized_distance , int cluster) const;
-    bool isolation_property(double **normalized_distance , int cluster ,
-                            isolation_scale scale = CLUSTER_SCALE) const;
+    bool isolation_property(double **normalized_distance , int cluster , char type = 'c') const;
     double between_cluster_distance_computation(int cluster) const;
     std::ostream& global_distance_ascii_print(std::ostream &os);
 
@@ -298,8 +271,8 @@ namespace stat_tool {
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -308,7 +281,7 @@ namespace stat_tool {
     void cluster_distance_computation_1();
     void cluster_distance_computation_2();
 
-    // class member access
+    // acces membres de la classe
 
     DistanceMatrix* get_distance_matrix() { return distance_matrix; }
     int get_nb_pattern() const { return nb_pattern; }
@@ -322,9 +295,8 @@ namespace stat_tool {
   };
 
 
-  /// \brief Hierarchical clustering results
 
-  class Dendrogram : public StatInterface {
+  class Dendrogram : public StatInterface {  // resultats du clustering hierarchique
 
     friend class DistanceMatrix;
 
@@ -333,31 +305,30 @@ namespace stat_tool {
 
   private :
 
-    DistanceMatrix *distance_matrix;  ///< pointer on a DistanceMatrix object
-    cluster_scale scale;    ///< scale for representing the distances between clusters
-    int nb_cluster;         ///< number of clusters
-    int *cluster_nb_pattern;  ///< cluster sizes
-    int **cluster_pattern;  ///< cluster compositions
-    int *parent;            ///< parent node
-    int **child;            ///< child nodes
-    double *child_distance;  ///< distances between the two merged clusters
-    double *within_cluster_distance;  ///< within-cluster distances
-    double *between_cluster_distance;  ///< between-cluster distances
-    double *max_within_cluster_distance;  ///< diameters
-    double *min_between_cluster_distance;  ///< separations
+    DistanceMatrix *distance_matrix;  // pointeur sur un objet DistanceMatrix
+    int scale;              // echelle pour representer les distances entre groupes
+    int nb_cluster;         // nombre de groupes
+    int *cluster_nb_pattern;  // effectifs des groupes
+    int **cluster_pattern;  // compositions des groupes
+    int *parent;            // noeuds parent
+    int **child;            // noeuds fils
+    double *child_distance;  // distances entre les deux groupes fusionnes
+    double *within_cluster_distance;  // distances intra-groupe
+    double *between_cluster_distance;  // distances inter-groupe
+    double *max_within_cluster_distance;  // diametres
+    double *min_between_cluster_distance;  // separations
 
     void copy(const Dendrogram &dendrogram);
     void remove();
 
     double* distance_ordering() const;
-    double coefficient_computation(cluster_scale iscale) const;
-    double coefficient_computation() const;
+    double coefficient_computation(int iscale = I_DEFAULT) const;
     void tree_computation();
 
   public :
 
     Dendrogram();
-    Dendrogram(const DistanceMatrix &dist_matrix , cluster_scale iscale);
+    Dendrogram(const DistanceMatrix &dist_matrix , int iscale);
     Dendrogram(const Dendrogram &dendrogram)
     { copy(dendrogram); }
     ~Dendrogram();
@@ -366,15 +337,15 @@ namespace stat_tool {
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const
     { return false; }
 
-    // class member access
+    // acces membres de la classe
 
     DistanceMatrix* get_distance_matrix() { return distance_matrix; }
-    cluster_scale get_scale() const { return scale; }
+    int get_scale() const { return scale; }
     int get_nb_cluster() const { return nb_cluster; }
     int get_cluster_nb_pattern(int cluster) const { return cluster_nb_pattern[cluster]; }
     int get_cluster_pattern(int cluster , int index) const { return cluster_pattern[cluster][index]; }

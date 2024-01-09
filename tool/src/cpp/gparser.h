@@ -8,7 +8,7 @@
  *       File author(s): Ch. Godin (christophe.godin@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: gparser.h 17588 2014-10-10 12:48:32Z boudon $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *

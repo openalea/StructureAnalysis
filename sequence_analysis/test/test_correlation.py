@@ -4,7 +4,7 @@ ComputewhiteNoiseCorrelation
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_correlation.py 9401 2010-08-10 12:24:59Z cokelaer $"
 
 
 from openalea.sequence_analysis.sequences import Sequences

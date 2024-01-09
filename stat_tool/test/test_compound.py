@@ -3,7 +3,7 @@
 :Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__version__ = "$Id$"
+__version__ = "$Id: test_compound.py 8625 2010-04-13 11:34:37Z cokelaer $"
 
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.data_transform import ExtractDistribution

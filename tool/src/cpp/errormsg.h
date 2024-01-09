@@ -8,7 +8,7 @@
  *       File author(s): Ch. Godin (christophe.godin@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: errormsg.h 9869 2010-11-04 17:31:41Z dbarbeau $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *

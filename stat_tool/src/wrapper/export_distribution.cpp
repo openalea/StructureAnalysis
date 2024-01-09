@@ -16,7 +16,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id$
+ *        $Id: export_distribution.cpp 18034 2015-04-23 07:15:31Z guedon $
  *
  *-----------------------------------------------------------------------------*/
 
@@ -25,7 +25,9 @@
 #include "wrapper_util.h"
 #include "export_distribution.h"
 
+#include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
+
 
 #include <boost/python.hpp>
 // definition of boost::python::len
@@ -116,7 +118,7 @@ void class_distribution()
     .def(init< boost::python::optional< int > > ())
     .def(init<const FrequencyDistribution&>())
     .def(init<const Distribution&, double>())
-    .def(init<const Distribution&, boost::python::optional< distribution_transformation, int > >())
+    .def(init<const Distribution&, boost::python::optional< char, int > >())
 
     .def(self_ns::str(self)) // __str__
     .def( self == self )
@@ -243,8 +245,7 @@ class DiscreteParametricWrap
 
 public:
 
-    static int get_ident(const DiscreteParametric& Model) 
-    { return int(Model.ident); }
+
 
 };
 
@@ -255,19 +256,19 @@ void class_discrete_parametric()
 
   // DiscreteParametric base class
   class_< DiscreteParametric, bases< Distribution > >
-    ("_DiscreteParametric", init< boost::python::optional< int, discrete_parametric, int, int, double, double > >())
-    .def(init<discrete_parametric, int, int, double, double, boost::python::optional< double > >())
+    ("_DiscreteParametric", init< boost::python::optional< int, int, int, int, double, double > >())
+    .def(init<int, int, int, double, double, boost::python::optional< double > >())
     .def(init<int, int>())
     .def(init<const Distribution&, boost::python::optional<int> >())
     .def(init<const Distribution&, double>())
     .def(init<const DiscreteParametric&, double>())
     .def(init<const FrequencyDistribution& >())
-    .def(init<const DiscreteParametric&, boost::python::optional< distribution_transformation, int> >())
+    .def(init<const DiscreteParametric&, boost::python::optional< char, int> >())
     .def(init<Distribution&>())
     .def(init<DiscreteParametric&>())
     //to remove
     .def(init<Distribution&>())
-    .def("get_ident", DiscreteParametricWrap::get_ident)
+    .def_readonly("get_ident", &DiscreteParametric::ident)
     .def_readonly("get_inf_bound", &DiscreteParametric::inf_bound)
     .def_readonly("get_sup_bound", &DiscreteParametric::sup_bound)
     .def_readonly("get_parameter", &DiscreteParametric::parameter)
@@ -329,38 +330,13 @@ public:
   {
     StatError error;
     DiscreteParametricModel *model = NULL;
-    model = DiscreteParametricModel::ascii_read(error, filename);
+    model = discrete_parametric_ascii_read(error, filename);
 
     if(!model) stat_tool::wrap_util::throw_error(error);
     return boost::shared_ptr<DiscreteParametricModel>(model);
   }
-  
-  static boost::shared_ptr<DiscreteParametricModel> parametric_model_from_ident(int iident = I_DEFAULT ,
-          int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
-          double iparameter = D_DEFAULT, double iprobability = D_DEFAULT, double cumul_threshold = CUMUL_THRESHOLD)
-  {
-    DiscreteParametricModel *model = NULL;
-    discrete_parametric ident = CATEGORICAL;
-    
-    if (iident != I_DEFAULT)
-       ident = discrete_parametric(iident);
-    
-    model = new DiscreteParametricModel(ident, iinf_bound, isup_bound,
-                                        iparameter, iprobability, cumul_threshold);
 
-    return boost::shared_ptr<DiscreteParametricModel>(model);
-  }
-  
-  static boost::shared_ptr<DiscreteParametricModel> parametric_model_from_ident2(int iident = I_DEFAULT ,
-          int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
-          double iparameter = D_DEFAULT, double iprobability = D_DEFAULT)
-  {
 
-    return parametric_model_from_ident(iident, iinf_bound, isup_bound,
-                                         iparameter, iprobability);
-
-  }
-  
   // simulation method wrapping
   WRAP_METHOD1(DiscreteParametricModel, simulation, DiscreteDistributionData, int);
 
@@ -439,16 +415,14 @@ void class_discrete_parametric_model()
   class_< DiscreteParametricModel, bases< DiscreteParametric, StatInterface > >
   ("_DiscreteParametricModel", "Parametric model", init <const FrequencyDistribution& >())
 
-  .def(init< discrete_parametric, int, int, double, double, boost::python::optional< double > >())
+  .def(init< int, int, int, double, double, boost::python::optional< double > >())
   // this constructor clashes with the previous one and fail to pass tests.
-  //.def(init< int, boost::python::optional <discrete_parametric, int, int, double, double > >())
+  //.def(init< int, boost::python::optional <int, int, int, double, double > >())
   .def(init <const Distribution& >())
   .def(init <const DiscreteParametric& >())
   .def(init <const DiscreteParametricModel& , boost::python::optional< bool> >())
 
   .def("__init__", make_constructor(DiscreteParametricModelWrap::parametric_model_from_file))
-  .def("__init__", make_constructor(DiscreteParametricModelWrap::parametric_model_from_ident))
-  .def("__init__", make_constructor(DiscreteParametricModelWrap::parametric_model_from_ident2))
   .def(self_ns::str(self)) // __str__
 
   /*.def("get_histogram", &DiscreteParametricModel::get_histogram,

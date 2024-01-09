@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: stat_label.cpp 18018 2015-04-23 07:05:17Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -41,7 +41,7 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  keywords (file format)
+ *  Mots cles (format des fichiers) :
  */
 
 
@@ -50,8 +50,6 @@ const char *STAT_word[] = {
   "SUP_BOUND" ,
   "PARAMETER" ,
   "PROBABILITY" ,
-  "NO_SEGMENT" ,
-  "SEQUENCE_LENGTH" ,
 
   "SHAPE" ,
   "SCALE" ,
@@ -62,7 +60,6 @@ const char *STAT_word[] = {
   "CONCENTRATION" ,
   "INTERCEPT" ,
   "SLOPE" ,
-  "AUTOREGRESSIVE_COEFF" ,
 
   "MIXTURE" ,
   "CONVOLUTION" ,
@@ -81,7 +78,7 @@ const char *STAT_word[] = {
   "VARIABLES" ,
 
   "DISTANCE" ,
-  "CATEGORIES" ,
+  "SYMBOLS" ,
   "PERIOD" ,
 
   "STATES" ,
@@ -93,19 +90,15 @@ const char *STAT_word[] = {
 
   "OUTPUT_PROCESS" ,
   "OUTPUT_PROCESSES" ,
-
-  "NONPARAMETRIC" ,   // for ascending compatibility
-
+  "NONPARAMETRIC" ,   // pour compatibilite ascendante
   "CATEGORICAL" ,
-
-  "PARAMETRIC" ,   // for ascending compatibility
-
+  "PARAMETRIC" ,   // pour compatibilite ascendante
   "DISCRETE_PARAMETRIC" ,
   "CONTINUOUS_PARAMETRIC" ,
   "OBSERVATION_DISTRIBUTION" ,
   "OBSERVATION_MODEL" ,
 
-  "OBSERVATION_PROBABILITIES" ,   // for ascending compatibility
+  "OBSERVATION_PROBABILITIES" ,   // pour compatibilite ascendante
 
   "OUTPUT"
 };
@@ -116,9 +109,7 @@ const char *STAT_discrete_distribution_word[] = {
   "BINOMIAL" ,
   "POISSON" ,
   "NEGATIVE_BINOMIAL" ,
-  "POISSON_GEOMETRIC" ,
-  "UNIFORM" ,
-  "PRIOR_SEGMENT_LENGTH"
+  "UNIFORM"
 };
 
 
@@ -127,36 +118,30 @@ const char *STAT_discrete_distribution_letter[] = {
   "B" ,
   "P" ,
   "NB" ,
-  "PG" ,
-  "U" ,
-  "PSL"
+  "U"
 };
 
 
 const char *STAT_continuous_distribution_word[] = {
   "GAMMA" ,
-  "INVERSE_GAUSSIAN" ,
   "GAUSSIAN" ,
   "VON_MISES" ,
   "ZERO_INFLATED_GAMMA" ,
-  "LINEAR_MODEL" ,
-  "AUTOREGRESSIVE_MODEL"
+  "LINEAR_MODEL"
 };
 
 
 const char *STAT_continuous_distribution_letter[] = {
   "Ga" ,
-  "IG" ,
   "G" ,
   "VM" ,
   "ZIGa" ,
-  "LM" ,
-  "AR"
+  "LM"
 };
 
 
 const char *STAT_variable_type_word[] = {
-  "NOMINAL" ,
+  "SYMBOLIC" ,
   "ORDINAL" ,
   "NUMERIC" ,
   "CIRCULAR"
@@ -164,9 +149,9 @@ const char *STAT_variable_type_word[] = {
 
 
 const char *STAT_variable_type_letter[] = {
-  "No" ,
+  "S" ,
   "O" ,
-  "Nu" ,
+  "N" ,
   "C"
 };
 
@@ -186,9 +171,7 @@ const char *STAT_criterion_word[] = {
   "ICLc" ,
   "mBIC" ,
   "log-likelihood slope" ,
-  "dimension jump" ,
-  "segmentation log-likelihood slope" ,
-  "segmentation dimension jump"
+  "segmentation log-likelihood slope"
 };
 
 
@@ -203,7 +186,7 @@ const char *STAT_variable_word[] = {
   "INT" ,
   "REAL" ,
   "STATE" ,
-  "VALUE" ,         // for ascending compatibility
+  "VALUE" ,         // pour compatibilite ascendante
 //  "NB_INTERNODE" ,
   "AUXILIARY"
 };
@@ -212,7 +195,7 @@ const char *STAT_variable_word[] = {
 
 /****************************************************************
  *
- *  Labels
+ *  Labels :
  */
 
 
@@ -226,13 +209,8 @@ const char *STAT_label[] = {
   "model" ,
 
   "mean" ,
-  "median" ,
-  "mode" ,
   "variance" ,
   "standard deviation" ,
-  "quantile" ,
-  "lower quartile" ,
-  "upper quartile" ,
   "mean absolute deviation" ,
   "coefficient of variation" ,
   "variance/mean ratio" ,
@@ -273,9 +251,9 @@ const char *STAT_label[] = {
   "normalized" ,
   "maximum possible log-likelihood" ,
   "deviance" ,
-  "log-likelihood for the optimal classification" ,
-  "maximum possible log-likelihood for the optimal classification" ,
-  "classification entropy" ,
+  "log-likelihood of the optimal classification" ,
+  "maximum possible log-likelihood of the optimal classification" ,
+  "classification entropy",
   "free parameter" ,
   "free parameters" ,
   "penalyzed log-likelihood" ,
@@ -292,7 +270,6 @@ const char *STAT_label[] = {
   "matching" ,
   "concentration" ,
   "curve" ,
-
   "mixture" ,
   "weight" ,
   "component" ,
@@ -309,22 +286,16 @@ const char *STAT_label[] = {
   "survival probability" ,
   "frequency" ,
 
-  "backward" ,
-  "forward" ,
-  "inter-event time within the observation period" ,
-  "sojourn time" ,
-
   "frequency distribution" ,
   "frequency distributions" ,
   "histogram" ,
-  "bin width" ,
   "sample" ,
   "sample size" ,
   "dissimilarities" ,
 
   "information ratio" ,
   "clustering step" ,
-  "category" ,
+  "symbol" ,
 
   "vector" ,
   "vectors" ,
@@ -341,8 +312,6 @@ const char *STAT_label[] = {
   "limit correlation coefficient" ,
   "Spearman limit rank correlation coefficient" ,
   "Kendall limit rank correlation coefficient" ,
-  "sup norm distance" ,
-  "overlap" ,
 
   "contingency table" ,
   "deviation table" ,
@@ -362,9 +331,7 @@ const char *STAT_label[] = {
   "response variable" ,
   "correlation coefficient" ,
   "R-squared" ,
-//  "regression variation / total variation" ,
-  "coefficient of determination" ,
-  "95% confidence limits for a null autoregressive coefficient" ,
+  "regression variation / total variation" ,
   "residual" ,
   "standardized residual" ,
   "linear" ,
@@ -401,7 +368,7 @@ const char *STAT_label[] = {
   "isolated" ,
   "non-isolated" ,
   "within" ,
-  "between" ,
+  "between",
   "ratio" ,
   "prototype" ,
   "step" ,
@@ -438,12 +405,12 @@ const char *STAT_label[] = {
 
 /****************************************************************
  *
- *  Error messages for lexical analysis of files
+ *  Messages d'erreur pour l'analyse des fichiers :
  */
 
 
 const char *STAT_parsing[] = {
-  "bad keyword" ,
+  "bad key word" ,
   "format error" ,
 
   "bad distribution name" ,
@@ -472,7 +439,7 @@ const char *STAT_parsing[] = {
   "bad variable index" ,
   "bad variable type" ,
 
-  "bad number of categories" ,
+  "bad number of symbols" ,
   "bad local distance" ,
   "triangle inequality not verified" ,
   "bad period value" ,
@@ -501,7 +468,7 @@ const char *STAT_parsing[] = {
 
 /****************************************************************
  *
- *  Error messages
+ *  Messages d'erreur de traitement :
  */
 
 
@@ -522,13 +489,6 @@ const char *STAT_error[] = {
   "distribution range of values incompatible with frequency distribution range of values" ,
   "bad minimum inferior bound" ,
   "estimation failure" ,
-
-  "number of complete intervals too small" ,
-  "complete time interval: bad minimum value" ,
-  "forward recurrence time interval: bad minimum value" ,
-  "no event observation period: bad minimum value" ,
-  "bad duration mean estimation method" ,
-  "initial inter-event distribution support incompatible with data" ,
 
   "bad distribution index" ,
   "bad frequency distribution index" ,
@@ -560,26 +520,24 @@ const char *STAT_error[] = {
   "smaller than" ,
   "greater than" ,
   "not allowed" ,
-  "bad number of categories" ,
-  "non-consecutive categories" ,
-  "missing category" ,
+  "bad number of symbols" ,
+  "non-consecutive symbols",
+  "missing symbol" ,
   "bad cluster limit" ,
   "bad information ratio: should be between 0 and 1" ,
   "null reference information: variance should be strictly positive" ,
   "bad scaling coefficient" ,
-  "bad value" ,
   "bad minimum value" ,
   "bad maximum value" ,
 
   "marginal frequency distribution not built" ,
   "marginal histogram not built" ,
-  "bad histogram bin width" ,
+  "bad histogram step" ,
   "bad histogram min value" ,
   "bad" ,
   "bad number of vectors" ,
   "bad number of variables" ,
   "bad number of selected variables" ,
-  "bad number of summed variables" ,
   "bad variable type" ,
   "bad variable index" ,
   "bad variable indices: should be different" ,

@@ -3,7 +3,7 @@
 
 .. todo:: to be done
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: functional1.py 9401 2010-08-10 12:24:59Z cokelaer $"
 
 import os
 from openalea.stat_tool import *

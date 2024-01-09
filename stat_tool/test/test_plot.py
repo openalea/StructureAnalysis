@@ -1,5 +1,5 @@
 """output tests"""
-__version__ = "$Id$"
+__version__ = "$Id: test_plot.py 7886 2010-02-09 07:49:53Z cokelaer $"
 
 from openalea.stat_tool import _stat_tool
 from openalea.stat_tool.plot import get_plotter, gnuplot 

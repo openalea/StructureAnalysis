@@ -16,7 +16,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id$
+ *        $Id: export_vectors.cpp 18040 2015-04-23 07:17:16Z guedon $
  *
  *-----------------------------------------------------------------------------*/
 
@@ -25,7 +25,14 @@
 #include "wrapper_util.h"
 #include "export_base.h"
 
+#include "stat_tool/stat_tools.h"
+
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
 #include "stat_tool/regression.h"
+#include "stat_tool/distance_matrix.h"
+#include "stat_tool/multivariate_mixture.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -50,7 +57,7 @@ public:
   WRAP_METHOD2(Vectors,comparison, DistanceMatrix, VectorDistance, bool);
   WRAP_METHOD_SPREADSHEET_WRITE( Vectors);WRAP_METHOD2(Vectors,scaling,
        Vectors, int, int);
-  WRAP_METHOD2(Vectors,round, Vectors, int, rounding);
+  WRAP_METHOD2(Vectors,round, Vectors, int, int);
   WRAP_METHOD_FILE_ASCII_WRITE( Vectors)
 
   static Vectors*
@@ -59,7 +66,7 @@ public:
     Vectors *vec;
     StatError error;
 
-    vec = Vectors::ascii_read(error, filename);
+    vec = vectors_ascii_read(error, filename);
 
     if (vec)
       {
@@ -82,7 +89,7 @@ public:
 
     int dummy;
 
-    variable_nature *types = 0; // 0 for int and 1 for float/double
+    int *types = 0; // 0 for int and 1 for float/double
     int *identifier = 0;
     int nb_variable = -1, this_nb_variable=-1;
     int **int_vector = 0;
@@ -131,7 +138,7 @@ public:
     }
 
     // extract the types
-    types = new variable_nature[nb_types];
+    types = new int[nb_types];
     int nb_variable_int = 0;
     int nb_variable_float = 0;
     for (int ii = 0; ii < nb_types; ii++){
@@ -443,7 +450,7 @@ public:
   }
 
   static void
-  file_ascii_data_write(const Vectors& d, const std::string path, bool exhaustive)
+  file_ascii_data_write(const Vectors& d, const char* path, bool exhaustive)
   {
     bool result = true;
     StatError error;
@@ -460,8 +467,7 @@ public:
   {
     StatError error;
     Vectors * ret = NULL;
-    //std::stringstream s;
-    bool display = true;
+    std::stringstream s;
 
     boost::python::extract<int> get_min(min);
     boost::python::extract<int> get_max(max);
@@ -471,19 +477,19 @@ public:
       {
         int mi = get_min();
         int ma = get_max();
-        ret = v.value_select(error, display, variable, mi, ma, keep);
+        ret = v.value_select(error, s, variable, mi, ma, keep);
       }
     else
       {
         double mi = extract<double> (min);
         double ma = extract<double> (max);
-        ret = v.value_select(error, display, variable, mi, ma, keep);
+        ret = v.value_select(error, s, variable, mi, ma, keep);
       }
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    //cout << s.str() << endl;
+    cout << s.str() << endl;
 
     return ret;
   }
@@ -691,6 +697,18 @@ public:
     return ret;
   }
 
+  // Mixture cluster
+  static MultivariateMixtureData*
+  mixture_cluster(const Vectors& v, const MultivariateMixture& m)
+  {
+    StatError error;
+    MultivariateMixtureData* ret = NULL;
+    ret = m.cluster(error, v);
+    if (ret == NULL)
+      stat_tool::wrap_util::throw_error(error);
+    return ret;
+  }
+
   // Extract
   static DiscreteDistributionData*
   extract_histogram(const Vectors& v, int variable)
@@ -705,7 +723,7 @@ public:
 
   static Regression*
   moving_average_dist(const Vectors& v, int explanatory_var, int response_var,
-      const Distribution &dist, moving_average_method algo)
+      const Distribution &dist, char algo)
   {
     StatError error;
     Regression * ret = NULL;
@@ -717,7 +735,7 @@ public:
 
   static Regression*
   moving_average_list(const Vectors& v, int explanatory_var, int response_var,
-      const boost::python::list& filter, moving_average_method algo)
+      const boost::python::list& filter, char algo)
   {
     StatError error;
     Regression * ret = NULL;
@@ -771,61 +789,241 @@ public:
     return ret;
   }
 
+  static MultivariateMixture*
+  mixture_estimation_model(const Vectors& v, const MultivariateMixture& mixt, int nb_iter,
+      boost::python::list force_param)
+  {
+    bool status = true, several_errors = false;
+    MultivariateMixture* ret = NULL;
+    bool *fparam = NULL;
+    StatError error;
+    ostringstream error_message;
+    int nb_fparam, p;
+    const int nb_variables = v.get_nb_variable();
+    object o;
+
+    nb_fparam = boost::python::len(force_param);
+
+    if (nb_fparam > 0)
+      {
+        if (nb_fparam != nb_variables)
+          {
+            status = false;
+            error_message << "bad size of argument list: " << nb_fparam
+                << ": should be the number of variables (" << nb_variables
+                << ")";
+            PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
+            throw_error_already_set();
+          }
+        else
+          {
+            fparam = new bool[nb_fparam];
+            for (p = 0; p < nb_fparam; p++)
+              {
+                o = force_param[p];
+                try
+                  {
+                    extract<bool> x(o);
+                    if (x.check())
+                      fparam[p] = x();
+                    else
+                      status = false;
+                  }
+                catch (...)
+                  {
+                    status = false;
+                  }
+                if (!status)
+                  {
+                    if (several_errors)
+                      error_message << endl;
+                    else
+                      several_errors = true;
+                    error_message << "incorrect type for element " << p
+                        << " of argument list: expecting a boolean";
+                  }
+              }
+            if (!status)
+              {
+                delete[] fparam;
+                fparam = NULL;
+                PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
+                throw_error_already_set();
+              }
+          }
+      }
+    else
+      {
+        nb_fparam = nb_variables;
+        fparam = new bool[nb_fparam];
+        for (p = 0; p < nb_fparam; p++)
+          fparam[p] = false;
+      }
+
+    if (status)
+      {
+
+        ret = v.mixture_estimation(error, cout, mixt, nb_iter, fparam);
+        if (fparam != NULL)
+          {
+            delete[] fparam;
+            fparam = NULL;
+          }
+
+        if (ret == NULL)
+          stat_tool::wrap_util::throw_error(error);
+
+        if (error.get_nb_error() > 0)
+          {
+            ret->ascii_write(cout, true);
+            delete ret;
+            error_message << error << endl;
+            PyErr_SetString(PyExc_UserWarning, (error_message.str()).c_str());
+            throw_error_already_set();
+          }
+      }
+    return ret;
+  }
+
+  static MultivariateMixture*
+  mixture_estimation_nb_component(const Vectors& v, int nb_component, int nb_iter,
+      boost::python::list force_param)
+  {
+    bool status = true, several_errors = false;
+    MultivariateMixture* ret = NULL;
+    bool *fparam = NULL;
+    StatError error;
+    ostringstream error_message;
+    int nb_fparam, p;
+    const int nb_variables = v.get_nb_variable();
+    object o;
+
+    nb_fparam = boost::python::len(force_param);
+
+    if (nb_fparam > 0)
+      {
+        if (nb_fparam != nb_variables)
+          {
+            status = false;
+            error_message << "bad size of argument list: " << nb_fparam
+                << ": should be the number of variables (" << nb_variables
+                << ")";
+            PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
+            throw_error_already_set();
+          }
+        else
+          {
+            fparam = new bool[nb_fparam];
+            for (p = 0; p < nb_fparam; p++)
+              {
+                o = force_param[p];
+                try
+                  {
+                    extract<bool> x(o);
+                    if (x.check())
+                      fparam[p] = x();
+                    else
+                      status = false;
+                  }
+                catch (...)
+                  {
+                    status = false;
+                  }
+                if (!status)
+                  {
+                    if (several_errors)
+                      error_message << endl;
+                    else
+                      several_errors = true;
+                    error_message << "incorrect type for element " << p
+                        << " of argument list: expecting a boolean";
+                  }
+              }
+            if (!status)
+              {
+                delete[] fparam;
+                fparam = NULL;
+                PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
+                throw_error_already_set();
+              }
+          }
+      }
+    else
+      {
+        nb_fparam = nb_variables;
+        fparam = new bool[nb_fparam];
+        for (p = 0; p < nb_fparam; p++)
+          fparam[p] = false;
+      }
+
+    if (status)
+      {
+
+        ret = v.mixture_estimation(error, cout, nb_component, nb_iter, fparam);
+        if (fparam != NULL)
+          {
+            delete[] fparam;
+            fparam = NULL;
+          }
+
+        if (ret == NULL)
+          stat_tool::wrap_util::throw_error(error);
+
+        if (error.get_nb_error() > 0)
+          {
+            ret->ascii_write(cout, true);
+            delete ret;
+            error_message << error << endl;
+            PyErr_SetString(PyExc_UserWarning, (error_message.str()).c_str());
+            throw_error_already_set();
+          }
+      }
+    return ret;
+  }
+
   static string
   contingency_table(const Vectors& v, int variable1, int variable2,
-      const string& filename, int iformat)
+      const string& filename, char format)
   {
     StatError error;
-    //std::stringstream s;
-    bool display = true;
+    std::stringstream s;
     bool ret;
-    output_format format = output_format(iformat);
-
-    ret = v.contingency_table(error, display, variable1, variable2, filename.c_str(),
+    ret = v.contingency_table(error, s, variable1, variable2, filename.c_str(),
         format);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    return string();
+    return s.str();
   }
 
   static string
   variance_analysis(const Vectors& v, int class_variable,
       int response_variable, int response_type, const string& filename,
-      int iformat)
+      char format)
   {
     StatError error;
-    //std::stringstream s;
-    bool display = true;
-
+    std::stringstream s;
     bool ret;
-    output_format format = output_format(iformat);
 
-    ret = v.variance_analysis(error, display, class_variable, response_variable,
+    ret = v.variance_analysis(error, s, class_variable, response_variable,
         response_type, filename.c_str(), format);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    return string();
+    return s.str();
   }
 
   static string
-  rank_correlation_computation(const Vectors& input, int icorrel_type, const string &filename)
+  rank_correlation_computation(const Vectors& input, int type, const string &filename)
   {
     StatError error;
-    //std::stringstream os;
-    bool display = true;
-
+    std::stringstream os;
     bool ret;
-    correlation_type correl_type = correlation_type(icorrel_type);
-
-    ret = input.rank_correlation_computation(error, display, correl_type, filename.c_str());
+    ret = input.rank_correlation_computation(error, os, type, filename.c_str());
     //std::cout << os.str()<<endl;
-    if (!ret)
-      stat_tool::wrap_util::throw_error(error);
-    return string();
+    return os.str();
   }
 
   static MultiPlotSet*
@@ -837,12 +1035,12 @@ public:
   }
 
   static bool
-  select_bin_width(Vectors &input, int variable, double bin_width)
+  select_step(Vectors &input, int variable, double step)
   {
     StatError error;
     bool ret;
 
-    ret = input.select_bin_width(error, variable, bin_width);
+    ret = input.select_step(error, variable, step);
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
     return ret;
@@ -954,8 +1152,17 @@ class_vectors()
   DEF_RETURN_VALUE("nearest_neighbours_regression", WRAP::nearest_neighbours,
       args("explanatory_var", "response_var", "span", "weighting"),
       "TODO Linear regression (nearest neighbours)")
+  DEF_RETURN_VALUE("mixture_estimation_model", WRAP::mixture_estimation_model,
+      args("initial_mixture", "nb_max_iteration", "force_param"),
+      "TODO Mixture estimation (EM algorithm with initial model)")
+  DEF_RETURN_VALUE("mixture_estimation_nb_component", WRAP::mixture_estimation_nb_component,
+      args("nb_component", "nb_max_iteration", "force_param"),
+      "TODO Mixture estimation (EM algorithm with fixed number of components)")
 
 
+
+  DEF_RETURN_VALUE("mixture_cluster", WRAP::mixture_cluster,
+      args("model"), "TODOCluster individuals using mixture model" )
   DEF_RETURN_VALUE("compare", WRAP::comparison,
       args("distance"), "TODOCompare Vectors given a VectorDistance")
   DEF_RETURN_VALUE("scaling", WRAP::scaling,
@@ -982,9 +1189,9 @@ class_vectors()
       "Save vector data into a file")
   .def("spreadsheet_write", WRAP::spreadsheet_write,
       "Save data into CSV file")
-  .def("select_bin_width", WRAP::select_bin_width,
-    args("variable", "bin_width"), "select_bin_width(bin_width) redefine the bin_width of the histogram. bin_width must be >0")
-  DEF_RETURN_VALUE("get_marginal_histogram", WRAP::get_marginal_histogram,
+  .def("select_step", WRAP::select_step, 
+    args("variable", "step"), "select_step(step) refedine the step of the histogram. Step must be >0")
+  DEF_RETURN_VALUE("get_marginal_histogram", WRAP::get_marginal_histogram, 
     args("variable"), "get_marginal_histogram(nb_variable) construct marginal histogram of the vector given for the variable provided. The variable must be >=0 and less than nb_variable.")
 
   ;
@@ -994,7 +1201,7 @@ class_vectors()
     Vectors (int inb_vector , int *iidentifier , int inb_variable , int *itype ,  bool init_flag = false)
     Vectors(int inb_vector , int *iidentifier , int inb_variable , int *itype ,  int **iint_vector , double **ireal_vector);
     Vectors(const Vectors &vec , int inb_vector , int *index);
-
+    
 
 
 
@@ -1029,7 +1236,7 @@ public:
 
   static boost::shared_ptr<VectorDistance>
   build_from_types(boost::python::list& types, boost::python::list& weigths,
-      metric distance_type)
+      int distance_type)
   {
     VectorDistance* dist;
     int nb_variable;
@@ -1039,17 +1246,17 @@ public:
     stat_tool::wrap_util::auto_ptr_array<double> variable_weight(
         new double[nb_variable]);
 
-    stat_tool::wrap_util::auto_ptr_array<variable_type> var_type(
-        new variable_type[nb_variable]);
+    stat_tool::wrap_util::auto_ptr_array<int> variable_type(
+        new int[nb_variable]);
 
     // Extract each element of the vector
     for (int i = 0; i < nb_variable; i++)
       {
-        var_type[i] = boost::python::extract<stat_tool::variable_type>(types[i]);
+        variable_type[i] = boost::python::extract<int>(types[i]);
         variable_weight[i] = boost::python::extract<double>(weigths[i]);
       }
 
-    dist = new VectorDistance(nb_variable, var_type.get(),
+    dist = new VectorDistance(nb_variable, variable_type.get(),
         variable_weight.get(), distance_type);
 
     return boost::shared_ptr<VectorDistance>(dist);
@@ -1060,7 +1267,7 @@ public:
   {
     VectorDistance* dist;
     StatError error;
-    dist = VectorDistance::ascii_read(error, filename);
+    dist = vector_distance_ascii_read(error, filename);
 
     if (!dist)
       stat_tool::wrap_util::throw_error(error);
@@ -1069,7 +1276,7 @@ public:
   }
 
   static void
-  file_ascii_write(const VectorDistance& d, const std::string path, bool exhaustive)
+  file_ascii_write(const VectorDistance& d, const char* path, bool exhaustive)
   {
     bool result = true;
     StatError error;

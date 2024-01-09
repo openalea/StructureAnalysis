@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """tests on mv_mixture"""
-__version__ = "$Id$"
+__version__ = "$Id: test_multivariate_mixture_functional.py 9869 2010-11-04 17:31:41Z dbarbeau $"
 
 
 from openalea.stat_tool.multivariate_mixture import _MultivariateMixture

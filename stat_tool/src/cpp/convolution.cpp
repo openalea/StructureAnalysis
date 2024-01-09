@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: convolution.cpp 17984 2015-04-23 06:42:25Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -37,31 +37,29 @@
 
 
 #include <math.h>
-
 #include <sstream>
-#include <string>
-#include <vector>
 
-#include <boost/tokenizer.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/classification.hpp>
+#include "tool/rw_tokenizer.h"
+#include "tool/rw_cstring.h"
+#include "tool/rw_locale.h"
 
+#include "stat_tools.h"
+#include "distribution.h"
 #include "convolution.h"
 #include "stat_label.h"
 
 using namespace std;
-using namespace boost;
 
 
 namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Default constructor of the Convolution class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par defaut de la classe Convolution.
+ *
+ *--------------------------------------------------------------*/
 
 Convolution::Convolution()
 
@@ -72,19 +70,18 @@ Convolution::Convolution()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Convolution class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_dist number of distributions,
- *  \param[in] pdist   pointer on the elementary distributions.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Convolution.
+ *
+ *  arguments : nombre de lois elementaires, pointeurs sur les lois elementaires.
+ *
+ *--------------------------------------------------------------*/
 
 Convolution::Convolution(int nb_dist , const DiscreteParametric **pdist)
 
 {
-  int i;
+  register int i;
   int cnb_value = 1;
 
 
@@ -93,7 +90,7 @@ Convolution::Convolution(int nb_dist , const DiscreteParametric **pdist)
 
   distribution = new DiscreteParametric*[nb_distribution];
   for (i = 0;i < nb_distribution;i++) {
-    distribution[i] = new DiscreteParametric(*pdist[i] , NORMALIZATION);
+    distribution[i] = new DiscreteParametric(*pdist[i] , 'n');
     cnb_value += distribution[i]->nb_value - 1;
   }
 
@@ -102,44 +99,13 @@ Convolution::Convolution(int nb_dist , const DiscreteParametric **pdist)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Convolution class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_dist number of distributions,
- *  \param[in] pdist   pointer on the elementary distributions.
- */
-/*--------------------------------------------------------------*/
-
-Convolution::Convolution(int nb_dist , const vector<DiscreteParametric> idist)
-
-{
-  int i;
-  int cnb_value = 1;
-
-
-  convolution_data = NULL;
-  nb_distribution = nb_dist;
-
-  distribution = new DiscreteParametric*[nb_distribution];
-  for (i = 0;i < nb_distribution;i++) {
-    distribution[i] = new DiscreteParametric(idist[i] , NORMALIZATION);
-    cnb_value += distribution[i]->nb_value - 1;
-  }
-
-  Distribution::init(cnb_value);
-  computation(1 , CONVOLUTION_THRESHOLD);
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Convolution class.
+ *  Constructeur de la classe Convolution.
  *
- *  \param[in] known_dist   reference on the known distribution,
- *  \param[in] unknown_dist reference on the unknown distribution.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : references sur la loi connue et sur la loi inconnue.
+ *
+ *--------------------------------------------------------------*/
 
 Convolution::Convolution(const DiscreteParametric &known_dist ,
                          const DiscreteParametric &unknown_dist)
@@ -156,28 +122,27 @@ Convolution::Convolution(const DiscreteParametric &known_dist ,
                                              known_dist.probability , CONVOLUTION_THRESHOLD);
   }
   else {
-    distribution[0] = new DiscreteParametric(known_dist , NORMALIZATION);
+    distribution[0] = new DiscreteParametric(known_dist , 'n');
   }
-  distribution[1] = new DiscreteParametric(unknown_dist , DISTRIBUTION_COPY ,
-                                           (int)(unknown_dist.nb_value * NB_VALUE_COEFF));
+  distribution[1] = new DiscreteParametric(unknown_dist , 'c' , (int)(unknown_dist.nb_value * NB_VALUE_COEFF));
 
   Distribution::init(distribution[0]->alloc_nb_value + distribution[1]->alloc_nb_value - 1);
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Convolution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] convol    reference on a Convolution object,
- *  \param[in] data_flag flag copy of the included ConvolutionData object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Convolution.
+ *
+ *  arguments : reference sur un objet Convolution,
+ *              flag copie de l'objet ConvolutionData.
+ *
+ *--------------------------------------------------------------*/
 
 void Convolution::copy(const Convolution &convol , bool data_flag)
 
 {
-  int i;
+  register int i;
 
 
   if ((data_flag) && (convol.convolution_data)) {
@@ -196,11 +161,11 @@ void Convolution::copy(const Convolution &convol , bool data_flag)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the data members of a Convolution object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet Convolution.
+ *
+ *--------------------------------------------------------------*/
 
 void Convolution::remove()
 
@@ -208,7 +173,7 @@ void Convolution::remove()
   delete convolution_data;
 
   if (distribution) {
-    int i;
+    register int i;
 
     for (i = 0;i < nb_distribution;i++) {
       delete distribution[i];
@@ -218,11 +183,11 @@ void Convolution::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the Convolution class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe Convolution.
+ *
+ *--------------------------------------------------------------*/
 
 Convolution::~Convolution()
 
@@ -231,15 +196,13 @@ Convolution::~Convolution()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the Convolution class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] convol reference on a Convolution object.
+ *  Operateur d'assignement de la classe Convolution.
  *
- *  \return           Convolution object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet Convolution.
+ *
+ *--------------------------------------------------------------*/
 
 Convolution& Convolution::operator=(const Convolution &convol)
 
@@ -257,16 +220,13 @@ Convolution& Convolution::operator=(const Convolution &convol)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of an elementary distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] index distribution index.
+ *  Extraction d'une loi elementaire.
  *
- *  \return          DiscreteParametricModel object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la loi.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteParametricModel* Convolution::extract(StatError &error , int index) const
 
@@ -289,15 +249,13 @@ DiscreteParametricModel* Convolution::extract(StatError &error , int index) cons
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of the data part of a Convolution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Extraction de la partie "donnees" d'un objet Convolution.
  *
- *  \return          ConvolutionData object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
 
 ConvolutionData* Convolution::extract_data(StatError &error) const
 
@@ -321,20 +279,17 @@ ConvolutionData* Convolution::extract_data(StatError &error) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a Convolution object on the basis of
- *         elementary distributions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error   reference on a StatError object,
- *  \param[in] nb_dist number of distributions,
- *  \param[in] dist    pointer on the distributions.
+ *  Construction d'un objet Convolution a partir de lois elementaires.
  *
- *  \return            Convolution object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, nombre de lois elementaires,
+ *              pointeurs sur les lois elementaires.
+ *
+ *--------------------------------------------------------------*/
 
-Convolution* Convolution::building(StatError &error , int nb_dist , const DiscreteParametric **dist)
+Convolution* convolution_building(StatError &error , int nb_dist ,
+                                  const DiscreteParametric **dist)
 
 {
   Convolution *convol;
@@ -355,65 +310,29 @@ Convolution* Convolution::building(StatError &error , int nb_dist , const Discre
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a Convolution object on the basis of
- *         elementary distributions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error   reference on a StatError object,
- *  \param[in] nb_dist number of distributions,
- *  \param[in] dist    pointer on the distributions.
+ *  Construction d'un objet Convolution a partir d'un fichier.
  *
- *  \return            Convolution object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              seuil sur la fonction de repartition.
+ *
+ *--------------------------------------------------------------*/
 
-Convolution* Convolution::building(StatError &error , int nb_dist , const vector<DiscreteParametric> dist)
+Convolution* convolution_ascii_read(StatError &error , const char *path ,
+                                    double cumul_threshold)
 
 {
-  Convolution *convol;
-
-
-  error.init();
-
-  if ((nb_dist < 2) || (nb_dist > CONVOLUTION_NB_DISTRIBUTION)) {
-    convol = NULL;
-    error.update(STAT_parsing[STATP_NB_DISTRIBUTION]);
-  }
-
-  else {
-    convol = new Convolution(nb_dist , dist);
-  }
-
-  return convol;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a Convolution object from a file.
- *
- *  \param[in]  error           reference on a StatError object,
- *  \param[in]  path            file path,
- *  \param[in]  cumul_threshold threshold on the cumulative distribution function.
- *
- *  \return                     Convolution object.
- */
-/*--------------------------------------------------------------*/
-
-Convolution* Convolution::ascii_read(StatError &error , const string path , double cumul_threshold)
-
-{
-  string buffer;
+  RWLocaleSnapshot locale("en");
+  RWCString buffer , token;
   size_t position;
-  typedef tokenizer<char_separator<char>> tokenizer;
-  char_separator<char> separator(" \t");
   bool status , lstatus;
-  int i , j;
-  int line , nb_dist , index;
+  register int i , j;
+  int line;
+  long index , nb_dist;
   const DiscreteParametric **dist;
   Convolution *convol;
-  ifstream in_file(path.c_str());
+  ifstream in_file(path);
 
 
   convol = NULL;
@@ -428,47 +347,38 @@ Convolution* Convolution::ascii_read(StatError &error , const string path , doub
     line = 0;
     nb_dist = 0;
 
-    while (getline(in_file , buffer)) {
+    while (buffer.readLine(in_file , false)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.find('#');
-      if (position != string::npos) {
-        buffer.erase(position);
+      position = buffer.first('#');
+      if (position != RW_NPOS) {
+        buffer.remove(position);
       }
       i = 0;
 
-      tokenizer tok_buffer(buffer , separator);
+      RWCTokenizer next(buffer);
 
-      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+      while (!((token = next()).isNull())) {
         switch (i) {
 
-        // test CONVOLUTION keyword
+        // test mot cle CONVOLUTION
 
         case 0 : {
-          if (*token != STAT_word[STATW_CONVOLUTION]) {
+          if (token != STAT_word[STATW_CONVOLUTION]) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_CONVOLUTION] , line , i + 1);
+            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_CONVOLUTION] , line , i + 1);
           }
           break;
         }
 
-        // test number of distributions
+        // test nombre de lois
 
         case 1 : {
-          lstatus = true;
-
-/*          try {
-            nb_dist = stoi(*token);   in C++ 11
-          }
-          catch(invalid_argument &arg) {
-            lstatus = false;
-          } */
-          nb_dist = atoi(token->c_str());
-
+          lstatus = locale.stringToNum(token , &nb_dist);
           if ((lstatus) && ((nb_dist < 2) || (nb_dist > CONVOLUTION_NB_DISTRIBUTION))) {
             lstatus = false;
           }
@@ -480,12 +390,12 @@ Convolution* Convolution::ascii_read(StatError &error , const string path , doub
           break;
         }
 
-        // test DISTRIBUTIONS keyword
+        // test mot cle DISTRIBUTIONS
 
         case 2 : {
-          if (*token != STAT_word[STATW_DISTRIBUTIONS]) {
+          if (token != STAT_word[STATW_DISTRIBUTIONS]) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_DISTRIBUTIONS] , line , i + 1);
+            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_DISTRIBUTIONS] , line , i + 1);
           }
           break;
         }
@@ -516,47 +426,38 @@ Convolution* Convolution::ascii_read(StatError &error , const string path , doub
       }
 
       for (i = 0;i < nb_dist;i++) {
-        while (getline(in_file , buffer)) {
+        while (buffer.readLine(in_file , false)) {
           line++;
 
 #         ifdef DEBUG
           cout << line << "  " << buffer << endl;
 #         endif
 
-          position = buffer.find('#');
-          if (position != string::npos) {
-            buffer.erase(position);
+          position = buffer.first('#');
+          if (position != RW_NPOS) {
+            buffer.remove(position);
           }
           j = 0;
 
-          tokenizer tok_buffer(buffer , separator);
+          RWCTokenizer next(buffer);
 
-          for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+          while (!((token = next()).isNull())) {
             switch (j) {
 
-            // test DISTRIBUTION keyword
+            // test mot cle DISTRIBUTION
 
             case 0 : {
-              if (*token != STAT_word[STATW_DISTRIBUTION]) {
+              if (token != STAT_word[STATW_DISTRIBUTION]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_DISTRIBUTION] , line , j + 1);
+                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_DISTRIBUTION] , line , j + 1);
               }
               break;
             }
 
-            // test distribution index
+            // test indice de la loi
 
             case 1 : {
-              lstatus = true;
-
-/*              try {
-                index = stoi(*token);   in C++ 11
-              }
-              catch(invalid_argument &arg) {
-                lstatus = false;
-              } */
-              index = atoi(token->c_str());
-
+              lstatus = locale.stringToNum(token , &index);
               if ((lstatus) && (index != i + 1)) {
                 lstatus = false;
               }
@@ -578,7 +479,7 @@ Convolution* Convolution::ascii_read(StatError &error , const string path , doub
               error.update(STAT_parsing[STATP_FORMAT] , line);
             }
 
-            dist[i] = DiscreteParametric::parsing(error , in_file , line ,
+            dist[i] = discrete_parametric_parsing(error , in_file , line ,
                                                   NEGATIVE_BINOMIAL , cumul_threshold);
             break;
           }
@@ -590,18 +491,18 @@ Convolution* Convolution::ascii_read(StatError &error , const string path , doub
         }
       }
 
-      while (getline(in_file , buffer)) {
+      while (buffer.readLine(in_file , false)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.find('#');
-        if (position != string::npos) {
-          buffer.erase(position);
+        position = buffer.first('#');
+        if (position != RW_NPOS) {
+          buffer.remove(position);
         }
-        if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
+        if (!(buffer.isNull())) {
           status = false;
           error.update(STAT_parsing[STATP_FORMAT] , line);
         }
@@ -622,13 +523,13 @@ Convolution* Convolution::ascii_read(StatError &error , const string path , doub
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing on a single line of a Convolution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture sur une ligne d'un objet Convolution.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Convolution::line_write(ostream &os) const
 
@@ -641,23 +542,21 @@ ostream& Convolution::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a convolution of distributions and the associated
- *         frequency distributions in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os           stream,
- *  \param[in]     convol_histo pointer on a ConvolutionData object,
- *  \param[in]     exhaustive   flag detail level,
- *  \param[in]     file_flag    flag file output.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un produit de convolution et de la structure
+ *  de donnees associee dans un fichier.
+ *
+ *  arguments : stream, pointeur sur un objet ConvolutionData,
+ *              flag niveau de detail, flag fichier.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Convolution::ascii_write(ostream &os , const ConvolutionData *convol_histo ,
                                   bool exhaustive , bool file_flag) const
 
 {
-  int i;
+  register int i;
   double scale[CONVOLUTION_NB_DISTRIBUTION];
   const Distribution *pdist[CONVOLUTION_NB_DISTRIBUTION];
 
@@ -785,14 +684,13 @@ ostream& Convolution::ascii_write(ostream &os , const ConvolutionData *convol_hi
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Convolution object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet Convolution.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Convolution::ascii_write(ostream &os , bool exhaustive) const
 
@@ -801,24 +699,21 @@ ostream& Convolution::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Convolution object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet Convolution dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool Convolution::ascii_write(StatError &error , const string path ,
+bool Convolution::ascii_write(StatError &error , const char *path ,
                               bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -837,20 +732,19 @@ bool Convolution::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a convolution of distributions and the associated
- *         frequency distributions in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os           stream,
- *  \param[in]     convol_histo pointer on a ConvolutionData object.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un produit de convolution et de la structure
+ *  de donnees associee dans un fichier au format tableur.
+ *
+ *  arguments : stream, pointeur sur un objet ConvolutionData.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Convolution::spreadsheet_write(ostream &os , const ConvolutionData *convol_histo) const
 
 {
-  int i;
+  register int i;
   double scale[CONVOLUTION_NB_DISTRIBUTION];
   const Distribution *pdist[CONVOLUTION_NB_DISTRIBUTION];
 
@@ -935,22 +829,19 @@ ostream& Convolution::spreadsheet_write(ostream &os , const ConvolutionData *con
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Convolution object in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet Convolution dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool Convolution::spreadsheet_write(StatError &error , const string path) const
+bool Convolution::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -969,32 +860,29 @@ bool Convolution::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a convolution of distributions and the associated
- *         frequency distributions using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] prefix       file prefix,
- *  \param[in] title        figure title,
- *  \param[in] convol_histo pointer on a ConvolutionData object.
+ *  Sortie Gnuplot d'un produit de convolution et
+ *  de la structure de donnees associee.
  *
- *  \return                 error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : prefixe des fichiers, titre des figures,
+ *              pointeur sur un objet ConvolutionData.
+ *
+ *--------------------------------------------------------------*/
 
 bool Convolution::plot_write(const char *prefix , const char *title ,
                              const ConvolutionData *convol_histo) const
 
 {
   bool status;
-  int i , j;
+  register int i , j;
   double plot_max , scale[CONVOLUTION_NB_DISTRIBUTION + 2];
   const Distribution *pdist[CONVOLUTION_NB_DISTRIBUTION + 2];
   const FrequencyDistribution *phisto[CONVOLUTION_NB_DISTRIBUTION + 1];
   ostringstream data_file_name[CONVOLUTION_NB_DISTRIBUTION + 1];
 
 
-  // writing of the data files
+  // ecriture des fichiers de donnees
 
   data_file_name[0] << prefix << ".dat";
 
@@ -1026,7 +914,7 @@ bool Convolution::plot_write(const char *prefix , const char *title ,
       distribution[i]->plot_print((data_file_name[i + 1].str()).c_str());
     }
 
-    // writing of the script files
+    // ecriture du fichier de commandes et du fichier d'impression
 
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
@@ -1139,17 +1027,14 @@ bool Convolution::plot_write(const char *prefix , const char *title ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a Convolution object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title.
+ *  Sortie Gnuplot d'un objet Convolution.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool Convolution::plot_write(StatError &error , const char *prefix ,
                              const char *title) const
@@ -1167,21 +1052,19 @@ bool Convolution::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a convolution of distributions and the associated
- *         frequency distributions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] convol_histo pointer on a ConvolutionData object.
+ *  Sortie graphique d'un produit de convolution et
+ *  de la structure de donnees associee.
  *
- *  \return                 MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : pointeur sur un objet ConvolutionData.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* Convolution::get_plotable(const ConvolutionData *convol_histo) const
 
 {
-  int i;
+  register int i;
   int xmax;
   double ymax;
   ostringstream title , legend;
@@ -1199,7 +1082,7 @@ MultiPlotSet* Convolution::get_plotable(const ConvolutionData *convol_histo) con
 
   plot.border = "15 lw 0";
 
-  // convolution of distributions
+  // 1ere vue : produit de convolution
 
   xmax = nb_value - 1;
   if ((cumul[xmax] > 1. - DOUBLE_ERROR) &&
@@ -1241,7 +1124,7 @@ MultiPlotSet* Convolution::get_plotable(const ConvolutionData *convol_histo) con
 
   if (convol_histo) {
 
-    // fit of convolution
+    // 2eme vue : produit de convolution ajuste
 
     plot[1].xrange = Range(0 , xmax);
     plot[1].yrange = Range(0. , ceil(MAX(convol_histo->max ,
@@ -1265,7 +1148,7 @@ MultiPlotSet* Convolution::get_plotable(const ConvolutionData *convol_histo) con
 
     plotable_mass_write(plot[1][1] , convol_histo->nb_element);
 
-    // cumulative distribution functions
+    // 3eme vue : fonctions de repartition
 
     plot[2].xrange = Range(0 , xmax);
     plot[2].yrange = Range(0. , 1.);
@@ -1296,7 +1179,7 @@ MultiPlotSet* Convolution::get_plotable(const ConvolutionData *convol_histo) con
 
     for (i = 0;i < nb_distribution;i++) {
 
-      // fit of elementary distributions
+      // vues suivantes : distributions ajustees
 
       xmax = distribution[i]->nb_value - 1;
       if ((distribution[i]->cumul[xmax] > 1. - DOUBLE_ERROR) &&
@@ -1338,13 +1221,11 @@ MultiPlotSet* Convolution::get_plotable(const ConvolutionData *convol_histo) con
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a Convolution object.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet Convolution.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* Convolution::get_plotable() const
 
@@ -1353,11 +1234,11 @@ MultiPlotSet* Convolution::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Default constructor of the ConvolutionData class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par defaut de la classe ConvolutionData.
+ *
+ *--------------------------------------------------------------*/
 
 ConvolutionData::ConvolutionData()
 
@@ -1368,20 +1249,20 @@ ConvolutionData::ConvolutionData()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the ConvolutionData class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo   reference on a FrequencyDistribution object,
- *  \param[in] nb_dist number of frequency distributions.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe ConvolutionData.
+ *
+ *  arguments : reference sur un objet FrequencyDistribution,
+ *              nombre de lois empiriques.
+ *
+ *--------------------------------------------------------------*/
 
 ConvolutionData::ConvolutionData(const FrequencyDistribution &histo , int nb_dist)
 :FrequencyDistribution(histo)
 
 {
-  int i;
+  register int i;
 
 
   convolution = NULL;
@@ -1394,19 +1275,19 @@ ConvolutionData::ConvolutionData(const FrequencyDistribution &histo , int nb_dis
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the ConvolutionData class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] convol reference on a Convolution object.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe ConvolutionData.
+ *
+ *  argument : reference sur un objet Convolution.
+ *
+ *--------------------------------------------------------------*/
 
 ConvolutionData::ConvolutionData(const Convolution &convol)
 :FrequencyDistribution(convol)
 
 {
-  int i;
+  register int i;
 
 
   convolution = NULL;
@@ -1419,19 +1300,19 @@ ConvolutionData::ConvolutionData(const Convolution &convol)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a ConvolutionData object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] convol_histo reference on a ConvolutionData object,
- *  \param[in] model_flag   flag copy of the included Convolution object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet ConvolutionData.
+ *
+ *  arguments : reference sur un objet ConvolutionData,
+ *              flag copie de l'objet Convolution.
+ *
+ *--------------------------------------------------------------*/
 
 void ConvolutionData::copy(const ConvolutionData &convol_histo , bool model_flag)
 
 {
-  int i;
+  register int i;
 
 
   if ((model_flag) && (convol_histo.convolution)) {
@@ -1450,11 +1331,11 @@ void ConvolutionData::copy(const ConvolutionData &convol_histo , bool model_flag
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the data members of a ConvolutionData object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet ConvolutionData.
+ *
+ *--------------------------------------------------------------*/
 
 void ConvolutionData::remove()
 
@@ -1462,7 +1343,7 @@ void ConvolutionData::remove()
   delete convolution;
 
   if (frequency_distribution) {
-    int i;
+    register int i;
 
     for (i = 0;i < nb_distribution;i++) {
       delete frequency_distribution[i];
@@ -1472,11 +1353,11 @@ void ConvolutionData::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the ConvolutionData class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe ConvolutionData.
+ *
+ *--------------------------------------------------------------*/
 
 ConvolutionData::~ConvolutionData()
 
@@ -1485,15 +1366,13 @@ ConvolutionData::~ConvolutionData()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the ConvolutionData class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] convol_histo reference on a ConvolutionData object.
+ *  Operateur d'assignement de la classe ConvolutionData.
  *
- *  \return                 ConvolutionData object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet ConvolutionData.
+ *
+ *--------------------------------------------------------------*/
 
 ConvolutionData& ConvolutionData::operator=(const ConvolutionData &convol_histo)
 
@@ -1510,16 +1389,13 @@ ConvolutionData& ConvolutionData::operator=(const ConvolutionData &convol_histo)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of an elementary frequency distribution.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] index  frequency distribution index.
+ *  Extraction de lois empiriques elementaires.
  *
- *  \return           DiscreteDistributionData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la loi empirique.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteDistributionData* ConvolutionData::extract(StatError &error , int index) const
 
@@ -1544,13 +1420,13 @@ DiscreteDistributionData* ConvolutionData::extract(StatError &error , int index)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing on a single line of a ConvolutionData object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture sur une ligne d'un objet ConvolutionData.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& ConvolutionData::line_write(ostream &os) const
 
@@ -1563,14 +1439,13 @@ ostream& ConvolutionData::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a ConvolutionData object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet ConvolutionData.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& ConvolutionData::ascii_write(ostream &os , bool exhaustive) const
 
@@ -1583,19 +1458,16 @@ ostream& ConvolutionData::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a ConvolutionData object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet ConvolutionData dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool ConvolutionData::ascii_write(StatError &error , const string path ,
+bool ConvolutionData::ascii_write(StatError &error , const char *path ,
                                   bool exhaustive) const
 
 {
@@ -1603,7 +1475,7 @@ bool ConvolutionData::ascii_write(StatError &error , const string path ,
 
 
   if (convolution) {
-    ofstream out_file(path.c_str());
+    ofstream out_file(path);
 
     error.init();
 
@@ -1622,25 +1494,22 @@ bool ConvolutionData::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a ConvolutionData object in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet ConvolutionData dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool ConvolutionData::spreadsheet_write(StatError &error , const string path) const
+bool ConvolutionData::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status = false;
 
 
   if (convolution) {
-    ofstream out_file(path.c_str());
+    ofstream out_file(path);
 
     error.init();
 
@@ -1659,17 +1528,14 @@ bool ConvolutionData::spreadsheet_write(StatError &error , const string path) co
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a ConvolutionData object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title.
+ *  Sortie Gnuplot d'un objet ConvolutionData.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool ConvolutionData::plot_write(StatError &error , const char *prefix ,
                                  const char *title) const
@@ -1692,13 +1558,11 @@ bool ConvolutionData::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a ConvolutionData object.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet ConvolutionData.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* ConvolutionData::get_plotable() const
 

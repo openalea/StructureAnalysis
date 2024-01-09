@@ -1,5 +1,5 @@
 """ Regression tests"""
-__version__ = "$Id$"
+__version__ = "$Id: test_regression.py 9266 2010-07-11 13:02:34Z cokelaer $"
 
 
 from openalea.stat_tool.regression import Regression

@@ -3,7 +3,7 @@ of stat_tool_test.aml
 
 
 """
-__version__ = "$Id$"
+__version__ = "$Id: test_compound_functional.py 9325 2010-07-28 12:41:30Z cokelaer $"
 
 
 from openalea.stat_tool import Compound, Histogram, Distribution

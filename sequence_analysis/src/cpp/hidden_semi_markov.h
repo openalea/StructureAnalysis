@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: hidden_semi_markov.h 18051 2015-04-23 09:43:41Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -39,8 +39,7 @@
 #ifndef HIDDEN_SEMI_MARKOV_H
 #define HIDDEN_SEMI_MARKOV_H
 
-
-#include "semi_markov.h"
+//#include <vector>
 
 
 namespace sequence_analysis {
@@ -49,76 +48,71 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Constants
+ *  Constantes :
  */
 
 
-  const double SEMI_MARKOV_LIKELIHOOD_DIFF = 1.e-6;  // threshold for stopping the EM iterations
-  const int EXPLORATION_NB_ITER = 10;    // number of iterations, exploration phase
-  const int STOCHASTIC_EXPLORATION_NB_ITER = 5;  // number of iterations, exploration phase (MCEM algorithm)
-  const int SEMI_MARKOV_NB_ITER = 500;   // maximum number of EM iterations
+  const double SEMI_MARKOV_LIKELIHOOD_DIFF = 1.e-6;  /// seuil pour stopper les iterations EM
+  const int EXPLORATION_NB_ITER = 10;    // nombre d'iterations de la phase d'exploration
+  const int STOCHASTIC_EXPLORATION_NB_ITER = 5;  // nombre d'iterations de la phase d'exploration
+  const int SEMI_MARKOV_NB_ITER = 500;   // nombre maximum d'iterations EM
 
-  const double MIN_SMOOTHED_PROBABILITY = 1.e-3;  // threshold on the smoothed probabilities
+  const double MIN_SMOOTHED_PROBABILITY = 1.e-3;  // seuil sur les probabilites lissees
 
-  enum state_profile {
-    SSTATE ,                             // state
-    IN_STATE ,                           // state entering
-    OUT_STATE                            // state exit
+  enum {
+    SSTATE ,                             // etat
+    IN_STATE ,                           // entree etat
+    OUT_STATE                            // sortie etat
   };
 
 
 
 /****************************************************************
  *
- *  Class definition
+ *  Definition des classes :
  */
 
 
-  /// \brief Hidden semi-Markov chain
-
-  class HiddenSemiMarkov : public SemiMarkov {
+  class HiddenSemiMarkov : public SemiMarkov {  // semi-chaine de Markov cachee
 
     friend class MarkovianSequences;
 
+    friend HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *path ,
+                                                           int length,
+                                                           bool counting_flag ,
+                                                           double cumul_threshold ,
+                                                           bool old_format );
     friend std::ostream& operator<<(std::ostream &os , const HiddenSemiMarkov &hsmarkov)
     { return hsmarkov.ascii_write(os); }
 
   private :
-
-    HiddenSemiMarkov(stat_tool::process_type itype , int inb_state , int inb_output_process , int *nb_value)
-    :SemiMarkov(itype , inb_state , inb_output_process , nb_value) {}
+    HiddenSemiMarkov(char itype , int inb_state , int inb_output_process , int *nb_value)
+    :SemiMarkov(itype , inb_state , inb_output_process , nb_value), likelihood(100) {}
 
     int end_state() const;
 
     void forward_backward(SemiMarkovData &seq) const;
-    double forward_backward(MarkovianSequences &seq , int index , std::ostream *os ,
-                            stat_tool::MultiPlotSet *plot_set ,
-                            state_profile output , stat_tool::output_format format ,
+    double forward_backward(const MarkovianSequences &seq , int index , std::ostream *os ,
+                            stat_tool::MultiPlotSet *plot_set , int output , char format ,
                             double &max_marginal_entropy , double &entropy1) const;
-    double forward_backward_sampling(const MarkovianSequences &seq , int index , std::ostream &os ,
-                                     stat_tool::output_format format = stat_tool::ASCII ,
+    double forward_backward_sampling(const MarkovianSequences &seq , int index ,
+                                     std::ostream &os , char format = 'a' ,
                                      int nb_state_sequence = NB_STATE_SEQUENCE) const;
 
-    void log_computation();
+    void log_computation();  /// calcul des log probabilites
     double viterbi(const MarkovianSequences &seq , double *posterior_probability ,
-                   int index = stat_tool::I_DEFAULT) const;
+                   int index = I_DEFAULT) const;
     void viterbi(SemiMarkovData &seq) const;
     double generalized_viterbi(const MarkovianSequences &seq , int index , std::ostream &os ,
-                               double seq_likelihood , stat_tool::output_format format ,
-                               int inb_state_sequence) const;
+                               double seq_likelihood , char format , int inb_state_sequence) const;
     double viterbi_forward_backward(const MarkovianSequences &seq , int index ,
-                                    std::ostream *os , stat_tool::MultiPlot *plot ,
-                                    state_profile output , stat_tool::output_format format ,
-                                    double seq_likelihood = stat_tool::D_INF) const;
-
-    bool state_profile_write(StatError &error , std::ostream &os , const MarkovianSequences &iseq ,
-                             int identifier , state_profile output = SSTATE ,
-                             stat_tool::output_format format = stat_tool::ASCII ,
-                             latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
-                             int nb_state_sequence = NB_STATE_SEQUENCE) const;
+                                    std::ostream *os , stat_tool::MultiPlot *plot , int output ,
+                                    char format , double seq_likelihood = D_INF) const;
 
   public :
-
+    std::vector<double> likelihood;
+    std::vector<double> bic;
+    std::vector<double> nb_param;
     HiddenSemiMarkov() {}
     HiddenSemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
                      int inb_output_process , stat_tool::CategoricalProcess **pobservation ,
@@ -134,56 +128,53 @@ namespace sequence_analysis {
                 discrete_parametric_observation ,
                 continuous_parametric_observation , length , counting_flag) {}
     HiddenSemiMarkov(const HiddenSemiMarkov &hsmarkov , bool data_flag = true ,
-                     int param = stat_tool::I_DEFAULT)
+                     int param = I_DEFAULT)
     :SemiMarkov(hsmarkov , data_flag , param) {}
     ~HiddenSemiMarkov();
 
     HiddenSemiMarkov* thresholding(double min_probability = MIN_PROBABILITY) const;
 
-    static HiddenSemiMarkov* ascii_read(StatError &error , const std::string path ,
-                                        int length = DEFAULT_LENGTH ,
-                                        bool counting_flag = true ,
-                                        double cumul_threshold = OCCUPANCY_THRESHOLD ,
-                                        bool old_format = false);
-
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
 
     double likelihood_computation(const MarkovianSequences &seq , double *posterior_probability = NULL ,
-                                  int index = stat_tool::I_DEFAULT) const;
+                                  int index = I_DEFAULT) const;
 
-    bool state_profile_ascii_write(StatError &error , const MarkovianSequences &iseq ,
-                                   int identifier , state_profile output = SSTATE ,
-                                   latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
-                                   int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_write(StatError &error , const std::string path , const MarkovianSequences &iseq ,
-                             int identifier , state_profile output = SSTATE ,
-                             stat_tool::output_format format = stat_tool::ASCII ,
-                             latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
+    bool state_profile_write(StatError &error , std::ostream &os , const MarkovianSequences &iseq ,
+                             int identifier = I_DEFAULT , int output = SSTATE ,
+                             char format = 'a' , int state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_ascii_write(StatError &error , int identifier , state_profile output = SSTATE ,
-                                   latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
-                                   int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_write(StatError &error , const std::string path ,
-                             int identifier , state_profile output = SSTATE ,
-                             stat_tool::output_format format = stat_tool::ASCII ,
-                             latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
+    bool state_profile_write(StatError &error , const char *path , const MarkovianSequences &iseq ,
+                             int identifier = I_DEFAULT , int output = SSTATE ,
+                             char format = 'a' , int state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
-
+    bool state_profile_ascii_write(StatError &error , std::ostream &os , int identifier ,
+                                   int output = SSTATE , int state_sequence = GENERALIZED_VITERBI ,
+                                   int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_write(StatError &error, const char* path, int identifier, int output=SSTATE,
+                                   int state_sequence=GENERALIZED_VITERBI,
+                                   int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_write(StatError &error , const char *path ,
+                             int identifier = I_DEFAULT , int output = SSTATE ,
+                             char format = 'a' , int state_sequence = GENERALIZED_VITERBI ,
+                             int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_spreadsheet_write(StatError &error, const char* path, int identifier, int output=SSTATE,
+                                         int state_sequence=GENERALIZED_VITERBI,
+                                         int nb_state_sequence=NB_STATE_SEQUENCE) const;
     bool state_profile_plot_write(StatError &error , const char *prefix ,
                                   const MarkovianSequences &iseq , int identifier ,
-                                  state_profile output = SSTATE , const char *title = NULL) const;
+                                  int output = SSTATE , const char *title = NULL) const;
     bool state_profile_plot_write(StatError &error , const char *prefix , int identifier ,
-                                  state_profile output = SSTATE , const char *title = NULL) const;
+                                  int output = SSTATE , const char *title = NULL) const;
 
     stat_tool::MultiPlotSet* state_profile_plotable_write(StatError &error ,
                                                           const MarkovianSequences &iseq ,
-                                                          int identifier , state_profile output = SSTATE) const;
+                                                          int identifier , int output = SSTATE) const;
     stat_tool::MultiPlotSet* state_profile_plotable_write(StatError &error ,
-                                                          int identifier , state_profile output = SSTATE) const;
+                                                          int identifier , int output = SSTATE) const;
 
-    SemiMarkovData* state_sequence_computation(StatError &error , bool display ,
+    SemiMarkovData* state_sequence_computation(StatError &error , ostream &os ,
                                                const MarkovianSequences &seq ,
                                                bool characteristic_flag = true) const;
 
@@ -194,17 +185,24 @@ namespace sequence_analysis {
     SemiMarkovData* simulation(StatError &error , int nb_sequence ,
                                const MarkovianSequences &iseq , bool counting_flag = true) const;
 
-    stat_tool::DistanceMatrix* divergence_computation(StatError &error , bool display , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
                                                       const HiddenSemiMarkov **ihsmarkov ,
                                                       stat_tool::FrequencyDistribution **hlength ,
-                                                      const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(StatError &error , bool display , int nb_model ,
+                                                      const char *path = NULL) const;
+    stat_tool::DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
                                                       const HiddenSemiMarkov **hsmarkov , int nb_sequence ,
-                                                      int length , const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(StatError &error , bool display , int nb_model ,
+                                                      int length , const char *path = NULL) const;
+    stat_tool::DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
                                                       const HiddenSemiMarkov **hsmarkov , int nb_sequence ,
-                                                      const MarkovianSequences **seq , const std::string path = "") const;
+                                                      const MarkovianSequences **seq , const char *path = NULL) const;
   };
+
+
+  HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *path ,
+                                                  int length = DEFAULT_LENGTH ,
+                                                  bool counting_flag = true ,
+                                                  double cumul_threshold = OCCUPANCY_THRESHOLD ,
+                                                  bool old_format = false);
 
 
 };  // namespace sequence_analysis

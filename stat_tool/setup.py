@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-__revision__ = "$Id$"
+__revision__ = "$Id: setup.py 17627 2014-11-05 10:22:47Z pradal $"
 
 """setup file for stat_tool package"""
 
-__revision__ = "$Id$"
+__revision__ = "$Id: setup.py 17627 2014-11-05 10:22:47Z pradal $"
 
 import os, sys
 from setuptools import setup, find_packages
@@ -53,12 +53,10 @@ if __name__ == '__main__':
 
           # Packages
           packages=['openalea', 
-                    'openalea.stat_tool',
-                    'structure_analysis',
-                    'structure_analysis.stat_tool' 
+                    'openalea.stat_tool', 
                     ],
 
-          package_dir={ "openalea.stat_tool" : pj("src","stat_tool"), "structure_analysis" : pj("src", "py", "structure_analysis"), "structure_analysis.stat_tool" : pj("src", "py", "structure_analysis", "stat_tool"), '':'src'},
+          package_dir={ "openalea.stat_tool" : pj("src","stat_tool"), '':'src'  },
           share_dirs = { 'share' : 'share' },
 
 

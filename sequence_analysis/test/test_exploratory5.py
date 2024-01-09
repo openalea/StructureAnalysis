@@ -18,7 +18,7 @@
 #
 #########################################################################
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_exploratory5.py 9885 2010-11-06 18:19:34Z cokelaer $"
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis import get_shared_data
 

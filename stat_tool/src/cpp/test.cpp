@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id: test.cpp 18469 2015-07-29 11:27:56Z guedon $
+ *       $Id: test.cpp 18021 2015-04-23 07:07:14Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -55,16 +55,15 @@ static const double  CRITICAL_PROBABILITY_FACTOR = 1.2;
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Test class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] iident    identifier,
- *  \param[in] ione_side flag one-sided/two-sided.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Test.
+ *
+ *  arguments : identificateur, unilateral/bilateral.
+ *
+ *--------------------------------------------------------------*/
 
-Test::Test(test_distribution iident , bool ione_side)
+Test::Test(int iident , bool ione_side)
 
 {
   ident = iident;
@@ -76,19 +75,16 @@ Test::Test(test_distribution iident , bool ione_side)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Test class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] iident    identifier,
- *  \param[in] ione_side flag one-sided/two-sided,
- *  \param[in] idf1      degrees of freedom,
- *  \param[in] idf2      degrees of freedom,
- *  \param[in] ivalue    value.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Test.
+ *
+ *  arguments : identificateur, unilateral/bilateral, nombres de degres de liberte ,
+ *              valeur.
+ *
+ *--------------------------------------------------------------*/
 
-Test::Test(test_distribution iident , bool ione_side , int idf1 , int idf2 , double ivalue)
+Test::Test(int iident , bool ione_side , int idf1 , int idf2 , double ivalue)
 
 {
   ident = iident;
@@ -100,20 +96,16 @@ Test::Test(test_distribution iident , bool ione_side , int idf1 , int idf2 , dou
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Test class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] iident                identifier,
- *  \param[in] ione_side             flag one-sided/two-sided,
- *  \param[in] idf1                  degrees of freedom,
- *  \param[in] idf2                  degrees of freedom,
- *  \param[in] ivalue                value,
- *  \param[in] icritical_probability critical probability.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Test.
+ *
+ *  arguments : identificateur, unilateral/bilateral, nombres de degres de liberte,
+ *              valeur, probabilite critique.
+ *
+ *--------------------------------------------------------------*/
 
-Test::Test(test_distribution iident , bool ione_side , int idf1 , int idf2 , double ivalue ,
+Test::Test(int iident , bool ione_side , int idf1 , int idf2 , double ivalue ,
            double icritical_probability)
 
 {
@@ -184,13 +176,13 @@ Test::Test(test_distribution iident , bool ione_side , int idf1 , int idf2 , dou
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction by copy of a Test object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] test reference on a Test object.
- */
-/*--------------------------------------------------------------*/
+ *  Construction par copie d'un objet Test.
+ *
+ *  argument : reference sur un objet Test.
+ *
+ *--------------------------------------------------------------*/
 
 void Test::copy(const Test &test)
 
@@ -204,15 +196,13 @@ void Test::copy(const Test &test)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the Test class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] test reference on a Test object.
+ *  Operateur d'assignement de la classe Test.
  *
- *  \return         Test object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet Test.
+ *
+ *--------------------------------------------------------------*/
 
 Test& Test::operator=(const Test &test)
 
@@ -225,15 +215,13 @@ Test& Test::operator=(const Test &test)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the results of a test.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os             stream,
- *  \param[in]     comment_flag   flag comment,
- *  \param[in]     reference_flag flag reference result.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des resultats d'un test parametrique.
+ *
+ *  arguments : stream, flag commentaire, flag resultat de reference.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Test::ascii_print(ostream &os , bool comment_flag , bool reference_flag) const
 
@@ -244,7 +232,14 @@ ostream& Test::ascii_print(ostream &os , bool comment_flag , bool reference_flag
     }
 
     if (ident == STUDENT) {
-      os << (one_side ? STAT_label[STATL_ONE_SIDED] : STAT_label[STATL_TWO_SIDED]) << " ";
+      switch (one_side) {
+      case true :
+        os << STAT_label[STATL_ONE_SIDED] << " ";
+        break;
+      case false :
+        os << STAT_label[STATL_TWO_SIDED] << " ";
+        break;
+      }
     }
 
     switch (ident) {
@@ -289,7 +284,7 @@ ostream& Test::ascii_print(ostream &os , bool comment_flag , bool reference_flag
        << STAT_label[STATL_CRITICAL_PROBABILITY] << ": " << critical_probability << endl;
 
     if (reference_flag) {
-      int i;
+      register int i;
       Test *test;
 
 
@@ -298,11 +293,13 @@ ostream& Test::ascii_print(ostream &os , bool comment_flag , bool reference_flag
       for (i = 0;i < NB_CRITICAL_PROBABILITY;i++) {
         test->critical_probability = ref_critical_probability[i];
 
-/*        if (test->one_side) {
+/*        switch (test->one_side) {
+        case true :
           test->critical_probability = ref_critical_probability[i];
-        }
-        else {
+          break;
+        case false :
           test->critical_probability = 2 * ref_critical_probability[i];
+          break;
         } */
 
         switch (test->ident) {
@@ -354,21 +351,27 @@ ostream& Test::ascii_print(ostream &os , bool comment_flag , bool reference_flag
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the results of a test at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os             stream,
- *  \param[in]     reference_flag flag reference result.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des resultats d'un test parametrique au format tableur.
+ *
+ *  arguments : stream, flag resultat de reference.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Test::spreadsheet_print(ostream &os , bool reference_flag) const
 
 {
   if (value != 0.) {
     if (ident == STUDENT) {
-      os << (one_side ? STAT_label[STATL_ONE_SIDED] : STAT_label[STATL_TWO_SIDED]) << " ";
+      switch (one_side) {
+      case true :
+        os << STAT_label[STATL_ONE_SIDED] << " ";
+        break;
+      case false :
+        os << STAT_label[STATL_TWO_SIDED] << " ";
+        break;
+      }
     }
 
     switch (ident) {
@@ -409,7 +412,7 @@ ostream& Test::spreadsheet_print(ostream &os , bool reference_flag) const
        << STAT_label[STATL_CRITICAL_PROBABILITY] << "\t" << critical_probability << endl;
 
     if (reference_flag) {
-      int i;
+      register int i;
       Test *test;
 
 
@@ -418,11 +421,13 @@ ostream& Test::spreadsheet_print(ostream &os , bool reference_flag) const
       for (i = 0;i < NB_CRITICAL_PROBABILITY;i++) {
         test->critical_probability = ref_critical_probability[i];
 
-/*        if (test->one_side) {
+/*        switch (test->one_side) {
+        case true :
           test->critical_probability = ref_critical_probability[i];
-        }
-        else {
+          break;
+        case false :
           test->critical_probability = 2 * ref_critical_probability[i];
+          break;
         } */
 
         switch (test->ident) {
@@ -471,12 +476,12 @@ ostream& Test::spreadsheet_print(ostream &os , bool reference_flag) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the critical probability from the value
- *         taken by a standard Gaussian random variable.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la probabilite critique a partir de la valeur
+ *  prise par une variable normale centree reduite.
+ *
+ *--------------------------------------------------------------*/
 
 void Test::standard_normal_critical_probability_computation()
 
@@ -484,21 +489,20 @@ void Test::standard_normal_critical_probability_computation()
   normal dist;
 
 
-  if (one_side) {
-    critical_probability = cdf(complement(dist , value));
-  }
-  else {
-    critical_probability = 2 * cdf(complement(dist , fabs(value)));
+  critical_probability = cdf(complement(dist , value));
+
+  if (!one_side) {
+    critical_probability *= 2.;
   }
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the value taken by a standard Gaussian random variable
- *         from the critical probability.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la valeur prise par une variable normale centree reduite
+ *  a partir de la probabilite critique.
+ *
+ *--------------------------------------------------------------*/
 
 void Test::standard_normal_value_computation()
 
@@ -506,16 +510,16 @@ void Test::standard_normal_value_computation()
   normal dist;
 
 
-  value = quantile(complement(dist , (one_side ? critical_probability : critical_probability / 2)));
+  value = quantile(complement(dist , (one_side ? critical_probability : critical_probability / 2.)));
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of la critical probability from the value taken by
- *         a Chi2 random variable.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la probabilite critique a partir de la valeur prise
+ *  par une variable du chi2.
+ *
+ *--------------------------------------------------------------*/
 
 void Test::chi2_critical_probability_computation()
 
@@ -533,12 +537,12 @@ void Test::chi2_critical_probability_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the value taken by a Chi2 random variable from
- *         the critical probability.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la valeur prise par une variable du chi2 a partir
+ *  de la probabilite critique.
+ *
+ *--------------------------------------------------------------*/
 
 void Test::chi2_value_computation()
 
@@ -556,12 +560,12 @@ void Test::chi2_value_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the critical probability from the value taken by
- *         a F random variable.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la probabilite critique a partir de la valeur prise
+ *  par une variable F.
+ *
+ *--------------------------------------------------------------*/
 
 void Test::F_critical_probability_computation()
 
@@ -579,12 +583,12 @@ void Test::F_critical_probability_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the value taken by a F random variable from
- *         the critical probability.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la valeur prise par une variable F a partir de
+ *  la probabilite critique.
+ *
+ *--------------------------------------------------------------*/
 
 void Test::F_value_computation()
 
@@ -602,12 +606,12 @@ void Test::F_value_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the critical probability from the value taken by
- *         a Student's t-random variable.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la probabilite critique a partir de la valeur prise
+ *  par une variable t.
+ *
+ *--------------------------------------------------------------*/
 
 void Test::t_critical_probability_computation()
 
@@ -616,11 +620,21 @@ void Test::t_critical_probability_computation()
     students_t dist(df1);
 
 
-    if (one_side) {
-      critical_probability = cdf(complement(dist , value));
+    critical_probability = cdf(complement(dist , value));
+
+    switch (one_side) {
+
+    case true : {
+      if (value < 0.) {
+        critical_probability = 1. - critical_probability;
+      }
+      break;
     }
-    else {
-      critical_probability = 2 * cdf(complement(dist , fabs(value)));
+
+    case false : {
+      critical_probability *= 2.;
+      break;
+    }
     }
   }
 
@@ -630,12 +644,12 @@ void Test::t_critical_probability_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the value taken by a Student's t-random variable from
- *         the critical probability.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la valeur prise par une variable t a partir de
+ *  la probabilite critique.
+ *
+ *--------------------------------------------------------------*/
 
 void Test::t_value_computation()
 
@@ -644,7 +658,7 @@ void Test::t_value_computation()
     students_t dist(df1);
 
 
-    value = quantile(complement(dist , (one_side ? critical_probability : critical_probability / 2)));
+    value = quantile(complement(dist , critical_probability));
   }
 
   else {

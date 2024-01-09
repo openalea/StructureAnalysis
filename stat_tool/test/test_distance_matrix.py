@@ -4,7 +4,7 @@
 :Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__version__ = "$Id$"
+__version__ = "$Id: test_distance_matrix.py 9380 2010-08-06 17:53:45Z cokelaer $"
 
 
 from openalea.stat_tool.vectors import Vectors, VectorDistance

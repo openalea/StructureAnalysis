@@ -10,9 +10,9 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: regression.py 15183 2013-11-06 10:35:50Z jbdurand $
 """
-__version__ = "$Id$"
+__version__ = "$Id: regression.py 15183 2013-11-06 10:35:50Z jbdurand $"
 
 import error
 import interface

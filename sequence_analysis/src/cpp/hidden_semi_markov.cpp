@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: hidden_semi_markov.cpp 18050 2015-04-23 09:43:10Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -37,21 +37,27 @@
 
 
 #include <math.h>
-
-#include <string>
 #include <sstream>
+#include <vector>
 
-#include <boost/tokenizer.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/classification.hpp>
+#include "tool/rw_tokenizer.h"
+#include "tool/rw_cstring.h"
+#include "tool/rw_locale.h"
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
+#include "sequences.h"
+#include "semi_markov.h"
 #include "hidden_semi_markov.h"
 #include "sequence_label.h"
 
 using namespace std;
-using namespace boost;
 using namespace stat_tool;
 
 
@@ -59,18 +65,16 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the SemiMarkov class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] pchain             pointer on a Chain object,
- *  \param[in] poccupancy         pointer on a CategoricalSequenceProcess object,
- *  \param[in] inb_output_process number of observation processes,
- *  \param[in] pobservation       pointer on CategoricalProcess objects,
- *  \param[in] length             sequence length,
- *  \param[in] counting_flag      flag on the computation of the counting distributions.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe SemiMarkov.
+ *
+ *  arguments : pointeur sur un objet Chain et sur un objet CategoricalSequenceProcess,
+ *              nombre de processus d'observation, pointeurs sur
+ *              des objets CategoricalProcess, longueur des sequences,
+ *              flag sur le calcul des lois de comptage.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
                        int inb_output_process , CategoricalProcess **pobservation ,
@@ -78,7 +82,7 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
 :SemiMarkovChain(pchain , poccupancy)
 
 {
-  int i;
+  register int i;
 
 
   nb_iterator = 0;
@@ -95,13 +99,13 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
     }
   }
 
-  sojourn_type = new state_sojourn_type[nb_state];
+  state_subtype = new int[nb_state];
   forward = new Forward*[nb_state];
 
   for (i = 0;i < nb_state;i++) {
-    sojourn_type[i] = (state_process->sojourn_time[i] ? SEMI_MARKOVIAN : MARKOVIAN);
+    state_subtype[i] = (state_process->sojourn_time[i] ? SEMI_MARKOVIAN : MARKOVIAN);
 
-    if ((sojourn_type[i] == SEMI_MARKOVIAN) && (stype[i] == RECURRENT)) {
+    if ((state_subtype[i] == SEMI_MARKOVIAN) && (state_type[i] == 'r')) {
       forward[i] = new Forward(*(state_process->sojourn_time[i]));
     }
     else {
@@ -109,7 +113,7 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
     }
   }
 
-  if (type == EQUILIBRIUM) {
+  if (type == 'e') {
     for (i = 0;i < nb_state;i++) {
       initial[i] = 1. / (double)nb_state;
     }
@@ -130,20 +134,17 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the SemiMarkov class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] pchain                            pointer on a Chain object,
- *  \param[in] poccupancy                        pointer on a CategoricalSequenceProcess object,
- *  \param[in] inb_output_process                number of observation processes,
- *  \param[in] categorical_observation           pointer on CategoricalProcess objects,
- *  \param[in] discrete_parametric_observation   pointer on DiscreteParametricProcess objects,
- *  \param[in] continuous_parametric_observation pointer on ContinuousParametricProcess objects,
- *  \param[in] length                            sequence length,
- *  \param[in] counting_flag                     flag on the computation of the counting distributions.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe SemiMarkov.
+ *
+ *  arguments : pointeur sur un objet Chain et sur un objet CategoricalSequenceProcess,
+ *              nombre de processus d'observation, pointeurs sur des objets
+ *              CategoricalProcess, DiscreteParametricProcess et
+ *              ContinuousParametricProcess, longueur des sequences,
+ *              flag sur le calcul des lois de comptage.
+ *
+ *--------------------------------------------------------------*/
 
 SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy ,
                        int inb_output_process , CategoricalProcess **categorical_observation ,
@@ -153,7 +154,7 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
 :SemiMarkovChain(pchain , poccupancy)
 
 {
-  int i;
+  register int i;
 
 
   nb_iterator = 0;
@@ -170,13 +171,13 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
     }
   }
 
-  sojourn_type = new state_sojourn_type[nb_state];
+  state_subtype = new int[nb_state];
   forward = new Forward*[nb_state];
 
   for (i = 0;i < nb_state;i++) {
-    sojourn_type[i] = (state_process->sojourn_time[i] ? SEMI_MARKOVIAN : MARKOVIAN);
+    state_subtype[i] = (state_process->sojourn_time[i] ? SEMI_MARKOVIAN : MARKOVIAN);
 
-    if ((sojourn_type[i] == SEMI_MARKOVIAN) && (stype[i] == RECURRENT)) {
+    if ((state_subtype[i] == SEMI_MARKOVIAN) && (state_type[i] == 'r')) {
       forward[i] = new Forward(*(state_process->sojourn_time[i]));
     }
     else {
@@ -184,7 +185,7 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
     }
   }
 
-  if (type == EQUILIBRIUM) {
+  if (type == 'e') {
     for (i = 0;i < nb_state;i++) {
       initial[i] = 1. / (double)nb_state;
     }
@@ -222,29 +223,27 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the HiddenSemiMarkov class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe HiddenSemiMarkov.
+ *
+ *--------------------------------------------------------------*/
 
 HiddenSemiMarkov::~HiddenSemiMarkov() {}
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Application of a threshold on the probability parameters of a hidden semi-Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] min_probability minimum probability.
+ *  Application d'un seuil sur les parametres d'une semi-chaine de Markov cachee.
  *
- *  \return                    HiddenSemiMarkov object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : probabilite minimum.
+ *
+ *--------------------------------------------------------------*/
 
 HiddenSemiMarkov* HiddenSemiMarkov::thresholding(double min_probability) const
 
 {
-  int i;
+  register int i;
   HiddenSemiMarkov *hsmarkov;
 
 
@@ -261,42 +260,36 @@ HiddenSemiMarkov* HiddenSemiMarkov::thresholding(double min_probability) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a HiddenSemiMarkov object from a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error           reference on a StatError object,
- *  \param[in] path            file path,
- *  \param[in] length          sequence length,
- *  \param[in] counting_flag   flag on the computation of the counting distributions,
- *  \param[in] cumul_threshold threshold on the cumulative parametric distribution functions,
- *  \param[in] old_format      flag format of the observation processes.
+ *  Construction d'un objet HiddenSemiMarkov a partir d'un fichier.
  *
- *  \return                    HiddenSemiMarkov object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path, longueur des sequences,
+ *              flag sur le calcul des lois de comptage, seuil sur les fonctions de repartition
+ *              des lois parametriques, flag format des processus d'observation.
+ *
+ *--------------------------------------------------------------*/
 
-HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string path ,
-                                               int length , bool counting_flag ,
-                                               double cumul_threshold , bool old_format)
+HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *path ,
+                                                int length , bool counting_flag ,
+                                                double cumul_threshold , bool old_format)
 
 {
-  string buffer;
+  RWLocaleSnapshot locale("en");
+  RWCString buffer , token;
   size_t position;
-  typedef tokenizer<char_separator<char>> tokenizer;
-  char_separator<char> separator(" \t");
-  process_type type = DEFAULT_TYPE;
+  char type = 'v';
   bool status , lstatus;
-  int i;
-  int line , nb_output_process , value , index;
-  observation_process obs_type;
+  register int i;
+  int line , nb_output_process , output_process_type , index;
+  long value;
   const Chain *chain;
   const CategoricalSequenceProcess *occupancy;
   CategoricalProcess **categorical_observation;
   DiscreteParametricProcess **discrete_parametric_observation;
   ContinuousParametricProcess **continuous_parametric_observation;
   HiddenSemiMarkov *hsmarkov;
-  ifstream in_file(path.c_str());
+  ifstream in_file(path);
 
 
   hsmarkov = NULL;
@@ -319,38 +312,38 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
       error.update(SEQ_error[SEQR_LONG_SEQUENCE_LENGTH]);
     }
 
-    while (getline(in_file , buffer)) {
+    while (buffer.readLine(in_file , false)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.find('#');
-      if (position != string::npos) {
-        buffer.erase(position);
+      position = buffer.first('#');
+      if (position != RW_NPOS) {
+        buffer.remove(position);
       }
       i = 0;
 
-      tokenizer tok_buffer(buffer , separator);
+      RWCTokenizer next(buffer);
 
-      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+      while (!((token = next()).isNull())) {
 
-        // test (EQUILIBRIUM_)HIDDEN_SEMI-MARKOV_CHAIN keyword
+        // test mot cle (EQUILIBRIUM) HIDDEN_SEMI-MARKOV_CHAIN
 
         if (i == 0) {
-          if (*token == SEQ_word[SEQW_HIDDEN_SEMI_MARKOV_CHAIN]) {
-            type = ORDINARY;
+          if (token == SEQ_word[SEQW_HIDDEN_SEMI_MARKOV_CHAIN]) {
+            type = 'o';
           }
-          else if (*token == SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_SEMI_MARKOV_CHAIN]) {
-            type = EQUILIBRIUM;
+          else if (token == SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_SEMI_MARKOV_CHAIN]) {
+            type = 'e';
           }
           else {
             status = false;
             ostringstream correction_message;
             correction_message << SEQ_word[SEQW_HIDDEN_SEMI_MARKOV_CHAIN] << " or "
                                << SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_SEMI_MARKOV_CHAIN];
-            error.correction_update(STAT_parsing[STATP_KEYWORD] , (correction_message.str()).c_str() , line);
+            error.correction_update(STAT_parsing[STATP_KEY_WORD] , (correction_message.str()).c_str() , line);
           }
         }
 
@@ -366,79 +359,54 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
       }
     }
 
-    if (type != DEFAULT_TYPE) {
+    if (type != 'v') {
 
-      // analysis of the format and reading of the Markov chain
+      // analyse du format et lecture de la chaine de Markov
 
-      chain = Chain::parsing(error , in_file , line , type);
+      chain = chain_parsing(error , in_file , line , type);
 
       if (chain) {
 
-        // analysis of the format and reading of the state occupancy distributions
+        // analyse du format et lecture des lois d'occupation de etats
 
-        occupancy = CategoricalSequenceProcess::occupancy_parsing(error , in_file , line ,
-                                                                  *chain , cumul_threshold);
+        occupancy = occupancy_parsing(error , in_file , line , *chain , cumul_threshold);
         if (!occupancy) {
           status = false;
         }
 
-        // analysis of the format and reading of the observation distributions
+        // analyse du format et lecture des lois d'observation
 
-        if (old_format) {
-          categorical_observation = CategoricalProcess::old_parsing(error , in_file , line ,
-                                                                    chain->nb_state , nb_output_process);
+        switch (old_format) {
 
-          if (categorical_observation) {
-            if (status) {
-              hsmarkov = new HiddenSemiMarkov(chain , occupancy , nb_output_process ,
-                                              categorical_observation , length , counting_flag);
-            }
-
-            for (i = 0;i < nb_output_process;i++) {
-              delete categorical_observation[i];
-            }
-            delete [] categorical_observation;
-          }
-        }
-
-        else {
+        case false : {
           nb_output_process = I_DEFAULT;
 
           categorical_observation = NULL;
           discrete_parametric_observation = NULL;
           continuous_parametric_observation = NULL;
 
-          while (getline(in_file , buffer)) {
+          while (buffer.readLine(in_file , false)) {
             line++;
 
 #           ifdef DEBUG
             cout << line << "  " << buffer << endl;
 #           endif
 
-            position = buffer.find('#');
-            if (position != string::npos) {
-              buffer.erase(position);
+            position = buffer.first('#');
+            if (position != RW_NPOS) {
+              buffer.remove(position);
             }
             i = 0;
 
-            tokenizer tok_buffer(buffer , separator);
+            RWCTokenizer next(buffer);
 
-            for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+            while (!((token = next()).isNull())) {
               switch (i) {
 
-              // test number of observation processes
+              // test nombre de processus d'observation
 
               case 0 : {
-                lstatus = true;
-
-/*                try {
-                  value = stoi(*token);   in C++ 11
-                }
-                catch(invalid_argument &arg) {
-                  lstatus = false;
-                } */
-                value = atoi(token->c_str());
-
+                lstatus = locale.stringToNum(token , &value);
                 if (lstatus) {
                   if ((value < 1) || (value > NB_OUTPUT_PROCESS)) {
                     lstatus = false;
@@ -455,12 +423,12 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
                 break;
               }
 
-              // test OUTPUT_PROCESS(ES) keyword
+              // test mot cle OUTPUT_PROCESS(ES)
 
               case 1 : {
-                if (*token != STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES]) {
+                if (token != STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES]) {
                   status = false;
-                  error.correction_update(STAT_parsing[STATP_KEYWORD] ,
+                  error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
                                           STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES] , line , i + 1);
                 }
                 break;
@@ -497,48 +465,41 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
 
             index = 0;
 
-            while (getline(in_file , buffer)) {
+            while (buffer.readLine(in_file , false)) {
               line++;
 
 #             ifdef DEBUG
               cout << line << "  " << buffer << endl;
 #             endif
 
-              position = buffer.find('#');
-              if (position != string::npos) {
-                buffer.erase(position);
+              position = buffer.first('#');
+              if (position != RW_NPOS) {
+                buffer.remove(position);
               }
               i = 0;
 
-              tokenizer tok_buffer(buffer , separator);
+              RWCTokenizer next(buffer);
 
-              for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+              while (!((token = next()).isNull())) {
                 switch (i) {
 
-                // test OUTPUT_PROCESS keyword
+                // test mot cle OUTPUT_PROCESS
 
                 case 0 : {
-                  if (*token != STAT_word[STATW_OUTPUT_PROCESS]) {
+                  if (token == STAT_word[STATW_OUTPUT_PROCESS]) {
+                    index++;
+                  }
+                  else {
                     status = false;
-                    error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OUTPUT_PROCESS] , line , i + 1);
+                    error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_OUTPUT_PROCESS] , line , i + 1);
                   }
                   break;
                 }
 
-                // test observation process index
+                // test indice du processus d'observation
 
                 case 1 : {
-                  index++;
-                  lstatus = true;
-
-/*                  try {
-                    value = stoi(*token);   in C++ 11
-                  }
-                  catch(invalid_argument &arg) {
-                    lstatus = false;
-                  } */
-                  value = atoi(token->c_str());
-
+                  lstatus = locale.stringToNum(token , &value);
                   if ((lstatus) && ((value != index) || (value > nb_output_process))) {
                     lstatus = false;
                   }
@@ -550,38 +511,38 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
                   break;
                 }
 
-                // test separator
+                // test separateur
 
                 case 2 : {
-                  if (*token != ":") {
+                  if (token != ":") {
                     status = false;
                     error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
                   }
                   break;
                 }
 
-                // test CATEGORICAL/DISCRETE_PARAMETRIC/CONTINUOUS_PARAMETRIC keyword
+                // test mot cle CATEGORICAL / DISCRETE_PARAMETRIC / CONTINUOUS_PARAMETRIC
 
                 case 3 : {
-                  if ((*token == STAT_word[STATW_CATEGORICAL]) ||
-                      (*token == STAT_word[STATW_NONPARAMETRIC])) {
-                    obs_type = CATEGORICAL_PROCESS;
+                  if ((token == STAT_word[STATW_CATEGORICAL]) ||
+                      (token == STAT_word[STATW_NONPARAMETRIC])) {
+                    output_process_type = CATEGORICAL_PROCESS;
                   }
-                  else if ((*token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
-                           (*token == STAT_word[STATW_PARAMETRIC])) {
-                    obs_type = DISCRETE_PARAMETRIC;
+                  else if ((token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
+                           (token == STAT_word[STATW_PARAMETRIC])) {
+                    output_process_type = DISCRETE_PARAMETRIC;
                   }
-                  else if (*token == STAT_word[STATW_CONTINUOUS_PARAMETRIC]) {
-                    obs_type = CONTINUOUS_PARAMETRIC;
+                  else if (token == STAT_word[STATW_CONTINUOUS_PARAMETRIC]) {
+                    output_process_type = CONTINUOUS_PARAMETRIC;
                   }
                   else {
-                    obs_type = DEFAULT_PROCESS;
+                    output_process_type = CATEGORICAL_PROCESS - 1;
                     status = false;
                     ostringstream correction_message;
                     correction_message << STAT_word[STATW_CATEGORICAL] << " or "
                                        << STAT_word[STATW_DISCRETE_PARAMETRIC] << " or "
                                        << STAT_word[STATW_CONTINUOUS_PARAMETRIC];
-                    error.correction_update(STAT_parsing[STATP_KEYWORD] , (correction_message.str()).c_str() , line , i + 1);
+                    error.correction_update(STAT_parsing[STATP_KEY_WORD] , (correction_message.str()).c_str() , line , i + 1);
                   }
                   break;
                 }
@@ -596,15 +557,15 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
                   error.update(STAT_parsing[STATP_FORMAT] , line);
                 }
 
-                switch (obs_type) {
+                switch (output_process_type) {
 
                 case CATEGORICAL_PROCESS : {
-                  categorical_observation[index - 1] = CategoricalProcess::parsing(error , in_file , line ,
-                                                                                   chain->nb_state ,
-                                                                                   HIDDEN_MARKOV , true);
-/*                  categorical_observation[index - 1] = CategoricalProcess::parsing(error , in_file , line , pour les donnees de suivi de croissance manguier
-                                                                                   chain->nb_state ,
-                                                                                   HIDDEN_MARKOV , false); */
+                  categorical_observation[index - 1] = categorical_observation_parsing(error , in_file , line ,
+                                                                                       chain->nb_state ,
+                                                                                       HIDDEN_MARKOV , true);
+/*                  categorical_observation[index - 1] = categorical_observation_parsing(error , in_file , line , pour les donnees de suivi de croissance manguier
+                                                                                       chain->nb_state ,
+                                                                                       HIDDEN_MARKOV , false); */
                   if (!categorical_observation[index - 1]) {
                     status = false;
                   }
@@ -612,10 +573,10 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
                 }
 
                 case DISCRETE_PARAMETRIC : {
-                  discrete_parametric_observation[index - 1] = DiscreteParametricProcess::parsing(error , in_file , line ,
-                                                                                                  chain->nb_state ,
-                                                                                                  HIDDEN_MARKOV ,
-                                                                                                  cumul_threshold);
+                  discrete_parametric_observation[index - 1] = discrete_observation_parsing(error , in_file , line ,
+                                                                                            chain->nb_state ,
+                                                                                            HIDDEN_MARKOV ,
+                                                                                            cumul_threshold);
                   if (!discrete_parametric_observation[index - 1]) {
                     status = false;
                   }
@@ -623,10 +584,10 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
                 }
 
                 case CONTINUOUS_PARAMETRIC : {
-                  continuous_parametric_observation[index - 1] = ContinuousParametricProcess::parsing(error , in_file , line ,
-                                                                                                      chain->nb_state ,
-                                                                                                      HIDDEN_MARKOV ,
-                                                                                                      AUTOREGRESSIVE_MODEL);
+                  continuous_parametric_observation[index - 1] = continuous_observation_parsing(error , in_file , line ,
+                                                                                                chain->nb_state ,
+                                                                                                HIDDEN_MARKOV ,
+                                                                                                LINEAR_MODEL);
                   if (!continuous_parametric_observation[index - 1]) {
                     status = false;
                   }
@@ -634,34 +595,11 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
                 }
                 }
               }
-
-              if (index == nb_output_process) {
-                break;
-              }
             }
 
-            if (index < nb_output_process) {
+            if (index != nb_output_process) {
               status = false;
               error.update(STAT_parsing[STATP_FORMAT] , line);
-            }
-
-            else {
-              while (getline(in_file , buffer)) {
-                line++;
-
-#               ifdef DEBUG
-                cout << line << " " << buffer << endl;
-#               endif
-
-                position = buffer.find('#');
-                if (position != string::npos) {
-                  buffer.erase(position);
-                }
-                if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
-                  status = false;
-                  error.update(STAT_parsing[STATP_FORMAT] , line);
-                }
-              }
             }
 
             if (status) {
@@ -681,6 +619,26 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
             delete [] discrete_parametric_observation;
             delete [] continuous_parametric_observation;
           }
+          break;
+        }
+
+        case true : {
+          categorical_observation = old_categorical_observation_parsing(error , in_file , line ,
+                                                                        chain->nb_state , nb_output_process);
+
+          if (categorical_observation) {
+            if (status) {
+              hsmarkov = new HiddenSemiMarkov(chain , occupancy , nb_output_process ,
+                                              categorical_observation , length , counting_flag);
+            }
+
+            for (i = 0;i < nb_output_process;i++) {
+              delete categorical_observation[i];
+            }
+            delete [] categorical_observation;
+          }
+          break;
+        }
         }
 
         delete chain;
@@ -693,14 +651,13 @@ HiddenSemiMarkov* HiddenSemiMarkov::ascii_read(StatError &error , const string p
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a HiddenSemiMarkov object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet HiddenSemiMarkov dans un fichier.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& HiddenSemiMarkov::ascii_write(ostream &os , bool exhaustive) const
 
@@ -714,24 +671,21 @@ ostream& HiddenSemiMarkov::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a HiddenSemiMarkov object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet HiddenSemiMarkov dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool HiddenSemiMarkov::ascii_write(StatError &error , const string path ,
+bool HiddenSemiMarkov::ascii_write(StatError &error , const char *path ,
                                    bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -751,22 +705,19 @@ bool HiddenSemiMarkov::ascii_write(StatError &error , const string path ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a HiddenSemiMarkov object in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet HiddenSemiMarkov dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool HiddenSemiMarkov::spreadsheet_write(StatError &error , const string path) const
+bool HiddenSemiMarkov::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -785,23 +736,21 @@ bool HiddenSemiMarkov::spreadsheet_write(StatError &error , const string path) c
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Search for an end state.
+/*--------------------------------------------------------------*
  *
- *  \return end state index.
- */
-/*--------------------------------------------------------------*/
+ *  Recherche etat de fin.
+ *
+ *--------------------------------------------------------------*/
 
 int HiddenSemiMarkov::end_state() const
 
 {
-  int i , j , k;
+  register int i , j , k;
   int end_state = I_DEFAULT , output;
 
 
   for (i = nb_state - 1;i >= 0;i--) {
-    if (stype[i] == ABSORBING) {
+    if (state_type[i] == 'a') {
 
 #     ifdef DEBUG
       cout << "\nstate: " << i << " | ";
@@ -887,3 +836,8 @@ int HiddenSemiMarkov::end_state() const
 
 
 };  // namespace sequence_analysis
+
+
+
+
+

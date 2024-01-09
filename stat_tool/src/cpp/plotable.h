@@ -49,26 +49,11 @@
 using std::string;
 
 
-
-namespace stat_tool {
-
-  enum process_distribution {
-    SELF_TRANSITION ,
-    OBSERVATION ,
-    INTENSITY ,
-    FIRST_OCCURRENCE ,
-    RECURRENCE_TIME ,
-    SOJOURN_TIME ,
-    INITIAL_RUN ,
-    FINAL_RUN ,
-    NB_RUN ,
-    NB_OCCURRENCE ,
-    COUNTING ,
-    LENGTH
-  };
+namespace stat_tool
 
 
 
+{
   typedef std::pair<float, float> PlotPoint;
   typedef std::pair<float, float> Range;
   typedef std::pair<PlotPoint, string> Label;
@@ -179,7 +164,7 @@ namespace stat_tool {
 
   // Class MultiPlotSet: list of MultiPlot
 
-  template<typename Type> class TemplateMultiPlotSet
+  class MultiPlotSet
   {
     std::vector<MultiPlot> multiplots;
 
@@ -190,11 +175,13 @@ namespace stat_tool {
     int nb_variable;
     std::vector<int> variable_nb_viewpoint;
     std::vector<int> variable;
-    std::vector<Type> viewpoint;
+    std::vector<int> viewpoint;
 
-    TemplateMultiPlotSet(int size = 1);
+    MultiPlotSet(int size = 1)
+    :multiplots(size)
+    {};
 
-    TemplateMultiPlotSet(int size, int inb_variable);
+    MultiPlotSet(int size, int inb_variable);
 
     MultiPlot& operator[](int index)
     { return multiplots[index]; };
@@ -209,9 +196,6 @@ namespace stat_tool {
     { return multiplots.end(); };
   };
 
-  typedef TemplateMultiPlotSet<process_distribution> MultiPlotSet;
-
-#include "plotable.hpp"
 
 };  // namespace stat_tool
 

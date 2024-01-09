@@ -13,7 +13,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id$
+ *        $Id: export_compound.h 6080 2009-03-13 16:11:35Z cokelaer $
  *
  *-----------------------------------------------------------------------------*/
 

@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: chain.cpp 17973 2015-04-23 06:33:24Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -38,30 +38,31 @@
 
 #include <iomanip>
 
-#include <boost/tokenizer.hpp>
+#include "tool/rw_tokenizer.h"
+#include "tool/rw_cstring.h"
+#include "tool/rw_locale.h"
+#include "tool/config.h"
 
+#include "stat_tools.h"
 #include "markovian.h"
 #include "stat_label.h"
 
 using namespace std;
-using namespace boost;
 
 
 namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Chain class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] itype     type,
- *  \param[in] inb_state number of states,
- *  \param[in] init_flag flag initialization.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Chain.
+ *
+ *  arguments : type, nombre d'etats, flag initialisation.
+ *
+ *--------------------------------------------------------------*/
 
-Chain::Chain(process_type itype , int inb_state , bool init_flag)
+Chain::Chain(char itype , int inb_state , bool init_flag)
 
 {
   type = itype;
@@ -72,7 +73,7 @@ Chain::Chain(process_type itype , int inb_state , bool init_flag)
   nb_component = 0;
   component_nb_state = NULL;
   component = NULL;
-  stype = NULL;
+  state_type = NULL;
 
   if (nb_state == 0) {
     nb_row = 0;
@@ -82,15 +83,15 @@ Chain::Chain(process_type itype , int inb_state , bool init_flag)
   }
 
   else {
-    int i , j;
+    register int i , j;
 
 
     nb_row = nb_state;
 
-    initial = new double[type == ORDINARY ? nb_state : nb_row];
+    initial = new double[type == 'o' ? nb_state : nb_row];
 
     if (init_flag) {
-      for (i = 0;i < (type == ORDINARY ? nb_state : nb_row);i++) {
+      for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
         initial[i] = 0.;
       }
     }
@@ -112,21 +113,19 @@ Chain::Chain(process_type itype , int inb_state , bool init_flag)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Chain class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] itype     type,
- *  \param[in] inb_state number of states,
- *  \param[in] inb_row   number of rows of the transition probability matrix,
- *  \param[in] init_flag flag initialization.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Chain.
+ *
+ *  arguments : type, nombre d'etats, nombre de lignes de la matrice
+ *              des probabilites de transition, flag initialisation.
+ *
+ *--------------------------------------------------------------*/
 
-Chain::Chain(process_type itype , int inb_state , int inb_row , bool init_flag)
+Chain::Chain(char itype , int inb_state , int inb_row , bool init_flag)
 
 {
-  int i , j;
+  register int i , j;
 
 
   type = itype;
@@ -138,12 +137,12 @@ Chain::Chain(process_type itype , int inb_state , int inb_row , bool init_flag)
   nb_component = 0;
   component_nb_state = NULL;
   component = NULL;
-  stype = NULL;
+  state_type = NULL;
 
-  initial = new double[type == ORDINARY ? nb_state : nb_row];
+  initial = new double[type == 'o' ? nb_state : nb_row];
 
   if (init_flag) {
-    for (i = 0;i < (type == ORDINARY ? nb_state : nb_row);i++) {
+    for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
       initial[i] = 0.;
     }
   }
@@ -164,26 +163,26 @@ Chain::Chain(process_type itype , int inb_state , int inb_row , bool init_flag)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of Markov chain parameters.
+/*--------------------------------------------------------------*
  *
- *  \param[in] chain reference on a Chain object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie des parametres d'une chaine de Markov.
+ *
+ *  argument : reference sur un objet Chain.
+ *
+ *--------------------------------------------------------------*/
 
 void Chain::parameter_copy(const Chain &chain)
 
 {
-  int i , j;
+  register int i , j;
 
 
-  for (i = 0;i < (type == ORDINARY ? nb_state : nb_row);i++) {
+  for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
     initial[i] = chain.initial[i];
   }
 
   if (chain.cumul_initial) {
-    for (i = 0;i < (type == ORDINARY ? nb_state : nb_row);i++) {
+    for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
       cumul_initial[i] = chain.cumul_initial[i];
     }
   }
@@ -204,18 +203,18 @@ void Chain::parameter_copy(const Chain &chain)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Chain object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] chain reference on a Chain object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Chain.
+ *
+ *  argument : reference sur un objet Chain.
+ *
+ *--------------------------------------------------------------*/
 
 void Chain::copy(const Chain &chain)
 
 {
-  int i , j;
+  register int i , j;
 
 
   type = chain.type;
@@ -243,9 +242,9 @@ void Chain::copy(const Chain &chain)
       }
     }
 
-    stype = new state_type[nb_state];
+    state_type = new char[nb_state];
     for (i = 0;i < nb_state;i++) {
-      stype[i] = chain.stype[i];
+      state_type[i] = chain.state_type[i];
     }
   }
 
@@ -254,13 +253,13 @@ void Chain::copy(const Chain &chain)
     nb_component = 0;
     component_nb_state = NULL;
     component = NULL;
-    stype = NULL;
+    state_type = NULL;
   }
 
-  initial = new double[type == ORDINARY ? nb_state : nb_row];
+  initial = new double[type == 'o' ? nb_state : nb_row];
 
   if (chain.cumul_initial) {
-    cumul_initial = new double[type == ORDINARY ? nb_state : nb_row];
+    cumul_initial = new double[type == 'o' ? nb_state : nb_row];
   }
   else {
     cumul_initial = NULL;
@@ -285,16 +284,16 @@ void Chain::copy(const Chain &chain)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the data members of a Chain object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet Chain.
+ *
+ *--------------------------------------------------------------*/
 
 void Chain::remove()
 
 {
-  int i;
+  register int i;
 
 
   if (accessibility) {
@@ -313,7 +312,7 @@ void Chain::remove()
     delete [] component;
   }
 
-  delete [] stype;
+  delete [] state_type;
 
   delete [] initial;
   delete [] cumul_initial;
@@ -334,11 +333,11 @@ void Chain::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the Chain class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe Chain.
+ *
+ *--------------------------------------------------------------*/
 
 Chain::~Chain()
 
@@ -347,15 +346,13 @@ Chain::~Chain()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the Chain class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] chain reference on a Chain object.
+ *  Operateur d'assignement de la classe Chain.
  *
- *  \return          Chain object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet Chain.
+ *
+ *--------------------------------------------------------------*/
 
 Chain& Chain::operator=(const Chain &chain)
 
@@ -369,68 +366,56 @@ Chain& Chain::operator=(const Chain &chain)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Analysis of the format of a Chain object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error   reference on a StatError object,
- *  \param[in] in_file stream,
- *  \param[in] line    reference on the file line index,
- *  \param[in] type    process type (ORDINARY/EQUILIBRIUM).
+ *  Analyse du format d'un objet Chain.
  *
- *  \return            Chain object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream,
+ *              reference sur l'indice de la ligne lue, type du processus
+ *              ('o' : ordinaire, 'e' : en equilibre).
+ *
+ *--------------------------------------------------------------*/
 
-Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process_type type)
+Chain* chain_parsing(StatError &error , ifstream &in_file , int &line , char type)
 
 {
-  string buffer;
+  RWLocaleSnapshot locale("en");
+  RWCString buffer , token;
   size_t position;
-  typedef tokenizer<char_separator<char>> tokenizer;
-  char_separator<char> separator(" \t");
   bool status = true , lstatus , **logic_transition;
-  int i;
-  int read_line , nb_state = 0 , value;
+  register int i;
+  int read_line , nb_state = 0;
+  long value;
   double proba , cumul;
   Chain *chain;
 
 
   chain = NULL;
 
-  // analysis of the lines defining the number of states and the order (or memory length)
+  // analyse lignes definissant le nombre d'etats et l'ordre
 
-  while (getline(in_file , buffer)) {
+  while (buffer.readLine(in_file , false)) {
     line++;
 
 #   ifdef DEBUG
     cout << line << "  " << buffer << endl;
 #   endif
 
-    position = buffer.find('#');
-    if (position != string::npos) {
-      buffer.erase(position);
+    position = buffer.first('#');
+    if (position != RW_NPOS) {
+      buffer.remove(position);
     }
     i = 0;
 
-    tokenizer tok_buffer(buffer , separator);
+    RWCTokenizer next(buffer);
 
-    for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+    while (!((token = next()).isNull())) {
       switch (i) {
 
-      // test number of states
+      // test valeur nombre d'etats
 
       case 0 : {
-        lstatus = true;
-
-/*        try {
-          value = stoi(*token);   in C++ 11
-        }
-        catch(invalid_argument &arg) {
-          lstatus = false;
-        } */
-        value = atoi(token->c_str());
-
+        lstatus = locale.stringToNum(token , &value);
         if (lstatus) {
           if ((value < 2) || (value > NB_STATE)) {
             lstatus = false;
@@ -447,12 +432,12 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
         break;
       }
 
-      // test STATES keyword
+      // test mot cle STATES
 
       case 1 : {
-        if (*token != STAT_word[STATW_STATES]) {
+        if (token != STAT_word[STATW_STATES]) {
           status = false;
-          error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_STATES] , line , i + 1);
+          error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_STATES] , line , i + 1);
         }
         break;
       }
@@ -478,41 +463,41 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
   if (status) {
     chain = new Chain(type , nb_state , nb_state , false);
 
-    // analysis initial/transition probabilities
+    // analyse probabilites initiales / probabilites de transition
 
     read_line = 0;
-    while (getline(in_file , buffer)) {
+    while (buffer.readLine(in_file , false)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.find('#');
-      if (position != string::npos) {
-        buffer.erase(position);
+      position = buffer.first('#');
+      if (position != RW_NPOS) {
+        buffer.remove(position);
       }
       i = 0;
 
-      tokenizer tok_buffer(buffer , separator);
+      RWCTokenizer next(buffer);
 
-      if ((read_line == 0) || ((type == ORDINARY) && (read_line == 2))) {
-        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+      if ((read_line == 0) || ((type == 'o') && (read_line == 2))) {
+        while (!((token = next()).isNull())) {
 
-          // test INITIAL_PROBABILITIES/TRANSITION_PROBABILITIES keyword
+          // test mot cle INITIAL_PROBABILITIES / TRANSITION_PROBABILITIES
 
           if (i == 0) {
-            if ((type == ORDINARY) && (read_line == 0)) {
-              if (*token != STAT_word[STATW_INITIAL_PROBABILITIES]) {
+            if ((type == 'o') && (read_line == 0)) {
+              if (token != STAT_word[STATW_INITIAL_PROBABILITIES]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_INITIAL_PROBABILITIES] , line);
+                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_INITIAL_PROBABILITIES] , line);
               }
             }
 
             else {
-              if (*token != STAT_word[STATW_TRANSITION_PROBABILITIES]) {
+              if (token != STAT_word[STATW_TRANSITION_PROBABILITIES]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_TRANSITION_PROBABILITIES] , line);
+                error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_TRANSITION_PROBABILITIES] , line);
               }
             }
           }
@@ -531,18 +516,9 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
       else {
         cumul = 0.;
 
-        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+        while (!((token = next()).isNull())) {
           if (i < nb_state) {
-            lstatus = true;
-
-/*            try {
-              proba = stod(*token);   in C++ 11
-            }
-            catch (invalid_argument &arg) {
-              lstatus = false;
-            } */
-            proba = atof(token->c_str());
-
+            lstatus = locale.stringToNum(token , &proba);
             if (lstatus) {
               if ((proba < 0.) || (proba > 1. - cumul + DOUBLE_ERROR)) {
                 lstatus = false;
@@ -551,18 +527,18 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
               else {
                 cumul += proba;
 
-                if ((type == ORDINARY) && (read_line == 1)) {
+                if ((type == 'o') && (read_line == 1)) {
                   chain->initial[i] = proba;
                 }
                 else {
-                  chain->transition[read_line - (type == ORDINARY ? 3 : 1)][i] = proba;
+                  chain->transition[read_line - (type == 'o' ? 3 : 1)][i] = proba;
                 }
               }
             }
 
             if (!lstatus) {
               status = false;
-              if ((type == ORDINARY) && (read_line == 1)) {
+              if ((type == 'o') && (read_line == 1)) {
                 error.update(STAT_parsing[STATP_INITIAL_PROBABILITY] , line , i + 1);
               }
               else {
@@ -589,8 +565,8 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
 
       if (i > 0) {
         read_line++;
-        if (((type == ORDINARY) && (read_line == chain->nb_row + 3)) ||
-            ((type == EQUILIBRIUM) && (read_line == chain->nb_row + 1))) {
+        if (((type == 'o') && (read_line == chain->nb_row + 3)) ||
+            ((type == 'e') && (read_line == chain->nb_row + 1))) {
           break;
         }
       }
@@ -598,19 +574,19 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
 
     if (status) {
 
-      // test accessible states
+      // test etats atteignables
 
-      status = chain->strongly_connected_component_research(error);
+      status = chain->connex_component_research(error);
 
       logic_transition = chain->logic_transition_computation();
-      status = chain->strongly_connected_component_research(error , logic_transition);
+      status = chain->connex_component_research(error , logic_transition);
 
       if (status) {
 
-        // test irreducibility in the equilibrium process case
+        // test irreductibilite dans le cas en equilibre
 
         chain->component_computation(logic_transition);
-        if ((type == EQUILIBRIUM) && (chain->nb_component > 1)) {
+        if ((type == 'e') && (chain->nb_component > 1)) {
           status = false;
           error.correction_update(STAT_parsing[STATP_CHAIN_STRUCTURE] , STAT_parsing[STATP_IRREDUCIBLE]);
         }
@@ -632,28 +608,27 @@ Chain* Chain::parsing(StatError &error , ifstream &in_file , int &line , process
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Chain object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os        stream,
- *  \param[in]     file_flag file flag.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet Chain.
+ *
+ *  arguments : stream, flag fichier.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Chain::ascii_print(ostream &os , bool file_flag) const
 
 {
-  int i , j;
+  register int i , j;
   int buff , width;
-  ios_base::fmtflags format_flags;
+  long old_adjust;
 
 
-  format_flags = os.setf(ios::left , ios::adjustfield);
+  old_adjust = os.setf(ios::left , ios::adjustfield);
 
   os << "\n" << nb_state << " " << STAT_word[STATW_STATES] << endl;
 
-  // computation of the column width
+  // calcul des largeurs des colonnes
 
   width = column_width(nb_state , initial);
   for (i = 0;i < nb_row;i++) {
@@ -668,12 +643,12 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag) const
 
   switch (type) {
 
-  case ORDINARY : {
+  case 'o' : {
     os << STAT_word[STATW_INITIAL_PROBABILITIES] << endl;
     break;
   }
 
-  case EQUILIBRIUM : {
+  case 'e' : {
     if (file_flag) {
       os << "# ";
     }
@@ -682,7 +657,7 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag) const
   }
   }
 
-  if ((type == EQUILIBRIUM) && (file_flag)) {
+  if ((type == 'e') && (file_flag)) {
     os << "# ";
   }
   for (i = 0;i < nb_state;i++) {
@@ -706,8 +681,8 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag) const
         os << "# ";
       }
 
-      switch (stype[component[i][0]]) {
-      case TRANSIENT :
+      switch (state_type[component[i][0]]) {
+      case 't' :
         os << STAT_label[STATL_TRANSIENT] << " ";
         break;
       default :
@@ -720,40 +695,40 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag) const
         os << " " << component[i][j];
       }
 
-      if (stype[component[i][0]] == ABSORBING) {
+      if (state_type[component[i][0]] == 'a') {
         os << " (" << STAT_label[STATL_ABSORBING] << " " << STAT_label[STATL_STATE] << ")";
       }
     }
     os << endl;
   }
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Chain object at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet Chain au format tableur.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Chain::spreadsheet_print(ostream &os) const
 
 {
-  int i , j;
+  register int i , j;
 
 
   os << "\n" << nb_state << "\t" << STAT_word[STATW_STATES] << endl;
 
   switch (type) {
-  case ORDINARY :
+  case 'o' :
     os << "\n" << STAT_word[STATW_INITIAL_PROBABILITIES] << endl;
     break;
-  case EQUILIBRIUM :
+  case 'e' :
     os << "\n" << STAT_label[STATL_STATIONARY_PROBABILITIES] << endl;
     break;
   }
@@ -774,8 +749,8 @@ ostream& Chain::spreadsheet_print(ostream &os) const
 
   if (nb_component > 0) {
     for (i = 0;i < nb_component;i++) {
-      switch (stype[component[i][0]]) {
-      case TRANSIENT :
+      switch (state_type[component[i][0]]) {
+      case 't' :
         os << "\n"<< STAT_label[STATL_TRANSIENT] << " ";
         break;
       default :
@@ -788,7 +763,7 @@ ostream& Chain::spreadsheet_print(ostream &os) const
         os << "\t" << component[i][j];
       }
 
-      if (stype[component[i][0]] == ABSORBING) {
+      if (state_type[component[i][0]] == 'a') {
         os << " (" << STAT_label[STATL_ABSORBING] << " " << STAT_label[STATL_STATE] << ")";
       }
     }
@@ -799,20 +774,20 @@ ostream& Chain::spreadsheet_print(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of the cumulative initial and transition distribution functions of a Chain object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Creation des champs de type "cumul" d'un objet Chain.
+ *
+ *--------------------------------------------------------------*/
 
 void Chain::create_cumul()
 
 {
-  int i;
+  register int i;
 
 
   if (!cumul_initial) {
-    cumul_initial = new double[type == ORDINARY ? nb_state : nb_row];
+    cumul_initial = new double[type == 'o' ? nb_state : nb_row];
   }
 
   if (!cumul_transition) {
@@ -824,16 +799,16 @@ void Chain::create_cumul()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the cumulative initial and transition distribution functions of a Chain object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs de type "cumul" d'un objet Chain.
+ *
+ *--------------------------------------------------------------*/
 
 void Chain::remove_cumul()
 
 {
-  int i;
+  register int i;
 
 
   if (cumul_initial) {
@@ -853,20 +828,20 @@ void Chain::remove_cumul()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of cumulative initial and transition distribution functions.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des fonctions de repartition.
+ *
+ *--------------------------------------------------------------*/
 
 void Chain::cumul_computation()
 
 {
   if ((cumul_initial) && (cumul_transition)) {
-    int i;
+    register int i;
 
 
-    stat_tool::cumul_computation((type == ORDINARY ? nb_state : nb_row) , initial , cumul_initial);
+    stat_tool::cumul_computation((type == 'o' ? nb_state : nb_row) , initial , cumul_initial);
 
     for (i = 0;i < nb_row;i++) {
       stat_tool::cumul_computation(nb_state , transition[i] , cumul_transition[i]);
@@ -875,20 +850,20 @@ void Chain::cumul_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Log transform of Markov chain parameters.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Transfomation en log des parametres d'une chaine de Markov.
+ *
+ *--------------------------------------------------------------*/
 
 void Chain::log_computation()
 
 {
   if ((cumul_initial) && (cumul_transition)) {
-    int i;
+    register int i;
 
 
-    stat_tool::log_computation((type == ORDINARY ? nb_state : nb_row) , initial , cumul_initial);
+    stat_tool::log_computation((type == 'o' ? nb_state : nb_row) , initial , cumul_initial);
 
     for (i = 0;i < nb_row;i++) {
       stat_tool::log_computation(nb_state , transition[i] , cumul_transition[i]);
@@ -897,13 +872,13 @@ void Chain::log_computation()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor by copy of the ChainData class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] chain_data reference on a ChainData object.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur par copie de la classe ChainData.
+ *
+ *  argument : reference sur un objet ChainData.
+ *
+ *--------------------------------------------------------------*/
 
 ChainData::ChainData(const ChainData &chain_data)
 

@@ -10,9 +10,9 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: compare.py 9035 2010-06-01 19:17:27Z cokelaer $
 """
-__version__ = "$Id$"
+__version__ = "$Id: compare.py 9035 2010-06-01 19:17:27Z cokelaer $"
 
 
 from openalea.stat_tool.comparison import compare_histo, compare_vectors

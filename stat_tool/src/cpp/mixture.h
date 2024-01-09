@@ -3,7 +3,7 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
@@ -40,8 +40,6 @@
 #define MIXTURE_H
 
 
-#include "vectors.h"
-
 
 namespace stat_tool {
 
@@ -49,50 +47,51 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constants
+ *  Constantes :
  */
 
 
-  const int MIXTURE_NB_COMPONENT = NB_STATE;  // maximum number of components
+  const int MIXTURE_NB_COMPONENT = NB_STATE;  // nombre maximum de composantes
 
-  const double MIXTURE_LIKELIHOOD_DIFF = 1.e-6;  // threshold for stopping the EM iterations
-  const int MIXTURE_NB_ITER = 500;        // maximum number of EM iterations
-  const int POSTERIOR_PROBABILITY_NB_VECTOR = 300;  // maximum number of individuals for the output of
-                                                    // the posterior probabilities of the most probable assignments
+  const double MIXTURE_LIKELIHOOD_DIFF = 1.e-6;  // seuil pour stopper les iterations EM
+  const int MIXTURE_NB_ITER = 500;        // nombre maximum d'iterations EM
+  const int POSTERIOR_PROBABILITY_NB_VECTOR = 300;  // nombre maximum de vecteurs pour la sortie des probabilites
+                                                    // a posteriori des affectations les plus probables
 
-  const int MIXTURE_NB_VECTOR = 50000;   // maximum sample size for simulation
+  const int MIXTURE_NB_VECTOR = 50000;   // nombre maximum d'individus pour la simulation
 
 
 
 /****************************************************************
  *
- *  Class definition
+ *  Definition des classes :
  */
 
 
   class MixtureData;
 
-  /// \brief Multivariate mixture of distributions
 
-  class Mixture : public StatInterface {
+  class Mixture : public StatInterface {  // melange multivarie de lois
 
     friend class Vectors;
     friend class MixtureData;
 
+    friend Mixture* mixture_ascii_read(StatError &error , const char *path ,
+                                       double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const Mixture &mixt)
     { return mixt.ascii_write(os , mixt.mixture_data); }
 
   private :
 
-    MixtureData *mixture_data;  ///< pointer on a MixtureData object
-    int nb_component;       ///< number of components
-    DiscreteParametric *weight;  ///< weight distribution
-//    int explanatory_variable;  categorical explanatory variable for the weights
-//    DiscreteParametric **category_weight;  component weights for the different categories
-    int nb_output_process;  ///< number of observation processes
-    CategoricalProcess **categorical_process;  ///< categorical observation processes
-    DiscreteParametricProcess **discrete_parametric_process;  ///< discrete parametric observation processes
-    ContinuousParametricProcess **continuous_parametric_process;  ///< continuous parametric observation processes
+    MixtureData *mixture_data;  // pointeur sur un objet MixtureData
+    int nb_component;       // nombre de composantes
+    DiscreteParametric *weight;  // poids de chaque composante
+//    int explanatory_variable;  variable explicative categorielle pour les poids
+//    DiscreteParametric **category_weight;  poids de chaque composante pour differents categories
+    int nb_output_process;  // nombre de processus d'observation
+    CategoricalProcess **categorical_process;  // processus d'observation categoriels
+    DiscreteParametricProcess **discrete_parametric_process;  // processus d'observation discrets parametriques
+    ContinuousParametricProcess **continuous_parametric_process;  // processus d'observation continus parametriques
 
     Mixture(const DiscreteParametric *iweight , int inb_output_process ,
             CategoricalProcess **categorical_observation ,
@@ -116,10 +115,8 @@ namespace stat_tool {
 
     Mixture();
     Mixture(int inb_component , int inb_output_process , int *nb_value);
-    Mixture(int inb_component , double offset , double mean , double standard_deviation ,
-            bool common_dispersion);
     Mixture(int inb_component , int ident , double mean , double standard_deviation ,
-            bool tied_mean , tying_rule variance_factor);
+            bool tied_mean , int variance_factor);
     Mixture(const Mixture &mixt , bool data_flag = true)
     { copy(mixt , data_flag); }
     ~Mixture();
@@ -130,14 +127,11 @@ namespace stat_tool {
 
     Mixture* thresholding(double min_probability = MIN_PROBABILITY) const;
 
-    static Mixture* ascii_read(StatError &error , const std::string path ,
-                               double cumul_threshold = CUMUL_THRESHOLD);
-
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -146,7 +140,7 @@ namespace stat_tool {
 
     MixtureData* simulation(StatError &error , int nb_vector) const;
 
-    // class member access
+    // acces membres de la classe
 
     MixtureData* get_mixture_data() const { return mixture_data; }
     int get_nb_component() const { return nb_component; }
@@ -167,9 +161,13 @@ namespace stat_tool {
   };
 
 
-  /// \brief Data structure corresponding to a multivariate mixture of distributions
+  Mixture* mixture_ascii_read(StatError &error , const char *path ,
+                              double cumul_threshold = CUMUL_THRESHOLD);
 
-  class MixtureData : public Vectors {
+
+
+  class MixtureData : public Vectors {  // structure de donnees correspondant
+                                        // a un melange multivarie
 
     friend class Vectors;
     friend class Mixture;
@@ -179,16 +177,16 @@ namespace stat_tool {
 
   private :
 
-    Mixture *mixture;       ///< pointer on a Mixture object
-//    int explanatory_variable;  categorical explanatory variable for the weights
-//    FrequencyDistribution **category_weight;  component weights for the different categories
-    FrequencyDistribution ***observation_distribution;  ///< observation frequency distributions
-    Histogram ***observation_histogram;  ///< observation histograms
-    double likelihood;      ///< log-likelihood of the observed data
-    double restoration_likelihood;  ///< log-likelihood of the restored data
-    double sample_entropy;  ///< sum of the entropy of the individual assignments
-    double *posterior_probability;  ///< posterior probabilities of the most probable assignments
-    double *entropy;        ///< entropy of the individual assignments
+    Mixture *mixture;       // pointeur sur un objet Mixture
+//    int explanatory_variable;  variable explicative categorielle pour les poids
+//    FrequencyDistribution **category_weight;  poids de chaque composante pour differents categories
+    FrequencyDistribution ***observation_distribution;  // lois empiriques d'observation
+    Histogram ***observation_histogram;  // histogrammes d'observation
+    double likelihood;      // vraisemblance des donnees observees
+    double restoration_likelihood;  // vraisemblance des donnees restaurees
+    double sample_entropy;  // entropie des affectations
+    double *posterior_probability;  // probabilite a posteriori de l'affectation la plus probable
+    double *entropy;        // entropie des affectations
 
     void copy(const MixtureData &vec , bool model_flag = true);
     void remove();
@@ -198,10 +196,9 @@ namespace stat_tool {
   public :
 
     MixtureData();
-    MixtureData(int inb_vector , int inb_variable , variable_nature *itype , bool init_flag = false);
-    MixtureData(const Vectors &vec , vector_transformation transform = VECTOR_COPY);
-    MixtureData(const MixtureData &vec , bool model_flag = true ,
-                vector_transformation transform = VECTOR_COPY)
+    MixtureData(int inb_vector , int inb_variable , int *itype , bool init_flag = false);
+    MixtureData(const Vectors &vec , char transform = 'c');
+    MixtureData(const MixtureData &vec , bool model_flag = true , char transform = 'c')
     :Vectors(vec , transform) { copy(vec , model_flag); }
     ~MixtureData();
     MixtureData& operator=(const MixtureData &vec);
@@ -209,26 +206,25 @@ namespace stat_tool {
     DiscreteDistributionData* extract(StatError &error , int variable , int index) const;
 
     std::ostream& ascii_data_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_data_write(StatError &error , const std::string path , bool exhaustive = false) const;
+    bool ascii_data_write(StatError &error , const char *path , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(StatError &error , const std::string path , bool exhaustive = false) const;
-    bool spreadsheet_write(StatError &error , const std::string path) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
     bool plot_write(StatError &error , const char *prefix , const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    void state_variable_init(variable_nature itype = STATE);
+    void state_variable_init(int itype = STATE);
 
     double classification_information_computation() const;
     double information_computation() const;
 
     void build_observation_frequency_distribution(int nb_component);
-    void build_observation_histogram(int variable , int nb_component , double bin_width = D_DEFAULT);
+    void build_observation_histogram(int variable , int nb_component , double step = D_DEFAULT);
     void build_observation_histogram(int nb_component);
-    bool select_bin_width(StatError &error , int variable , double bin_width ,
-                          double imin_value = D_INF);
+    bool select_step(StatError &error , int variable , double step , double imin_value = D_INF);
 
-    // class member access
+    // acces membres de la classe
 
     Mixture* get_mixture() const { return mixture; }
     FrequencyDistribution*** get_observation_distribution() const

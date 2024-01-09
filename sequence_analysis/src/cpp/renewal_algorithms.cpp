@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: renewal_algorithms.cpp 18065 2015-04-23 10:50:49Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -37,13 +37,769 @@
 
 
 #include <math.h>
+#include <iomanip>
 
+#include "tool/config.h"
+
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
 #include "renewal.h"
 #include "sequence_label.h"
 
 using namespace std;
+
+
+
+namespace stat_tool {
+
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la vraisemblance des donnees d'intervalles de temps.
+ *
+ *  arguments : loi de l'intervalle de temps residuel, lois empiriques des intervalles
+ *              de temps complets, censures a gauche, a droite et
+ *              de la longueur de la periode d'observation dans le cas 0 evenement.
+ *
+ *--------------------------------------------------------------*/
+
+double DiscreteParametric::renewal_likelihood_computation(const Forward &forward_dist ,
+                                                          const FrequencyDistribution &within ,
+                                                          const FrequencyDistribution &backward ,
+                                                          const FrequencyDistribution &forward ,
+                                                          const FrequencyDistribution *no_event) const
+
+{
+  double likelihood , buff;
+  FrequencyDistribution *histo;
+
+
+  likelihood = likelihood_computation(within);
+
+  if (likelihood != D_INF) {
+    histo = new FrequencyDistribution(backward , 's' , 1);
+    buff = survivor_likelihood_computation(*histo);
+    delete histo;
+
+    if (buff != D_INF) {
+      likelihood += buff;
+      buff = forward_dist.likelihood_computation(forward);
+
+      if (buff != D_INF) {
+        likelihood += buff;
+
+        if (no_event) {
+          histo = new FrequencyDistribution(*no_event , 's' , 1);
+          buff = forward_dist.survivor_likelihood_computation(*histo);
+          delete histo;
+
+          if (buff != D_INF) {
+            likelihood += buff;
+          }
+          else {
+            likelihood = D_INF;
+          }
+        }
+      }
+
+      else {
+        likelihood = D_INF;
+      }
+    }
+
+    else {
+      likelihood = D_INF;
+    }
+  }
+
+  return likelihood;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des quantites de reestimation correspondant a la loi inter-evenement
+ *  (estimateur EM d'un processus de renouvellement en equilibre a partir
+ *   de donnees d'intervalles de temps).
+ *
+ *  arguments : lois empiriques des intervalles de temps complets, censures a gauche,
+ *              a droite et de la longueur de la periode d'observation dans le cas 0 evenement,
+ *              pointeurs sur les quantites de reestimation de la loi inter-evenement et
+ *              de la loi biaisee par la longueur.
+ *
+ *--------------------------------------------------------------*/
+
+void DiscreteParametric::expectation_step(const FrequencyDistribution &within ,
+                                          const FrequencyDistribution &backward ,
+                                          const FrequencyDistribution &forward ,
+                                          const FrequencyDistribution *no_event ,
+                                          Reestimation<double> *inter_event_reestim ,
+                                          Reestimation<double> *length_bias_reestim , int iter) const
+
+{
+  register int i , j;
+  int reestim_offset , reestim_nb_value , *pfrequency;
+  double sum , *ifrequency , *lfrequency , *pmass , *pcumul , *norm;
+
+
+  // initialisations
+
+  ifrequency = inter_event_reestim->frequency;
+  lfrequency = length_bias_reestim->frequency;
+  for (i = 0;i < inter_event_reestim->alloc_nb_value;i++) {
+    *ifrequency++ = 0.;
+    *lfrequency++ = 0.;
+  }
+
+  // calcul des quantites de reestimation de la loi inter-evenement
+
+  ifrequency = inter_event_reestim->frequency + within.offset;
+  pfrequency = within.frequency + within.offset;
+  for (i = within.offset;i < within.nb_value;i++) {
+    *ifrequency++ += *pfrequency++;
+  }
+
+  pfrequency = backward.frequency + backward.offset;
+  pcumul = cumul + backward.offset;
+  ifrequency = inter_event_reestim->frequency + backward.offset + 1;
+  pmass = mass + backward.offset + 1;
+  sum = 0.;
+
+  for (i = backward.offset;i < backward.nb_value;i++) {
+    sum += *pfrequency++ / (1. - *pcumul++);
+    *ifrequency++ += *pmass++ * sum;
+  }
+  for (i = backward.nb_value;i < nb_value - 1;i++) {
+    *ifrequency++ += *pmass++ * sum;
+  }
+
+  // calcul des quantites de reestimation de la loi biaisee par la longueur
+
+  pfrequency = forward.frequency + forward.offset;
+  pcumul = cumul + forward.offset - 1;
+  lfrequency = length_bias_reestim->frequency + forward.offset;
+  pmass = mass + forward.offset;
+  sum = 0.;
+
+  for (i = forward.offset;i < forward.nb_value;i++) {
+    sum += *pfrequency++ / (1. - *pcumul++);
+    *lfrequency++ += *pmass++ * sum;
+  }
+  for (i = forward.nb_value;i < nb_value;i++) {
+    *lfrequency++ += *pmass++ * sum;
+  }
+
+  if (no_event) {
+    norm = new double[no_event->nb_value];
+
+    for (i = no_event->offset;i < no_event->nb_value;i++) {
+      if (no_event->frequency[i] > 0) {
+        pmass = mass + i + 1;
+        norm[i] = 0.;
+        for (j = i + 1;j < nb_value;j++) {
+          norm[i] += (j - i) * *pmass++;
+        }
+      }
+    }
+
+    lfrequency = length_bias_reestim->frequency + no_event->offset + 1;
+    pmass = mass + no_event->offset + 1;
+    for (i = no_event->offset + 1;i < nb_value;i++) {
+      pfrequency = no_event->frequency + no_event->offset;
+      sum = 0.;
+      for (j = no_event->offset;j < MIN(i , no_event->nb_value);j++) {
+        if ((*pfrequency > 0) && (norm[j] > 0.)) {
+          sum += *pfrequency * (i - j) / norm[j];
+        }
+        pfrequency++;
+      }
+
+      *lfrequency++ += *pmass++ * sum;
+    }
+
+    delete [] norm;
+  }
+
+  reestim_offset = 1;
+  reestim_nb_value = inter_event_reestim->alloc_nb_value;
+
+  ifrequency = inter_event_reestim->frequency + inter_event_reestim->alloc_nb_value;
+  lfrequency = length_bias_reestim->frequency + inter_event_reestim->alloc_nb_value;
+  while ((*--ifrequency == 0) && (*--lfrequency == 0) && (reestim_nb_value > 2)) {
+    reestim_nb_value--;
+  }
+  inter_event_reestim->nb_value = reestim_nb_value;
+  length_bias_reestim->nb_value = reestim_nb_value;
+
+  ifrequency = inter_event_reestim->frequency + reestim_offset;
+  lfrequency = length_bias_reestim->frequency + reestim_offset;
+  while ((*ifrequency++ == 0) && (*lfrequency++ == 0) && (reestim_offset < reestim_nb_value - 1)) {
+    reestim_offset++;
+  }
+  inter_event_reestim->offset = reestim_offset;
+  length_bias_reestim->offset = reestim_offset;
+
+  inter_event_reestim->nb_element_computation();
+  length_bias_reestim->nb_element_computation();
+
+# ifdef DEBUG
+  if ((iter < 10) || ((iter < 100) && (iter % 10 == 0)) ||
+      ((iter < 1000) && (iter % 100 == 0)) || (iter % 1000 == 0)) {
+    inter_event_reestim->max_computation();
+    inter_event_reestim->mean_computation();
+    inter_event_reestim->variance_computation();
+
+    length_bias_reestim->max_computation();
+    length_bias_reestim->mean_computation();
+    length_bias_reestim->variance_computation();
+
+    cout << "\nquantites de reestimation loi inter_evenement :" << *inter_event_reestim << endl;
+    cout << "\nquantites de reestimation loi biaisee par la longueur :" << *length_bias_reestim << endl;
+  }
+# endif
+
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la moyenne d'une loi par bissection d'intervalle.
+ *
+ *  arguments : pointeurs sur les quantites de reestimation de la loi et
+ *              de la loi biaisee par la longueur.
+ *
+ *--------------------------------------------------------------*/
+
+double interval_bisection(Reestimation<double> *distribution_reestim ,
+                          Reestimation<double> *length_bias_reestim)
+
+{
+  register int i;
+  double ratio , inf_ratio , sup_ratio , mean , inf_mean , sup_mean , *dfrequency , *lfrequency;
+
+# ifdef DEBUG
+  int iter = 0;
+# endif
+
+
+  // initialisations : calculs des 2 premieres valeurs
+
+  dfrequency = distribution_reestim->frequency + distribution_reestim->offset;
+  lfrequency = length_bias_reestim->frequency + distribution_reestim->offset;
+  inf_ratio = 0.;
+  sup_ratio = 0.;
+  inf_mean = distribution_reestim->offset;
+  sup_mean = distribution_reestim->nb_value - 1;
+
+  for (i = distribution_reestim->offset;i < distribution_reestim->nb_value;i++) {
+    inf_ratio += (*dfrequency + *lfrequency) * i /
+                 (distribution_reestim->nb_element * sup_mean + length_bias_reestim->nb_element * i);
+    sup_ratio += (*dfrequency++ + *lfrequency++) * i /
+                 (distribution_reestim->nb_element * inf_mean + length_bias_reestim->nb_element * i);
+  }
+
+  do {
+    dfrequency = distribution_reestim->frequency + distribution_reestim->offset;
+    lfrequency = length_bias_reestim->frequency + distribution_reestim->offset;
+    ratio = 0.;
+    mean = (inf_mean + sup_mean) / 2.;
+
+    for (i = distribution_reestim->offset;i < distribution_reestim->nb_value;i++) {
+      ratio += (*dfrequency++ + *lfrequency++) * i /
+               (distribution_reestim->nb_element * mean + length_bias_reestim->nb_element * i);
+    }
+
+#   ifdef DEBUG
+    cout << STAT_label[STATL_ITERATION] << " " << iter++ << ": " << mean << " " << ratio << endl;
+#   endif
+
+    if (ratio < 1.) {
+      inf_ratio = ratio;
+      sup_mean = mean;
+    }
+    else {
+      sup_ratio = ratio;
+      inf_mean = mean;
+    }
+  }
+  while (sup_ratio - inf_ratio > BISECTION_RATIO_THRESHOLD);
+
+  mean = (inf_mean + sup_mean) / 2.;
+
+# ifdef DEBUG
+  cout << STAT_label[STATL_MEAN] << ": " << mean << " " << ratio << endl;
+# endif
+
+  return mean;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Estimation des parametres d'un processus de renouvellement en equilibre
+ *  par l'algorithme EM a partir de donnees d'intervalles de temps.
+ *
+ *  arguments : reference sur un objet StatError, stream, lois empiriques des intervalles
+ *              de temps censures a gauche, a droite et de la longueur
+ *              de la periode d'observation dans le cas 0 evenement,
+ *              reference sur la loi inter-evenement initiale, type d'estimateur
+ *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
+ *              methode de calcul de la moyenne de la loi inter-evenement,
+ *              poids de la penalisation, type de penalisation,
+ *              type de gestion des effets de bord (zero a l'exterieur du support ou
+ *              prolongation de la loi), moyenne de la loi inter-evenement.
+ *
+ *--------------------------------------------------------------*/
+
+DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream &os ,
+                                                           const FrequencyDistribution &backward ,
+                                                           const FrequencyDistribution &forward ,
+                                                           const FrequencyDistribution *no_event ,
+                                                           const DiscreteParametric &iinter_event ,
+                                                           int estimator , int nb_iter ,
+                                                           int mean_computation_method , double weight ,
+                                                           int penalty_type , int outside ,
+                                                           double iinter_event_mean) const
+
+{
+  using namespace sequence_analysis;
+
+  bool status = true;
+  register int i;
+  int inb_value , max_nb_value;
+  double likelihood , previous_likelihood , inter_event_mean , *penalty;
+  DiscreteParametricModel *inter_event;
+  Forward *forward_dist;
+  Reestimation<double> *inter_event_reestim , *length_bias_reestim;
+  FrequencyDistribution *backward_forward;
+  const FrequencyDistribution *phisto[2];
+
+
+  inter_event = NULL;
+  error.init();
+
+  if (nb_element < NB_COMPLETE_INTERVAL) {
+    status = false;
+    error.update(SEQ_error[SEQR_NB_COMPLETE_INTERVAL_TOO_SMALL]);
+  }
+
+  if (offset == 0) {
+    status = false;
+    error.update(SEQ_error[SEQR_COMPLETE_MIN_VALUE]);
+  }
+  if (forward.offset == 0) {
+    status = false;
+    error.update(SEQ_error[SEQR_FORWARD_MIN_VALUE]);
+  }
+  if ((no_event) && (no_event->offset == 0)) {
+    status = false;
+    error.update(SEQ_error[SEQR_NO_EVENT_MIN_VALUE]);
+  }
+
+  if ((nb_iter != I_DEFAULT) && (nb_iter < 1)) {
+    status = false;
+    error.update(STAT_error[STATR_NB_ITERATION]);
+  }
+
+  if ((weight != D_DEFAULT) && (weight <= 0.)) {
+    status = false;
+    error.update(STAT_error[STATR_PENALTY_WEIGHT]);
+  }
+
+  if ((mean_computation_method == ESTIMATED) && (iinter_event_mean == D_DEFAULT)) {
+    status = false;
+    error.update(SEQ_error[SEQR_MEAN_COMPUTATION_METHOD]);
+  }
+
+  inb_value = nb_value;
+  if (backward.nb_value + 1 > inb_value) {
+    inb_value = backward.nb_value + 1;
+  }
+  if (forward.nb_value > inb_value) {
+    inb_value = forward.nb_value;
+  }
+
+  if ((no_event) && (no_event->nb_value > inb_value)) {
+    max_nb_value = no_event->nb_value;
+  }
+  else {
+    max_nb_value = inb_value;
+  }
+
+  if ((iinter_event.offset > offset) || (iinter_event.nb_value < max_nb_value)) {
+    status = false;
+    error.update(SEQ_error[SEQR_INTER_EVENT_SUPPORT]);
+  }
+
+  if (status) {
+    phisto[0] = new FrequencyDistribution(backward , 's' , 1);
+    phisto[1] = &forward;
+    backward_forward = new FrequencyDistribution(2 , phisto);
+    delete phisto[0];
+
+#   ifdef MESSAGE
+    {
+      int max_nb_element , width[2];
+      long old_adjust;
+
+
+      old_adjust = os.setf(ios::right , ios::adjustfield);
+
+      width[0] = column_width(max_nb_value - 1);
+
+      max_nb_element = nb_element;
+      if (backward_forward->nb_element > max_nb_element) {
+        max_nb_element = backward_forward->nb_element;
+      }
+      if ((no_event) && (no_event->nb_element > max_nb_element)) {
+        max_nb_element = no_event->nb_element;
+      }
+      width[1] = column_width(max_nb_element) + ASCII_SPACE;
+
+      os << "\n   | " << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+         << " | " << SEQ_label[SEQL_BACKWARD] << "/" << SEQ_label[SEQL_FORWARD]
+         << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+      if (no_event) {
+        os << " | no-event " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+      }
+      os << endl;
+
+      for (i = 0;i < max_nb_value;i++) {
+        os << setw(width[0]) << i;
+
+        if (i < nb_value) {
+          os << setw(width[1]) << frequency[i];
+        }
+        else {
+          os << setw(width[1]) << " ";
+        }
+
+        if (i < backward_forward->nb_value) {
+          os << setw(width[1]) << backward_forward->frequency[i];
+        }
+        else {
+          os << setw(width[1]) << " ";
+        }
+
+        if (no_event) {
+          if (i < no_event->nb_value) {
+            os << setw(width[1]) << no_event->frequency[i];
+          }
+          else {
+            os << setw(width[1]) << " ";
+          }
+        }
+
+        os << "    |  ";
+        if (i < backward.nb_value) {
+          os << setw(width[1]) << backward.frequency[i];
+        }
+        else {
+          os << setw(width[1]) << " ";
+        }
+
+        if (i < forward.nb_value) {
+          os << setw(width[1]) << forward.frequency[i];
+        }
+        else {
+          os << setw(width[1]) << " ";
+        }
+
+        os << endl;
+      }
+      os << endl;
+
+      os << setw(width[0]) << " "
+         << setw(width[1]) << nb_element
+         << setw(width[1]) << backward_forward->nb_element;
+      if (no_event) {
+        os << setw(width[1]) << no_event->nb_element;
+      }
+      os << "    |  " << setw(width[1]) << backward.nb_element
+         << setw(width[1]) << forward.nb_element << "\n" << endl;
+
+      os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+    }
+#   endif
+
+    // creation de la loi inter-evenement
+
+    inter_event = new DiscreteParametricModel(iinter_event , this);
+    inter_event->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
+    forward_dist = new Forward(*inter_event);
+
+    if (estimator == PENALIZED_LIKELIHOOD) {
+      penalty = new double[inter_event->nb_value];
+
+      if (weight == D_DEFAULT) {
+        if (penalty_type != ENTROPY) {
+          weight = RENEWAL_DIFFERENCE_WEIGHT;
+        }
+        else {
+          weight = RENEWAL_ENTROPY_WEIGHT;
+        }
+      }
+
+      if (no_event) {
+        weight *= (nb_element + backward.nb_element + forward.nb_element + no_event->nb_element);
+      }
+      else {
+        weight *= (nb_element + backward.nb_element + forward.nb_element);
+      }
+    }
+
+    inter_event_reestim = new Reestimation<double>(inter_event->nb_value);
+    length_bias_reestim = new Reestimation<double>(inter_event->nb_value);
+
+    likelihood = D_INF;
+    i = 0;
+
+    do {
+      i++;
+
+      inter_event->expectation_step(*this , backward , forward , no_event ,
+                                    inter_event_reestim , length_bias_reestim , i);
+
+      switch (estimator) {
+
+      case LIKELIHOOD : {
+        switch (mean_computation_method) {
+        case ESTIMATED :
+          inter_event_mean = iinter_event_mean;
+          break;
+        case COMPUTED :
+          inter_event_mean = interval_bisection(inter_event_reestim , length_bias_reestim);
+          break;
+        case ONE_STEP_LATE :
+          inter_event_mean = inter_event->mean;
+          break;
+        }
+
+        inter_event_reestim->equilibrium_process_estimation(length_bias_reestim , inter_event ,
+                                                            inter_event_mean);
+        break;
+      }
+
+      case PENALIZED_LIKELIHOOD : {
+        switch (mean_computation_method) {
+        case ESTIMATED :
+          inter_event_mean = iinter_event_mean;
+          break;
+        case ONE_STEP_LATE :
+          inter_event_mean = inter_event->mean;
+          break;
+        }
+
+        inter_event_reestim->penalized_likelihood_equilibrium_process_estimation(length_bias_reestim ,
+                                                                                 inter_event , inter_event_mean ,
+                                                                                 weight , penalty_type , penalty ,
+                                                                                 outside);
+        break;
+      }
+      }
+
+      forward_dist->computation(*inter_event);
+      previous_likelihood = likelihood;
+      likelihood = inter_event->renewal_likelihood_computation(*forward_dist , *this , backward ,
+                                                               forward , no_event);
+
+#     ifdef MESSAGE
+      if ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0)) {
+        os << STAT_label[STATL_ITERATION] << " " << i << "   "
+           << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+           << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
+        if (estimator == PENALIZED_LIKELIHOOD) {
+          os << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
+        }
+
+        if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
+            ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]) > 0.)) {
+          if (mean_computation_method == ESTIMATED) {
+            inter_event_mean = iinter_event_mean;
+          }
+          else {
+            inter_event_mean = inter_event->mean;
+          }
+
+          os << "   smaller upper bound: "
+             << inb_value - 1 + (no_event->nb_element * inter_event_mean) /
+                                ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]));
+        }
+
+/*        if (backward_forward->nb_value > nb_value) {
+          register int j;
+          double term = forward.nb_element * (backward_forward->nb_value - 1) /
+                        inter_event->mean + nb_element + backward.nb_element;
+          if (no_event) {
+            term += no_event->nb_element * (backward_forward->nb_value - 1) / inter_event->mean;
+          }
+          for (j = backward_forward->offset;j < backward_forward->nb_value;j++) {
+            term -= backward_forward->frequency[j] / (1. - inter_event->cumul[j - 1]);
+          }
+
+          os << " |   " << term;
+        } */
+
+        os << endl;
+      }
+#     endif
+
+    }
+    while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (i < RENEWAL_NB_ITER) &&
+             ((likelihood - previous_likelihood) / -likelihood > RENEWAL_LIKELIHOOD_DIFF)) ||
+            ((nb_iter != I_DEFAULT) && (i < nb_iter))));
+
+    if (likelihood != D_INF) {
+
+#     ifdef MESSAGE
+      os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+         << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+         << STAT_label[STATL_SMOOTHNESS] << ": " << inter_event->second_difference_norm_computation();
+      if (estimator == PENALIZED_LIKELIHOOD) {
+        os << "   cumul: " << inter_event->cumul[inter_event->nb_value - 1];
+      }
+
+      if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
+          ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]) > 0.)) {
+        if (mean_computation_method == ESTIMATED) {
+          inter_event_mean = iinter_event_mean;
+        }
+        else {
+          inter_event_mean = inter_event->mean;
+        }
+
+        os << "   smaller upper bound: "
+           << inb_value - 1 + (no_event->nb_element * inter_event_mean) /
+                              ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]));
+      }
+      os << endl;
+#     endif
+
+    }
+
+    else {
+      delete inter_event;
+      inter_event = NULL;
+      error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
+    }
+
+    delete backward_forward;
+
+    delete forward_dist;
+    if (estimator == PENALIZED_LIKELIHOOD) {
+      delete [] penalty;
+    }
+
+    delete inter_event_reestim;
+    delete length_bias_reestim;
+  }
+
+  return inter_event;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Estimation des parametres d'un processus de renouvellement en equilibre
+ *  par l'algorithme EM a partir de donnees d'intervalles de temps.
+ *
+ *  arguments : reference sur un objet StatError, stream, lois empiriques des intervalles
+ *              de temps censures a gauche, a droite et de la longueur de la periode
+ *              d'observation dans le cas 0 evenement, type d'estimateur
+ *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
+ *              methode de calcul de la moyenne de la loi inter-evenement,
+ *              poids de la penalisation, type de penalisation,
+ *              type de gestion des effets de bord (zero a l'exterieur du support ou
+ *              prolongation de la loi).
+ *
+ *--------------------------------------------------------------*/
+
+DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream &os ,
+                                                           const FrequencyDistribution &backward ,
+                                                           const FrequencyDistribution &forward ,
+                                                           const FrequencyDistribution *no_event ,
+                                                           int estimator , int nb_iter ,
+                                                           int mean_computation_method , double weight ,
+                                                           int penalty_type , int outside) const
+
+{
+  using namespace sequence_analysis;
+
+  register int i;
+  int nb_histo , *pfrequency;
+  double *pmass;
+  DiscreteParametric *iinter_event;
+  DiscreteParametricModel *inter_event;
+  FrequencyDistribution *interval;
+  const FrequencyDistribution *phisto[4];
+
+
+  nb_histo = 3;
+  phisto[0] = this;
+  phisto[1] = new FrequencyDistribution(backward , 's' , 1);
+  phisto[2] = &forward;
+  if (no_event) {
+    nb_histo++;
+    phisto[3] = new FrequencyDistribution(*no_event , 's' , 1);
+  }
+
+  interval = new FrequencyDistribution(nb_histo , phisto);
+  delete phisto[1];
+  if (no_event) {
+    delete phisto[3];
+  }
+
+  iinter_event = new DiscreteParametric((int)(interval->nb_value * MAX_VALUE_COEFF));
+
+  iinter_event->offset = interval->offset;
+
+  pmass = iinter_event->mass;
+  for (i = 0;i < interval->offset;i++) {
+    *pmass++ = 0.;
+  }
+
+  pfrequency = interval->frequency + interval->offset;
+  for (i = interval->offset;i < interval->nb_value;i++) {
+    *pmass++ = (double)*pfrequency++ / (double)(interval->nb_element + 1);
+  }
+
+  for (i = interval->nb_value;i < iinter_event->nb_value - 1;i++) {
+    *pmass++ = 0.;
+  }
+  *pmass = 1. / (double)(interval->nb_element + 1);
+
+  iinter_event->cumul_computation();
+
+  iinter_event->max = (double)max / (double)(interval->nb_element + 1);
+  iinter_event->mean_computation();
+  iinter_event->variance_computation();
+
+  delete interval;
+
+# ifdef DEBUG
+  iinter_event->ascii_print(cout);
+# endif
+
+  inter_event = estimation(error , os , backward , forward , no_event ,
+                           *iinter_event , estimator , nb_iter , mean_computation_method ,
+                           weight , penalty_type , outside);
+  delete iinter_event;
+
+  return inter_event;
+}
+
+
+};  // namespace stat_tool
+
+
+
 using namespace stat_tool;
 
 
@@ -51,16 +807,16 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the information quantity of a TimeEvents object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la quantite d'information d'un objet TimeEvents.
+ *
+ *--------------------------------------------------------------*/
 
 double TimeEvents::information_computation() const
 
 {
-  int i;
+  register int i;
   double information , buff;
 
 
@@ -86,19 +842,19 @@ double TimeEvents::information_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the log-likelihood of a mixture of number of events distributions
- *         for pairs {observation period, number of events}.
+/*--------------------------------------------------------------*
  *
- *  \param[in] timev reference on a TimeEvents object.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la  vraisemblance d'echantillons {temps, nombre d'evenements}
+ *  pour une melange de lois du nombre d'evenements donne.
+ *
+ *  argument : reference sur un objet TimeEvents.
+ *
+ *--------------------------------------------------------------*/
 
 double Renewal::likelihood_computation(const TimeEvents &timev) const
 
 {
-  int i;
+  register int i;
   double likelihood , buff;
 
 
@@ -124,26 +880,26 @@ double Renewal::likelihood_computation(const TimeEvents &timev) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the inter-event distribution reestimation quantities
- *         (EM estimator of an ordinary renewal process on the basis of count data).
+/*--------------------------------------------------------------*
  *
- *  \param[in] timev               reference on the pairs {observation period, number of events},
- *  \param[in] inter_event_reestim pointer on the reestimation quantities.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul des quantites de reestimation correspondant a la loi inter-evenement
+ *  (estimateur EM d'un processus de renouvellement ordinaire a partir de donnees de comptage).
+ *
+ *  arguments : reference sur les echantillons {temps, nombre d'evenements},
+ *              pointeur sur les quantites de reestimation.
+ *
+ *--------------------------------------------------------------*/
 
 void Renewal::expectation_step(const TimeEvents &timev ,
                                Reestimation<double> *inter_event_reestim) const
 
 {
-  int i , j;
+  register int i , j;
   int min_time , max_time , *ptime , *pnb_event , *pfrequency;
   double num , denom , *ifrequency , *pmass;
 
 
-  // initialization
+  // initialisation
 
   ifrequency = inter_event_reestim->frequency;
   for (i = 0;i < inter_event_reestim->alloc_nb_value;i++) {
@@ -156,7 +912,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
 
   for (i = 0;i < timev.nb_class;i++) {
 
-    // case no event
+    // cas pas d'evenement
 
     if (*pnb_event == 0) {
       min_time = MAX(inter_event->offset , *ptime + 1);
@@ -174,7 +930,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
       }
     }
 
-    // case number of events > 0
+    // cas au moins 1 evenement
 
     else {
       denom = 0.;
@@ -191,7 +947,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
         for (j = inter_event->offset;j < inter_event->nb_value;j++) {
           num = 0.;
 
-          // case number of events = 1: complet time interval
+          // cas 1 evenement : intervalle complet
 
           if (*pnb_event == 1) {
             if ((*ptime - j >= 0) && (*ptime - j < nevent_time[*pnb_event]->nb_value)) {
@@ -199,7 +955,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
             }
           }
 
-          // case number of events > 1: complete time intervals
+          // cas plus de 1 evenement : intervalles complets
 
           else {
             if (*ptime - j >= nevent_time[*pnb_event - 1]->offset) {
@@ -213,7 +969,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
             }
           }
 
-          // right-censored time interval
+          // intervalle tronque
 
           if ((max_time > *ptime - j) && (max_time >= nevent_time[*pnb_event]->offset)) {
             num += nevent_time[*pnb_event]->cumul[max_time];
@@ -243,40 +999,38 @@ void Renewal::expectation_step(const TimeEvents &timev ,
   cout << "\n" << (timev.mixture->mean + 1) * timev.nb_element << " | "
        << " " << inter_event_reestim->nb_element << endl;
 
-  cout << "\nthe reestimation quantities inter-event distribution:" << *inter_event_reestim << endl;
+  cout << "\nquantites de reestimation loi inter_evenement :" << *inter_event_reestim << endl;
 # endif
 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the inter-event distribution reestimation quantities
- *         (EM estimator of an equilibrium renewal process on the basis of count data).
+/*--------------------------------------------------------------*
  *
- *  \param[in] timev               reference on the pairs {observation period, number of events},
- *  \param[in] inter_event_reestim pointer on the inter-event distribution reestimation quantities,
- *  \param[in] length_bias_reestim pointer on the length-biased distribution reestimation quantities,
- *  \param[in] estimator           estimator type (complete or partial likelihood),
- *  \param[in] combination         combination or not of the reestimation quantities,
- *  \param[in] mean_estimator      method for the computation of the inter-event distribution mean (equilibrium renewel process).
- */
-/*--------------------------------------------------------------*/
+ *  Calcul des quantites de reestimation correspondant a la loi inter-evenement
+ *  (estimateur EM d'un processus de renouvellement en equilibre a partir de donnees de comptage).
+ *
+ *  arguments : reference sur les echantillons {temps, nombre d'evenements},
+ *              pointeurs sur les quantites de reestimation de la loi inter-evenement et
+ *              de la loi biaisee par la longueur, type d'estimateur,
+ *              combinaison ou non des quantites de reestimation,
+ *              methode de calcul de la moyenne de la loi inter-evenement.
+ *
+ *--------------------------------------------------------------*/
 
 void Renewal::expectation_step(const TimeEvents &timev ,
                                Reestimation<double> *inter_event_reestim ,
-                               Reestimation<double> *length_bias_reestim ,
-                               censoring_estimator estimator , bool combination ,
-                               duration_distribution_mean_estimator mean_estimator) const
+                               Reestimation<double> *length_bias_reestim , int estimator ,
+                               bool combination , int mean_computation_method) const
 
 {
-  int i , j;
+  register int i , j;
   int max_time , offset , nb_value , *ptime , *pnb_event , *pfrequency;
   double complete_num , censored_num , denom , inter_event_mean , *ifrequency ,
          *lfrequency , *pmass;
 
 
-  // initializations
+  // initialisations
 
   ifrequency = inter_event_reestim->frequency;
   for (i = 0;i < inter_event_reestim->alloc_nb_value;i++) {
@@ -296,7 +1050,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
 
   for (i = 0;i < timev.nb_class;i++) {
 
-    // case no event
+    // cas pas d'evenement
 
     if (*pnb_event == 0) {
       if ((estimator == COMPLETE_LIKELIHOOD) && (*ptime + 1 < inter_event->nb_value)) {
@@ -312,7 +1066,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
       }
     }
 
-    // case number of events > 0
+    // cas au moins 1 evenement
 
     else {
       denom = 0.;
@@ -322,7 +1076,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
 
       if (denom > 0.) {
 
-        // left-censored time interval
+        // intervalle tronque initial
 
 /*        if (estimator == COMPLETE_LIKELIHOOD) {
           lfrequency = length_bias_reestim->frequency + inter_event->offset;
@@ -332,7 +1086,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
           for (j = 1;j < inter_event->nb_value;j++) {
             if (j <= *ptime) {
 
-              // case 1 event
+              // cas 1 evenement
 
               if (*pnb_event == 1) {
                 if (*ptime - j < aux_nevent_time[*pnb_event]->nb_value) {
@@ -340,7 +1094,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
                 }
               }
 
-              // case number of events > 1
+              // cas plus de 1 evenement
 
               else {
                 if (*ptime - j >= aux_nevent_time[*pnb_event - 1]->offset) {
@@ -372,7 +1126,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
         for (j = inter_event->offset;j < inter_event->nb_value;j++) {
           complete_num = 0.;
 
-          // case number of events > 1: complete time intervals
+          // cas plus de 1 evenement : intervalles complets
 
           if (*pnb_event > 1) {
             if (*ptime - j >= nevent_time[*pnb_event - 1]->offset) {
@@ -386,7 +1140,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
             }
           }
 
-          // left- and right-censored time intervals
+          // intervalles tronques initial et final
 
           censored_num = 0.;
           if ((max_time > *ptime - j) && (max_time >= nevent_time[*pnb_event]->offset)) {
@@ -455,15 +1209,15 @@ void Renewal::expectation_step(const TimeEvents &timev ,
     cout << "\n" << timev.nb_element << " | "  << length_bias_reestim->nb_element << " || "
          << timev.mixture->mean * timev.nb_element << " | " << " " << inter_event_reestim->nb_element << endl;
 
-    cout << "\nthe reestimation quantities inter-event distribution:" << *inter_event_reestim << endl;
-    cout << "\nthe reestimation quantities length-biased distribution:" << *length_bias_reestim << endl;
+    cout << "\nquantites de reestimation loi inter_evenement :" << *inter_event_reestim << endl;
+    cout << "\nquantites de reestimation loi biaisee par la longueur :" << *length_bias_reestim << endl;
 #   endif
 
   }
   }
 
   if ((estimator == COMPLETE_LIKELIHOOD) && (combination)) {
-    switch (mean_estimator) {
+    switch (mean_computation_method) {
     case ESTIMATED :
       inter_event_mean = timev.htime->mean / timev.mixture->mean;
       break;
@@ -476,7 +1230,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
     }
 
 #   ifdef DEBUG
-    if (mean_estimator != ESTIMATED) {
+    if (mean_computation_method != ESTIMATED) {
       cout << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_MEAN] << ": "
            << inter_event_mean << " (" << timev.htime->mean / timev.mixture->mean << ") | ";
     }
@@ -492,44 +1246,38 @@ void Renewal::expectation_step(const TimeEvents &timev ,
   }
 
 # ifdef DEBUG
-  cout << "\nthe reestimation quantities inter-event distribution:" << *inter_event_reestim << endl;
+  cout << "\nquantites de reestimation loi inter_evenement :" << *inter_event_reestim << endl;
 # endif
 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of a renewal process on the basis of pairs
- *         {observation period, number of events} using the EM algorithm.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error                 reference on a StatError object,
- *  \param[in] display               flag for displaying estimation intermediate results,
- *  \param[in] type                  renewal process type (ORDINARY/EQUILIBRIUM),
- *  \param[in] iinter_event          reference on the initial inter-event distribution,
- *  \param[in] estimator             estimator type (maximum likelihood or penalized likelihood or
- *                                   estimation of a parametric distribution),
- *  \param[in] nb_iter               number of iterations,
- *  \param[in] equilibrium_estimator estimator type in the case of an equilibrium renewal process,
- *  \param[in] mean_estimator        method of computation of the inter-event distribution mean,
- *  \param[in] weight                penalty weight,
- *  \param[in] pen_type              penalty type,
- *  \param[in] outside               management of side effects (zero outside the support or
- *                                   continuation of the distribution).
+ *  Estimation des parametres d'un processus de renouvellement par l'algorithme EM
+ *  a partir d'echantillons {temps d'observation, nombre d'evenements}.
  *
- *  \return                          Renewal object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream,
+ *              type de processus ('o' : ordinaire, 'e' : en equilibre),
+ *              reference sur la loi inter-evenement initiale,
+ *              type d'estimateur (vraisemblance, vraisemblance penalisee ou
+ *              estimation d'une loi parametrique), nombre d'iterations,
+ *              type d'estimateur dans le cas d'un processus de renouvellement en equilibre,
+ *              methode de calcul de la moyenne de la loi inter-evenement,
+ *              poids de la penalisation, type de penalisation,
+ *              type de gestion des effets de bord (zero a l'exterieur du support ou
+ *              prolongation de la loi).
+ *
+ *--------------------------------------------------------------*/
 
-Renewal* TimeEvents::estimation(StatError &error , bool display , process_type type ,
-                                const DiscreteParametric &iinter_event , estimation_criterion estimator ,
-                                int nb_iter , censoring_estimator equilibrium_estimator ,
-                                duration_distribution_mean_estimator mean_estimator ,
-                                double weight , penalty_type pen_type , side_effect outside) const
+Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
+                                const DiscreteParametric &iinter_event , int estimator ,
+                                int nb_iter , int equilibrium_estimator , int mean_computation_method ,
+                                double weight , int penalty_type , int outside) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   int nb_likelihood_decrease;
   double likelihood , previous_likelihood , information , hlikelihood , inter_event_mean , *penalty;
   DiscreteParametric *pinter_ev;
@@ -568,7 +1316,7 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
   if (status) {
     information = information_computation();
 
-    // construction of a Renewal object
+    // creation du processus de renouvellement
 
     renew = new Renewal(type , *htime , iinter_event);
     renew->renewal_data = new RenewalData(*this , type);
@@ -579,7 +1327,7 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
       penalty = new double[pinter_ev->alloc_nb_value];
 
       if (weight == D_DEFAULT) {
-        if (pen_type != ENTROPY) {
+        if (penalty_type != ENTROPY) {
           weight = RENEWAL_DIFFERENCE_WEIGHT;
         }
         else {
@@ -597,7 +1345,7 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
 
     inter_event_reestim = new Reestimation<double>(pinter_ev->alloc_nb_value);
 
-    if (type == EQUILIBRIUM) {
+    if (type == 'e') {
       if (equilibrium_estimator == COMPLETE_LIKELIHOOD) {
         length_bias_reestim = new Reestimation<double>(pinter_ev->alloc_nb_value);
       }
@@ -612,25 +1360,25 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
     do {
       i++;
 
-      // computation of the reestimation quantities
+      // calcul des quantites de reestimation
 
       switch (type) {
-      case ORDINARY :
+      case 'o' :
         renew->expectation_step(*this , inter_event_reestim);
         break;
-      case EQUILIBRIUM :
+      case 'e' :
         renew->expectation_step(*this , inter_event_reestim ,
                                 length_bias_reestim , equilibrium_estimator);
         break;
       }
 
       if (estimator != PENALIZED_LIKELIHOOD) {
-        if ((type == ORDINARY) || (equilibrium_estimator == PARTIAL_LIKELIHOOD)) {
+        if ((type == 'o') || (equilibrium_estimator == PARTIAL_LIKELIHOOD)) {
           inter_event_reestim->distribution_estimation(pinter_ev);
         }
 
         else {
-          switch (mean_estimator) {
+          switch (mean_computation_method) {
           case ESTIMATED :
             inter_event_mean = htime->mean / mixture->mean;
             break;
@@ -648,14 +1396,14 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
       }
 
       else {
-        if ((type == ORDINARY) || (equilibrium_estimator == PARTIAL_LIKELIHOOD)) {
+        if ((type == 'o') || (equilibrium_estimator == PARTIAL_LIKELIHOOD)) {
           inter_event_reestim->penalized_likelihood_estimation(pinter_ev , weight ,
-                                                               pen_type , penalty ,
+                                                               penalty_type , penalty ,
                                                                outside);
         }
 
         else {
-          switch (mean_estimator) {
+          switch (mean_computation_method) {
           case ESTIMATED :
             inter_event_mean = htime->mean / mixture->mean;
             break;
@@ -666,44 +1414,49 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
 
           inter_event_reestim->penalized_likelihood_equilibrium_process_estimation(length_bias_reestim ,
                                                                                    pinter_ev , inter_event_mean ,
-                                                                                   weight , pen_type ,
+                                                                                   weight , penalty_type ,
                                                                                    penalty , outside);
         }
       }
 
-      // computation of the mixture of number of events distributions and the associated log-likelihood
+      // calcul du melange de lois du nombre d'evenements et
+      // de la log-vraisemblance correspondante
 
       renew->computation();
 
       previous_likelihood = likelihood;
       likelihood = renew->likelihood_computation(*this);
 
-      if ((display) && ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0))) {
-        cout << STAT_label[STATL_ITERATION] << " " << i << "   "
-             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-             << STAT_label[STATL_DEVIANCE] << ": " << 2 * (information - likelihood) << "   "
-             << STAT_label[STATL_SMOOTHNESS] << ": "  << pinter_ev->second_difference_norm_computation();
+#     ifdef MESSAGE
+      if ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0)) {
+        os << STAT_label[STATL_ITERATION] << " " << i << "   "
+           << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+           << STAT_label[STATL_DEVIANCE] << ": " << 2 * (information - likelihood) << "   "
+           << STAT_label[STATL_SMOOTHNESS] << ": "  << pinter_ev->second_difference_norm_computation();
         if (estimator == PENALIZED_LIKELIHOOD) {
-          cout << "   cumul: " << pinter_ev->cumul[pinter_ev->nb_value - 1];
+          os << "   cumul: " << pinter_ev->cumul[pinter_ev->nb_value - 1];
         }
-        cout << endl;
+        os << endl;
       }
+#     endif
+
     }
     while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (i < RENEWAL_NB_ITER) &&
              ((likelihood - previous_likelihood) / -likelihood > RENEWAL_LIKELIHOOD_DIFF)) ||
             ((nb_iter != I_DEFAULT) && (i < nb_iter))));
 
     if (likelihood != D_INF) {
-      if (display) {
-        cout << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
-             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-             << STAT_label[STATL_DEVIANCE] << ": " << 2 * (information - likelihood) << "   "
-             << STAT_label[STATL_SMOOTHNESS] << ": " << pinter_ev->second_difference_norm_computation();
-        if (estimator == PENALIZED_LIKELIHOOD) {
-          cout << "   cumul: " << pinter_ev->cumul[pinter_ev->nb_value - 1];
-        }
-        cout << endl;
+
+#     ifdef MESSAGE
+      os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+         << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+         << STAT_label[STATL_DEVIANCE] << ": " << 2 * (information - likelihood) << "   "
+         << STAT_label[STATL_SMOOTHNESS] << ": " << pinter_ev->second_difference_norm_computation();
+      if (estimator == PENALIZED_LIKELIHOOD) {
+        os << "   cumul: " << pinter_ev->cumul[pinter_ev->nb_value - 1];
       }
+      os << endl;
+#     endif
 
       if (estimator == PARAMETRIC_REGULARIZATION) {
         hreestim = new FrequencyDistribution(pinter_ev->alloc_nb_value);
@@ -715,16 +1468,16 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
         do {
           i++;
 
-          // computation of the reestimation quantities
+          // calcul des quantites de reestimation
 
           switch (type) {
-          case ORDINARY :
+          case 'o' :
             renew->expectation_step(*this , inter_event_reestim);
             break;
-          case EQUILIBRIUM :
+          case 'e' :
             renew->expectation_step(*this , inter_event_reestim ,
                                     length_bias_reestim , equilibrium_estimator ,
-                                    true , mean_estimator);
+                                    true , mean_computation_method);
             break;
           }
 
@@ -737,7 +1490,8 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
             likelihood = D_INF;
           }
 
-          // computation of the mixture of number of events distributions and the associated log-likelihood
+          // calcul du melange de lois du nombre d'evenements et
+          // de la log-vraisemblance correspondante
 
           else {
             renew->init(pinter_ev->ident , pinter_ev->inf_bound , pinter_ev->sup_bound ,
@@ -756,9 +1510,9 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
 
 #           ifdef DEBUG
             if ((i < 10) || (i % 10 == 0)) {
-              cout << STAT_label[STATL_ITERATION] << " " << i << "   "
-                   << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                   << STAT_label[STATL_SMOOTHNESS] << ": " << pinter_ev->second_difference_norm_computation() << endl;
+              os << STAT_label[STATL_ITERATION] << " " << i << "   "
+                 << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                 << STAT_label[STATL_SMOOTHNESS] << ": " << pinter_ev->second_difference_norm_computation() << endl;
             }
 #           endif
 
@@ -770,11 +1524,14 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
 
         delete hreestim;
 
-        if ((display) && (likelihood != D_INF)) {
-          cout << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
-               << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-               << STAT_label[STATL_SMOOTHNESS] << ": " << pinter_ev->second_difference_norm_computation() << endl;
+#       ifdef MESSAGE
+        if (likelihood != D_INF) {
+          os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+             << STAT_label[STATL_SMOOTHNESS] << ": " << pinter_ev->second_difference_norm_computation() << endl;
         }
+#       endif
+
       }
     }
 
@@ -784,7 +1541,7 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
 
     delete inter_event_reestim;
 
-    if (type == EQUILIBRIUM) {
+    if (type == 'e') {
       if (equilibrium_estimator == COMPLETE_LIKELIHOOD) {
         delete length_bias_reestim;
       }
@@ -792,7 +1549,7 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
 
     if (likelihood != D_INF) {
 
-      // update of the number of free parameters
+      // mise a jour du nombre de parametres inconnus
 
       pinter_ev->nb_parameter_update();
       for (i = renew->time->offset;i < renew->time->nb_value;i++) {
@@ -814,33 +1571,27 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation a renewal process on the basis of pairs
- *         {observation period, number of events} using the EM algorithm.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error                 reference on a StatError object,
- *  \param[in] display               flag for displaying estimation intermediate results,
- *  \param[in] type                  renewal process type (ORDINARY/EQUILIBRIUM),
- *  \param[in] estimator type        (maximum likelihood or penalized likelihood or
- *                                   estimation of a parametric distribution),
- *  \param[in] nb_iter               number of iterations,
- *  \param[in] equilibrium_estimator estimator type in the case of an equilibrium renewal process,
- *  \param[in] mean_estimator        method of computation of the inter-event distribution mean,
- *  \param[in] weight                penalty weight,
- *  \param[in] pen_type              penalty type,
- *  \param[in] outside               management of side effects (zero outside the support or
- *                                   continuation of the distribution).
+ *  Estimation des parametres d'un processus de renouvellement par l'algorithme EM
+ *  a partir d'echantillons {temps d'observation, nombre d'evenements}.
  *
- *  \return                          Renewal object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream,
+ *              type de processus ('o' : ordinaire, 'e' : en equilibre),
+ *              type d'estimateur (vraisemblance, vraisemblance penalisee ou
+ *              estimation d'une loi parametrique), nombre d'iterations,
+ *              type d'estimateur dans le cas d'un processus de renouvellement en equilibre,
+ *              methode de calcul de la moyenne de la loi inter-evenement,
+ *              poids de la penalisation, type de penalisation,
+ *              type de gestion des effets de bord (zero a l'exterieur du support ou
+ *              prolongation de la loi).
+ *
+ *--------------------------------------------------------------*/
 
-Renewal* TimeEvents::estimation(StatError &error , bool display , process_type type ,
-                                estimation_criterion estimator , int nb_iter ,
-                                censoring_estimator equilibrium_estimator ,
-                                duration_distribution_mean_estimator mean_estimator , double weight ,
-                                penalty_type pen_type , side_effect outside) const
+Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
+                                int estimator , int nb_iter , int equilibrium_estimator ,
+                                int mean_computation_method , double weight ,
+                                int penalty_type , int outside) const
 
 {
   double proba;
@@ -863,43 +1614,38 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
   iinter_event->ascii_print(cout);
 # endif
 
-  renew = estimation(error , display , type , *iinter_event , estimator , nb_iter ,
-                     equilibrium_estimator , mean_estimator , weight ,
-                     pen_type , outside);
+  renew = estimation(error , os , type , *iinter_event , estimator , nb_iter ,
+                     equilibrium_estimator , mean_computation_method , weight ,
+                     penalty_type , outside);
   delete iinter_event;
 
   return renew;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of an equilibrium renewal process on the basis of
- *         time interval data using the EM algorithm.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error          reference on a StatError object,
- *  \param[in] display        flag for displaying estimation intermediate results,
- *  \param[in] iinter_event   reference on the initial inter-event distribution,
- *  \param[in] estimator      estimator type (maximum likelihood or penalized likelihood),
- *  \param[in] nb_iter        number of iterations,
- *  \param[in] mean_estimator method of computation of the inter-event distribution mean,
- *  \param[in] weight         penalty weight,
- *  \param[in] pen_type       penalty type,
- *  \param[in] outside        management of side effects (zero outside the support or
- *                            continuation of the distribution).
+ *  Estimation des parametres d'un processus de renouvellement en equilibre
+ *  par l'algorithme EM a partir de donnees d'intervalles de temps.
  *
- *  \return                   Renewal object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream,
+ *              reference sur la loi inter-evenement initiale, type d'estimateur
+ *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
+ *              methode de calcul de la moyenne de la loi inter-evenement,
+ *              poids de la penalisation, type de penalisation,
+ *              type de gestion des effets de bord (zero a l'exterieur du support ou
+ *              prolongation de la loi).
+ *
+ *--------------------------------------------------------------*/
 
-Renewal* RenewalData::estimation(StatError &error , bool display ,
+Renewal* RenewalData::estimation(StatError &error , ostream &os ,
                                  const DiscreteParametric &iinter_event ,
-                                 estimation_criterion estimator , int nb_iter ,
-                                 duration_distribution_mean_estimator mean_estimator , double weight ,
-                                 penalty_type pen_type , side_effect outside) const
+                                 int estimator , int nb_iter ,
+                                 int mean_computation_method , double weight ,
+                                 int penalty_type , int outside) const
 
 {
-  int i , j;
+  register int i , j;
   int *psequence;
   DiscreteParametricModel *inter_event;
   Renewal *renew;
@@ -975,9 +1721,9 @@ Renewal* RenewalData::estimation(StatError &error , bool display ,
     no_event = NULL;
   }
 
-  inter_event = within->estimation(error , display , *within_backward , *within_forward , no_event ,
-                                   iinter_event , estimator , nb_iter , mean_estimator ,
-                                   weight , pen_type , outside , htime->mean / mixture->mean);
+  inter_event = within->estimation(error , os , *within_backward , *within_forward , no_event ,
+                                   iinter_event , estimator , nb_iter , mean_computation_method ,
+                                   weight , penalty_type , outside , htime->mean / mixture->mean);
 
   delete within_backward;
   delete within_forward;
@@ -994,28 +1740,23 @@ Renewal* RenewalData::estimation(StatError &error , bool display ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Estimation of an equilibrium renewal process on the basis of
- *         time interval data using the EM algorithm.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error          reference on a StatError object,
- *  \param[in] display        flag for displaying estimation intermediate results,
- *  \param[in] estimator      estimator type (maximum likelihood or penalized likelihood),
- *  \param[in] nb_iter        number of iterations,
- *  \param[in] mean_estimator method of computation of the inter-event distribution mean,
- *  \param[in] weight         penalty weight,
- *  \param[in] pen_type       penalty type,
- *  \param[in] outside        management of side effects (zero outside the support or
- *                            continuation of the distribution).
+ *  Estimation des parametres d'un processus de renouvellement en equilibre
+ *  par l'algorithme EM a partir de donnees d'intervalles de temps.
  *
- *  \return                   Renewal object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, type d'estimateur
+ *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
+ *              methode de calcul de la moyenne de la loi inter-evenement,
+ *              poids de la penalisation, type de penalisation,
+ *              type de gestion des effets de bord (zero a l'exterieur du support ou
+ *              prolongation de la loi).
+ *
+ *--------------------------------------------------------------*/
 
-Renewal* RenewalData::estimation(StatError &error , bool display , estimation_criterion estimator ,
-                                 int nb_iter , duration_distribution_mean_estimator mean_estimator ,
-                                 double weight , penalty_type pen_type , side_effect outside) const
+Renewal* RenewalData::estimation(StatError &error , ostream &os , int estimator ,
+                                 int nb_iter , int mean_computation_method , double weight ,
+                                 int penalty_type , int outside) const
 
 {
   double proba;
@@ -1038,32 +1779,30 @@ Renewal* RenewalData::estimation(StatError &error , bool display , estimation_cr
   iinter_event->ascii_print(cout);
 # endif
 
-  renew = estimation(error , display , *iinter_event , estimator , nb_iter ,
-                     mean_estimator , weight , pen_type , outside);
+  renew = estimation(error , os , *iinter_event , estimator , nb_iter ,
+                     mean_computation_method , weight , penalty_type , outside);
   delete iinter_event;
 
   return renew;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Simulation using a renewal process.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] itype  renewal process type (ORDINARY/EQUILIBRIUM),
- *  \param[in] ihtime observation frequency distribution.
+ *  Simulation par un processus de renouvellement.
  *
- *  \return           RenewalData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError,
+ *              type de simulation ('o' : ordinaire, 'e' : en equilibre),
+ *              loi empirique du temps d'observation.
+ *
+ *--------------------------------------------------------------*/
 
-RenewalData* Renewal::simulation(StatError &error , process_type itype ,
+RenewalData* Renewal::simulation(StatError &error , char itype ,
                                  const FrequencyDistribution &ihtime) const
 
 {
   bool status = true , compute;
-  int i , j , k , m;
+  register int i , j , k , m;
   int offset , time_interval , cumul_time , *ptime , *pnb_event , *psequence;
   Distribution *dtime;
   Renewal *renew;
@@ -1096,7 +1835,7 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
       compute = false;
     }
 
-    // construction of a RenewalData object
+    // creation d'un objet RenewalData
 
     timev = new RenewalData(itype , *this);
 
@@ -1107,15 +1846,15 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
     timev->sequence = new int*[ihtime.nb_element];
 
     switch (itype) {
-    case ORDINARY :
+    case 'o' :
       offset = 0;
       break;
-    case EQUILIBRIUM :
+    case 'e' :
       offset = 1;
       break;
     }
 
-    // 1st to nth event
+    // 1er au n-eme evenement
 
     ptime = new int[ihtime.nb_element];
     pnb_event = new int[ihtime.nb_element];
@@ -1124,9 +1863,9 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
     for (j = ihtime.offset;j < ihtime.nb_value;j++) {
       for (k = 0;k < ihtime.frequency[j];k++) {
 
-        // time to the 1st event (equilibrium renewal process)
+        // temps avant le 1er evenement (processus de renouvellement en equilibre)
 
-        if (itype == EQUILIBRIUM) {
+        if (itype == 'e') {
           if (i == 0) {
             cumul_time = renew->forward->simulation();
           }
@@ -1138,16 +1877,16 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
           time_interval = cumul_time;
         }
 
-        // observation period
+        // temps d'observation
 
         *ptime = j;
 
         timev->length[i] = *ptime + 1 - offset;
         timev->sequence[i] = new int[timev->length[i]];
 
-        // time to the 1st event (ordinary renewal process)
+        // temps avant le 1er evenement (processus de renouvellement ordinaire)
 
-        if (itype == ORDINARY) {
+        if (itype == 'o') {
           time_interval = renew->inter_event->simulation();
           cumul_time = time_interval;
           (timev->inter_event->frequency[time_interval])++;
@@ -1160,7 +1899,7 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
         }
 
         psequence = timev->sequence[i] - 1;
-        if (itype == ORDINARY) {
+        if (itype == 'o') {
           *++psequence = 1;
         }
         for (m = 1;m < MIN(time_interval , *ptime + 1);m++) {
@@ -1191,7 +1930,7 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
         }
 
         (timev->backward->frequency[*ptime - (cumul_time - time_interval)])++;
-        if (itype == ORDINARY) {
+        if (itype == 'o') {
           (timev->forward->frequency[cumul_time - *ptime])++;
         }
 
@@ -1203,17 +1942,17 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
     ptime -= ihtime.nb_element;
     pnb_event -= ihtime.nb_element;
 
-    // construction of the triplets {observation period, number of events, frequency} and of
-    // the observation period frequency distribution and number of events frequency distributions
+    // construction des echantillons {temps, nombre d'evenements, frequence} et
+    // des lois empiriques du temps d'observation et du nombre d'evenements
 
     timev->build(ihtime.nb_element , ptime , pnb_event);
     delete [] ptime;
     delete [] pnb_event;
 
-    // extraction of the characteristics of the inter-event frequency distribution,
-    // the frequency distribution of time intervals between events within the observation period,
-    // the length-biased frequency distribution,
-    // the backward and forward recurrence time frequency distributions,
+    // extraction des caracteristiques des lois empiriques des intervalles de temps entre 2 evenements,
+    // des intervalles de temps entre 2 evenements a l'interieur de la periode d'observation,
+    // des intervalles de temps recouvrant une date d'observation,
+    // des intervalles de temps apres le dernier evenement, des intervalles de temps residuel
 
     timev->inter_event->nb_value_computation();
     timev->inter_event->offset_computation();
@@ -1250,7 +1989,7 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
     timev->forward->mean_computation();
     timev->forward->variance_computation();
 
-    // extraction of no-event/event probabilities as a function of time
+    // extraction des probabilites de non-evenement/evenement fonction du temps
 
     timev->build_index_event(offset);
 
@@ -1264,20 +2003,17 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Simulation using a renewal process.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] itype      renewal process type (ORDINARY/EQUILIBRIUM),
- *  \param[in] nb_element sample size,
- *  \param[in] itime      observation period.
+ *  Simulation par un processus de renouvellement.
  *
- *  \return               RenewalData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError,
+ *              type de simulation ('o' : ordinaire, 'e' : en equilibre),
+ *              nombre d'echantillons, temps d'observation.
+ *
+ *--------------------------------------------------------------*/
 
-RenewalData* Renewal::simulation(StatError &error , process_type itype ,
+RenewalData* Renewal::simulation(StatError &error , char itype ,
                                  int nb_element , int itime) const
 
 {
@@ -1318,20 +2054,17 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Simulation using a renewal process.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] itype      renewal process type (ORDINARY/EQUILIBRIUM),
- *  \param[in] nb_element sample size,
- *  \param[in] itimev     reference on a TimeEvents object.
+ *  Simulation par un processus de renouvellement.
  *
- *  \return               RenewalData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError,
+ *              type de simulation ('o' : ordinaire, 'e' : en equilibre),
+ *              nombre d'echantillons, reference sur un objet TimeEvents.
+ *
+ *--------------------------------------------------------------*/
 
-RenewalData* Renewal::simulation(StatError &error , process_type itype ,
+RenewalData* Renewal::simulation(StatError &error , char itype ,
                                  int nb_element , const TimeEvents &itimev) const
 
 {
@@ -1357,14 +2090,13 @@ RenewalData* Renewal::simulation(StatError &error , process_type itype ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the RenewalIterator class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] irenewal pointer on a Renewal object,
- *  \param[in] ilength  sequence length.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe RenewalIterator.
+ *
+ *  arguments : pointeur sur un objet Renewal, longueur de la sequence.
+ *
+ *--------------------------------------------------------------*/
 
 RenewalIterator::RenewalIterator(Renewal *irenewal , int ilength)
 
@@ -1380,18 +2112,18 @@ RenewalIterator::RenewalIterator(Renewal *irenewal , int ilength)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a RenewalIterator object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] iter reference on a RenewalIterator object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet RenewalIterator.
+ *
+ *  argument : reference sur un objet RenewalIterator.
+ *
+ *--------------------------------------------------------------*/
 
 void RenewalIterator::copy(const RenewalIterator &iter)
 
 {
-  int i;
+  register int i;
   int *psequence , *isequence;
 
 
@@ -1412,11 +2144,11 @@ void RenewalIterator::copy(const RenewalIterator &iter)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the RenewalIterator class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe RenewalIterator.
+ *
+ *--------------------------------------------------------------*/
 
 RenewalIterator::~RenewalIterator()
 
@@ -1426,15 +2158,13 @@ RenewalIterator::~RenewalIterator()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the RenewalIterator class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] iter reference on a RenewalIterator object.
+ *  Operateur d'assignement de la classe RenewalIterator.
  *
- *  \return         RenewalIterator object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet RenewalIterator.
+ *
+ *--------------------------------------------------------------*/
 
 RenewalIterator& RenewalIterator::operator=(const RenewalIterator &iter)
 
@@ -1450,24 +2180,24 @@ RenewalIterator& RenewalIterator::operator=(const RenewalIterator &iter)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Simulation using a renewal process.
+/*--------------------------------------------------------------*
  *
- *  \param[in] ilength sequence length,
- *  \param[in] type    renewal process type (ORDINARY/EQUILIBRIUM).
- */
-/*--------------------------------------------------------------*/
+ *  Simulation par un processus de renouvellement.
+ *
+ *  arguments : longueur de la sequence,
+ *              type d'initialisation ('o' : ordinaire, 'e' : en equilibre).
+ *
+ *--------------------------------------------------------------*/
 
-void RenewalIterator::simulation(int ilength , process_type type)
+void RenewalIterator::simulation(int ilength , char type)
 
 {
-  int i;
+  register int i;
   int offset , *psequence;
 
 
   switch (type) {
-  case ORDINARY :
+  case 'o' :
     offset = 1;
     break;
   default :
@@ -1484,12 +2214,12 @@ void RenewalIterator::simulation(int ilength , process_type type)
   psequence = sequence;
 
   switch (type) {
-  case ORDINARY :
+  case 'o' :
     interval = renewal->inter_event->simulation();
     *psequence++ = 1;
     counter = 1;
     break;
-  case EQUILIBRIUM :
+  case 'e' :
     interval = renewal->forward->simulation();
     counter = 1;
     break;

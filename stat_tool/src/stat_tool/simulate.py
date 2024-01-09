@@ -10,9 +10,9 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: simulate.py 9033 2010-06-01 12:06:16Z cokelaer $
 """
-__version__ = "$Id$"
+__version__ = "$Id: simulate.py 9033 2010-06-01 12:06:16Z cokelaer $"
 
 __all__ = ["Simulate"]
 

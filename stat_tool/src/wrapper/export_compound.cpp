@@ -13,7 +13,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id$
+ *        $Id: export_compound.cpp 18030 2015-04-23 07:12:51Z guedon $
  *
  *----------------------------------------------------------------------------*/
 
@@ -23,7 +23,9 @@
 #include "wrapper_util.h"
 #include "export_base.h"
 
+#include "stat_tool/stat_tools.h"
 #include "stat_tool/compound.h"
+#include "stat_tool/distribution.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -51,7 +53,7 @@ class CompoundWrap
   {
     StatError error;
     Compound *compound = NULL;
-    compound = Compound::ascii_read(error, filename);
+    compound = compound_ascii_read(error, filename);
     if (!compound)
       stat_tool::wrap_util::throw_error(error);
     return boost::shared_ptr<Compound>(compound);
@@ -207,7 +209,7 @@ class CompoundDataWrap
 
 public:
 
-  WRAP_METHOD1(CompoundData, extract, DiscreteDistributionData, compound_distribution);
+  WRAP_METHOD1(CompoundData, extract, DiscreteDistributionData, char);
 
   static DiscreteDistributionData*
   extract_sum_distribution(const CompoundData &input)

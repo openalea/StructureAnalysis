@@ -4,7 +4,7 @@
 
 .. todo:: systematic tests
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_compare.py 9401 2010-08-10 12:24:59Z cokelaer $"
 
 from openalea.sequence_analysis.sequences import Sequences
 from openalea.sequence_analysis.hidden_semi_markov import HiddenSemiMarkov

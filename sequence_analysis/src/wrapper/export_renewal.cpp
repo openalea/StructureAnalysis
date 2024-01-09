@@ -4,7 +4,7 @@
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
- *        File author(s): Yann Guedon <yann.guedon@cirad.fr>
+ *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
  *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
@@ -21,8 +21,15 @@
 
 #include "wrapper_util.h"
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
+#include "sequence_analysis/sequences.h"
 #include "sequence_analysis/renewal.h"
 #include "sequence_analysis/sequence_label.h"
 
@@ -52,22 +59,20 @@ public:
   {
     StatError error;
     Renewal *renewal = NULL;
-    process_type type = EQUILIBRIUM;
-    int time = DEFAULT_TIME;
-    double cumul_threshold = RENEWAL_THRESHOLD;
+    bool old_format = false;
 
-    renewal = Renewal::ascii_read(error, filename, type, time, cumul_threshold);
+    renewal = renewal_ascii_read(error, filename, old_format);
 
     return boost::shared_ptr<Renewal>(renewal);
   }
 
   static boost::shared_ptr<Renewal>
-  constructor_from_inter_event(const DiscreteParametric &inter_event, process_type type, int time)
+  constructor_from_inter_event(const DiscreteParametric &inter_event, char type, int time)
   {
     StatError error;
     Renewal *renewal = NULL;
 
-    renewal = Renewal::building(error, inter_event, type, time);
+    renewal = renewal_building(error, inter_event, type, time);
 
     return boost::shared_ptr<Renewal>(renewal);
   }
@@ -103,7 +108,7 @@ public:
 
 
   static RenewalData*
-  simulation_histogram(const Renewal &input, process_type itype, const FrequencyDistribution &ihtime)
+  simulation_histogram(const Renewal &input, char itype, const FrequencyDistribution &ihtime)
   {
     HEADER(RenewalData);
     ret = input.simulation(error, itype , ihtime);
@@ -112,7 +117,7 @@ public:
   }
 
   static RenewalData*
-  simulation_nb_elements(const Renewal &input, process_type itype, int nb_element, int itime)
+  simulation_nb_elements(const Renewal &input, char itype, int nb_element, int itime)
   {
     HEADER(RenewalData);
     ret = input.simulation(error, itype , nb_element, itime);
@@ -120,7 +125,7 @@ public:
   }
 
   static RenewalData*
-  simulation_time_events(const Renewal &input, process_type itype , int nb_element,
+  simulation_time_events(const Renewal &input, char itype , int nb_element,
 		  const TimeEvents &timev)
   {
     HEADER(RenewalData);
@@ -129,7 +134,7 @@ public:
   }
 
   static DiscreteParametricModel*
-  extract(const Renewal &seq, renewal_distribution type, int state)
+  extract(const Renewal &seq, int type, int state)
   {
     HEADER(DiscreteParametricModel);
     ret = seq.extract(error, type, state);
@@ -154,12 +159,12 @@ public:
 void class_renewal() {
 
   class_<Renewal, bases<StatInterface> > ("_Renewal", "Renewal", no_init)
-    // type = ORDINARY/EQUILIBRIUM
+    //type = 'o' or 'e'
     .def("__init__", make_constructor(WRAP::constructor_from_file))
     .def("__init__", make_constructor(WRAP::constructor_from_inter_event))
 
-    .def(init <process_type, FrequencyDistribution, DiscreteParametric>())
-    .def(init <process_type, Distribution, DiscreteParametric>())
+    .def(init <char, FrequencyDistribution, DiscreteParametric>())
+    .def(init <char, Distribution, DiscreteParametric>())
 
     // Python Operators
     .def(self_ns::str(self)) //__str__
@@ -188,7 +193,7 @@ void class_renewal() {
    bool plot_write(StatError &error , const char *prefix ,  const char *title = 0) const;
 
 
-	void computation(bool inter_event_flag = true , process_type itype = DEFAULT_TYPE , const Distribution *dtime = 0);
+	void computation(bool inter_event_flag = true , char itype = 'v' , const Distribution *dtime = 0);
 	double likelihood_computation(const TimeEvents &timev) const;
 
 	DiscreteParametric* get_inter_event() const { return inter_event; }
@@ -209,7 +214,7 @@ class RenewalDataWrap {
 
 public:
   static DiscreteDistributionData*
-  extract(const RenewalData &seq, renewal_distribution histo_type, int itime)
+  extract(const RenewalData &seq, int histo_type, int itime)
   {
     //default itime = I_DEFAULT
     HEADER(DiscreteDistributionData);
@@ -241,13 +246,12 @@ public:
   }
 
   static Renewal*
-  estimation(const RenewalData &input, estimation_criterion estimator, int nb_iter,
-      duration_distribution_mean_estimator mean_estimator, double weight,
-      penalty_type pen_type, side_effect outside)
+  estimation(const RenewalData &input, int estimator, int nb_iter,
+      int mean_computation_method, double weight, int penalty_type, int outside)
   {
     HEADER_OS(Renewal);
-    ret = input.estimation(error, os, estimator, nb_iter, mean_estimator,
-        weight, pen_type, outside);
+    ret = input.estimation(error, os, estimator, nb_iter, mean_computation_method,
+        weight, penalty_type, outside);
 
     FOOTER_OS;
   }
@@ -255,14 +259,13 @@ public:
 
    static Renewal*
   estimation_inter_event(const RenewalData &input,
-      const DiscreteParametric &input_dist, estimation_criterion estimator, int nb_iter,
-      duration_distribution_mean_estimator mean_estimator, double weight,
-      penalty_type pen_type, side_effect outside)
+      const DiscreteParametric &input_dist, int estimator, int nb_iter,
+      int mean_computation_method, double weight, int penalty_type, int outside)
   {
     HEADER_OS(Renewal);
 
     ret = input.estimation(error, os, input_dist, estimator, nb_iter,
-        mean_estimator, weight, pen_type, outside);
+        mean_computation_method, weight, penalty_type, outside);
 
     FOOTER_OS;
   }
@@ -276,9 +279,9 @@ void class_renewal_data() {
 
 
   class_<RenewalData, bases<TimeEvents> > ("_RenewalData", "RenewalData", no_init)
-    .def(init <process_type, int>())
-    .def(init <process_type, Renewal>())
-    .def(init <TimeEvents, process_type>())
+    .def(init <int, int>())
+    .def(init <int, Renewal>())
+    .def(init <TimeEvents, int>())
     .def(init <RenewalData, boost::python::optional<bool> >())
 
     // Python Operators
@@ -318,7 +321,7 @@ class RenewalIteratorWrap
 public:
 
   static boost::python::list
-  simulation(RenewalIterator &input, int nb_sequence = 1, process_type type = DEFAULT_TYPE)
+  simulation(RenewalIterator &input, int nb_sequence = 1, char type = 'v')
   {
     int *sequence;
 

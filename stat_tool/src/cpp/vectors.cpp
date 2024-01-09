@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: vectors.cpp 18024 2015-04-23 07:08:49Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -38,34 +38,34 @@
 
 #include <limits.h>
 #include <math.h>
-
-#include <string>
-#include <vector>
 #include <sstream>
 #include <iomanip>
 
-#include <boost/tokenizer.hpp>
+#include "tool/rw_tokenizer.h"
+#include "tool/rw_cstring.h"
+#include "tool/rw_locale.h"
+#include "tool/config.h"
 
-#include "quantile_computation.hpp"
-
+#include "stat_tools.h"
+#include "distribution.h"
+#include "markovian.h"
 #include "vectors.h"
 #include "stat_label.h"
 
-// #include "quantile_computation.h"   problem compiler C++ Windows
+// #include "quantile_computation.h"   probleme compilateur C++ Windows
 
 using namespace std;
-using namespace boost;
 
 
 namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Default constructor of the Vectors class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur par defaut de la classe Vectors.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors::Vectors()
 
@@ -90,23 +90,20 @@ Vectors::Vectors()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Initialization of a Vectors object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_vector   number of individuals,
- *  \param[in] iidentifier  individual identifiers,
- *  \param[in] inb_variable number of variables,
- *  \param[in] itype        variable types,
- *  \param[in] init_flag    flag initialization.
- */
-/*--------------------------------------------------------------*/
+ *  Initialisation d'un objet Vectors.
+ *
+ *  arguments : nombre de vecteurs, identificateurs des vecteurs,
+ *              nombre de variables, type de chaque variable, flag initialisation.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::init(int inb_vector , int *iidentifier , int inb_variable ,
-                   variable_nature *itype , bool init_flag)
+                   int *itype , bool init_flag)
 
 {
-  int i , j;
+  register int i , j;
 
 
   nb_vector = inb_vector;
@@ -127,7 +124,7 @@ void Vectors::init(int inb_vector , int *iidentifier , int inb_variable ,
 
   nb_variable = inb_variable;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   min_interval = new double[nb_variable];
@@ -172,26 +169,24 @@ void Vectors::init(int inb_vector , int *iidentifier , int inb_variable ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Vectors class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_vector   number of individuals,
- *  \param[in] iidentifier  individual identifiers,
- *  \param[in] inb_variable number of variables,
- *  \param[in] iint_vector  integer-valued vectors.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Vectors.
+ *
+ *  arguments : nombre de vecteurs, identificateurs des vecteurs,
+ *              nombre de variables, vecteurs entiers.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
                  int **iint_vector)
 
 {
-  int i , j;
-  variable_nature *itype;
+  register int i , j;
+  int *itype;
 
 
-  itype = new variable_nature[inb_variable];
+  itype = new int[inb_variable];
   for (i = 0;i < inb_variable;i++) {
     itype[i] = INT_VALUE;
   }
@@ -217,26 +212,24 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Vectors class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_vector   number of individuals,
- *  \param[in] iidentifier  individual identifiers,
- *  \param[in] inb_variable number of variables,
- *  \param[in] ireal_vector real-valued vectors.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Vectors.
+ *
+ *  arguments : nombre de vecteurs, identificateurs des vecteurs,
+ *              nombre de variables, vecteurs reels.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
                  double **ireal_vector)
 
 {
-  int i , j;
-  variable_nature *itype;
+  register int i , j;
+  int *itype;
 
 
-  itype = new variable_nature[inb_variable];
+  itype = new int[inb_variable];
   for (i = 0;i < inb_variable;i++) {
     itype[i] = REAL_VALUE;
   }
@@ -265,46 +258,28 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Vectors class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] inb_vector     number of individuals,
- *  \param[in] iidentifier    individual identifiers,
- *  \param[in] inb_variable   number of variables,
- *  \param[in] itype          variable types,
- *  \param[in] iint_vector    integer variables,
- *  \param[in] ireal_vector   real variables,
- *  \param[in] variable_index variable indexing.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Vectors.
+ *
+ *  arguments : nombre de vecteurs, identificateurs des vecteurs,
+ *              nombre de variables, type de chaque variable,
+ *              variables entieres, variables reelles, indexation variable.
+ *
+ *--------------------------------------------------------------*/
 
-Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable , variable_nature *itype ,
+Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable , int *itype ,
                  int **iint_vector , double **ireal_vector , bool variable_index)
 
 {
-  int i , j , k , m;
+  register int i , j , k , m;
 
 
   init(inb_vector , iidentifier , inb_variable , itype , false);
 
-  if (variable_index) {
-    for (i = 0;i < nb_variable;i++) {
-      if (type[i] != REAL_VALUE) {
-        for (j = 0;j < nb_vector;j++) {
-          int_vector[j][i] = iint_vector[j][i];
-        }
-      }
+  switch (variable_index) {
 
-      else {
-        for (j = 0;j < nb_vector;j++) {
-          real_vector[j][i] = ireal_vector[j][i];
-        }
-      }
-    }
-  }
-
-  else {
+  case false : {
     i = 0;
     j = 0;
     for (k = 0;k < nb_variable;k++) {
@@ -322,6 +297,25 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable , variable
         j++;
       }
     }
+    break;
+  }
+
+  case true : {
+    for (i = 0;i < nb_variable;i++) {
+      if (type[i] != REAL_VALUE) {
+        for (j = 0;j < nb_vector;j++) {
+          int_vector[j][i] = iint_vector[j][i];
+        }
+      }
+
+      else {
+        for (j = 0;j < nb_vector;j++) {
+          real_vector[j][i] = ireal_vector[j][i];
+        }
+      }
+    }
+    break;
+  }
   }
 
   for (i = 0;i < nb_variable;i++) {
@@ -346,20 +340,19 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable , variable
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Vectors class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] vec      reference on a Vectors object,
- *  \param[in] variable variable index,
- *  \param[in] itype    variable type.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Vectors.
+ *
+ *  arguments : reference sur un objet Vectors, indice de la variable,
+ *              type de la variable selectionnee.
+ *
+ *--------------------------------------------------------------*/
 
-Vectors::Vectors(const Vectors &vec , int variable , variable_nature itype)
+Vectors::Vectors(const Vectors &vec , int variable , int itype)
 
 {
-  int i , j;
+  register int i , j;
 
 
   nb_vector = vec.nb_vector;
@@ -371,7 +364,7 @@ Vectors::Vectors(const Vectors &vec , int variable , variable_nature itype)
 
   nb_variable = vec.nb_variable;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   min_interval = new double[nb_variable];
@@ -448,20 +441,19 @@ Vectors::Vectors(const Vectors &vec , int variable , variable_nature itype)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the Vectors class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] vec        reference on a Vectors object,
- *  \param[in] inb_vector number of individuals,
- *  \param[in] index      indices of the selected individuals.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe Vectors.
+ *
+ *  arguments : reference sur un objet Vectors, nombre de vecteurs,
+ *              index des vecteurs selectionnes.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors::Vectors(const Vectors &vec , int inb_vector , int *index)
 
 {
-  int i , j;
+  register int i , j;
   int *pivector , *civector;
 
 
@@ -474,7 +466,7 @@ Vectors::Vectors(const Vectors &vec , int inb_vector , int *index)
 
   nb_variable = vec.nb_variable;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   min_interval = new double[nb_variable];
@@ -514,7 +506,7 @@ Vectors::Vectors(const Vectors &vec , int inb_vector , int *index)
     }
 
     else  {
-      build_marginal_histogram(i , vec.marginal_histogram[i]->bin_width);
+      build_marginal_histogram(i , vec.marginal_histogram[i]->step);
 
       mean_computation(i);
       variance_computation(i);
@@ -527,18 +519,18 @@ Vectors::Vectors(const Vectors &vec , int inb_vector , int *index)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Vectors object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] vec reference on a Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Vectors.
+ *
+ *  argument : reference sur un objet Vectors.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::copy(const Vectors &vec)
 
 {
-  int i , j;
+  register int i , j;
 
 
   nb_vector = vec.nb_vector;
@@ -550,7 +542,7 @@ void Vectors::copy(const Vectors &vec)
 
   nb_variable = vec.nb_variable;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   min_interval = new double[nb_variable];
@@ -604,18 +596,18 @@ void Vectors::copy(const Vectors &vec)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Vectors object adding a state variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] vec reference on a Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Vectors avec ajout d'une variable d'etat.
+ *
+ *  arguments : reference sur un objet Vectors.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::add_state_variable(const Vectors &vec)
 
 {
-  int i , j;
+  register int i , j;
 
 
   nb_vector = vec.nb_vector;
@@ -627,7 +619,7 @@ void Vectors::add_state_variable(const Vectors &vec)
 
   nb_variable = vec.nb_variable + 1;
 
-  type = new variable_nature[nb_variable];
+  type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
   min_interval = new double[nb_variable];
@@ -691,20 +683,20 @@ void Vectors::add_state_variable(const Vectors &vec)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor by copy of the Vectors class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] vec       reference on a Vectors object,
- *  \param[in] transform type of transform.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur par copie de la classe Vectors.
+ *
+ *  arguments : reference sur un objet Vectors, type de transformation ('c' : copie,
+ *              'a' : ajout d'une variable d'etat).
+ *
+ *--------------------------------------------------------------*/
 
-Vectors::Vectors(const Vectors &vec , vector_transformation transform)
+Vectors::Vectors(const Vectors &vec , char transform)
 
 {
   switch (transform) {
-  case ADD_COMPONENT_VARIABLE :
+  case 'a' :
     Vectors::add_state_variable(vec);
     break;
   default :
@@ -714,16 +706,16 @@ Vectors::Vectors(const Vectors &vec , vector_transformation transform)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destruction of the data members of a Vectors object.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destruction des champs d'un objet Vectors.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::remove()
 
 {
-  int i;
+  register int i;
 
 
   delete [] identifier;
@@ -773,11 +765,11 @@ void Vectors::remove()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the Vectors class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe Vectors.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors::~Vectors()
 
@@ -786,15 +778,13 @@ Vectors::~Vectors()
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Assignment operator of the Vectors class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] vec reference on a Vectors object.
+ *  Operateur d'assignement de la classe Vectors.
  *
- *  \return        Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet Vectors.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors& Vectors::operator=(const Vectors &vec)
 
@@ -808,18 +798,18 @@ Vectors& Vectors::operator=(const Vectors &vec)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of an integer-valued variable as a real-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index.
- */
-/*--------------------------------------------------------------*/
+ *  Construction des valeurs reelles pour les variables entieres.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::build_real_vector(int variable)
 
 {
-  int i , j;
+  register int i , j;
 
 
   for (i = 0;i < nb_variable;i++) {
@@ -832,16 +822,13 @@ void Vectors::build_real_vector(int variable)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of the marginal frequency distribution for a positive integer-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index.
+ *  Extraction de la loi marginale empirique pour une variable entiere.
  *
- *  \return             DiscreteDistributionData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, variable.
+ *
+ *--------------------------------------------------------------*/
 
 DiscreteDistributionData* Vectors::extract(StatError &error , int variable) const
 
@@ -882,23 +869,20 @@ DiscreteDistributionData* Vectors::extract(StatError &error , int variable) cons
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Checking of a list of individual identifiers (unique identifiers).
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] nb_individual number of individuals,
- *  \param[in] identifier    individual identifiers.
+ *  Verification de la liste complete des identificateurs.
  *
- *  \return                  error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, nombre d'individus,
+ *              identificateurs des individus.
+ *
+ *--------------------------------------------------------------*/
 
 bool identifier_checking(StatError &error , int nb_individual , int *identifier)
 
 {
   bool status = true , *selected_identifier;
-  int i;
+  register int i;
   int max_identifier;
 
 
@@ -933,15 +917,13 @@ bool identifier_checking(StatError &error , int nb_individual , int *identifier)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Checking of the identifiers of a Vectors object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Verification d'un objet Vectors.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
 
 bool Vectors::check(StatError &error)
 
@@ -965,23 +947,20 @@ bool Vectors::check(StatError &error)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Merging of Vectors objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] nb_sample number of Vectors objects,
- *  \param[in] ivec      pointer on the Vectors objects.
+ *  Fusion d'objets Vectors.
  *
- *  \return              Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError, nombre d'objets Vectors,
+ *             pointeurs sur les objets Vectors.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec) const
 
 {
   bool status = true;
-  int i , j , k , m;
+  register int i , j , k , m;
   int inb_vector , cumul_nb_vector , *iidentifier;
   const FrequencyDistribution **phisto;
   Vectors *vec;
@@ -1023,14 +1002,14 @@ Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec)
       pvec[i] = ivec[i - 1];
     }
 
-    // computation of the number of individuals
+    // calcul du nombre de vecteurs
 
     inb_vector = 0;
     for (i = 0;i < nb_sample;i++) {
       inb_vector += pvec[i]->nb_vector;
     }
 
-    // comparaison of individual identifiers
+    // comparaison des identificateurs des vecteurs
 
     iidentifier = new int[inb_vector];
 
@@ -1063,7 +1042,7 @@ Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec)
     vec = new Vectors(inb_vector , iidentifier , nb_variable , type);
     delete [] iidentifier;
 
-    // copy of vectors
+    // copie des vecteurs
 
     i = 0;
     for (j = 0;j < nb_sample;j++) {
@@ -1131,59 +1110,20 @@ Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Merging of Vectors objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] nb_sample number of Vectors objects,
- *  \param[in] ivec      pointer on the Vectors objects.
+ *  Translation des valeurs d'une variable.
  *
- *  \return              Vectors object.
- */
-/*--------------------------------------------------------------*/
-
-Vectors* Vectors::merge(StatError &error , int nb_sample , const vector<Vectors> ivec) const
-
-{
-  int i;
-  Vectors *vec;
-  const Vectors **pvec;
-
-
-  pvec = new const Vectors*[nb_sample];
-  for (i = 0;i < nb_sample;i++) {
-    pvec[i] = new Vectors(ivec[i]);
-  }
-
-  vec = merge(error , nb_sample , pvec);
-
-  for (i = 0;i < nb_sample;i++) {
-    delete pvec[i];
-  }
-  delete [] pvec;
-
-  return vec;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Shifting of values of a variable.
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              parametre de translation.
  *
- *  \param[in] error       reference on a StatError object,
- *  \param[in] variable    variable index,
- *  \param[in] shift_param integer shifting parameter.
- *
- *  \return                Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Vectors* Vectors::shift(StatError &error , int variable , int shift_param) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   Vectors *vec;
 
 
@@ -1229,7 +1169,7 @@ Vectors* Vectors::shift(StatError &error , int variable , int shift_param) const
 
     switch (vec->type[variable]) {
 
-    // shifting of integer values
+    // translation des valeurs entieres
 
     case INT_VALUE : {
       for (i = 0;i < vec->nb_vector;i++) {
@@ -1238,7 +1178,7 @@ Vectors* Vectors::shift(StatError &error , int variable , int shift_param) const
       break;
     }
 
-    // shifting of real values
+    // translation des valeurs reelles
 
     case REAL_VALUE : {
       for (i = 0;i < vec->nb_vector;i++) {
@@ -1255,8 +1195,7 @@ Vectors* Vectors::shift(StatError &error , int variable , int shift_param) const
     if ((vec->type[variable] == INT_VALUE) && (vec->min_value[variable] >= 0) &&
         (vec->max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
       if (marginal_distribution[variable]) {
-        vec->marginal_distribution[variable] = new FrequencyDistribution(*marginal_distribution[variable] ,
-                                                                         SHIFT , shift_param);
+        vec->marginal_distribution[variable] = new FrequencyDistribution(*marginal_distribution[variable] , 's' , shift_param);
 
         vec->mean[variable] = vec->marginal_distribution[variable]->mean;
       }
@@ -1282,23 +1221,20 @@ Vectors* Vectors::shift(StatError &error , int variable , int shift_param) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Shifting of values of a real-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error       reference on a StatError object,
- *  \param[in] variable    variable index,
- *  \param[in] shift_param real shifting parameter.
+ *  Translation des valeurs d'une variable reelle.
  *
- *  \return                Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              parametre de translation.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors* Vectors::shift(StatError &error , int variable , double shift_param) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   Vectors *vec;
 
 
@@ -1322,7 +1258,7 @@ Vectors* Vectors::shift(StatError &error , int variable , double shift_param) co
   if (status) {
     vec = new Vectors(*this , variable , type[variable]);
 
-    // shifting of real values
+    // translation des valeurs reelles
 
     for (i = 0;i < vec->nb_vector;i++) {
       vec->real_vector[i][variable] = real_vector[i][variable] + shift_param;
@@ -1346,25 +1282,20 @@ Vectors* Vectors::shift(StatError &error , int variable , double shift_param) co
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Thresholding of values of a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] variable  variable index,
- *  \param[in] threshold integer threshold,
- *  \param[in] mode      mode (ABOVE/BELOW).
+ *  Seuillage des valeurs d'une variable.
  *
- *  \return              Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              seuil, mode (ABOVE/BELOW).
+ *
+ *--------------------------------------------------------------*/
 
-Vectors* Vectors::thresholding(StatError &error , int variable , int threshold ,
-                               threshold_direction mode) const
+Vectors* Vectors::thresholding(StatError &error , int variable , int threshold , int mode) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   Vectors *vec;
 
 
@@ -1406,7 +1337,7 @@ Vectors* Vectors::thresholding(StatError &error , int variable , int threshold ,
 
     switch (vec->type[variable]) {
 
-    // thresholding of integer values
+    // seuillage des valeurs entieres
 
     case INT_VALUE : {
       switch (mode) {
@@ -1439,7 +1370,7 @@ Vectors* Vectors::thresholding(StatError &error , int variable , int threshold ,
       break;
     }
 
-    // thresholding of real values
+    // seuillage des valeurs reelles
 
     case REAL_VALUE : {
       switch (mode) {
@@ -1502,25 +1433,20 @@ Vectors* Vectors::thresholding(StatError &error , int variable , int threshold ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Thresholding of values of a real-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] variable  variable index,
- *  \param[in] threshold real threshold,
- *  \param[in] mode      mode (ABOVE/BELOW).
+ *  Seuillage des valeurs d'une variable reelle.
  *
- *  \return              Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              seuil, mode (ABOVE/BELOW).
+ *
+ *--------------------------------------------------------------*/
 
-Vectors* Vectors::thresholding(StatError &error , int variable , double threshold ,
-                               threshold_direction mode) const
+Vectors* Vectors::thresholding(StatError &error , int variable , double threshold , int mode) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   Vectors *vec;
 
 
@@ -1558,7 +1484,7 @@ Vectors* Vectors::thresholding(StatError &error , int variable , double threshol
   if (status) {
     vec = new Vectors(*this , variable , type[variable]);
 
-    // thresholding of real values
+    // seuillage des valeurs reelles
 
     switch (mode) {
 
@@ -1605,24 +1531,20 @@ Vectors* Vectors::thresholding(StatError &error , int variable , double threshol
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Clustering of values of a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] step     clustering step,
- *  \param[in] mode     mode (FLOOR/ROUND/CEIL).
+ *  Regroupement des valeurs d'une variable.
  *
- *  \return             Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              pas de regroupement, mode (FLOOR/ROUND/CEIL).
+ *
+ *--------------------------------------------------------------*/
 
-Vectors* Vectors::cluster(StatError &error , int variable , int step , rounding mode) const
+Vectors* Vectors::cluster(StatError &error , int variable , int step , int mode) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   Vectors *vec;
 
 
@@ -1655,7 +1577,7 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , rounding 
 
     switch (vec->type[variable]) {
 
-    // clustering of integer values
+    // regroupement des valeurs entieres
 
     case INT_VALUE : {
       switch (mode) {
@@ -1700,8 +1622,7 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , rounding 
       }
 
       if (marginal_distribution[variable]) {
-        vec->marginal_distribution[variable] = new FrequencyDistribution(*marginal_distribution[variable] ,
-                                                                         CLUSTER , step , mode);
+        vec->marginal_distribution[variable] = new FrequencyDistribution(*marginal_distribution[variable] , 'c' , step , mode);
 
         vec->mean[variable] = vec->marginal_distribution[variable]->mean;
         vec->covariance[variable][variable] = vec->marginal_distribution[variable]->variance;
@@ -1715,7 +1636,7 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , rounding 
       break;
     }
 
-    // clustering of real values
+    // regroupement des valeurs reelles
 
     case REAL_VALUE : {
       for (i = 0;i < vec->nb_vector;i++) {
@@ -1725,7 +1646,7 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , rounding 
       vec->min_value[variable] = min_value[variable] / step;
       vec->max_value[variable] = max_value[variable] / step;
 
-      vec->build_marginal_histogram(variable , marginal_histogram[variable]->bin_width / step);
+      vec->build_marginal_histogram(variable , marginal_histogram[variable]->step / step);
 
       vec->min_interval_computation(variable);
 
@@ -1742,32 +1663,29 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , rounding 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Transcoding of categories of an integer-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] vec          reference on a Vectors object,
- *  \param[in] variable     variable index,
- *  \param[in] min_category lowest category,
- *  \param[in] max_category highest category,
- *  \param[in] category     transcoding table.
- */
-/*--------------------------------------------------------------*/
+ *  Transcodage des symboles d'une variable entiere.
+ *
+ *  arguments : reference sur un objet Vectors, indice de la variable,
+ *              plus petit et plus grand symboles, table de transcodage des symboles.
+ *
+ *--------------------------------------------------------------*/
 
-void Vectors::transcode(const Vectors &vec , int variable , int min_category ,
-                        int max_category , int *category)
+void Vectors::transcode(const Vectors &vec , int variable , int min_symbol ,
+                        int max_symbol , int *symbol)
 
 {
-  int i;
+  register int i;
 
 
   for (i = 0;i < nb_vector;i++) {
-    int_vector[i][variable] = category[vec.int_vector[i][variable] -
-                                       (int)vec.min_value[variable]] + min_category;
+    int_vector[i][variable] = symbol[vec.int_vector[i][variable] -
+                                     (int)vec.min_value[variable]] + min_symbol;
   }
 
-  min_value[variable] = min_category;
-  max_value[variable] = max_category;
+  min_value[variable] = min_symbol;
+  max_value[variable] = max_symbol;
 
   build_marginal_frequency_distribution(variable);
   min_interval_computation(variable);
@@ -1776,24 +1694,21 @@ void Vectors::transcode(const Vectors &vec , int variable , int min_category ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Transcoding of categories of an integer-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] category transcoding table.
+ *  Transcodage des symboles d'une variable entiere.
  *
- *  \return             Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              table de transcodage des symboles.
+ *
+ *--------------------------------------------------------------*/
 
-Vectors* Vectors::transcode(StatError &error , int variable , int *category) const
+Vectors* Vectors::transcode(StatError &error , int variable , int *symbol) const
 
 {
   bool status = true , *presence;
-  int i;
-  int min_category , max_category;
+  register int i;
+  int min_symbol , max_symbol;
   Vectors *vec;
 
 
@@ -1816,44 +1731,44 @@ Vectors* Vectors::transcode(StatError &error , int variable , int *category) con
     }
 
     else {
-      min_category = category[0];
-      max_category = category[0];
+      min_symbol = symbol[0];
+      max_symbol = symbol[0];
 
       for (i = 1;i <= (int)(max_value[variable] - min_value[variable]);i++) {
-        if (category[i] < min_category) {
-          min_category = category[i];
+        if (symbol[i] < min_symbol) {
+          min_symbol = symbol[i];
         }
-        if (category[i] > max_category) {
-          max_category = category[i];
+        if (symbol[i] > max_symbol) {
+          max_symbol = symbol[i];
         }
       }
 
-      if (max_category - min_category == 0) {
+      if (max_symbol - min_symbol == 0) {
         status = false;
-        error.update(STAT_error[STATR_NB_CATEGORY]);
+        error.update(STAT_error[STATR_NB_SYMBOL]);
       }
 
-      if (max_category - min_category > (int)(max_value[variable] - min_value[variable])) {
+      if (max_symbol - min_symbol > (int)(max_value[variable] - min_value[variable])) {
         status = false;
-        error.update(STAT_error[STATR_NON_CONSECUTIVE_CATEGORIES]);
+        error.update(STAT_error[STATR_NON_CONSECUTIVE_SYMBOLS]);
       }
     }
 
     if (status) {
-      presence = new bool[max_category - min_category + 1];
-      for (i = 0;i <= max_category - min_category;i++) {
+      presence = new bool[max_symbol - min_symbol + 1];
+      for (i = 0;i <= max_symbol - min_symbol;i++) {
         presence[i] = false;
       }
 
       for (i = 0;i <= (int)(max_value[variable] - min_value[variable]);i++) {
-        presence[category[i] - min_category] = true;
+        presence[symbol[i] - min_symbol] = true;
       }
 
-      for (i = 0;i <= max_category - min_category;i++) {
+      for (i = 0;i <= max_symbol - min_symbol;i++) {
         if (!presence[i]) {
           status = false;
           ostringstream error_message;
-          error_message << STAT_error[STATR_MISSING_CATEGORY] << " " << i + min_category;
+          error_message << STAT_error[STATR_MISSING_SYMBOL] << " " << i + min_symbol;
           error.update((error_message.str()).c_str());
         }
       }
@@ -1863,11 +1778,11 @@ Vectors* Vectors::transcode(StatError &error , int variable , int *category) con
 
     if (status) {
       for (i = 0;i <= (int)(max_value[variable] - min_value[variable]);i++) {
-        category[i] -= min_category;
+        symbol[i] -= min_symbol;
       }
 
       vec = new Vectors(*this , variable , type[variable]);
-      vec->transcode(*this , variable , min_category , max_category , category);
+      vec->transcode(*this , variable , min_symbol , max_symbol , symbol);
     }
   }
 
@@ -1875,45 +1790,22 @@ Vectors* Vectors::transcode(StatError &error , int variable , int *category) con
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Transcoding of categories of an integer-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] category transcoding table.
+ *  Regroupement des valeurs d'une variable entiere.
  *
- *  \return             Vectors object.
- */
-/*--------------------------------------------------------------*/
-
-Vectors* Vectors::transcode(StatError &error , int variable , vector<int> category) const
-
-{
-  return transcode(error , variable , category.data());
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Partitioning of values of a variable.
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              nombre de classes, bornes pour regrouper les valeurs.
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] nb_class number of classes,
- *  \param[in] ilimit   integer limits between classes (beginning of classes).
- *
- *  \return             Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Vectors* Vectors::cluster(StatError &error , int variable ,
                           int nb_class , int *ilimit) const
 
 {
   bool status = true;
-  int i , j , k;
-  int *int_limit , *category;
+  register int i , j , k;
+  int *int_limit , *symbol;
   double *real_limit;
   Vectors *vec;
 
@@ -1952,19 +1844,19 @@ Vectors* Vectors::cluster(StatError &error , int variable ,
       }
 
       if (status) {
-        category = new int[(int)(max_value[variable] - min_value[variable]) + 1];
+        symbol = new int[(int)(max_value[variable] - min_value[variable]) + 1];
 
         i = 0;
         for (j = 0;j < nb_class;j++) {
           for (k = int_limit[j];k < int_limit[j + 1];k++) {
-            category[i++] = j;
+            symbol[i++] = j;
           }
         }
 
         vec = new Vectors(*this , variable , type[variable]);
-        vec->transcode(*this , variable , 0 , nb_class - 1 , category);
+        vec->transcode(*this , variable , 0 , nb_class - 1 , symbol);
 
-        delete [] category;
+        delete [] symbol;
       }
 
       delete [] int_limit;
@@ -1998,42 +1890,19 @@ Vectors* Vectors::cluster(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Partitioning of values of a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] variable  variable index,
- *  \param[in] nb_class  number of classes,
- *  \param[in] ilimit    integer limits between classes (beginning of classes).
+ *  Regroupement des valeurs d'une variable reelle.
  *
- *  \return              Vectors object.
- */
-/*--------------------------------------------------------------*/
-
-Vectors* Vectors::cluster(StatError &error , int variable ,
-                          int nb_class , vector<int> ilimit) const
-
-{
-  return cluster(error , variable , nb_class , ilimit.data());
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Partitioning of values of a real-valued variable.
+ *  arguments : reference sur un objet Vectors, indice de la variable,
+ *              nombre de classes, bornes pour regrouper les valeurs.
  *
- *  \param[in] vec      reference on a Vectors object,
- *  \param[in] variable variable index,
- *  \param[in] nb_class number of classes,
- *  \param[in] limit    real limits between classes (beginning of classes).
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 void Vectors::cluster(const Vectors &vec , int variable , int nb_class , double *limit)
 
 {
-  int i , j;
+  register int i , j;
 
 
   for (i = 0;i < nb_vector;i++) {
@@ -2055,25 +1924,21 @@ void Vectors::cluster(const Vectors &vec , int variable , int nb_class , double 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Partitioning of values of a real-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] nb_class number of classes,
- *  \param[in] ilimit   real limits between classes (beginning of classes).
+ *  Regroupement des valeurs d'une variable reelle.
  *
- *  \return             Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              nombre de classes, bornes pour regrouper les valeurs.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors* Vectors::cluster(StatError &error , int variable ,
                           int nb_class , double *ilimit) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   double *limit;
   Vectors *vec;
 
@@ -2127,44 +1992,19 @@ Vectors* Vectors::cluster(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Partitioning of values of a real-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] variable  variable index,
- *  \param[in] nb_class  number of classes,
- *  \param[in] ilimit    real limits between classes (beginning of classes).
+ *  Changement d'unite d'une variable.
  *
- *  \return              Vectors object.
- */
-/*--------------------------------------------------------------*/
-
-Vectors* Vectors::cluster(StatError &error , int variable ,
-                          int nb_class , vector<double> ilimit) const
-
-{
-  return cluster(error , variable , nb_class , ilimit.data());
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Scaling of a variable.
+ *  arguments : reference sur un objet StatError, variable, facteur d'echelle.
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] variable      variable index,
- *  \param[in] scaling_coeff integer scaling factor.
- *
- *  \return                  Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Vectors* Vectors::scaling(StatError &error , int variable , int scaling_coeff) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   Vectors *vec;
 
 
@@ -2205,7 +2045,7 @@ Vectors* Vectors::scaling(StatError &error , int variable , int scaling_coeff) c
 
     switch (vec->type[variable]) {
 
-    // scaling of integer values
+    // mise a l'echelle des valeurs entieres
 
     case INT_VALUE : {
       for (i = 0;i < vec->nb_vector;i++) {
@@ -2214,7 +2054,7 @@ Vectors* Vectors::scaling(StatError &error , int variable , int scaling_coeff) c
       break;
     }
 
-    // scaling of real values
+    // mise a l'echelle des valeurs reelles
 
     case REAL_VALUE : {
       for (i = 0;i < vec->nb_vector;i++) {
@@ -2237,23 +2077,19 @@ Vectors* Vectors::scaling(StatError &error , int variable , int scaling_coeff) c
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Scaling of a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] variable      variable index,
- *  \param[in] scaling_coeff real scaling factor.
+ *  Changement d'unite d'une variable.
  *
- *  \return                  Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, variable, facteur d'echelle.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors* Vectors::scaling(StatError &error , int variable , double scaling_coeff) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   Vectors *vec;
 
 
@@ -2286,7 +2122,7 @@ Vectors* Vectors::scaling(StatError &error , int variable , double scaling_coeff
 
     switch (type[variable]) {
 
-    // scaling of integer values
+    // mise a l'echelle des valeurs entieres
 
     case INT_VALUE : {
       for (i = 0;i < vec->nb_vector;i++) {
@@ -2295,7 +2131,7 @@ Vectors* Vectors::scaling(StatError &error , int variable , double scaling_coeff
       break;
     }
 
-    // scaling of real values
+    // mise a l'echelle des valeurs reelles
 
     case REAL_VALUE : {
       for (i = 0;i < vec->nb_vector;i++) {
@@ -2319,24 +2155,21 @@ Vectors* Vectors::scaling(StatError &error , int variable , double scaling_coeff
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Rounding of values of a real-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] mode     mode (FLOOR/ROUND/CEIL).
+ *  Arrondi des valeurs d'une variable reelle.
  *
- *  \return             Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              mode (FLOOR/ROUND/CEIL).
+ *
+ *--------------------------------------------------------------*/
 
-Vectors* Vectors::round(StatError &error , int variable , rounding mode) const
+Vectors* Vectors::round(StatError &error , int variable , int mode) const
 
 {
   bool status = true;
-  int i , j;
-  variable_nature *itype;
+  register int i , j;
+  int *itype;
   Vectors *vec;
 
 
@@ -2384,7 +2217,7 @@ Vectors* Vectors::round(StatError &error , int variable , rounding mode) const
   }
 
   if (status) {
-    itype = new variable_nature[nb_variable];
+    itype = new int[nb_variable];
 
     if (variable == I_DEFAULT) {
       for (i = 0;i < nb_variable;i++) {
@@ -2405,7 +2238,7 @@ Vectors* Vectors::round(StatError &error , int variable , rounding mode) const
     for (i = 0;i < vec->nb_vector;i++) {
       for (j = 0;j < vec->nb_variable;j++) {
 
-        // copy of integer values
+        // copie des valeurs entieres
 
         if (type[j] != REAL_VALUE) {
           vec->int_vector[i][j] = int_vector[i][j];
@@ -2413,7 +2246,7 @@ Vectors* Vectors::round(StatError &error , int variable , rounding mode) const
 
         else {
 
-          // rounding of real values
+          // arrondi des valeurs reelles
 
           if ((variable == I_DEFAULT) || (variable == j)) {
             switch (mode) {
@@ -2429,7 +2262,7 @@ Vectors* Vectors::round(StatError &error , int variable , rounding mode) const
             }
           }
 
-          // copy of real values
+          // copie des valeurs reelles
 
           else {
             vec->real_vector[i][j] = real_vector[i][j];
@@ -2485,210 +2318,22 @@ Vectors* Vectors::round(StatError &error , int variable , rounding mode) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Log-transform of values.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] base     base of the logarithm.
+ *  Selection de vecteurs sur les valeurs prises par une variable.
  *
- *  \return             Vectors object.
- */
-/*--------------------------------------------------------------*/
-
-Vectors* Vectors::log_transform(StatError &error , int variable , log_base base) const
-
-{
-  bool status = true;
-  int i , j , k;
-  int offset , inb_variable;
-  variable_nature *itype;
-  Vectors *vec;
-
-
-  vec = NULL;
-  error.init();
-
-  if (type[0] == STATE) {
-    offset = 1;
-    if (nb_variable == 1) {
-      status = false;
-      error.update(STAT_error[STATR_NB_VARIABLE]);
-    }
-  }
-  else {
-    offset = 0;
-  }
-
-  if (variable != I_DEFAULT) {
-    if ((variable < offset + 1) || (variable > nb_variable)) {
-      status = false;
-      error.update(STAT_error[STATR_VARIABLE_INDEX]);
-    }
-    else {
-      variable--;
-    }
-  }
-
-  for (i = offset;i < nb_variable;i++) {
-    if ((variable == I_DEFAULT) || (variable == i)) {
-      if ((type[i] != INT_VALUE) && (type[i] != REAL_VALUE)) {
-        status = false;
-        ostringstream error_message , correction_message;
-        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                      << STAT_error[STATR_VARIABLE_TYPE];
-        correction_message << STAT_variable_word[INT_VALUE] << " or "
-                           << STAT_variable_word[REAL_VALUE];
-        error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
-      }
-
-      else if (min_value[i] <= 0.) {
-        status = false;
-        ostringstream error_message;
-        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                      << STAT_error[STATR_POSITIVE_MIN_VALUE];
-        error.update((error_message.str()).c_str());
-      }
-    }
-  }
-
-  if (status) {
-    if (variable == I_DEFAULT) {
-      inb_variable = nb_variable;
-    }
-    else {
-      inb_variable = offset + 1;
-    }
-
-    itype = new variable_nature[inb_variable];
-    if (type[0] == STATE) {
-      itype[0] = type[0];
-    }
-    for (i = offset;i < inb_variable;i++) {
-      itype[i] = REAL_VALUE;
-    }
-
-    vec = new Vectors(nb_vector , identifier , inb_variable , itype);
-    delete [] itype;
-
-    // copy of the state variable
-
-    if (type[0] == STATE) {
-      for (i = 0;i < vec->nb_vector;i++) {
-        vec->int_vector[i][0] = int_vector[i][0];
-      }
-
-      vec->min_value[0] = min_value[0];
-      vec->max_value[0] = max_value[0];
-
-      vec->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
-    }
-
-    // log-transform of values
-
-    switch (base) {
-
-    case NATURAL : {
-      for (i = 0;i < nb_vector;i++) {
-        j = offset;
-        for (k = offset;k < nb_variable;k++) {
-          if ((variable == I_DEFAULT) || (variable == k)) {
-            if (type[k] != REAL_VALUE) {
-              vec->real_vector[i][j] = log(int_vector[i][k]);
-            }
-
-            else {
-              vec->real_vector[i][j] = log(real_vector[i][k]);
-            }
-
-            j++;
-          }
-        }
-      }
-      break;
-    }
-
-    case TWO : {
-      for (i = 0;i < nb_vector;i++) {
-        j = offset;
-        for (k = offset;k < nb_variable;k++) {
-          if ((variable == I_DEFAULT) || (variable == k)) {
-            if (type[k] != REAL_VALUE) {
-              vec->real_vector[i][j] = log2(int_vector[i][k]);
-            }
-
-            else {
-              vec->real_vector[i][j] = log2(real_vector[i][k]);
-            }
-
-            j++;
-          }
-        }
-      }
-      break;
-    }
-
-    case TEN : {
-       for (i = 0;i < nb_vector;i++) {
-        j = offset;
-        for (k = offset;k < nb_variable;k++) {
-          if ((variable == I_DEFAULT) || (variable == k)) {
-            if (type[k] != REAL_VALUE) {
-              vec->real_vector[i][j] = log10(int_vector[i][k]);
-            }
-
-            else {
-              vec->real_vector[i][j] = log10(real_vector[i][k]);
-            }
-
-            j++;
-          }
-        }
-      }
-     break;
-    }
-    }
-
-    for (i = offset;i < vec->nb_variable;i++) {
-      vec->min_value_computation(i);
-      vec->max_value_computation(i);
-
-      vec->build_marginal_histogram(i);
-      vec->min_interval_computation(i);
-
-      vec->mean_computation(i);
-      vec->variance_computation(i);
-    }
-
-    vec->covariance_computation();
- }
-
-  return vec;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of individuals taking values in a given range for a variable.
+ *  arguments : reference sur un objet StatError, stream, indice de la variable,
+ *              bornes sur les valeurs, flag pour conserver ou rejeter
+ *              les vecteurs selectionnes.
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] display    flag for displaying the selected individuals,
- *  \param[in] variable   variable index,
- *  \param[in] imin_value lowest integer value,
- *  \param[in] imax_value highest integer value,
- *  \param[in] keep       flag for keeping or rejecting the selected individuals.
- *
- *  \return               Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
-Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
+Vectors* Vectors::value_select(StatError &error , ostream &os , int variable ,
                                int imin_value , int imax_value , bool keep) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   int inb_vector , *index , *iidentifier;
   Vectors *vec;
 
@@ -2716,7 +2361,7 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
 
   if (status) {
 
-    // selection of individuals
+    // selection des vecteurs
 
     iidentifier = new int[nb_vector];
     index = new int[nb_vector];
@@ -2759,15 +2404,15 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
       error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
-    // copy of vectors
+    // copie des vecteurs
 
     if (status) {
-      if ((display) && (inb_vector <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
+      if (inb_vector <= DISPLAY_NB_INDIVIDUAL) {
+        os << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
         for (i = 0;i < inb_vector;i++) {
-          cout << iidentifier[i] << ", ";
+          os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        os << endl;
       }
 
       vec = new Vectors(*this , inb_vector , index);
@@ -2781,27 +2426,22 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of individuals taking values in a given range for a real-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] display    flag for displaying the selected individuals,
- *  \param[in] variable   variable index,
- *  \param[in] imin_value lowest real value,
- *  \param[in] imax_value highest real value,
- *  \param[in] keep       flag for keeping or rejecting the selected individuals.
+ *  Selection de vecteurs sur les valeurs prises par une variable reelle.
  *
- *  \return               Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, indice de la variable,
+ *              bornes sur les valeurs, flag pour conserver ou rejeter
+ *              les vecteurs selectionnes.
+ *
+ *--------------------------------------------------------------*/
 
-Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
+Vectors* Vectors::value_select(StatError &error , ostream &os , int variable ,
                                double imin_value , double imax_value , bool keep) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   int inb_vector , *index , *iidentifier;
   Vectors *vec;
 
@@ -2834,7 +2474,7 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
 
   if (status) {
 
-    // selection of individuals
+    // selection des vecteurs
 
     iidentifier = new int[nb_vector];
     index = new int[nb_vector];
@@ -2859,15 +2499,15 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
       error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
-    // copy of vectors
+    // copie des vecteurs
 
     if (status) {
-      if ((display) && (inb_vector <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
+      if (inb_vector <= DISPLAY_NB_INDIVIDUAL) {
+        os << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
         for (i = 0;i < inb_vector;i++) {
-          cout << iidentifier[i] << ", ";
+          os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        os << endl;
       }
 
       vec = new Vectors(*this , inb_vector , index);
@@ -2881,20 +2521,15 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Checking of an identifier list.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error                  reference on a StatError object,
- *  \param[in] nb_individual          number of individuals,
- *  \param[in] identifier             individual identifiers,
- *  \param[in] nb_selected_individual number of selected individuals,
- *  \param[in] selected_identifier    selected individual identifiers,
- *  \param[in] data_label             data type label.
+ *  Verification d'une liste d'identificateurs.
  *
- *  \return                           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, nombre d'individus,
+ *              identificateurs des individus, nombre d'individus selectionnes,
+ *              identificateurs des individus selectionnes, label du type de donnees.
+ *
+ *--------------------------------------------------------------*/
 
 bool selected_identifier_checking(StatError &error , int nb_individual , int *identifier ,
                                   int nb_selected_individual , int *selected_identifier ,
@@ -2902,7 +2537,7 @@ bool selected_identifier_checking(StatError &error , int nb_individual , int *id
 
 {
   bool status = true , *selected_individual;
-  int i , j;
+  register int i , j;
   int max_identifier;
 
 
@@ -2951,42 +2586,27 @@ bool selected_identifier_checking(StatError &error , int nb_individual , int *id
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of individuals by their identifiers.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_individual          number of individuals,
- *  \param[in] identifier             individual identifiers,
- *  \param[in] nb_selected_individual number of selected individuals,
- *  \param[in] selected_identifier    selected individual identifiers,
- *  \param[in] keep                   flag for keeping or rejecting the selected individuals.
+ *  Selection d'individus par l'identificateur.
  *
- *  \return                           selected individual indices.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : nombre d'individus, identificateurs des individus,
+ *              nombre d'individus selectionnes, identificateurs des individus selectionnes,
+ *              flag pour conserver ou rejeter les individus selectionnes.
+ *
+ *--------------------------------------------------------------*/
 
 int* identifier_select(int nb_individual , int *identifier , int nb_selected_individual ,
                        int *selected_identifier , bool keep)
 
 {
-  int i , j , k;
+  register int i , j , k;
   int *index;
 
 
-  if (keep) {
-    index = new int[nb_selected_individual];
+  switch (keep) {
 
-    for (i = 0;i < nb_selected_individual;i++) {
-      for (j = 0;j < nb_individual;j++) {
-        if (selected_identifier[i] == identifier[j]) {
-          index[i] = j;
-          break;
-        }
-      }
-    }
-  }
-
-  else {
+  case false : {
     index = new int[nb_individual - nb_selected_individual];
 
     i = 0;
@@ -3001,24 +2621,37 @@ int* identifier_select(int nb_individual , int *identifier , int nb_selected_ind
         index[i++] = j;
       }
     }
+    break;
+  }
+
+  case true : {
+    index = new int[nb_selected_individual];
+
+    for (i = 0;i < nb_selected_individual;i++) {
+      for (j = 0;j < nb_individual;j++) {
+        if (selected_identifier[i] == identifier[j]) {
+          index[i] = j;
+          break;
+        }
+      }
+    }
+    break;
+  }
   }
 
   return index;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of individuals by their identifiers.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error       reference on a StatError object,
- *  \param[in] inb_vector  number of individuals,
- *  \param[in] iidentifier identifiers,
- *  \param[in] keep        flag for keeping or rejecting the selected individuals.
+ *  Selection de vecteurs par l'identificateur.
  *
- *  \return                Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, nombre de vecteurs,
+ *              identificateurs des vecteurs, flag pour conserver ou rejeter
+ *              les vecteurs selectionnees.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors* Vectors::select_individual(StatError &error , int inb_vector ,
                                     int *iidentifier , bool keep) const
@@ -3054,40 +2687,18 @@ Vectors* Vectors::select_individual(StatError &error , int inb_vector ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of individuals by their identifiers.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error          reference on a StatError object,
- *  \param[in] inb_vector     number of individuals,
- *  \param[in] vec_identifier identifiers,
- *  \param[in] keep           flag for keeping or rejecting the selected individuals.
+ *  Selection de variables.
  *
- *  \return                   Vectors object.
- */
-/*--------------------------------------------------------------*/
-
-Vectors* Vectors::select_individual(StatError &error , int inb_vector ,
-                                    vector<int> iidentifier , bool keep) const
-
-{
-  return select_individual(error , inb_vector , iidentifier.data() , keep);
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of variables.
+ *  arguments : reference sur un objet Vectors, indices des variables selectionnees.
  *
- *  \param[in] vec      reference on a Vectors object,
- *  \param[in] variable selected variable indices.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 void Vectors::select_variable(const Vectors &vec , int *variable)
 
 {
-  int i , j;
+  register int i , j;
 
 
   for (i = 0;i < nb_vector;i++) {
@@ -3117,22 +2728,18 @@ void Vectors::select_variable(const Vectors &vec , int *variable)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of 2 variables supposed to be an explanatory variable and a response variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] explanatory_variable explanatory variable,
- *  \param[in] response_variable    response variable.
+ *  Selection de 2 variables.
  *
- *  \return                         Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : variable explicative, variable expliquee.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors* Vectors::select_variable(int explanatory_variable , int response_variable) const
 
 {
-  int variable[2];
-  variable_nature itype[2];
+  int variable[2] , itype[2];
   Vectors *vec;
 
 
@@ -3150,24 +2757,21 @@ Vectors* Vectors::select_variable(int explanatory_variable , int response_variab
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of variables.
+/*--------------------------------------------------------------*
  *
- *  \param[in] nb_variable          number of variables,
- *  \param[in] nb_selected_variable number of selected variables,
- *  \param[in] selected_variable    selected variable indices,
- *  \param[in] keep                 flag for keeping or rejecting the selected variables.
+ *  Selection de variables.
  *
- *  \return    variable             variable indices.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : nombre de variables, nombre de variables selectionnees,
+ *              indices des variables selectionnees, flag pour conserver ou
+ *              rejeter les variables selectionnees.
+ *
+ *--------------------------------------------------------------*/
 
 int* select_variable(int nb_variable , int nb_selected_variable ,
                      int *selected_variable , bool keep)
 
 {
-  int i , j , k;
+  register int i , j , k;
   int *variable;
 
 
@@ -3175,15 +2779,9 @@ int* select_variable(int nb_variable , int nb_selected_variable ,
     selected_variable[i]--;
   }
 
-  if (keep) {
-    variable = new int[nb_selected_variable];
+  switch (keep) {
 
-    for (i = 0;i < nb_selected_variable;i++) {
-      variable[i] = selected_variable[i];
-    }
-  }
-
-  else {
+  case false : {
     variable = new int[nb_variable - nb_selected_variable];
 
     i = 0;
@@ -3198,33 +2796,40 @@ int* select_variable(int nb_variable , int nb_selected_variable ,
         variable[i++] = j;
       }
     }
+    break;
+  }
+
+  case true : {
+    variable = new int[nb_selected_variable];
+
+    for (i = 0;i < nb_selected_variable;i++) {
+      variable[i] = selected_variable[i];
+    }
+    break;
+  }
   }
 
   return variable;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of variables.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error        reference on a StatError object,
- *  \param[in] inb_variable number of variables,
- *  \param[in] ivariable    variable indices,
- *  \param[in] keep         flag for keeping or rejecting the selected variables.
+ *  Selection de variables.
  *
- *  \return                 Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, nombre de variables,
+ *              indices des variables, flag pour conserver ou rejeter
+ *              les variables selectionnees.
+ *
+ *--------------------------------------------------------------*/
 
 Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
                                   int *ivariable , bool keep) const
 
 {
   bool status = true , *selected_variable;
-  int i;
-  int bnb_variable , *variable;
-  variable_nature *itype;
+  register int i;
+  int bnb_variable , *variable , *itype;
   Vectors *vec;
 
 
@@ -3270,7 +2875,7 @@ Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
 
     bnb_variable = (keep ? inb_variable : nb_variable - inb_variable);
 
-    itype = new variable_nature[bnb_variable];
+    itype = new int[bnb_variable];
     for (i = 0;i < bnb_variable;i++) {
       itype[i] = type[variable[i]];
     }
@@ -3286,46 +2891,22 @@ Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of variables.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error        reference on a StatError object,
- *  \param[in] inb_variable number of variables,
- *  \param[in] ivariable    variable indices,
- *  \param[in] keep         flag for keeping or rejecting the selected variables.
+ *  Suppression de la 1ere variable.
  *
- *  \return                 Vectors object.
- */
-/*--------------------------------------------------------------*/
-
-Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
-                                  vector<int>ivariable , bool keep) const
-
-{
-  return select_variable(error , inb_variable , ivariable.data() , keep);
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Removing of the 1st variable (supposed to be a state variable).
- *
- *  \return Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Vectors* Vectors::remove_variable_1() const
 
 {
-  int i;
-  int *variable;
-  variable_nature *itype;
+  register int i;
+  int *variable , *itype;
   Vectors *vec;
 
 
   variable = new int[nb_variable - 1];
-  itype = new variable_nature[nb_variable - 1];
+  itype = new int[nb_variable - 1];
   for (i = 0;i < nb_variable - 1;i++) {
     variable[i] = i + 1;
     itype[i] = type[i + 1];
@@ -3341,269 +2922,22 @@ Vectors* Vectors::remove_variable_1() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Summation of variables.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error              reference on a StatError object,
- *  \param[in] nb_summed_variable number of variables to be summed,
- *  \param[in] variable           variable indices.
+ *  Concatenation des variables d'objets Vectors.
  *
- *  \return                       Vectors object.
- */
-/*--------------------------------------------------------------*/
-
-Vectors* Vectors::sum_variable(StatError &error , int nb_summed_variable , int *ivariable) const
-
-{
-  bool status = true , *selected_variable;
-  int i , j , k , m;
-  int inb_variable , *copied_variable , *summed_variable;
-  variable_nature *itype;
-  Vectors *vec;
-
-
-  vec = NULL;
-  error.init();
-
-  if (nb_variable == 1) {
-    status = false;
-    error.update(STAT_error[STATR_NB_VARIABLE]);
-  }
-
-  if ((nb_summed_variable < 2) || (nb_summed_variable > nb_variable)) {
-    status = false;
-    error.update(STAT_error[STATR_NB_SUMMED_VARIABLE]);
-  }
-
-  else {
-    selected_variable = new bool[nb_variable + 1];
-    for (i = 1;i <= nb_variable;i++) {
-      selected_variable[i] = false;
-    }
-
-    for (i = 0;i < nb_summed_variable;i++) {
-      if ((ivariable[i] < 1) || (ivariable[i] > nb_variable)) {
-        status = false;
-        ostringstream error_message;
-        error_message << ivariable[i] << ": " << STAT_error[STATR_VARIABLE_INDEX];
-        error.update((error_message.str()).c_str());
-      }
-
-      else {
-        if (selected_variable[ivariable[i]]) {
-          status = false;
-          ostringstream error_message;
-          error_message << STAT_label[STATL_VARIABLE] << " " << ivariable[i] << " "
-                        << STAT_error[STATR_ALREADY_SELECTED];
-          error.update((error_message.str()).c_str());
-        }
-
-        else {
-          selected_variable[ivariable[i]] = true;
-
-          if ((type[ivariable[i] - 1] != INT_VALUE) && (type[ivariable[i] - 1] != REAL_VALUE)) {
-            status = false;
-            ostringstream error_message , correction_message;
-            error_message << STAT_label[STATL_VARIABLE] << " " << ivariable[i] << ": "
-                          << STAT_error[STATR_VARIABLE_TYPE];
-            correction_message << STAT_variable_word[INT_VALUE] << " or "
-                               << STAT_variable_word[REAL_VALUE];
-            error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
-          }
-        }
-      }
-    }
-
-    delete [] selected_variable;
-  }
-
-  if (status) {
-    inb_variable = nb_variable - nb_summed_variable + 1;
-    for (i = 0;i < nb_summed_variable;i++) {
-      ivariable[i]--;
-    }
-
-    summed_variable = new int[nb_summed_variable];
-    copied_variable = new int[nb_variable - nb_summed_variable];
-    i = 0;
-    j = 0;
-    for (k = 0;k < nb_variable;k++) {
-      for (m = 0;m < nb_summed_variable;m++) {
-        if (ivariable[m] == k) {
-          summed_variable[i++] = k;
-          break;
-        }
-      }
-      if (m == nb_summed_variable) {
-        copied_variable[j++] = k;
-      }
-    }
-
-    itype = new variable_nature[inb_variable];
-    i = 0;
-    for (j = 0;j < inb_variable;j++) {
-      if (j == summed_variable[0]) {
-        itype[j] = type[j];
-        for (k = 1;k < nb_summed_variable;k++) {
-          if (type[summed_variable[k]] == REAL_VALUE) {
-           itype[j] = REAL_VALUE;
-          }
-        }
-      }
-      else {
-        itype[j] = type[copied_variable[i++]];
-      }
-    }
-
-    vec = new Vectors(nb_vector , identifier , inb_variable , itype);
-    delete [] itype;
-
-    for (i = 0;i < nb_vector;i++) {
-      j = 0;
-      for (k = 0;k < inb_variable;k++) {
-
-        // summation of values
-
-        if (k == summed_variable[0]) {
-          switch (vec->type[k]) {
-
-          case INT_VALUE : {
-            vec->int_vector[i][k] = 0.;
-
-            for (m = 0;m < nb_summed_variable;m++) {
-              switch (type[summed_variable[m]]) {
-              case INT_VALUE :
-                vec->int_vector[i][k] += int_vector[i][summed_variable[m]];
-                break;
-              case REAL_VALUE :
-                vec->int_vector[i][k] += real_vector[i][summed_variable[m]];
-                break;
-              }
-            }
-            break;
-          }
-
-          case REAL_VALUE : {
-            vec->real_vector[i][k] = 0.;
-
-            for (m = 0;m < nb_summed_variable;m++) {
-              switch (type[summed_variable[m]]) {
-              case INT_VALUE :
-                vec->real_vector[i][k] += int_vector[i][summed_variable[m]];
-                break;
-              case REAL_VALUE :
-                vec->real_vector[i][k] += real_vector[i][summed_variable[m]];
-                break;
-              }
-            }
-            break;
-          }
-          }
-        }
-
-        // copy of values
-
-        else {
-          switch (vec->type[k]) {
-          case INT_VALUE :
-            vec->int_vector[i][k] = int_vector[i][copied_variable[j++]];
-            break;
-          case REAL_VALUE :
-            vec->real_vector[i][k] = real_vector[i][copied_variable[j++]];
-            break;
-          }
-        }
-      }
-    }
-
-    i = 0;
-    for (j = 0;j < inb_variable;j++) {
-      if (j == summed_variable[0]) {
-        vec->min_value_computation(j);
-        vec->max_value_computation(j);
-
-        vec->build_marginal_frequency_distribution(j);
-      }
-
-      else {
-        vec->min_value[j] = min_value[copied_variable[i]];
-        vec->max_value[j] = max_value[copied_variable[i]];
-        vec->min_interval[j] = min_interval[copied_variable[i]];
-
-        if (marginal_distribution[copied_variable[i]]) {
-          vec->marginal_distribution[j] = new FrequencyDistribution(*(marginal_distribution[copied_variable[i]]));
-        }
-        if (marginal_histogram[copied_variable[i]]) {
-          vec->marginal_histogram[j] = new Histogram(*(marginal_histogram[copied_variable[i]]));
-        }
-
-        vec->mean[j] = mean[copied_variable[i]];
-
-        k = 0;
-        for (m = 0;m < inb_variable;m++) {
-          if (m != summed_variable[0]) {
-            vec->covariance[j][m] = covariance[copied_variable[i]][copied_variable[k++]];
-            if (m != j) {
-              vec->covariance[m][j] = vec->covariance[j][m];
-            }
-          }
-        }
-
-        i++;
-      }
-
-      vec->covariance_computation(summed_variable[0]);
-    }
-
-    delete [] summed_variable;
-    delete [] copied_variable;
-  }
-
-  return vec;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Summation of variables.
+ *  arguments : reference sur un objet StatError, nombre d'objets Vectors,
+ *              pointeurs sur les objets Vectors, echantillon de reference pour les identificateurs.
  *
- *  \param[in] error              reference on a StatError object,
- *  \param[in] nb_summed_variable number of variables to be summed,
- *  \param[in] variable           variable indices.
- *
- *  \return                       Vectors object.
- */
-/*--------------------------------------------------------------*/
-
-Vectors* Vectors::sum_variable(StatError &error , int nb_summed_variable , vector<int>ivariable) const
-
-{
-  return sum_variable(error , nb_summed_variable , ivariable.data());
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Merging of variables of Vectors objects.
- *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] nb_sample  number of Vectors objects,
- *  \param[in] ivec       pointer on the Vectors objects,
- *  \param[in] ref_sample reference Vectors object for the identifiers.
- *
- *  \return               Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
                                  const Vectors **ivec , int ref_sample) const
 
 {
   bool status = true;
-  int i , j , k;
-  int inb_variable , *iidentifier;
-  variable_nature *itype;
+  register int i , j , k;
+  int inb_variable , *iidentifier , *itype;
   Vectors *vec;
   const Vectors **pvec;
 
@@ -3637,7 +2971,7 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
       inb_variable += ivec[i - 1]->nb_variable;
     }
 
-    // comparaison of individual identifiers
+    // comparaison des identificateurs des vecteurs
 
     if (ref_sample == I_DEFAULT) {
       for (i = 0;i < nb_vector;i++) {
@@ -3664,7 +2998,7 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
       iidentifier = pvec[ref_sample]->identifier;
     }
 
-    itype = new variable_nature[inb_variable];
+    itype = new int[inb_variable];
     inb_variable = 0;
     for (i = 0;i < nb_sample;i++) {
       for (j = 0;j < pvec[i]->nb_variable;j++) {
@@ -3679,7 +3013,7 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
     vec = new Vectors(nb_vector , iidentifier , inb_variable , itype);
     delete [] itype;
 
-    // copy of vectors
+    // copie des vecteurs
 
     for (i = 0;i < nb_vector;i++) {
       inb_variable = 0;
@@ -3721,70 +3055,28 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Merging of variables of Vectors objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] nb_sample  number of Vectors objects,
- *  \param[in] ivec       pointer on the Vectors objects,
- *  \param[in] ref_sample reference Vectors object for the identifiers.
+ *  Construction d'un objet Vectors a partir d'un fichier.
+ *  Format : chaque ligne represente un individu.
  *
- *  \return               Vectors object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
-                                 const vector<Vectors> ivec , int ref_sample) const
+Vectors* vectors_ascii_read(StatError &error , const char *path)
 
 {
-  int i;
-  Vectors *vec;
-  const Vectors **pvec;
-
-
-  pvec = new const Vectors*[nb_sample];
-  for (i = 0;i < nb_sample;i++) {
-    pvec[i] = new Vectors(ivec[i]);
-  }
-
-  vec = merge_variable(error , nb_sample , pvec , ref_sample);
-
-  for (i = 0;i < nb_sample;i++) {
-    delete pvec[i];
-  }
-  delete [] pvec;
-
-  return vec;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a Vectors object from a file.
- *         Format: rows: individuals | columns: variables.
- *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
- *
- *  \return          Vectors object.
- */
-/*--------------------------------------------------------------*/
-
-Vectors* Vectors::ascii_read(StatError &error , const string path)
-
-{
-  string buffer;
+  RWLocaleSnapshot locale("en");
+  RWCString buffer , token;
   size_t position;
-  typedef tokenizer<char_separator<char>> tokenizer;
-  char_separator<char> separator(" \t");
   bool status , lstatus;
-  int i , j;
-  int line , read_line , initial_nb_line , nb_variable = 0 , nb_vector , index , int_value;
-  variable_nature *type;
+  register int i , j;
+  int line , read_line , initial_nb_line , nb_variable = 0 , nb_vector , index , *type;
+  long int_value;
   double real_value;
   Vectors *vec;
-  ifstream in_file(path.c_str());
+  ifstream in_file(path);
 
 
   vec = NULL;
@@ -3796,39 +3088,30 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
 
   else {
 
-    // 1st pass: analysis of the line defining the number of variables
+    // 1ere passe : analyse de la ligne definissant le nombre de variables
 
     status = true;
     line = 0;
     read_line = 0;
 
-    while (getline(in_file , buffer)) {
+    while (buffer.readLine(in_file , false)) {
       line++;
 
-      position = buffer.find('#');
-      if (position != string::npos) {
-        buffer.erase(position);
+      position = buffer.first('#');
+      if (position != RW_NPOS) {
+        buffer.remove(position);
       }
       i = 0;
 
-      tokenizer tok_buffer(buffer , separator);
+      RWCTokenizer next(buffer);
 
-      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+      while (!((token = next()).isNull())) {
         switch (i) {
 
-        // test number of variables
+        // test nombre de variables
 
         case 0 : {
-          lstatus = true;
-
-/*          try {
-            int_value = stoi(*token);   in C++ 11
-          }
-          catch(invalid_argument &arg) {
-            lstatus = false;
-          } */
-          int_value = atoi(token->c_str());
-
+          lstatus = locale.stringToNum(token , &int_value);
           if (lstatus) {
             if ((int_value < 1) || (int_value > VECTOR_NB_VARIABLE)) {
               lstatus = false;
@@ -3845,12 +3128,12 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
           break;
         }
 
-        // test VARIABLE(S) keyword
+        // test mot cle VARIABLE(S)
 
         case 1 : {
-          if (*token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
+          if (token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
             status = false;
-            error.correction_update(STAT_parsing[STATP_KEYWORD] ,
+            error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
                                     STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] , line , i + 1);
           }
           break;
@@ -3876,53 +3159,44 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
       error.update(STAT_parsing[STATP_FORMAT]);
     }
 
-    // analysis of the lines defining the variable types
+    // analyse des lignes definissant le type de chaque variable
 
     if (status) {
-      type = new variable_nature[nb_variable];
+      type = new int[nb_variable];
       for (i = 0;i < nb_variable;i++) {
-        type[i] = AUXILIARY;
+        type[i] = I_DEFAULT;
       }
 
       read_line = 0;
 
-      while (getline(in_file , buffer)) {
+      while (buffer.readLine(in_file , false)) {
         line++;
 
-        position = buffer.find('#');
-        if (position != string::npos) {
-          buffer.erase(position);
+        position = buffer.first('#');
+        if (position != RW_NPOS) {
+          buffer.remove(position);
         }
         i = 0;
 
-        tokenizer tok_buffer(buffer , separator);
+        RWCTokenizer next(buffer);
 
-        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+        while (!((token = next()).isNull())) {
           switch (i) {
 
-          // test VARIABLE keyword
+          // test mot cle VARIABLE
 
           case 0 : {
-            if (*token != STAT_word[STATW_VARIABLE]) {
+            if (token != STAT_word[STATW_VARIABLE]) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_VARIABLE] , line , i + 1);
+              error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_VARIABLE] , line , i + 1);
             }
             break;
           }
 
-          // test variable index
+          // test index de la variable
 
           case 1 : {
-            lstatus = true;
-
-/*            try {
-              int_value = stoi(*token);   in C++ 11
-            }
-            catch(invalid_argument &arg) {
-              lstatus = false;
-            } */
-            int_value = atoi(token->c_str());
-
+            lstatus = locale.stringToNum(token , &int_value);
             if ((lstatus) && (int_value != read_line + 1)) {
               lstatus = false;
             }
@@ -3934,29 +3208,29 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
             break;
           }
 
-          // test separator
+          // test separateur
 
           case 2 : {
-            if (*token != ":") {
+            if (token != ":") {
               status = false;
               error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
             }
             break;
           }
 
-          // test keyword defining the variable type
+          // test mot cle correspondant au type de la variable
 
           case 3 : {
             for (j = INT_VALUE;j <= STATE;j++) {
-              if (*token == STAT_variable_word[j]) {
-                type[read_line] = (variable_nature)j;
+              if (token == STAT_variable_word[j]) {
+                type[read_line] = j;
                 break;
               }
             }
 
             if (j == REAL_VALUE + 1) {
               status = false;
-              error.update(STAT_parsing[STATP_KEYWORD] , line , i + 1);
+              error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
             }
             break;
           }
@@ -3988,48 +3262,33 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
 
     if (status) {
 
-      // analysis of the lines and determination of the number of individuals
+      // analyse des lignes et recherche du nombre de vecteurs
 
       line = 0;
       nb_vector = 0;
 
-      while (getline(in_file , buffer)) {
+      while (buffer.readLine(in_file , false)) {
         line++;
 
 #       ifdef DEBUG
         cout << line << "  " << buffer << endl;
 #       endif
 
-        position = buffer.find('#');
-        if (position != string::npos) {
-          buffer.erase(position);
+        position = buffer.first('#');
+        if (position != RW_NPOS) {
+          buffer.remove(position);
         }
         i = 0;
 
-        tokenizer tok_buffer(buffer , separator);
+        RWCTokenizer next(buffer);
 
-        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+        while (!((token = next()).isNull())) {
           if (i <= nb_variable) {
-            lstatus = true;
-
             if (type[i] != REAL_VALUE) {
-/*              try {
-                int_value = stoi(*token);   in C++ 11
-              }
-              catch(invalid_argument &arg) {
-                lstatus = false;
-              } */
-              int_value = atoi(token->c_str());
+              lstatus = locale.stringToNum(token , &int_value);
             }
-
             else {
-/*              try {
-                real_value = stod(*token);   in C++ 11
-              }
-              catch(invalid_argument &arg) {
-                lstatus = false;
-              } */
-              real_value = atof(token->c_str());
+              lstatus = locale.stringToNum(token , &real_value);
             }
 
             if (!lstatus) {
@@ -4041,7 +3300,7 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
           i++;
         }
 
-        // test constant number of items per line
+        // test nombre de valeurs par ligne constant
 
         if (i > 0) {
           if (i != nb_variable) {
@@ -4059,11 +3318,11 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
       }
     }
 
-    // 2nd pass: copy of vectors
+    // 2eme passe : copie des vecteurs
 
     if (status) {
 //      in_file.close();
-//      in_file.open(path.c_str() , ios::in);
+//      in_file.open(path , ios::in);
 
       in_file.clear();
       in_file.seekg(0 , ios::beg);
@@ -4071,7 +3330,7 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
       line = 0;
 
       do {
-        getline(in_file , buffer);
+        buffer.readLine(in_file , false);
         line++;
 
 #       ifdef DEBUG
@@ -4085,24 +3344,23 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
 
       index = 0;
 
-      while (getline(in_file , buffer)) {
-        position = buffer.find('#');
-        if (position != string::npos) {
-          buffer.erase(position);
+      while (buffer.readLine(in_file , false)) {
+        position = buffer.first('#');
+        if (position != RW_NPOS) {
+          buffer.remove(position);
         }
         i = 0;
 
-        tokenizer tok_buffer(buffer , separator);
+        RWCTokenizer next(buffer);
 
-        for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+        while (!((token = next()).isNull())) {
           if (type[i] != REAL_VALUE) {
-//            vec->int_vector[index][i++] = stoi(*token);   in C++ 11
-            vec->int_vector[index][i++] = atoi(token->c_str());
+            locale.stringToNum(token , &int_value);
+            vec->int_vector[index][i++] = int_value;
           }
-
           else {
-//            vec->real_vector[index][i++] = stod(*token);   in C++ 11
-            vec->real_vector[index][i++] = atof(token->c_str());
+            locale.stringToNum(token , &real_value);
+            vec->real_vector[index][i++] = real_value;
           }
         }
 
@@ -4127,13 +3385,13 @@ Vectors* Vectors::ascii_read(StatError &error , const string path)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing on a single line of a Vectors object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os stream.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture sur une ligne d'un objet Vectors.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Vectors::line_write(ostream &os) const
 
@@ -4145,27 +3403,24 @@ ostream& Vectors::line_write(ostream &os) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Vectors object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os           stream,
- *  \param[in]     exhaustive   flag detail level,
- *  \param[in]     comment_flag flag comments.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet Vectors.
+ *
+ *  arguments : stream, flag niveau de detail, flag commentaire.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag) const
 
 {
-  int i , j;
-  int buff , width[2] , *int_value;
-  double median , lower_quartile , upper_quartile , *real_value , **correlation;
+  register int i , j;
+  int buff , width[2];
+  long old_adjust;
+  double **correlation;
   Test *test;
-  ios_base::fmtflags format_flags;
 
-
-  format_flags = os.setf(ios::right , ios::adjustfield);
+  old_adjust = os.setf(ios::right , ios::adjustfield);
 
   if (comment_flag) {
     os << "# ";
@@ -4205,43 +3460,6 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
     }
 
     else {
-      if (covariance[i][i] > 0.) {
-        switch (type[i]) {
-
-        case INT_VALUE : {
-          int_value = new int[nb_vector];
-          for (j = 0;j < nb_vector;j++) {
-            int_value[j] = int_vector[j][i];
-          }
-
-          lower_quartile = quantile_computation(nb_vector , int_value , 0.25);
-          median = quantile_computation(nb_vector , int_value , 0.5);
-          upper_quartile = quantile_computation(nb_vector , int_value , 0.75);
-
-          delete [] int_value;
-          break;
-        }
-
-        case REAL_VALUE : {
-          real_value = new double[nb_vector];
-          for (j = 0;j < nb_vector;j++) {
-            real_value[j] = real_vector[j][i];
-          }
-
-          lower_quartile = quantile_computation(nb_vector , real_value , 0.25);
-          median = quantile_computation(nb_vector , real_value , 0.5);
-          upper_quartile = quantile_computation(nb_vector , real_value , 0.75);
-
-          delete [] real_value;
-          break;
-        }
-        }
-      }
-
-      else {
-        median = mean[i];
-      }
-
       os << "\n";
       if (comment_flag) {
         os << "# ";
@@ -4252,18 +3470,8 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
         os << "# ";
       }
       os << STAT_label[STATL_MEAN] << ": " << mean[i] << "   "
-         << STAT_label[STATL_MEDIAN] << ": " << median << endl;
-
-      if (comment_flag) {
-        os << "# ";
-      }
-      os << STAT_label[STATL_VARIANCE] << ": " << covariance[i][i] << "   "
-         << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(covariance[i][i]);
-      if (covariance[i][i] > 0.) {
-        os << "   " << STAT_label[STATL_LOWER_QUARTILE] << ": " << lower_quartile
-           << "   " << STAT_label[STATL_UPPER_QUARTILE] << ": " << upper_quartile;
-      }
-      os << endl;
+         << STAT_label[STATL_VARIANCE] << ": " << covariance[i][i] << "   "
+         << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(covariance[i][i]) << endl;
 
       if ((exhaustive) && (covariance[i][i] > 0.)) {
         if (comment_flag) {
@@ -4288,13 +3496,52 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
         marginal_histogram[i]->ascii_print(os , comment_flag);
       }
     }
+
+/* #   ifdef DEBUG
+    if (comment_flag) {
+      os << "# ";
+    }
+
+    if (type[i] == INT_VALUE) {
+      int *int_value;
+
+      int_value = new int[nb_vector];
+      for (j = 0;j < nb_vector;j++) {
+        int_value[j] = int_vector[j][i];
+      }
+      os << "quartile: " << quantile_computation(nb_vector , int_value , 0.25 , false) << " | "
+         << "median: " << quantile_computation(nb_vector , int_value , 0.5 , false) << " | "
+         << "quartile: " << quantile_computation(nb_vector , int_value , 0.75 , false) << endl;
+
+      os << "quartile: " << quantile_computation(nb_vector , int_value , 0.25 , true) << " | "
+         << "median: " << quantile_computation(nb_vector , int_value , 0.5 , true) << " | "
+         << "quartile: " << quantile_computation(nb_vector , int_value , 0.75 , true) << endl;
+
+      delete [] int_value;
+    }
+
+    else {
+      double *real_value;
+
+      real_value = new double[nb_vector];
+      for (j = 0;j < nb_vector;j++) {
+        real_value[j] = real_vector[j][i];
+      }
+      os << "quartile: " << quantile_computation(nb_vector , real_value , 0.25 , false) << " | "
+         << "median: " << quantile_computation(nb_vector , real_value , 0.5 , false) << " | "
+         << "quartile: " << quantile_computation(nb_vector , real_value , 0.75 , false) << endl;
+
+      delete [] real_value;
+    }
+#   endif */
+
   }
 
   width[0] = column_width(nb_variable);
 
   if (exhaustive) {
 
-    // computation of the column width
+    // calcul des largeurs des colonnes
 
     width[1] = 0;
     for (i = 0;i < nb_variable;i++) {
@@ -4305,7 +3552,7 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
     }
     width[1] += ASCII_SPACE;
 
-    // writing of the variance-covariance matrix
+    // ecriture de la matrice de variance-covariance
 
     os << "\n";
     if (comment_flag) {
@@ -4336,7 +3583,7 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
 
   correlation = correlation_computation();
 
-  // computation of the column width
+  // calcul des largeurs des colonnes
 
   width[1] = 0;
   for (i = 0;i < nb_variable;i++) {
@@ -4347,7 +3594,7 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
   }
   width[1] += ASCII_SPACE;
 
-  // writing of the correlation matrix
+  // ecriture de la matrice des coefficients de correlation
 
   os << "\n";
   if (comment_flag) {
@@ -4375,7 +3622,7 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
   }
   os << endl;
 
-  // test significant character of the correlation coefficients
+  // test du caractere significatif des coefficients de correlation
 
   if (nb_vector > 2) {
 #   ifdef DEBUG
@@ -4419,20 +3666,19 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
   }
   delete [] correlation;
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Vectors object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet Vectors.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Vectors::ascii_write(ostream &os , bool exhaustive) const
 
@@ -4441,23 +3687,21 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Vectors object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet Vectors dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool Vectors::ascii_write(StatError &error , const string path , bool exhaustive) const
+bool Vectors::ascii_write(StatError &error , const char *path ,
+                          bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -4476,27 +3720,25 @@ bool Vectors::ascii_write(StatError &error , const string path , bool exhaustive
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of vectors.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os                    stream,
- *  \param[in]     comment_flag          flag comments,
- *  \param[in]     posterior_probability posterior probabilities of the optimal assignments.
- *  \param[in]     entropy               assignment entropies.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des vecteurs discrets.
+ *
+ *  arguments : stream, flag commentaire, probabilites a posteriori des affectactions optimales
+ *              entropies des affectation.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Vectors::ascii_print(ostream &os , bool comment_flag ,
                               double *posterior_probability , double *entropy) const
 
 {
-  int i , j;
+  register int i , j;
   int buff , width[2];
-  ios_base::fmtflags format_flags;
+  long old_adjust;
 
 
-  format_flags = os.setf(ios::right , ios::adjustfield);
+  old_adjust = os.setf(ios::right , ios::adjustfield);
 
   width[0] = 0;
   for (i = 0;i < nb_variable;i++) {
@@ -4555,20 +3797,19 @@ ostream& Vectors::ascii_print(ostream &os , bool comment_flag ,
     os << endl;
   }
 
-  os.setf(format_flags , ios::adjustfield);
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Vectors object.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet Vectors.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& Vectors::ascii_data_write(ostream &os , bool exhaustive) const
 
@@ -4580,23 +3821,20 @@ ostream& Vectors::ascii_data_write(ostream &os , bool exhaustive) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Vectors object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet Vectors dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool Vectors::ascii_data_write(StatError &error , const string path , bool exhaustive) const
+bool Vectors::ascii_data_write(StatError &error , const char *path , bool exhaustive) const
 
 {
   bool status = false;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -4616,26 +3854,22 @@ bool Vectors::ascii_data_write(StatError &error , const string path , bool exhau
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a Vectors object in a file at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet Vectors dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
-bool Vectors::spreadsheet_write(StatError &error , const string path) const
+bool Vectors::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
-  int i , j;
-  int *int_value;
-  double median , lower_quartile , upper_quartile , *real_value , **correlation;
+  register int i , j;
+  double **correlation;
   Test *test;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -4668,55 +3902,11 @@ bool Vectors::spreadsheet_write(StatError &error , const string path) const
       }
 
       else {
-        if (covariance[i][i] > 0.) {
-          switch (type[i]) {
-
-          case INT_VALUE : {
-            int_value = new int[nb_vector];
-            for (j = 0;j < nb_vector;j++) {
-              int_value[j] = int_vector[j][i];
-            }
-
-            lower_quartile = quantile_computation(nb_vector , int_value , 0.25);
-            median = quantile_computation(nb_vector , int_value , 0.5);
-            upper_quartile = quantile_computation(nb_vector , int_value , 0.75);
-
-            delete [] int_value;
-            break;
-          }
-
-          case REAL_VALUE : {
-            real_value = new double[nb_vector];
-            for (j = 0;j < nb_vector;j++) {
-              real_value[j] = real_vector[j][i];
-            }
-
-            lower_quartile = quantile_computation(nb_vector , real_value , 0.25);
-            median = quantile_computation(nb_vector , real_value , 0.5);
-            upper_quartile = quantile_computation(nb_vector , real_value , 0.75);
-
-            delete [] real_value;
-            break;
-          }
-          }
-        }
-
-        else {
-          median = mean[i];
-        }
-
         out_file << "\n" << STAT_label[STATL_SAMPLE_SIZE] << "\t" << nb_vector << endl;
 
         out_file << STAT_label[STATL_MEAN] << "\t" << mean[i] << "\t\t"
-                 << STAT_label[STATL_MEDIAN] << "\t" << median << endl;
-
-        out_file << STAT_label[STATL_VARIANCE] << "\t" << covariance[i][i] << "\t\t"
-                 << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(covariance[i][i]);
-        if (covariance[i][i] > 0.) {
-          out_file << "\t\t" << STAT_label[STATL_LOWER_QUARTILE] << "\t" << lower_quartile
-                   << "\t\t" << STAT_label[STATL_UPPER_QUARTILE] << "\t" << upper_quartile;
-        }
-        out_file << endl;
+                 << STAT_label[STATL_VARIANCE] << "\t" << covariance[i][i] << "\t\t"
+                 << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(covariance[i][i]) << endl;
 
         if (covariance[i][i] > 0.) {
           out_file << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation(i) << "\t\t"
@@ -4729,7 +3919,7 @@ bool Vectors::spreadsheet_write(StatError &error , const string path) const
       }
     }
 
-    // writing of the variance-covariance matrix
+    // ecriture de la matrice de variance-covariance
 
     out_file << "\n" << STAT_label[STATL_VARIANCE_COVARIANCE_MATRIX] << endl;
 
@@ -4745,7 +3935,7 @@ bool Vectors::spreadsheet_write(StatError &error , const string path) const
     }
     out_file << endl;
 
-    // writing of the correlation matrix
+    // ecriture de la matrice des coefficients de correlation
 
     correlation = correlation_computation();
 
@@ -4763,7 +3953,7 @@ bool Vectors::spreadsheet_write(StatError &error , const string path) const
     }
     out_file << endl;
 
-    // test significant character of the correlation coefficients
+    // test du caractere significatif des coefficients de correlation
 
     if (nb_vector > 2) {
       test = new Test(STUDENT , false , nb_vector - 2 , I_DEFAULT , D_DEFAULT);
@@ -4788,7 +3978,7 @@ bool Vectors::spreadsheet_write(StatError &error , const string path) const
     }
     delete [] correlation;
 
-    // writing of vectors
+    // ecriture des vecteurs
 
     for (i = 0;i < nb_vector;i++) {
       out_file << "\n";
@@ -4809,22 +3999,20 @@ bool Vectors::spreadsheet_write(StatError &error , const string path) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of vectors at the Gnuplot format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] path              file path,
- *  \param[in] standard_residual standardized residuals.
+ *  Ecriture des vecteurs au format Gnuplot.
  *
- *  \return                      error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : path, residus reduits.
+ *
+ *--------------------------------------------------------------*/
+
 
 bool Vectors::plot_print(const char *path , double *standard_residual) const
 
 {
   bool status = false;
-  int i , j;
+  register int i , j;
   ofstream out_file(path);
 
 
@@ -4853,31 +4041,28 @@ bool Vectors::plot_print(const char *path , double *standard_residual) const
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a of a Vectors object using Gnuplot.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error  reference on a StatError object,
- *  \param[in] prefix file prefix,
- *  \param[in] title  figure title.
+ *  Sortie Gnuplot d'un objet Vectors.
  *
- *  \return           error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures.
+ *
+ *--------------------------------------------------------------*/
 
 bool Vectors::plot_write(StatError &error , const char *prefix ,
                          const char *title) const
 
 {
   bool status;
-  int i , j , k , m , n;
+  register int i , j , k , m , n;
   int **frequency;
   ostringstream *data_file_name;
 
 
   error.init();
 
-  // writing of the data files
+  // ecriture des fichiers de donnees
 
   data_file_name = new ostringstream[nb_variable + 1];
 
@@ -4900,7 +4085,7 @@ bool Vectors::plot_write(StatError &error , const char *prefix ,
       }
     }
 
-    // writing of the script files
+    // ecriture des fichiers de commandes et des fichier d'impression
 
     for (i = 0;i < 2;i++) {
       for (j = 0;j < nb_variable;j++) {
@@ -5035,14 +4220,14 @@ bool Vectors::plot_write(StatError &error , const char *prefix ,
             else {
               out_file << "plot [" << min_value[j];
             }
-            out_file << ":" << max_value[j] * YSCALE << "] [";
+            out_file << ":" << MAX(max_value[j] , min_value[j] + 1) << "] [";
             if ((min_value[k] >= 0.) && (max_value[k] - min_value[k] > min_value[k] * PLOT_RANGE_RATIO)) {
               out_file << 0;
             }
             else {
               out_file << min_value[k];
             }
-            out_file << ":" << max_value[k] * YSCALE << "] \""
+            out_file << ":" << MAX(max_value[k] , min_value[k] + 1) << "] \""
                      << label((data_file_name[0].str()).c_str()) << "\" using "
                      << j + 1 << ":" << k + 1 << " notitle with points" << endl;
 
@@ -5081,20 +4266,18 @@ bool Vectors::plot_write(StatError &error , const char *prefix ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of 2-dimensional vectors for plotting.
+/*--------------------------------------------------------------*
  *
- *  \param[in] plot      reference on a SinglePlot object,
- *  \param[in] variable1 variable 1 index.
- *  \param[in] variable2 variable 2 index.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des vecteurs.
+ *
+ *  arguments : reference sur un objet SinglePlot, indices des 2 variables.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::plotable_write(SinglePlot &plot , int variable1 , int variable2) const
 
 {
-  int i;
+  register int i;
 
 
   if (type[variable1] != REAL_VALUE) {
@@ -5125,20 +4308,18 @@ void Vectors::plotable_write(SinglePlot &plot , int variable1 , int variable2) c
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of frequencies associated with 2-dimensional vectors.
+/*--------------------------------------------------------------*
  *
- *  \param[in] plot      reference on a SinglePlot object,
- *  \param[in] variable1 variable 1 index.
- *  \param[in] variable2 variable 2 index.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture des frequences associees aux vecteurs.
+ *
+ *  arguments : reference sur un objet SinglePlot, indice des 2 variables.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::plotable_frequency_write(SinglePlot &plot , int variable1 , int variable2) const
 
 {
-  int i , j;
+  register int i , j;
   int **frequency;
   ostringstream label;
 
@@ -5163,18 +4344,16 @@ void Vectors::plotable_frequency_write(SinglePlot &plot , int variable1 , int va
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Plot of a Vectors object.
+/*--------------------------------------------------------------*
  *
- *  \return MultiPlotSet object.
- */
-/*--------------------------------------------------------------*/
+ *  Sortie graphique d'un objet Vectors.
+ *
+ *--------------------------------------------------------------*/
 
 MultiPlotSet* Vectors::get_plotable() const
 
 {
-  int i , j , k;
+  register int i , j , k;
   int nb_plot_set;
   double xmin , ymin;
   ostringstream legend , label;
@@ -5195,7 +4374,7 @@ MultiPlotSet* Vectors::get_plotable() const
 
     if (marginal_distribution[j]) {
 
-      // marginal frequency distribution
+      // vue : loi marginale empirique
 
       plot[i].xrange = Range(0 , MAX(marginal_distribution[j]->nb_value - 1 , 1));
       plot[i].yrange = Range(0 , ceil(marginal_distribution[j]->max * YSCALE));
@@ -5221,7 +4400,7 @@ MultiPlotSet* Vectors::get_plotable() const
 
     else {
 
-      // marginal histogram
+      // vue : histogramme marginal
 
       plot[i].xrange = Range(marginal_histogram[j]->min_value , marginal_histogram[j]->max_value);
       plot[i].yrange = Range(0 , ceil(marginal_histogram[j]->max * YSCALE));
@@ -5247,7 +4426,7 @@ MultiPlotSet* Vectors::get_plotable() const
       if (k != j) {
         plot.variable[i] = j;
 
-         // joint frequency distribution of 2 variables
+         // vue : loi jointe empirique de 2 variables
 
         if ((min_value[j] >= 0.) && (max_value[j] - min_value[j] > min_value[j] * PLOT_RANGE_RATIO)) {
           xmin = 0.;
@@ -5255,7 +4434,7 @@ MultiPlotSet* Vectors::get_plotable() const
         else {
           xmin = min_value[j];
         }
-        plot[i].xrange = Range(xmin , max_value[j] * YSCALE);
+        plot[i].xrange = Range(xmin , MAX(max_value[j] , min_value[j] + 1));
 
         if ((min_value[k] >= 0.) && (max_value[k] - min_value[k] > min_value[k] * PLOT_RANGE_RATIO)) {
           ymin = 0.;
@@ -5263,7 +4442,7 @@ MultiPlotSet* Vectors::get_plotable() const
         else {
           ymin = min_value[k];
         }
-        plot[i].yrange = Range(ymin , max_value[k] * YSCALE);
+        plot[i].yrange = Range(ymin , MAX(max_value[k] , min_value[k] + 1));
 
         if (max_value[j] - min_value[j] < TIC_THRESHOLD) {
           plot[i].xtics = 1;
@@ -5312,18 +4491,18 @@ MultiPlotSet* Vectors::get_plotable() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the minimum value taken by a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la valeur minimum prise par une variable.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::min_value_computation(int variable)
 
 {
-  int i;
+  register int i;
 
 
   if (type[variable] != REAL_VALUE) {
@@ -5348,18 +4527,18 @@ void Vectors::min_value_computation(int variable)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the maximum taken by a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la valeur maximum prise par une variable.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::max_value_computation(int variable)
 
 {
-  int i;
+  register int i;
 
 
   if (type[variable] != REAL_VALUE) {
@@ -5384,21 +4563,20 @@ void Vectors::max_value_computation(int variable)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of the marginal frequency distribution for
- *         a positive integer-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index.
- */
-/*--------------------------------------------------------------*/
+ *  Construction de la loi marginale empirique pour une variable entiere positive.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::build_marginal_frequency_distribution(int variable)
 
 {
   if ((type[variable] != REAL_VALUE) && (min_value[variable] >= 0) &&
       (max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
-    int i;
+    register int i;
 
 
     marginal_distribution[variable] = new FrequencyDistribution((int)max_value[variable] + 1);
@@ -5426,82 +4604,80 @@ void Vectors::build_marginal_frequency_distribution(int variable)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of the marginal histogram for a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable   variable index,
- *  \param[in] bin_width  bin width,
- *  \param[in] imin_value minimum value.
- */
-/*--------------------------------------------------------------*/
+ *  Construction de l'histogramme marginal pour une variable.
+ *
+ *  arguments : indice de la variable, pas de regroupement, valeur minimum.
+ *
+ *--------------------------------------------------------------*/
 
-void Vectors::build_marginal_histogram(int variable , double bin_width , double imin_value)
+void Vectors::build_marginal_histogram(int variable , double step , double imin_value)
 
 {
-  if ((!marginal_histogram[variable]) || (bin_width != marginal_histogram[variable]->bin_width) ||
+  if ((!marginal_histogram[variable]) || (step != marginal_histogram[variable]->step) ||
       (imin_value != D_INF)) {
-    int i;
+    register int i;
 
 
-    // construction of the histogram
+    // construction de l'histogramme
 
-    if (bin_width == D_DEFAULT) {
-      bin_width = MAX(::round((max_value[variable] - min_value[variable]) * HISTOGRAM_FREQUENCY / nb_vector) , 1);
+    if (step == D_DEFAULT) {
+      step = MAX(::round((max_value[variable] - min_value[variable]) * HISTOGRAM_FREQUENCY / nb_vector) , 1);
 
 #     ifdef MESSAGE
       cout << "\n" << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - "
-           << STAT_label[STATL_BIN_WIDTH] << ": " << bin_width << endl;
+           << STAT_label[STATL_STEP] << ": " << step << endl;
 //           << " (" << min_value[variable] << ", " << max_value[variable] << ")"
 #     endif
 
     }
 
     if (imin_value == D_INF) {
-      imin_value = floor(min_value[variable] / bin_width) * bin_width;
+      imin_value = floor(min_value[variable] / step) * step;
     }
 
     if (marginal_histogram[variable]) {
-      marginal_histogram[variable]->nb_bin = (int)floor((max_value[variable] - imin_value) / bin_width) + 1;
+      marginal_histogram[variable]->nb_category = (int)floor((max_value[variable] - imin_value) / step) + 1;
 
       delete [] marginal_histogram[variable]->frequency;
-      marginal_histogram[variable]->frequency = new int[marginal_histogram[variable]->nb_bin];
+      marginal_histogram[variable]->frequency = new int[marginal_histogram[variable]->nb_category];
     }
 
     else {
-      marginal_histogram[variable] = new Histogram((int)floor((max_value[variable] - imin_value) / bin_width) + 1 , false);
+      marginal_histogram[variable] = new Histogram((int)floor((max_value[variable] - imin_value) / step) + 1 , false);
 
       marginal_histogram[variable]->nb_element = nb_vector;
       marginal_histogram[variable]->type = type[variable];
     }
 
-    marginal_histogram[variable]->bin_width = bin_width;
+    marginal_histogram[variable]->step = step;
     marginal_histogram[variable]->min_value = imin_value;
-    marginal_histogram[variable]->max_value = ceil(max_value[variable] / bin_width) * bin_width;
+    marginal_histogram[variable]->max_value = ceil(max_value[variable] / step) * step;
 
 #   ifdef DEBUG
     cout << "\nTEST: " << marginal_histogram[variable]->min_value << " " << marginal_histogram[variable]->max_value
-         << " | " << marginal_histogram[variable]->nb_bin 
-        << " " << (marginal_histogram[variable]->max_value - marginal_histogram[variable]->min_value) / marginal_histogram[variable]->bin_width << endl;
+         << " | " << marginal_histogram[variable]->nb_category 
+        << " " << (marginal_histogram[variable]->max_value - marginal_histogram[variable]->min_value) / marginal_histogram[variable]->step << endl;
 #    endif
 
-    // computation of bin frequencies
+    // calcul des frequences
 
-    for (i = 0;i < marginal_histogram[variable]->nb_bin;i++) {
+    for (i = 0;i < marginal_histogram[variable]->nb_category;i++) {
       marginal_histogram[variable]->frequency[i] = 0;
     }
 
     if (type[variable] != REAL_VALUE) {
       for (i = 0;i < nb_vector;i++) {
-//        (marginal_histogram[variable]->frequency[(int)((int_vector[i][variable] - imin_value) / bin_width)])++;
-        (marginal_histogram[variable]->frequency[(int)floor((int_vector[i][variable] - imin_value) / bin_width)])++;
+//        (marginal_histogram[variable]->frequency[(int)((int_vector[i][variable] - imin_value) / step)])++;
+        (marginal_histogram[variable]->frequency[(int)floor((int_vector[i][variable] - imin_value) / step)])++;
       }
     }
 
     else {
       for (i = 0;i < nb_vector;i++) {
-//        (marginal_histogram[variable]->frequency[(int)((real_vector[i][variable] - imin_value) / bin_width)])++;
-        (marginal_histogram[variable]->frequency[(int)floor((real_vector[i][variable] - imin_value) / bin_width)])++;
+//        (marginal_histogram[variable]->frequency[(int)((real_vector[i][variable] - imin_value) / step)])++;
+        (marginal_histogram[variable]->frequency[(int)floor((real_vector[i][variable] - imin_value) / step)])++;
       }
     }
 
@@ -5510,21 +4686,17 @@ void Vectors::build_marginal_histogram(int variable , double bin_width , double 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Change of the bin width of the marginal histogram for a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] variable   variable index,
- *  \param[in] bin_width  bin width,
- *  \param[in] imin_value minimum value,
+ *  Changement du pas de regroupement de l'histogramme marginal.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              pas de regroupement, valeur minimum.
+ *
+ *--------------------------------------------------------------*/
 
-bool Vectors::select_bin_width(StatError &error , int variable , double bin_width ,
-                               double imin_value)
+bool Vectors::select_step(StatError &error , int variable , double step ,
+                          double imin_value)
 
 {
   bool status = true;
@@ -5544,11 +4716,11 @@ bool Vectors::select_bin_width(StatError &error , int variable , double bin_widt
       status = false;
       error.update(STAT_error[STATR_MARGINAL_HISTOGRAM]);
     }
-    if ((bin_width <= 0.) || ((type[variable] != REAL_VALUE) && ((int)bin_width != bin_width))) {
+    if ((step <= 0.) || ((type[variable] != REAL_VALUE) && ((int)step != step))) {
       status = false;
-      error.update(STAT_error[STATR_HISTOGRAM_BIN_WIDTH]);
+      error.update(STAT_error[STATR_HISTOGRAM_STEP]);
     }
-    if ((imin_value != D_INF) && ((imin_value <= min_value[variable] - bin_width) ||
+    if ((imin_value != D_INF) && ((imin_value <= min_value[variable] - step) ||
          (imin_value > min_value[variable]) || ((type[variable] != REAL_VALUE) &&
           ((int)imin_value != imin_value)))) {
       status = false;
@@ -5557,28 +4729,26 @@ bool Vectors::select_bin_width(StatError &error , int variable , double bin_widt
   }
 
   if (status) {
-    build_marginal_histogram(variable , bin_width , imin_value);
+    build_marginal_histogram(variable , step , imin_value);
   }
 
   return status;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of an order on the individuals on the basis of
- *         the values taken by a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index.
+ *  Calcul d'un ordre sur les vecteurs a partir des valeurs prises
+ *  par une variable.
  *
- *  \return             ordered individual indices.
- */
-/*--------------------------------------------------------------*/
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 int* Vectors::order_computation(int variable) const
 
 {
-  int i , j;
+  register int i , j;
   int int_min , int_value , *index;
   double real_min , real_value;
 
@@ -5590,7 +4760,7 @@ int* Vectors::order_computation(int variable) const
   if (type[variable] != REAL_VALUE) {
     do {
 
-      // determination of the current minimum value
+      // recherche de la valeur minimum courante
 
       if (i == 0) {
         int_value = (int)min_value[variable];
@@ -5606,7 +4776,8 @@ int* Vectors::order_computation(int variable) const
         int_value = int_min;
       }
 
-      // selection of the individuals taken the current minimum value for the selected variable
+      // recherche des vecteurs prenant pour la variable selectionnee
+      // la valeur minimum courante
 
       for (j = 0;j < nb_vector;j++) {
         if (int_vector[j][variable] == int_value) {
@@ -5620,7 +4791,7 @@ int* Vectors::order_computation(int variable) const
   else {
     do {
 
-      // determination of the current minimum value
+      // recherche de la valeur minimum courante
 
       if (i == 0) {
         real_value = min_value[variable];
@@ -5636,7 +4807,8 @@ int* Vectors::order_computation(int variable) const
         real_value = real_min;
       }
 
-      // selection of the individuals taken the current minimum value for the selected variable
+      // recherche des vecteurs prenant pour la variable selectionnee
+      // la valeur minimum courante
 
       for (j = 0;j < nb_vector;j++) {
         if (real_vector[j][variable] == real_value) {
@@ -5651,21 +4823,18 @@ int* Vectors::order_computation(int variable) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the cumulative frequency distribution function for a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index,
- *  \param[in] cdf      (values, cumulative distribution function).
+ *  Calcul de la fonction de repartition empirique pour une variable.
  *
- *  \return             cumulative frequency distribution function.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : indice de la variable, (valeurs, fonction de repartition).
+ *
+ *--------------------------------------------------------------*/
 
 int Vectors::cumulative_distribution_function_computation(int variable , double **cdf) const
 
 {
-  int i , j;
+  register int i , j;
   int cumul , int_min , int_value , frequency;
   double real_min , real_value;
 
@@ -5685,7 +4854,7 @@ int Vectors::cumulative_distribution_function_computation(int variable , double 
 
       do {
 
-        // determination of the current minimum value
+        // recherche de la valeur minimum courante
 
         if (cumul == 0) {
           int_value = (int)min_value[variable];
@@ -5702,7 +4871,8 @@ int Vectors::cumulative_distribution_function_computation(int variable , double 
           int_value = int_min;
         }
 
-        // computation of the number of individuals taken the current minimum value for the selected variable
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
 
         frequency = 0;
         for (j = 0;j < nb_vector;j++) {
@@ -5722,7 +4892,7 @@ int Vectors::cumulative_distribution_function_computation(int variable , double 
     else {
       do {
 
-        // determination of the current minimum value
+        // recherche de la valeur minimum courante
 
         if (cumul == 0) {
           real_value = min_value[variable];
@@ -5739,7 +4909,8 @@ int Vectors::cumulative_distribution_function_computation(int variable , double 
           real_value = real_min;
         }
 
-        // computation of the number of individuals taken the current minimum value for the selected variable
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
 
         frequency = 0;
         for (j = 0;j < nb_vector;j++) {
@@ -5761,13 +4932,13 @@ int Vectors::cumulative_distribution_function_computation(int variable , double 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the shortest interval between 2 successive values for a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de l'intervalle minimum entre 2 valeurs pour une variable.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::min_interval_computation(int variable)
 
@@ -5777,7 +4948,7 @@ void Vectors::min_interval_computation(int variable)
   }
 
   else {
-    int i , j;
+    register int i , j;
     int int_min , int_value;
     double real_min , real_value;
 
@@ -5788,7 +4959,7 @@ void Vectors::min_interval_computation(int variable)
     if (type[variable] != REAL_VALUE) {
       do {
 
-        // determination of the current minimum value
+        // recherche de la valeur minimum courante
 
         if (i == 0) {
           int_value = (int)min_value[variable];
@@ -5809,7 +4980,8 @@ void Vectors::min_interval_computation(int variable)
           int_value = int_min;
         }
 
-        // computation of the number of individuals taken the current minimum value for the selected variable
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
 
         for (j = 0;j < nb_vector;j++) {
           if (int_vector[j][variable] == int_value) {
@@ -5823,7 +4995,7 @@ void Vectors::min_interval_computation(int variable)
     else {
       do {
 
-        // determination of the current minimum value
+        // recherche de la valeur minimum courante
 
         if (i == 0) {
           real_value = min_value[variable];
@@ -5844,7 +5016,8 @@ void Vectors::min_interval_computation(int variable)
           real_value = real_min;
         }
 
-        // computation of the number of individuals taken the current minimum value for the selected variable
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
 
         for (j = 0;j < nb_vector;j++) {
           if (real_vector[j][variable] == real_value) {
@@ -5858,18 +5031,18 @@ void Vectors::min_interval_computation(int variable)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Mean computation for a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la moyenne d'une variable.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::mean_computation(int variable)
 
 {
-  int i;
+  register int i;
 
 
   mean[variable] = 0.;
@@ -5890,104 +5063,92 @@ void Vectors::mean_computation(int variable)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Variance computation for a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la variance d'une variable.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::variance_computation(int variable)
 
 {
   if (mean[variable] != D_INF) {
+    covariance[variable][variable] = 0.;
+
     if (nb_vector > 1) {
-      int i;
+      register int i;
       double diff;
-      long double square_sum;
 
-
-      square_sum = 0.;
 
       if (type[variable] != REAL_VALUE) {
         for (i = 0;i < nb_vector;i++) {
           diff = int_vector[i][variable] - mean[variable];
-          square_sum += diff * diff;
+          covariance[variable][variable] += diff * diff;
         }
       }
 
       else{
         for (i = 0;i < nb_vector;i++) {
           diff = real_vector[i][variable] - mean[variable];
-          square_sum += diff * diff;
+          covariance[variable][variable] += diff * diff;
         }
       }
 
-      covariance[variable][variable] = square_sum / (nb_vector - 1);
-    }
-
-    else {
-      covariance[variable][variable] = 0.;
+      covariance[variable][variable] /= (nb_vector - 1);
     }
   }
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the variance-covariance matrix.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la matrice de variance-covariance.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 void Vectors::covariance_computation(int variable)
 
 {
   if (mean[0] != D_INF) {
-    int i , j , k;
-    long double square_sum;
+    register int i , j , k;
 
 
     for (i = 0;i < nb_variable;i++) {
       if ((variable == I_DEFAULT) || (i == variable)) {
         for (j = (variable == I_DEFAULT ? i + 1 : 0);j < nb_variable;j++) {
-          if (nb_vector > 1) {
-            square_sum = 0.;
+          covariance[i][j] = 0.;
 
+          if (nb_vector > 1) {
             if ((type[i] != REAL_VALUE) && (type[j] != REAL_VALUE)) {
               for (k = 0;k < nb_vector;k++) {
-                square_sum += (int_vector[k][i] - mean[i]) * (int_vector[k][j] - mean[j]);
+                covariance[i][j] += (int_vector[k][i] - mean[i]) * (int_vector[k][j] - mean[j]);
               }
             }
             else if ((type[i] != REAL_VALUE) && (type[j] == REAL_VALUE)) {
               for (k = 0;k < nb_vector;k++) {
-                square_sum += (int_vector[k][i] - mean[i]) * (real_vector[k][j] - mean[j]);
+                covariance[i][j] += (int_vector[k][i] - mean[i]) * (real_vector[k][j] - mean[j]);
               }
             }
             else if ((type[i] == REAL_VALUE) && (type[j] != REAL_VALUE)) {
               for (k = 0;k < nb_vector;k++) {
-                square_sum += (real_vector[k][i] - mean[i]) * (int_vector[k][j] - mean[j]);
+                covariance[i][j] += (real_vector[k][i] - mean[i]) * (int_vector[k][j] - mean[j]);
               }
             }
 //            else if ((type[i] == REAL_VALUE) && (type[j] == REAL_VALUE)) {
             else {
               for (k = 0;k < nb_vector;k++) {
-                square_sum += (real_vector[k][i] - mean[i]) * (real_vector[k][j] - mean[j]);
+                covariance[i][j] += (real_vector[k][i] - mean[i]) * (real_vector[k][j] - mean[j]);
               }
             }
 
-            covariance[i][j] = square_sum / (nb_vector - 1);
+            covariance[i][j] /= (nb_vector - 1);
           }
 
-          else {
-            covariance[i][j] = 0.;
-          }
-
-          if (j != i) {
-            covariance[j][i] = covariance[i][j];
-          }
+          covariance[j][i] = covariance[i][j];
         }
       }
     }
@@ -5995,40 +5156,33 @@ void Vectors::covariance_computation(int variable)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the mean absolute deviation for a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index,
- *  \param[in] location location measure (e.g. mean or median).
+ *  Calcul de l'ecart absolu moyen d'une variable.
  *
- *  \return             mean absolute deviation.
- */
-/*--------------------------------------------------------------*/
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
-double Vectors::mean_absolute_deviation_computation(int variable , double location) const
+double Vectors::mean_absolute_deviation_computation(int variable) const
 
 {
-  int i;
-  double mean_absolute_deviation;
+  register int i;
+  double mean_absolute_deviation = D_DEFAULT;
 
 
-  if (marginal_distribution[variable]) {
-    mean_absolute_deviation = marginal_distribution[variable]->mean_absolute_deviation_computation(location);
-  }
-
-  else {
+  if (mean[variable] != D_INF) {
     mean_absolute_deviation = 0.;
 
     if (type[variable] != REAL_VALUE) {
       for (i = 0;i < nb_vector;i++) {
-        mean_absolute_deviation += fabs(int_vector[i][variable] - location);
+        mean_absolute_deviation += fabs(int_vector[i][variable] - mean[variable]);
       }
     }
 
     else {
       for (i = 0;i < nb_vector;i++) {
-        mean_absolute_deviation += fabs(real_vector[i][variable] - location);
+        mean_absolute_deviation += fabs(real_vector[i][variable] - mean[variable]);
       }
     }
 
@@ -6039,20 +5193,18 @@ double Vectors::mean_absolute_deviation_computation(int variable , double locati
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the mean absolute difference for a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index.
+ *  Calcul de la difference absolue moyenne pour une variable.
  *
- *  \return             mean absolute difference.
- */
-/*--------------------------------------------------------------*/
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 double Vectors::mean_absolute_difference_computation(int variable) const
 
 {
-  int i , j;
+  register int i , j;
   double mean_absolute_difference;
 
 
@@ -6082,48 +5234,41 @@ double Vectors::mean_absolute_difference_computation(int variable) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the coefficient of skewness for a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index.
+ *  Calcul du coefficient d'asymetrie d'une variable.
  *
- *  \return             coefficient of skewness.
- */
-/*--------------------------------------------------------------*/
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 double Vectors::skewness_computation(int variable) const
 
 {
-  int i;
+  register int i;
   double skewness = D_INF , diff;
-  long double cube_sum;
 
 
   if ((mean[variable] != D_INF) && (covariance[variable][variable] != D_DEFAULT)) {
-    if ((nb_vector > 2) && (covariance[variable][variable] > 0.)) {
-      cube_sum = 0.;
+    skewness = 0.;
 
+    if ((nb_vector > 2) && (covariance[variable][variable] > 0.)) {
       if (type[variable] != REAL_VALUE) {
         for (i = 0;i < nb_vector;i++) {
           diff = int_vector[i][variable] - mean[variable];
-          cube_sum += diff * diff * diff;
+          skewness += diff * diff * diff;
         }
       }
 
       else {
         for (i = 0;i < nb_vector;i++) {
           diff = real_vector[i][variable] - mean[variable];
-          cube_sum += diff * diff * diff;
+          skewness += diff * diff * diff;
         }
       }
 
-      skewness = cube_sum * nb_vector / ((nb_vector - 1) * (nb_vector - 2) *
+      skewness = skewness * nb_vector / ((nb_vector - 1) * (nb_vector - 2) *
                   pow(covariance[variable][variable] , 1.5));
-    }
-
-    else {
-      skewness = 0.;
     }
   }
 
@@ -6131,49 +5276,46 @@ double Vectors::skewness_computation(int variable) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the excess kurtosis for a variable:
- *         excess kurtosis = coefficient of kurtosis - 3.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index.
+ *  Calcul de l'exces d'applatissement d'une variable :
+ *  exces d'applatissement = coefficient d'applatissement - 3.
  *
- *  \return             excess kurtosis.
- */
-/*--------------------------------------------------------------*/
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 double Vectors::kurtosis_computation(int variable) const
 
 {
-  int i;
+  register int i;
   double kurtosis = D_INF , diff;
-  long double power_sum;
 
 
   if ((mean[variable] != D_INF) && (covariance[variable][variable] != D_DEFAULT)) {
-    if (covariance[variable][variable] > 0.) {
-      power_sum = 0.;
+    if (covariance[variable][variable] == 0.) {
+      kurtosis = -2.;
+    }
+
+    else {
+      kurtosis = 0.;
 
       if (type[variable] != REAL_VALUE) {
         for (i = 0;i < nb_vector;i++) {
           diff = int_vector[i][variable] - mean[variable];
-          power_sum += diff * diff * diff * diff;
+          kurtosis += diff * diff * diff * diff;
         }
       }
 
       else {
         for (i = 0;i < nb_vector;i++) {
           diff = real_vector[i][variable] - mean[variable];
-          power_sum += diff * diff * diff * diff;
+          kurtosis += diff * diff * diff * diff;
         }
       }
 
-      kurtosis = power_sum / ((nb_vector - 1) * covariance[variable][variable] *
+      kurtosis = kurtosis / ((nb_vector - 1) * covariance[variable][variable] *
                   covariance[variable][variable]) - 3.;
-    }
-
-    else {
-      kurtosis = -2.;
     }
   }
 
@@ -6181,19 +5323,17 @@ double Vectors::kurtosis_computation(int variable) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the correlation matrix from
- *         the variance-covariance matrix.
+/*--------------------------------------------------------------*
  *
- *  \return correlation matrix.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul de la matrice des coefficients de correlation a partir
+ *  de la matrice de variance-covariance.
+ *
+ *--------------------------------------------------------------*/
 
 double** Vectors::correlation_computation() const
 
 {
-  int i , j;
+  register int i , j;
   double norm , **correlation = NULL;
 
 
@@ -6220,21 +5360,18 @@ double** Vectors::correlation_computation() const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the mean direction for a circular variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] variable variable index,
- *  \param[in] unit     unit (DEGREE/RADIAN).
+ *  Calcul de la direction moyenne d'une variable circulaire.
  *
- *  \return             mean direction.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : indice de la variable, unite (DEGREE/RADIAN).
+ *
+ *--------------------------------------------------------------*/
 
-double* Vectors::mean_direction_computation(int variable , angle_unit unit) const
+double* Vectors::mean_direction_computation(int variable , int unit) const
 
 {
-  int i;
+  register int i;
   double *mean_direction;
 
 

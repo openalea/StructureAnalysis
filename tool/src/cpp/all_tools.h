@@ -8,7 +8,7 @@
  *       File author(s): C. Nouguier & F. Boudon (frederic.boudon@cirad.fr) nouguier
  *
  *       $Source$
- *       $Id$
+ *       $Id: all_tools.h 9869 2010-11-04 17:31:41Z dbarbeau $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *

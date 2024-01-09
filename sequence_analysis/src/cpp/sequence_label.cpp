@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id: sequence_label.cpp 18667 2015-11-09 12:03:24Z guedon $
+ *       $Id: sequence_label.cpp 18070 2015-04-23 10:52:51Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -41,7 +41,7 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Key words (file format)
+ *  Mots cles (format des fichiers) :
  */
 
 
@@ -82,15 +82,15 @@ const char *SEQ_index_parameter_word[] = {
 
 /****************************************************************
  *
- *  Labels
+ *  Labels :
  */
 
 
 const char *SEQ_label[] = {
-  "log-likelihood for the state sequence" ,
-  "log-likelihood for the state sequences" ,
-  "log-likelihood for the observed sequences" ,
-  "information quantity of the sequences in the i.i.d. case" ,
+  "log-likelihood of the state sequence" ,
+  "log-likelihood of the state sequences" ,
+  "log-likelihood of the observed sequences" ,
+  "information of the sequences in the iid case" ,
 
   "smoothed" ,
   "observed" ,
@@ -101,8 +101,11 @@ const char *SEQ_label[] = {
   "equilibrium renewal process" ,
   "time between 2 observation" ,
   "inter-event" ,
+  "backward" ,
+  "forward" ,
   "recurrence time" ,
   "length-biased" ,
+  "inter-event time within the observation period" ,
   "inter-event time censored on both ends" ,
   "inter-event time censored on one end" ,
   "complete inter-event time" ,
@@ -153,7 +156,8 @@ const char *SEQ_label[] = {
   "absorption probability of " ,
   "biased" ,
   "occupancy" ,
-  "complete/censored state occupancy weights" ,
+  "complete/censored state occupancy weights",
+  "sojourn time" ,
   "initial run" ,
   "final run" ,
   "mixture of " ,
@@ -170,7 +174,6 @@ const char *SEQ_label[] = {
   "posterior state sequence probability" ,
   "posterior state sequence probability log ratio" ,
   "state begin" ,
-  "posterior most probable initial state probability" ,
   "posterior state probabilities" ,
   "posterior in state probabilities" ,
   "posterior out state probabilities" ,
@@ -197,7 +200,6 @@ const char *SEQ_label[] = {
   "rank" ,
   "lag" ,
   "maximum lag" ,
-  "autoregressive model" ,
   "white noise" ,
   "randomness 95% confidence limit" ,
   "pair frequency" ,
@@ -229,32 +231,21 @@ const char *SEQ_label[] = {
   "optimal" ,
   "change point" ,
   "change points" ,
-  "change-point amplitude" ,
+  "mean change-point amplitude" ,
   "segment" ,
   "segments" ,
   "segment sample size" ,
   "global standard deviation" ,
-  "global residual standard deviation" ,
-  "root mean square error" ,
-  "mean absolute error" ,
   "piecewise linear function" ,
-  "confidence interval" ,
-  "confidence intervals" ,
-  "autoregressive coefficient" ,
   "number of segments" ,
   "posterior probability" ,
-  "dimension jump" ,
-  "optimal slope" ,
-  "piecewise step function" ,
+  "penalty" ,
   "number of segmentations" ,
   "segmentations" ,
   "segmentation log-likelihood" ,
-  "log-likelihood for all the possible segmentations" ,
-  "change-point uncertainty intervals" ,
+  "log-likelihood of all the possible segmentations" ,
   "posterior change-point probabilities" ,
   "posterior segment probabilities" ,
-  "segment length" ,
-  "prior segment length" ,
   "segmentation entropy" ,
   "first-order dependency entropy" ,
   "change-point entropy" ,
@@ -277,7 +268,7 @@ const char *SEQ_label[] = {
 
 /****************************************************************
  *
- *  Error messages for lexical analysis of files
+ *  Messages d'erreur pour l'analyse des fichiers :
  */
 
 
@@ -299,7 +290,7 @@ const char *SEQ_parsing[] = {
 
 /****************************************************************
  *
- *  Error messages
+ *  Messages d'erreur de traitement :
  */
 
 
@@ -309,6 +300,12 @@ const char *SEQ_error[] = {
   "maximum number of events too small: choose a longer observation period" ,
   "average number of events too small: choose a longer observation period" ,
   "time unit too large" ,
+  "number of complete intervals too small" ,
+  "complete time interval: bad minimum value" ,
+  "forward recurrence time interval: bad minimum value" ,
+  "no event observation period: bad minimum value" ,
+  "bad inter-event mean computation method" ,
+  "initial inter-event distribution support incompatible with data" ,
 
   "bad time between two observation dates" ,
   "bad minimum time" ,
@@ -343,7 +340,6 @@ const char *SEQ_error[] = {
   "sequence length too short" ,
   "sequence length too long" ,
   "cumulative sequence length too long" ,
-  "variable sequence length: should be common to the individuals" ,
   "states not represented" ,
   "failure in the computation of the optimal state sequences" ,
   "reference model" ,
@@ -354,7 +350,6 @@ const char *SEQ_error[] = {
   "bad vertex identifier" ,
   "bad index parameter type" ,
   "bad index parameter" ,
-  "bad state" ,
   "bad variable indices" ,
   "bad variable lag" ,
   "bad date order" ,
@@ -375,7 +370,6 @@ const char *SEQ_error[] = {
   "bad frequency" ,
   "bad maximum lag" ,
   "incompatible with other correlation functions" ,
-  "bad autoregressive coefficient: should be between -1 and 1" ,
   "bad differencing order" ,
   "initial run histograms already built" ,
   "bad run length" ,
@@ -387,7 +381,6 @@ const char *SEQ_error[] = {
   "consecutive values from 0" ,
   "non-existing characteristic distribution" ,
   "non-existing forward sojourn time distribution" ,
-  "bad ordering of the posterior probabilities of the most probable state sequence and the most probable initial state" ,
   "incompatible with model" ,
   "sequence incompatible with model" ,
 

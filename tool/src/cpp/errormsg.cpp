@@ -8,7 +8,7 @@
  *       File author(s): Ch. Godin (christophe.godin@cirad.fr) 
  *
  *       $Source$
- *       $Id$
+ *       $Id: errormsg.cpp 5747 2008-11-26 09:06:22Z cokelaer $
  *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *               

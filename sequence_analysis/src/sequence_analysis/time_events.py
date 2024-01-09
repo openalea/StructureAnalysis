@@ -12,10 +12,10 @@
     :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: time_events.py 15827 2014-02-19 16:17:45Z jbdurand $
     
 """
-__version__ = "$Id$"
+__version__ = "$Id: time_events.py 15827 2014-02-19 16:17:45Z jbdurand $"
 
 import os
 import openalea.stat_tool.interface as interface

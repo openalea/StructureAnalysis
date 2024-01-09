@@ -10,9 +10,9 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: distribution.py 17945 2015-04-07 07:44:42Z pradal $
 """
-__version__ = "$Id$"
+__version__ = "$Id: distribution.py 17945 2015-04-07 07:44:42Z pradal $"
 
 import interface
 import error
@@ -155,8 +155,9 @@ def Binomial(inf_bound, sup_bound=I_DEFAULT, \
 
     param = D_DEFAULT
 
-    return(_DiscreteParametricModel(BINOMIAL.real,
-        inf_bound, sup_bound, param, proba))
+    return _DiscreteParametricModel(BINOMIAL,
+        inf_bound, sup_bound, param, proba)
+
 
 def Poisson(inf_bound, param=D_DEFAULT):
     """

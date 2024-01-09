@@ -12,12 +12,12 @@
     :Authors: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>, 
         Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: plot.py 13231 2012-11-27 15:48:09Z jbdurand $
 
 .. inheritance-diagram:: openalea.stat_tool.plot
 
 """
-__version__ = "$Id$"
+__version__ = "$Id: plot.py 13231 2012-11-27 15:48:09Z jbdurand $"
 
 import sys
 

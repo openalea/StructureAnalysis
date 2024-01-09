@@ -22,6 +22,7 @@
 #include "wrapper_util.h"
 #include "export_base.h"
 
+#include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 
 #include <boost/python.hpp>
@@ -44,7 +45,7 @@ void class_curves()
 {
   class_< Curves >("_Curves", "Curves")
   .def(init<int, int , optional<bool , bool> >())
-  .def(init<const Curves &, optional<curve_transformation, int> >())
+  .def(init<const Curves &, optional<char, int> >())
 
   .def(init<Distribution> ())
   .def(init<FrequencyDistribution> ())

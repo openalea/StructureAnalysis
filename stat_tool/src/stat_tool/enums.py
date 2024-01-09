@@ -3,16 +3,18 @@
 :Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
 :Code status: mature
 :Documentation status: to be completed
-:Revision: $Id$
+:Revision: $Id: enums.py 15183 2013-11-06 10:35:50Z jbdurand $
 """
-__version__ = "$Id$"
+__version__ = "$Id: enums.py 15183 2013-11-06 10:35:50Z jbdurand $"
 
 from openalea.stat_tool._stat_tool import *
 
 from openalea.stat_tool._stat_tool import _FrequencyDistribution, _DiscreteMixtureData, \
     _CompoundData,_ConvolutionData, _DiscreteDistributionData, _DiscreteMixture, \
     _Compound, _Convolution, _DiscreteParametricModel, _Distribution, \
-    _Vectors, _Cluster, _DistanceMatrix, _VectorDistance, _Regression
+    _Vectors, _Cluster, _DistanceMatrix, _VectorDistance, _Regression, \
+    _MultivariateMixture, _MultivariateMixtureData
+
 
 # map to enumerate in boost python
 criterion_type = {
@@ -57,16 +59,16 @@ variable_type = {
     "ORDINAL" : VariableType.ORDINAL,
     "N" : VariableType.NUMERIC,
     "NUMERIC" : VariableType.NUMERIC,
-    "S" : VariableType.NOMINAL,
-    "SYMBOLIC" : VariableType.NOMINAL,
+    "S" : VariableType.SYMBOLIC,
+    "SYMBOLIC" : VariableType.SYMBOLIC,
     "C" : VariableType.CIRCULAR,
     "CIRCULAR" : VariableType.CIRCULAR,
     }
 sub_variable_type = {
     "N" : VariableType.NUMERIC,
     "NUMERIC" : VariableType.NUMERIC,
-    "S" : VariableType.NOMINAL,
-    "SYMBOLIC" : VariableType.NOMINAL,
+    "S" : VariableType.SYMBOLIC,
+    "SYMBOLIC" : VariableType.SYMBOLIC,
     }
 
 pearson_type = {
@@ -199,6 +201,8 @@ all_stat_tool_types  = [_FrequencyDistribution,
                         _ConvolutionData,
                         _DiscreteDistributionData,
                         _DiscreteMixture,
+                        _MultivariateMixture,
+                        _MultivariateMixtureData,
                         _Compound,
                         _Convolution,
                         _DiscreteParametricModel,

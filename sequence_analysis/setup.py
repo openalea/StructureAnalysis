@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__revision__ = "$Id$"
+__revision__ = "$Id: setup.py 12250 2012-06-19 13:45:36Z pradal $"
 
 import os, sys
 from os.path import join as pj

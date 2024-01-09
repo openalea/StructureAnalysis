@@ -1,5 +1,5 @@
 """mixture tests"""
-__version__ = "$Id$"
+__version__ = "$Id: test_mixture.py 9397 2010-08-10 10:50:07Z cokelaer $"
 
 
 from openalea.stat_tool.mixture import Mixture
@@ -103,8 +103,8 @@ class Test(interface):
     def test_extract_data(self):
         """run and test the extract_data methods"""
 
-        h = Histogram(str(get_shared_data( "meri2.his")))
-        m = h.estimate_DiscreteMixture("B", "NB")
+        h = Histogram(get_shared_data( "meri2.his"))
+        m = h.estimate_mixture("B", "NB")
 
         d = m.extract_data()
         assert d

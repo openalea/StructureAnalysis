@@ -2,7 +2,7 @@
 
 .. note:: this is for developers usage only, not part of the user library
 """
-__version__ = "$Id$"
+__version__ = "$Id: interface.py 9033 2010-06-01 12:06:16Z cokelaer $"
 
 from output import StatInterface
 

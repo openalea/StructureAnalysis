@@ -10,9 +10,9 @@
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: estimate.py 15827 2014-02-19 16:17:45Z jbdurand $
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: estimate.py 15827 2014-02-19 16:17:45Z jbdurand $"
 
 
 from openalea.stat_tool import error
@@ -89,9 +89,8 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
         MAX_NB_STATE_SEQUENCE, \
         NB_STATE_SEQUENCE_PARAMETER
     from openalea.stat_tool._stat_tool import \
-        FORWARD, \
-        FORWARD_BACKWARD_SAMPLING, \
-        FORWARD_DYNAMIC_PROGRAMMING
+        FORWARD_BACKWARD, \
+        FORWARD_BACKWARD_SAMPLING
 
     GlobalInitialTransition = kargs.get("GlobalInitialTransition", True)
     CommonDispersion = kargs.get("CommonDispersion", False)
@@ -121,7 +120,7 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
                 raise ValueError("If % is provided, Algorithm cannot be MCEM" %
                                  option)
 
-    if Algorithm == FORWARD:
+    if Algorithm == FORWARD_BACKWARD:
         hmarkov = obj.hidden_variable_order_markov_estimation(
                 args[0], GlobalInitialTransition, CommonDispersion,
                 Counting, StateSequence, NbIteration)
@@ -131,8 +130,7 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
                         args[0], GlobalInitialTransition, CommonDispersion,
                         MinNbSequence, MaxNbSequence, Parameter, Counting,
                         StateSequence, NbIteration)
-    else:
-        print(Algorithm)
+
     return hmarkov
 
 def _estimate_renewal_count_data(obj, itype, **kargs):
@@ -311,7 +309,7 @@ def _estimate_semi_markov(obj, *args, **kargs):
         if kargs.get("OccupancyMean"):
             raise ValueError("Forbidden options Estimate OccupancyMean")
 
-    return obj.semi_markov_estimation(Type.real , Estimator , Counting,
+    return obj.semi_markov_estimation(Type , Estimator , Counting,
                                         NbIteration , OccupancyMean)
 
 
@@ -320,11 +318,10 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
     """
     .. doctest::
         :options: +SKIP
-        
+
         >>> hsmc21 = Estimate(seq21, "HIDDEN_SEMI-MARKOV", hsmc0)
 
     """
-
     from openalea.sequence_analysis._sequence_analysis import \
         MIN_NB_STATE_SEQUENCE, \
         MAX_NB_STATE_SEQUENCE, \
@@ -333,8 +330,7 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
 
 
     from openalea.stat_tool._stat_tool import \
-        NO_COMPUTATION, \
-        FORWARD, \
+        FORWARD_BACKWARD, \
         FORWARD_BACKWARD_SAMPLING, \
         KAPLAN_MEIER
 
@@ -353,15 +349,14 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
     InitialOccupancyMean = kargs.get("InitialOccupancyMean", D_DEFAULT)
     MeanComputation = error.ParseKargs(kargs, "OccupancyMean", 'Computed',
                                       mean_computation_map)
+    RandomInitialization = kargs.get("RandomInitialization", False)
 
     error.CheckType([CommonDispersion, Counting, NbIteration,
                      MinNbSequence, MaxNbSequence, Parameter, StateSequence,
                      InitialOccupancyMean],
                      [bool, bool, int, int, int, [int, float], bool,
                      [float, int]])
-    
-    print(Algorithm)
-    
+
     if Algorithm != sub_markovian_algorithms["MCEM"]:
         options = ["Parameter", "MaxNbStateSequence", "MinNbStateSequence"]
         for option in options:
@@ -400,14 +395,14 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
             raise AttributeError("type must be Ordinary or Equilibrium")
 
         if ((Type != 'e') or (Estimator == PARTIAL_LIKELIHOOD) or \
-            (Algorithm != NO_COMPUTATION)) and \
+            (Algorithm != FORWARD_BACKWARD)) and \
             kargs.get(InitialOccupancyMean):
             raise ValueError("Incompatible user arguments")
 
-        if Algorithm == NO_COMPUTATION:
+        if Algorithm == FORWARD_BACKWARD:
             hsmarkov = obj.hidden_semi_markov_estimation_model( Type, NbState,
                          LeftRight, InitialOccupancyMean, CommonDispersion, Estimator,
-                         Counting, StateSequence, NbIteration, MeanComputation)
+                         Counting, StateSequence, NbIteration, MeanComputation, RandomInitialization)
             return hsmarkov
 
         elif Algorithm == FORWARD_BACKWARD_SAMPLING:
@@ -427,7 +422,7 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
         #    raise ValueError("Incompatible arguments")
 
         hsmarkov = args[0]
-        if Algorithm == NO_COMPUTATION:
+        if Algorithm == FORWARD_BACKWARD:
             output = obj.hidden_semi_markov_estimation(hsmarkov,
                                 CommonDispersion, Estimator, Counting,
                                 StateSequence, NbIteration, MeanComputation)
@@ -510,7 +505,7 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
 
         if order_estimation is True:
             markov = obj.variable_order_markov_estimation1(
-                Type.real, MinOrder, MaxOrder, Algorithm.real, Threshold, Estimator.real ,
+                Type, MinOrder, MaxOrder, Algorithm, Threshold, Estimator ,
                   GlobalInitialTransition , GlobalSample , Counting)
         else:
             markov = obj.variable_order_markov_estimation2(
@@ -623,10 +618,10 @@ def _estimate_dispatch(obj, *args, **kargs):
             and isinstance(args[1], _FrequencyDistribution)):
         if len(args)>=1 and isinstance(obj, _FrequencyDistribution)==False and\
             type(args[0])==str:
-            
+
             return  _estimate_renewal_count_data(obj, args[0], *args[1:], **kargs)
         else:
-            
+
             #always 'equilibrium' as second argument
             return  _estimate_renewal_interval_data(obj, **kargs)
     else:
@@ -649,30 +644,30 @@ def Estimate(obj, *args, **kargs):
 
         >>> Estimate(histo, "NON-PARAMETRIC")
         >>> Estimate(histo, "NB", MinInfBound=1, InfBoundStatus="Fixed")
-        >>> Estimate(histo, "MIXTURE", "B", dist,..., MinInfBound=1, 
+        >>> Estimate(histo, "MIXTURE", "B", dist,..., MinInfBound=1,
             InfBoundStatus="Fixed", DistInfBoundStatus="Fixed")
-        >>> Estimate(histo, "MIXTURE", "B", "NB",..., MinInfBound=1, 
-                InfBoundStatus="Fixed", DistInfBoundStatus="Fixed", 
+        >>> Estimate(histo, "MIXTURE", "B", "NB",..., MinInfBound=1,
+                InfBoundStatus="Fixed", DistInfBoundStatus="Fixed",
                 NbComponent="Estimated", Penalty="AIC")
         >>> Estimate(histo, "CONVOLUTION", dist,MinInfBound=1, Parametric=False)
-        >>> Estimate(histo, "CONVOLUTION", dist,InitialDistribution=initial_dist, 
+        >>> Estimate(histo, "CONVOLUTION", dist,InitialDistribution=initial_dist,
                 Parametric=False)
-        >>> Estimate(histo, "COMPOUND", dist, unknown, Parametric=False, 
+        >>> Estimate(histo, "COMPOUND", dist, unknown, Parametric=False,
                 MinInfBound=0)
-        >>> Estimate(histo, "COMPOUND", dist, unknown, 
+        >>> Estimate(histo, "COMPOUND", dist, unknown,
                 InitialDistribution=initial_dist, Parametric=False)
 
-        >>> Estimate(top, MinPosition=1, MaxPosition=5, Neighbourhood=2,    
+        >>> Estimate(top, MinPosition=1, MaxPosition=5, Neighbourhood=2,
                 EqualProba=True)
 
         >>> Estimate(timev, type, NbIteration=10,Parametric=True)
-        >>> Estimate(timev, type, InitialInterEvent=initial_dist,    
+        >>> Estimate(timev, type, InitialInterEvent=initial_dist,
                 NbIteration=10, Parametric=True)
 
-        >>> Estimate(seq, "NONHOMOGENEOUS_MARKOV", MONOMOLECULAR, VOID, 
+        >>> Estimate(seq, "NONHOMOGENEOUS_MARKOV", MONOMOLECULAR, VOID,
                 Counting=False)
         >>> Estimate(seq, "SEMI-MARKOV", Counting=False)
-        >>> Estimate(seq, "HIDDEN_MARKOV", nb_state, structure, 
+        >>> Estimate(seq, "HIDDEN_MARKOV", nb_state, structure,
                 SelfTransition=0.9, NbIteration=10,
                 StateSequences="Viterbi", Counting=False)
         >>> Estimate(seq, "HIDDEN_MARKOV", hmc, Algorithm="Viterbi",
@@ -684,7 +679,7 @@ def Estimate(obj, *args, **kargs):
         >>> Estimate(seq, "HIDDEN_SEMI-MARKOV", nb_state, structure,
                 OccupancyMean=20, NbIteration=10, Estimator="PartialLikelihood",
                 StateSequences="Viterbi", Counting=False)
-        >>> Estimate(seq, "HIDDEN_SEMI-MARKOV", hsmc, Algorithm="Viterbi", 
+        >>> Estimate(seq, "HIDDEN_SEMI-MARKOV", hsmc, Algorithm="Viterbi",
             NbIteration=10, Counting=False)
 
     :Arguments:
@@ -855,4 +850,3 @@ def Estimate(obj, *args, **kargs):
         #return _estimate_top(obj, *args, **kargs)
     #else:
     return _estimate_dispatch(obj, *args, **kargs)
-

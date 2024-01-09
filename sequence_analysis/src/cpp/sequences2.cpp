@@ -1,14 +1,14 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       StructureAnalysis: Exploring and Analyzing Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2018 CIRAD AGAP
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: sequences2.cpp 18074 2015-04-23 10:56:21Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -38,18 +38,21 @@
 
 #include <limits.h>
 #include <math.h>
-
-#include <string>
-#include <vector>
 #include <sstream>
 #include <iomanip>
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/distributions/students_t.hpp>
 
-#include "stat_tool/stat_label.h"
+#include "tool/config.h"
 
-#include "stat_tool/quantile_computation.hpp"
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
+#include "stat_tool/stat_label.h"
 
 #include "sequences.h"
 #include "sequence_label.h"
@@ -63,23 +66,20 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Merging of Sequences objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] nb_sample number of Sequences objects,
- *  \param[in] iseq      pointer on the Sequences objects.
+ *  Fusion d'objets Sequences.
  *
- *  \return              Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, nombre d'objets Sequences,
+ *              pointeurs sur les objets Sequences.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences **iseq) const
 
 {
   bool status = true;
-  int i , j , k , m , n , p , q;
+  register int i , j , k , m , n , p , q;
   int inb_sequence , cumul_nb_sequence , *ilength , *iidentifier , **ivertex_identifier;
   const FrequencyDistribution **phisto;
   Sequences *seq;
@@ -90,17 +90,17 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
   error.init();
 
   for (i = 0;i < nb_sample;i++) {
-    if (iseq[i]->index_param_type != index_param_type) {
+    if (iseq[i]->index_parameter_type != index_parameter_type) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_SAMPLE] << " " << i + 2 << ": "
                     << SEQ_error[SEQR_INDEX_PARAMETER_TYPE];
 
-      if (index_param_type == IMPLICIT_TYPE) {
+      if (index_parameter_type == IMPLICIT_TYPE) {
         error.update((error_message.str()).c_str());
       }
       else {
-        error.correction_update((error_message.str()).c_str() , SEQ_index_parameter_word[index_param_type]);
+        error.correction_update((error_message.str()).c_str() , SEQ_index_parameter_word[index_parameter_type]);
       }
     }
   }
@@ -137,14 +137,14 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
       pseq[i] = iseq[i - 1];
     }
 
-    // computation of the number of sequences
+    // calcul du nombre de sequences
 
     inb_sequence = 0;
     for (i = 0;i < nb_sample;i++) {
       inb_sequence += pseq[i]->nb_sequence;
     }
 
-    // comparison of the sequence identifiers
+    // comparaison des identificateurs des sequences
 
     iidentifier = new int[inb_sequence];
 
@@ -174,7 +174,7 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
       cumul_nb_sequence += pseq[j]->nb_sequence;
     }
 
-    // copy of sequence lengths
+    // copie des longueurs des sequences
 
     ilength = new int[inb_sequence];
 
@@ -185,7 +185,7 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
       }
     }
 
-    // comparison of vertex identifiers
+    // comparaison des identificateurs des vertex
 
     for (i = 0;i < nb_sample;i++) {
       if (!(pseq[i]->vertex_identifier)) {
@@ -244,7 +244,7 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
     }
 
     seq = new Sequences(inb_sequence , iidentifier , ilength , ivertex_identifier ,
-                        index_param_type , nb_variable , type);
+                        index_parameter_type , nb_variable , type);
     delete [] iidentifier;
     delete [] ilength;
 
@@ -263,7 +263,7 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
       i = 0;
       for (j = 0;j < nb_sample;j++) {
         for (k = 0;k < pseq[j]->nb_sequence;k++) {
-          for (m = 0;m < (pseq[j]->index_param_type == POSITION ? pseq[j]->length[k] + 1 : pseq[j]->length[k]);m++) {
+          for (m = 0;m < (pseq[j]->index_parameter_type == POSITION ? pseq[j]->length[k] + 1 : pseq[j]->length[k]);m++) {
             seq->index_parameter[i][m] = pseq[j]->index_parameter[k][m];
           }
           i++;
@@ -276,16 +276,16 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
       seq->index_parameter_distribution = new FrequencyDistribution(nb_sample , phisto);
     }
 
-//    if ((seq->index_param_type == TIME) || ((seq->index_param_type == POSITION) &&
+//    if ((seq->index_parameter_type == TIME) || ((seq->index_parameter_type == POSITION) &&
 //         (seq->type[0] != NB_INTERNODE))) {
-    if ((seq->index_param_type == TIME) || (seq->index_param_type == POSITION)) {
+    if ((seq->index_parameter_type == TIME) || (seq->index_parameter_type == POSITION)) {
       for (i = 0;i < nb_sample;i++) {
         phisto[i] = pseq[i]->index_interval;
       }
       seq->index_interval = new FrequencyDistribution(nb_sample , phisto);
     }
 
-    // copy of values
+    // copie des valeurs
 
     i = 0;
     for (j = 0;j < nb_sample;j++) {
@@ -347,59 +347,20 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Merging of Sequences objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] nb_sample number of Sequences objects,
- *  \param[in] iseq      pointer on the Sequences objects.
+ *  Translation des valeurs d'une variable.
  *
- *  \return              Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::merge(StatError &error , int nb_sample , const vector<Sequences> iseq) const
-
-{
-  int i;
-  Sequences *seq;
-  const Sequences **pseq;
-
-
-  pseq = new const Sequences*[nb_sample];
-  for (i = 0;i < nb_sample;i++) {
-    pseq[i] = new Sequences(iseq[i]);
-  }
-
-  seq = merge(error , nb_sample , pseq);
-
-  for (i = 0;i < nb_sample;i++) {
-    delete pseq[i];
-  }
-  delete [] pseq;
-
-  return seq;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Shifting of values of a variable.
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              parametre de translation.
  *
- *  \param[in] error       reference on a StatError object,
- *  \param[in] variable    variable index,
- *  \param[in] shift_param integer shifting parameter.
- *
- *  \return                Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::shift(StatError &error , int variable , int shift_param) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
   Sequences *seq;
 
 
@@ -445,7 +406,7 @@ Sequences* Sequences::shift(StatError &error , int variable , int shift_param) c
 
     switch (seq->type[variable]) {
 
-    // shifting of integer values
+    // translation des valeurs entieres
 
     case INT_VALUE : {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -456,7 +417,7 @@ Sequences* Sequences::shift(StatError &error , int variable , int shift_param) c
       break;
     }
 
-    // shifting of real values
+    // translation des valeurs reelles
 
     case REAL_VALUE : {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -485,8 +446,7 @@ Sequences* Sequences::shift(StatError &error , int variable , int shift_param) c
     if ((seq->type[variable] == INT_VALUE) && (seq->min_value[variable] >= 0) &&
         (seq->max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
       if (marginal_distribution[variable]) {
-        seq->marginal_distribution[variable] = new FrequencyDistribution(*marginal_distribution[variable] ,
-                                                                         SHIFT , shift_param);
+        seq->marginal_distribution[variable] = new FrequencyDistribution(*marginal_distribution[variable] , 's' , shift_param);
       }
       else {
         seq->build_marginal_frequency_distribution(variable);
@@ -502,23 +462,20 @@ Sequences* Sequences::shift(StatError &error , int variable , int shift_param) c
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Shifting of values of a real-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error       reference on a StatError object,
- *  \param[in] variable    variable index,
- *  \param[in] shift_param real shifting parameter.
+ *  Translation des valeurs d'une variable reelle.
  *
- *  \return                Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              parametre de translation.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::shift(StatError &error , int variable , double shift_param) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
   Sequences *seq;
 
 
@@ -542,7 +499,7 @@ Sequences* Sequences::shift(StatError &error , int variable , double shift_param
   if (status) {
     seq = new Sequences(*this , variable , type[variable]);
 
-    // shifting of real values
+    // translation des valeurs reelles
 
     for (i = 0;i < seq->nb_sequence;i++) {
       for (j = 0;j < seq->length[i];j++) {
@@ -571,25 +528,20 @@ Sequences* Sequences::shift(StatError &error , int variable , double shift_param
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Thresholding of values of a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] variable  variable index,
- *  \param[in] threshold integer threshold,
- *  \param[in] mode      mode (ABOVE/BELOW).
+ *  Seuillage des valeurs d'une variable.
  *
- *  \return              Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              seuil, mode (ABOVE/BELOW).
+ *
+ *--------------------------------------------------------------*/
 
-Sequences* Sequences::thresholding(StatError &error , int variable , int threshold ,
-                                   threshold_direction mode) const
+Sequences* Sequences::thresholding(StatError &error , int variable , int threshold , int mode) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
   Sequences *seq;
 
 
@@ -640,7 +592,7 @@ Sequences* Sequences::thresholding(StatError &error , int variable , int thresho
 
     switch (seq->type[variable]) {
 
-    // thresholding of integer values
+    // seuillage des valeurs entieres
 
     case INT_VALUE : {
       switch (mode) {
@@ -677,7 +629,7 @@ Sequences* Sequences::thresholding(StatError &error , int variable , int thresho
       break;
     }
 
-    // thresholding of real values
+    // seuillage des valeurs reelles
 
     case REAL_VALUE : {
       switch (mode) {
@@ -739,25 +691,20 @@ Sequences* Sequences::thresholding(StatError &error , int variable , int thresho
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Thresholding of values of a real-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] variable  variable index,
- *  \param[in] threshold real threshold,
- *  \param[in] mode      mode (ABOVE/BELOW).
+ *  Seuillage des valeurs d'une variable reelle.
  *
- *  \return              Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              seuil, mode (ABOVE/BELOW).
+ *
+ *--------------------------------------------------------------*/
 
-Sequences* Sequences::thresholding(StatError &error , int variable , double threshold ,
-                                   threshold_direction mode) const
+Sequences* Sequences::thresholding(StatError &error , int variable , double threshold , int mode) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
   Sequences *seq;
 
 
@@ -795,7 +742,7 @@ Sequences* Sequences::thresholding(StatError &error , int variable , double thre
   if (status) {
     seq = new Sequences(*this , variable , type[variable]);
 
-    // thresholding of real values
+    // seuillage des valeurs reelles
 
     switch (mode) {
 
@@ -841,26 +788,24 @@ Sequences* Sequences::thresholding(StatError &error , int variable , double thre
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Clustering of values of a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq      reference on a Sequences object,
- *  \param[in] variable variable index,
- *  \param[in] step     clustering step,
- *  \param[in] mode     mode (FLOOR/ROUND/CEIL).
- */
-/*--------------------------------------------------------------*/
+ *  Regroupement des valeurs d'une variable.
+ *
+ *  arguments : reference sur un objet Sequences, indice de la variable,
+ *              pas de regroupement, mode (FLOOR/ROUND/CEIL).
+ *
+ *--------------------------------------------------------------*/
 
-void Sequences::cluster(const Sequences &seq , int variable , int step , rounding mode)
+void Sequences::cluster(const Sequences &seq , int variable , int step , int mode)
 
 {
-  int i , j;
+  register int i , j;
 
 
   switch (type[variable]) {
 
-  // clustering of integer values
+  // regroupement des valeurs entieres
 
   case INT_VALUE : {
     switch (mode) {
@@ -911,8 +856,7 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , roundin
     }
 
     if (seq.marginal_distribution[variable]) {
-      marginal_distribution[variable] = new FrequencyDistribution(*(seq.marginal_distribution[variable]) ,
-                                                                  CLUSTER , step , mode);
+      marginal_distribution[variable] = new FrequencyDistribution(*(seq.marginal_distribution[variable]) , 'c' , step , mode);
     }
     else {
       build_marginal_frequency_distribution(variable);
@@ -920,7 +864,7 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , roundin
     break;
   }
 
-  // clustering of real values
+  // regroupement des valeurs reelles
 
   case REAL_VALUE : {
     for (i = 0;i < nb_sequence;i++) {
@@ -932,7 +876,7 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , roundin
     min_value[variable] = seq.min_value[variable] / step;
     max_value[variable] = seq.max_value[variable] / step;
 
-    build_marginal_histogram(variable , seq.marginal_histogram[variable]->bin_width / step);
+    build_marginal_histogram(variable , seq.marginal_histogram[variable]->step / step);
 
     if ((variable + 1 < nb_variable) && (type[variable + 1] == AUXILIARY)) {
       for (i = 0;i < nb_sequence;i++) {
@@ -950,20 +894,16 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , roundin
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Clustering of values of a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] step     clustering step,
- *  \param[in] mode     mode (FLOOR/ROUND/CEIL).
+ *  Regroupement des valeurs d'une variable.
  *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              pas de regroupement, mode (FLOOR/ROUND/CEIL).
+ *
+ *--------------------------------------------------------------*/
 
-Sequences* Sequences::cluster(StatError &error , int variable , int step , rounding mode) const
+Sequences* Sequences::cluster(StatError &error , int variable , int step , int mode) const
 
 {
   bool status = true;
@@ -1012,24 +952,21 @@ Sequences* Sequences::cluster(StatError &error , int variable , int step , round
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Transcoding of categories of an integer-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq          reference on a Sequences object,
- *  \param[in] ivariable    variable index,
- *  \param[in] min_category lowest category,
- *  \param[in] max_category highest category,
- *  \param[in] category     transcoding table,
- *  \param[in] add_variable flag for adding a variable.
- */
-/*--------------------------------------------------------------*/
+ *  Transcodage des symboles d'une variable entiere.
+ *
+ *  arguments : reference sur un objet Sequences, indice de la variable,
+ *              plus petit et plus grand symboles, table de transcodage des symboles,
+ *              flag pour ajouter une variable.
+ *
+ *--------------------------------------------------------------*/
 
-void Sequences::transcode(const Sequences &seq , int ivariable , int min_category ,
-                          int max_category , int *category , bool add_variable)
+void Sequences::transcode(const Sequences &seq , int ivariable , int min_symbol ,
+                          int max_symbol , int *symbol , bool add_flag)
 
 {
-  int i , j , k;
+  register int i , j , k;
   int variable , offset;
 
 
@@ -1044,44 +981,46 @@ void Sequences::transcode(const Sequences &seq , int ivariable , int min_categor
 
   if (seq.index_parameter) {
     for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+      for (j = 0;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
         index_parameter[i][j] = seq.index_parameter[i][j];
       }
     }
   }
 
-  if (add_variable) {
-    variable = 0;
-    offset = 1;
-  }
-  else {
+  switch (add_flag) {
+  case false :
     variable = ivariable;
     offset = 0;
+    break;
+  case true :
+    variable = 0;
+    offset = 1;
+    break;
   }
 
   for (i = 0;i < nb_sequence;i++) {
     for (j = 0;j < nb_variable;j++) {
       if ((type[j] != REAL_VALUE) && (type[j] != AUXILIARY)) {
 
-        // transcoding of categories
+        // transcodage des symboles
 
         if (j == variable) {
           for (k = 0;k < length[i];k++) {
-            int_sequence[i][j][k] = category[seq.int_sequence[i][ivariable][k] -
-                                             (int)seq.min_value[variable]] + min_category;
+            int_sequence[i][j][k] = symbol[seq.int_sequence[i][ivariable][k] -
+                                           (int)seq.min_value[variable]] + min_symbol;
           }
         }
 
-        // copy of integer values
+        // copie des valeurs entieres
 
         else {
           for (k = 0;k < length[i];k++) {
-            int_sequence[i][j][k] = seq.int_sequence[i][j - offset][k];
+            int_sequence[i][j][k] =  seq.int_sequence[i][j - offset][k];
           }
         }
       }
 
-      // copy of real values
+      // copie des valeurs reelles
 
       else {
         for (k = 0;k < length[i];k++) {
@@ -1093,8 +1032,8 @@ void Sequences::transcode(const Sequences &seq , int ivariable , int min_categor
 
   for (i = 0;i < nb_variable;i++) {
     if (i == variable) {
-      min_value[i] = min_category;
-      max_value[i] = max_category;
+      min_value[i] = min_symbol;
+      max_value[i] = max_symbol;
 
       build_marginal_frequency_distribution(i);
     }
@@ -1114,24 +1053,21 @@ void Sequences::transcode(const Sequences &seq , int ivariable , int min_categor
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Transcoding of categories of an integer-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] category transcoding table.
+ *  Transcodage des symboles d'une variable entiere.
  *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              table de transcodage des symboles.
+ *
+ *--------------------------------------------------------------*/
 
-Sequences* Sequences::transcode(StatError &error , int variable , int *category) const
+Sequences* Sequences::transcode(StatError &error , int variable , int *symbol) const
 
 {
   bool status = true , *presence;
-  int i;
-  int min_category , max_category;
+  register int i;
+  int min_symbol , max_symbol;
   Sequences *seq;
 
 
@@ -1162,44 +1098,44 @@ Sequences* Sequences::transcode(StatError &error , int variable , int *category)
     }
 
     if (status) {
-      min_category = category[0];
-      max_category = category[0];
+      min_symbol = symbol[0];
+      max_symbol = symbol[0];
 
       for (i = 1;i <= (int)(max_value[variable] - min_value[variable]);i++) {
-        if (category[i] < min_category) {
-          min_category = category[i];
+        if (symbol[i] < min_symbol) {
+          min_symbol = symbol[i];
         }
-        if (category[i] > max_category) {
-          max_category = category[i];
+        if (symbol[i] > max_symbol) {
+          max_symbol = symbol[i];
         }
       }
 
-      if (max_category - min_category == 0) {
+      if (max_symbol - min_symbol == 0) {
         status = false;
-        error.update(STAT_error[STATR_NB_CATEGORY]);
+        error.update(STAT_error[STATR_NB_SYMBOL]);
       }
 
-      if (max_category - min_category > (int)(max_value[variable] - min_value[variable])) {
+      if (max_symbol - min_symbol > (int)(max_value[variable] - min_value[variable])) {
         status = false;
-        error.update(STAT_error[STATR_NON_CONSECUTIVE_CATEGORIES]);
+        error.update(STAT_error[STATR_NON_CONSECUTIVE_SYMBOLS]);
       }
     }
 
     if (status) {
-      presence = new bool[max_category - min_category + 1];
-      for (i = 0;i <= max_category - min_category;i++) {
+      presence = new bool[max_symbol - min_symbol + 1];
+      for (i = 0;i <= max_symbol - min_symbol;i++) {
         presence[i] = false;
       }
 
       for (i = 0;i <= (int)(max_value[variable] - min_value[variable]);i++) {
-        presence[category[i] - min_category] = true;
+        presence[symbol[i] - min_symbol] = true;
       }
 
-      for (i = 0;i <= max_category - min_category;i++) {
+      for (i = 0;i <= max_symbol - min_symbol;i++) {
         if (!presence[i]) {
           status = false;
           ostringstream error_message;
-          error_message << STAT_error[STATR_MISSING_CATEGORY] << " " << i + min_category;
+          error_message << STAT_error[STATR_MISSING_SYMBOL] << " " << i + min_symbol;
           error.update((error_message.str()).c_str());
         }
       }
@@ -1209,12 +1145,12 @@ Sequences* Sequences::transcode(StatError &error , int variable , int *category)
 
     if (status) {
       for (i = 0;i <= (int)(max_value[variable] - min_value[variable]);i++) {
-        category[i] -= min_category;
+        symbol[i] -= min_symbol;
       }
 
       seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
-                          index_param_type , nb_variable , type);
-      seq->transcode(*this , variable , min_category , max_category , category);
+                          index_parameter_type , nb_variable , type);
+      seq->transcode(*this , variable , min_symbol , max_symbol , symbol);
     }
   }
 
@@ -1222,46 +1158,22 @@ Sequences* Sequences::transcode(StatError &error , int variable , int *category)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Transcoding of categories of an integer-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] category transcoding table.
+ *  Regroupement des valeurs d'une variable entiere.
  *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::transcode(StatError &error , int variable , vector<int> category) const
-
-{
-  return transcode(error , variable , category.data());
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Partitioning of values of a variable.
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              nombre de classes, bornes pour regrouper les valeurs.
  *
- *  \param[in] error     reference on a StatError object, 
- *  \param[in] variable  variable index,
- *  \param[in] nb_class  number of classes,
- *  \param[in] ilimit    integer limits between classes (beginning of classes).
- *
- *  \return              Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::cluster(StatError &error , int variable ,
                               int nb_class , int *ilimit) const
 
 {
   bool status = true;
-  int i , j , k;
-  int *int_limit , *category;
-  variable_nature *itype;
+  register int i , j , k;
+  int *int_limit , *symbol , *itype;
   double *real_limit;
   Sequences *seq;
 
@@ -1318,20 +1230,20 @@ Sequences* Sequences::cluster(StatError &error , int variable ,
       }
 
       if (status) {
-        category = new int[(int)(max_value[variable] - min_value[variable]) + 1];
+        symbol = new int[(int)(max_value[variable] - min_value[variable]) + 1];
 
         i = 0;
         for (j = 0;j < nb_class;j++) {
           for (k = int_limit[j];k < int_limit[j + 1];k++) {
-            category[i++] = j;
+            symbol[i++] = j;
           }
         }
 
         seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
-                            index_param_type , nb_variable , type);
-        seq->transcode(*this , variable , 0 , nb_class - 1 , category);
+                            index_parameter_type , nb_variable , type);
+        seq->transcode(*this , variable , 0 , nb_class - 1 , symbol);
 
-        delete [] category;
+        delete [] symbol;
       }
 
       delete [] int_limit;
@@ -1365,45 +1277,22 @@ Sequences* Sequences::cluster(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Partitioning of values of a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] nb_class number of classes,
- *  \param[in] ilimit   integer limits between classes (beginning of classes).
+ *  Regroupement des valeurs d'une variable reelle.
  *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::cluster(StatError &error , int variable ,
-                              int nb_class , vector<int> ilimit) const
-
-{
-  return cluster(error , variable , nb_class , ilimit.data());
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Partitioning of values of a real-valued variable.
+ *  arguments : reference sur un objet Sequences, indice de la variable,
+ *              nombre de classes, bornes pour regrouper les valeurs.
  *
- *  \param[in] seq      reference on a Sequences object,
- *  \param[in] variable variable index,
- *  \param[in] nb_class number of classes,
- *  \param[in] limit    real limits between classes (beginning of classes).
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 void Sequences::cluster(const Sequences &seq , int variable , int nb_class , double *limit)
 
 {
-  int i , j , k;
+  register int i , j , k;
 
 
-  // grouping of real values
+  // regroupement des valeurs reelles
 
   for (i = 0;i < nb_sequence;i++) {
     for (j = 0;j < length[i];j++) {
@@ -1423,25 +1312,21 @@ void Sequences::cluster(const Sequences &seq , int variable , int nb_class , dou
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Partitioning of values of a real-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] nb_class number of classes,
- *  \param[in] ilimit   real limits between classes (beginning of classes).
+ *  Regroupement des valeurs d'une variable reelle.
  *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              nombre de classes, bornes pour regrouper les valeurs.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::cluster(StatError &error , int variable ,
                               int nb_class , double *ilimit) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   double *limit;
   Sequences *seq;
 
@@ -1503,44 +1388,19 @@ Sequences* Sequences::cluster(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Partitioning of values of a real-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] nb_class number of classes,
- *  \param[in] ilimit   real limits between classes (beginning of classes).
+ *  Changement d'unite d'une variable.
  *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::cluster(StatError &error , int variable ,
-                              int nb_class , vector<double> ilimit) const
-
-{
-  return cluster(error , variable , nb_class , ilimit.data());
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Scaling of a variable.
+ *  arguments : reference sur un objet StatError, variable, facteur d'echelle.
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] variable      variable index,
- *  \param[in] scaling_coeff integer scaling factor.
- *
- *  \return                  Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::scaling(StatError &error , int variable , int scaling_coeff) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
   Sequences *seq;
 
 
@@ -1581,7 +1441,7 @@ Sequences* Sequences::scaling(StatError &error , int variable , int scaling_coef
 
     switch (seq->type[variable]) {
 
-    // scaling of integer values
+    // mise a l'echelle des valeurs entieres
 
     case INT_VALUE : {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -1592,7 +1452,7 @@ Sequences* Sequences::scaling(StatError &error , int variable , int scaling_coef
       break;
     }
 
-    // scaling of real values
+    // mise a l'echelle des valeurs reelles
 
     case REAL_VALUE : {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -1625,23 +1485,19 @@ Sequences* Sequences::scaling(StatError &error , int variable , int scaling_coef
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Scaling of a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] variable      variable index,
- *  \param[in] scaling_coeff real scaling factor.
+ *  Changement d'unite d'une variable.
  *
- *  \return                  Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, variable, facteur d'echelle.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::scaling(StatError &error , int variable , double scaling_coeff) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
   Sequences *seq;
 
 
@@ -1674,7 +1530,7 @@ Sequences* Sequences::scaling(StatError &error , int variable , double scaling_c
 
     switch (type[variable]) {
 
-    // scaling of integer values
+    // mise a l'echelle des valeurs entieres
 
     case INT_VALUE : {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -1685,7 +1541,7 @@ Sequences* Sequences::scaling(StatError &error , int variable , double scaling_c
       break;
     }
 
-    // scaling of real values
+    // mise a l'echelle des valeurs reelles
 
     case REAL_VALUE : {
       for (i = 0;i < seq->nb_sequence;i++) {
@@ -1718,24 +1574,21 @@ Sequences* Sequences::scaling(StatError &error , int variable , double scaling_c
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Rounding of values of a real-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] mode     mode (FLOOR/ROUND/CEIL).
+ *  Arrondi des valeurs d'une variable reelle.
  *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              mode (FLOOR/ROUND/CEIL).
+ *
+ *--------------------------------------------------------------*/
 
-Sequences* Sequences::round(StatError &error , int variable , rounding mode) const
+Sequences* Sequences::round(StatError &error , int variable , int mode) const
 
 {
   bool status = true;
-  int i , j , k;
-  variable_nature *itype;
+  register int i , j , k;
+  int *itype;
   Sequences *seq;
 
 
@@ -1783,7 +1636,7 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
   }
 
   if (status) {
-    itype = new variable_nature[nb_variable];
+    itype = new int[nb_variable];
 
     if (variable == I_DEFAULT) {
       for (i = 0;i < nb_variable;i++) {
@@ -1804,7 +1657,7 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
     }
 
     seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
-                        index_param_type , nb_variable , itype);
+                        index_parameter_type , nb_variable , itype);
     delete [] itype;
 
     // copy of index parameters
@@ -1818,7 +1671,7 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
 
     if (index_parameter) {
       for (i = 0;i < seq->nb_sequence;i++) {
-        for (j = 0;j < (seq->index_param_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
+        for (j = 0;j < (seq->index_parameter_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
           seq->index_parameter[i][j] = index_parameter[i][j];
         }
       }
@@ -1827,7 +1680,7 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
     for (i = 0;i < seq->nb_sequence;i++) {
       for (j = 0;j < seq->nb_variable;j++) {
 
-        // copy of integer values
+        // copie des valeurs entieres
 
         if ((type[j] != REAL_VALUE) && (type[j] != AUXILIARY)) {
           for (k = 0;k < seq->length[i];k++) {
@@ -1837,7 +1690,7 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
 
         else {
 
-          // rounding of real values
+          // arrondi des valeurs reelles
 
           if (((variable == I_DEFAULT) && (type[j] == REAL_VALUE)) || (variable == j)) {
             switch (mode) {
@@ -1865,7 +1718,7 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
             }
           }
 
-          // copy of real values
+          // copie des valeurs reelles
 
           else {
             for (k = 0;k < seq->length[i];k++) {
@@ -1914,27 +1767,23 @@ Sequences* Sequences::round(StatError &error , int variable , rounding mode) con
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of sequences taking values in a given range for the index parameter.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error               reference on a StatError object,
- *  \param[in] display             flag for displaying the selected individuals,
- *  \param[in] min_index_parameter lowest index parameter,
- *  \param[in] max_index_parameter highest index parameter,
- *  \param[in] keep                flag for keeping or rejecting the selected sequences.
+ *  Selection de sequences sur les valeurs prises par le parametre d'index.
  *
- *  \return                        Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream,
+ *              bornes sur les parametres d'index,
+ *              flag pour conserver ou rejeter les sequences selectionnees.
+ *
+ *--------------------------------------------------------------*/
 
-Sequences* Sequences::index_parameter_select(StatError &error , bool display ,
+Sequences* Sequences::index_parameter_select(StatError &error , ostream &os ,
                                              int min_index_parameter ,
                                              int max_index_parameter , bool keep) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
   int inb_sequence , *index , *iidentifier;
   Sequences *seq;
 
@@ -1942,7 +1791,7 @@ Sequences* Sequences::index_parameter_select(StatError &error , bool display ,
   seq = NULL;
   error.init();
 
-  if ((index_param_type != TIME) && (index_param_type != POSITION)) {
+  if ((index_parameter_type != TIME) && (index_parameter_type != POSITION)) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
@@ -1962,14 +1811,14 @@ Sequences* Sequences::index_parameter_select(StatError &error , bool display ,
 
   if (status) {
 
-    // selection of sequences
+    // selection des sequences
 
     iidentifier = new int[nb_sequence];
     index = new int[nb_sequence];
     inb_sequence = 0;
 
     for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+      for (j = 0;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
         if ((index_parameter[i][j] >= min_index_parameter) &&
             (index_parameter[i][j] <= max_index_parameter)) {
           if (keep) {
@@ -1980,7 +1829,7 @@ Sequences* Sequences::index_parameter_select(StatError &error , bool display ,
         }
       }
 
-      if ((!keep) && (j == (index_param_type == POSITION ? length[i] + 1 : length[i]))) {
+      if ((!keep) && (j == (index_parameter_type == POSITION ? length[i] + 1 : length[i]))) {
         iidentifier[inb_sequence] = identifier[i];
         index[inb_sequence++] = i;
       }
@@ -1991,15 +1840,15 @@ Sequences* Sequences::index_parameter_select(StatError &error , bool display ,
       error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
-    // copy of sequences
+    // copie des sequences
 
     if (status) {
-      if ((display) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+      if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
+        os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
         for (i = 0;i < inb_sequence;i++) {
-          cout << iidentifier[i] << ", ";
+          os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        os << endl;
       }
 
       seq = new Sequences(*this , inb_sequence , index);
@@ -2013,27 +1862,22 @@ Sequences* Sequences::index_parameter_select(StatError &error , bool display ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of sequences taking values in a given range for a variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] display    flag for displaying the selected individuals,
- *  \param[in] variable   variable index,
- *  \param[in] imin_value lowest integer value,
- *  \param[in] imax_value highest integer value,
- *  \param[in] keep       flag for keeping or rejecting the selected sequences.
+ *  Selection de sequences sur les valeurs prises par une variable.
  *
- *  \return               Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, indice de la variable,
+ *              bornes sur les valeurs, flag pour conserver ou rejeter
+ *              les sequences selectionnees.
+ *
+ *--------------------------------------------------------------*/
 
-Sequences* Sequences::value_select(StatError &error , bool display , int variable ,
+Sequences* Sequences::value_select(StatError &error , ostream &os , int variable ,
                                    int imin_value , int imax_value , bool keep) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
   int inb_sequence , *index , *iidentifier;
   Sequences *seq;
 
@@ -2073,7 +1917,7 @@ Sequences* Sequences::value_select(StatError &error , bool display , int variabl
 
   if (status) {
 
-    // selection of sequences
+    // selection des sequences
 
     iidentifier = new int[nb_sequence];
     index = new int[nb_sequence];
@@ -2124,15 +1968,15 @@ Sequences* Sequences::value_select(StatError &error , bool display , int variabl
       error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
-    // copy of sequences
+    // copie des sequences
 
     if (status) {
-      if ((display) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+      if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
+        os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
         for (i = 0;i < inb_sequence;i++) {
-          cout << iidentifier[i] << ", ";
+          os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        os << endl;
       }
 
       seq = new Sequences(*this , inb_sequence , index);
@@ -2146,27 +1990,22 @@ Sequences* Sequences::value_select(StatError &error , bool display , int variabl
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of sequences taking values in a given range for a real-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] display    flag for displaying the selected individuals,
- *  \param[in] variable   variable index,
- *  \param[in] imin_value lowest real value,
- *  \param[in] imax_value highest real value,
- *  \param[in] keep       flag for keeping or rejecting the selected sequences.
+ *  Selection de sequences sur les valeurs prises par une variable reelle.
  *
- *  \return               Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, indice de la variable,
+ *              bornes sur les valeurs, flag pour conserver ou rejeter
+ *              les sequences selectionnees.
+ *
+ *--------------------------------------------------------------*/
 
-Sequences* Sequences::value_select(StatError &error , bool display , int variable ,
+Sequences* Sequences::value_select(StatError &error , ostream &os , int variable ,
                                    double imin_value , double imax_value , bool keep) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
   int inb_sequence , *index , *iidentifier;
   Sequences *seq;
 
@@ -2201,7 +2040,7 @@ Sequences* Sequences::value_select(StatError &error , bool display , int variabl
 
   if (status) {
 
-    // selection of sequences
+    // selection des sequences
 
     iidentifier = new int[nb_sequence];
     index = new int[nb_sequence];
@@ -2230,15 +2069,15 @@ Sequences* Sequences::value_select(StatError &error , bool display , int variabl
       error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
-    // copy of sequences
+    // copie des sequences
 
     if (status) {
-      if ((display) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+      if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
+        os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
         for (i = 0;i < inb_sequence;i++) {
-          cout << iidentifier[i] << ", ";
+          os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        os << endl;
       }
 
       seq = new Sequences(*this , inb_sequence , index);
@@ -2252,18 +2091,15 @@ Sequences* Sequences::value_select(StatError &error , bool display , int variabl
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of sequences by their identifiers.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error        reference on a StatError object,
- *  \param[in] inb_sequence number of sequences,
- *  \param[in] iidentifier  sequence identifiers,
- *  \param[in] keep         flag for keeping or rejecting the selected individuals.
+ *  Selection de sequences par l'identificateur.
  *
- *  \return                 Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, nombre de sequences,
+ *              identificateur des sequences, flag pour conserver ou rejeter
+ *              les sequences selectionnees.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::select_individual(StatError &error , int inb_sequence ,
                                         int *iidentifier , bool keep) const
@@ -2299,67 +2135,13 @@ Sequences* Sequences::select_individual(StatError &error , int inb_sequence ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of sequences by their identifiers.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error        reference on a StatError object,
- *  \param[in] inb_sequence number of sequences,
- *  \param[in] iidentifier  sequence identifiers,
- *  \param[in] keep         flag for keeping or rejecting the selected sequences.
+ *  Suppression du parametre d'index.
  *
- *  \return                 Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::select_individual(StatError &error , int inb_sequence ,
-                                        vector<int> iidentifier , bool keep) const
-
-{
-  return select_individual(error , inb_sequence , iidentifier.data() , keep);
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Copy of a Sequences object transforming the implicit index parameters in
- *         explicit index parameters.
+ *  argument : reference sur un objet StatError.
  *
- *  \param[in] error reference on a StatError object.
- *
- *  \return          Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::explicit_index_parameter(StatError &error) const
-
-{
-  Sequences *seq;
-
-
-  error.init();
-
-  if (index_parameter) {
-    seq = NULL;
-    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
-  }
-  else {
-    seq = new Sequences(*this , EXPLICIT_INDEX_PARAMETER);
-  }
-
-  return seq;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Removing of the index parameters.
- *
- *  \param[in] error reference on a StatError object.
- *
- *  \return          Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::remove_index_parameter(StatError &error) const
 
@@ -2374,26 +2156,54 @@ Sequences* Sequences::remove_index_parameter(StatError &error) const
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
-    seq = new Sequences(*this , REMOVE_INDEX_PARAMETER);
+    seq = new Sequences(*this , 'm');
   }
 
   return seq;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of variables.
+/*--------------------------------------------------------------*
  *
- *  \param[in] seq      reference on a Sequences object,
- *  \param[in] variable variable indices.
- */
-/*--------------------------------------------------------------*/
+ *  Copie d'un objet Sequences avec transformation du parametre d'index implicite
+ *  en parametre d'index explicite.
+ *
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::explicit_index_parameter(StatError &error) const
+
+{
+  Sequences *seq;
+
+
+  error.init();
+
+  if (index_parameter) {
+    seq = NULL;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+  else {
+    seq = new Sequences(*this , 'e');
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Selection de variables.
+ *
+ *  arguments : reference sur un objet Sequences, indices des variables.
+ *
+ *--------------------------------------------------------------*/
 
 void Sequences::select_variable(const Sequences &seq , int *variable)
 
 {
-  int i , j , k;
+  register int i , j , k;
 
 
   // copy of index parameters
@@ -2407,13 +2217,13 @@ void Sequences::select_variable(const Sequences &seq , int *variable)
 
   if (seq.index_parameter) {
     for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+      for (j = 0;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
         index_parameter[i][j] = seq.index_parameter[i][j];
       }
     }
   }
 
-  // copy of values
+  // copie des valeurs
 
   for (i = 0;i < nb_sequence;i++) {
     for (j = 0;j < nb_variable;j++) {
@@ -2445,27 +2255,23 @@ void Sequences::select_variable(const Sequences &seq , int *variable)
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of variables.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error        reference on a StatError object,
- *  \param[in] inb_variable number of variables,
- *  \param[in] ivariable    variable indices,
- *  \param[in] keep         flag for keeping or rejecting the selected variables.
+ *  Selection de variables.
  *
- *  \return                 Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, nombre de variables,
+ *              indices des variables, flag pour conserver ou rejeter
+ *              les variables selectionnees.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
                                       int *ivariable , bool keep) const
 
 {
   bool status = true , *selected_variable;
-  int i;
-  int bnb_variable , *variable;
-  variable_nature *itype;
+  register int i;
+  int bnb_variable , *variable , *itype;
   Sequences *seq;
 
 
@@ -2520,13 +2326,13 @@ Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
     }
 
     if (status) {
-      itype = new variable_nature[bnb_variable];
+      itype = new int[bnb_variable];
       for (i = 0;i < bnb_variable;i++) {
         itype[i] = type[variable[i]];
       }
 
       seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
-                          index_param_type , bnb_variable , itype);
+                          index_parameter_type , bnb_variable , itype);
       seq->select_variable(*this , variable);
 
       delete [] itype;
@@ -2539,303 +2345,23 @@ Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of variables.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error        reference on a StatError object,
- *  \param[in] inb_variable number of variables,
- *  \param[in] ivariable    variable indices,
- *  \param[in] keep         flag for keeping or rejecting the selected variables.
+ *  Concatenation des variables d'objets Sequences.
  *
- *  \return                 Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
-                                      vector<int> ivariable , bool keep) const
-
-{
-  return select_variable(error , inb_variable , ivariable.data() , keep);
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Summation of variables.
+ *  arguments : reference sur un objet StatError, nombre d'objets Sequences,
+ *              pointeurs sur les objets Sequences, echantillon de reference pour
+ *              les identificateurs.
  *
- *  \param[in] error              reference on a StatError object,
- *  \param[in] nb_summed_variable number of variables to be summed,
- *  \param[in] variable           variable indices.
- *
- *  \return                       Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::sum_variable(StatError &error , int nb_summed_variable , int *ivariable) const
-
-{
-  bool status = true , *selected_variable;
-  int i , j , k , m , n;
-  int inb_variable , *copied_variable , *summed_variable;
-  variable_nature *itype;
-  Sequences *seq;
-
-
-  seq = NULL;
-  error.init();
-
-  if (nb_variable == 1) {
-    status = false;
-    error.update(STAT_error[STATR_NB_VARIABLE]);
-  }
-
-  if ((nb_summed_variable < 2) || (nb_summed_variable > nb_variable)) {
-    status = false;
-    error.update(STAT_error[STATR_NB_SUMMED_VARIABLE]);
-  }
-
-  else {
-    selected_variable = new bool[nb_variable + 1];
-    for (i = 1;i <= nb_variable;i++) {
-      selected_variable[i] = false;
-    }
-
-    for (i = 0;i < nb_summed_variable;i++) {
-      if ((ivariable[i] < 1) || (ivariable[i] > nb_variable)) {
-        status = false;
-        ostringstream error_message;
-        error_message << ivariable[i] << ": " << STAT_error[STATR_VARIABLE_INDEX];
-        error.update((error_message.str()).c_str());
-      }
-
-      else {
-        if (selected_variable[ivariable[i]]) {
-          status = false;
-          ostringstream error_message;
-          error_message << STAT_label[STATL_VARIABLE] << " " << ivariable[i] << " "
-                        << STAT_error[STATR_ALREADY_SELECTED];
-          error.update((error_message.str()).c_str());
-        }
-
-        else {
-          selected_variable[ivariable[i]] = true;
-
-          if ((type[ivariable[i] - 1] != INT_VALUE) && (type[ivariable[i] - 1] != REAL_VALUE)) {
-            status = false;
-            ostringstream error_message , correction_message;
-            error_message << STAT_label[STATL_VARIABLE] << " " << ivariable[i] << ": "
-                          << STAT_error[STATR_VARIABLE_TYPE];
-            correction_message << STAT_variable_word[INT_VALUE] << " or "
-                               << STAT_variable_word[REAL_VALUE];
-            error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
-          }
-
-          else if ((ivariable[i] < nb_variable) && (type[ivariable[i]] == AUXILIARY)) {
-            status = false;
-            ostringstream error_message;
-            error_message << STAT_label[STATL_VARIABLE] << " " << ivariable[i] + 1 << ": "
-                          << STAT_error[STATR_VARIABLE_TYPE];
-            error.update((error_message.str()).c_str());
-          }
-        }
-      }
-    }
-
-    delete [] selected_variable;
-  }
-
-  if (status) {
-    inb_variable = nb_variable - nb_summed_variable + 1;
-    for (i = 0;i < nb_summed_variable;i++) {
-      ivariable[i]--;
-    }
-
-    summed_variable = new int[nb_summed_variable];
-    copied_variable = new int[nb_variable - nb_summed_variable];
-    i = 0;
-    j = 0;
-    for (k = 0;k < nb_variable;k++) {
-      for (m = 0;m < nb_summed_variable;m++) {
-        if (ivariable[m] == k) {
-          summed_variable[i++] = k;
-          break;
-        }
-      }
-      if (m == nb_summed_variable) {
-        copied_variable[j++] = k;
-      }
-    }
-
-    itype = new variable_nature[inb_variable];
-    i = 0;
-    for (j = 0;j < inb_variable;j++) {
-      if (j == summed_variable[0]) {
-        itype[j] = type[j];
-        for (k = 1;k < nb_summed_variable;k++) {
-          if (type[summed_variable[k]] == REAL_VALUE) {
-           itype[j] = REAL_VALUE;
-          }
-        }
-      }
-      else {
-        itype[j] = type[copied_variable[i++]];
-      }
-    }
-
-    seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
-                        index_param_type , inb_variable , itype);
-    delete [] itype;
-
-    // copy of index parameters
-
-    if (index_parameter_distribution) {
-      seq->index_parameter_distribution = new FrequencyDistribution(*(index_parameter_distribution));
-    }
-    if (index_interval) {
-      seq->index_interval = new FrequencyDistribution(*(index_interval));
-    }
-
-    if (index_parameter) {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
-          seq->index_parameter[i][j] = index_parameter[i][j];
-        }
-      }
-    }
-
-    for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < length[i];j++) {
-        k = 0;
-        for (m = 0;m < inb_variable;m++) {
-
-          // summation of values
-
-          if (m == summed_variable[0]) {
-            switch (seq->type[m]) {
-
-            case INT_VALUE : {
-              seq->int_sequence[i][m][j] = 0.;
-
-              for (n = 0;n < nb_summed_variable;n++) {
-                switch (type[summed_variable[n]]) {
-                case INT_VALUE :
-                  seq->int_sequence[i][m][j] += int_sequence[i][summed_variable[n]][j];
-                  break;
-                case REAL_VALUE :
-                  seq->int_sequence[i][m][j] += real_sequence[i][summed_variable[n]][j];
-                  break;
-                }
-              }
-              break;
-            }
-
-            case REAL_VALUE : {
-              seq->real_sequence[i][m][j] = 0.;
-
-              for (n = 0;n < nb_summed_variable;n++) {
-                switch (type[summed_variable[n]]) {
-                case INT_VALUE :
-                  seq->real_sequence[i][m][j] += int_sequence[i][summed_variable[n]][j];
-                  break;
-                case REAL_VALUE :
-                  seq->real_sequence[i][m][j] += real_sequence[i][summed_variable[n]][j];
-                  break;
-                }
-              }
-              break;
-            }
-            }
-          }
-
-          // copy of values
-
-          else {
-            switch (seq->type[m]) {
-            case INT_VALUE :
-              seq->int_sequence[i][m][j] = int_sequence[i][copied_variable[k++]][j];
-              break;
-            case REAL_VALUE :
-              seq->real_sequence[i][m][j] = real_sequence[i][copied_variable[k++]][j];
-              break;
-            }
-          }
-        }
-      }
-    }
-
-    i = 0;
-    for (j = 0;j < inb_variable;j++) {
-      if (j == summed_variable[0]) {
-        seq->min_value_computation(j);
-        seq->max_value_computation(j);
-
-        seq->build_marginal_frequency_distribution(j);
-      }
-
-      else {
-        seq->min_value[j] = min_value[copied_variable[i]];
-        seq->max_value[j] = max_value[copied_variable[i]];
-
-        if (marginal_distribution[copied_variable[i]]) {
-          seq->marginal_distribution[j] = new FrequencyDistribution(*(marginal_distribution[copied_variable[i]]));
-        }
-        if (marginal_histogram[copied_variable[i]]) {
-          seq->marginal_histogram[j] = new Histogram(*(marginal_histogram[copied_variable[i]]));
-        }
-        i++;
-      }
-    }
-
-    delete [] summed_variable;
-    delete [] copied_variable;
-  }
-
-  return seq;
-}
-
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Summation of variables.
- *
- *  \param[in] error              reference on a StatError object,
- *  \param[in] nb_summed_variable number of variables to be summed,
- *  \param[in] variable           variable indices.
- *
- *  \return                       Vectors object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::sum_variable(StatError &error , int nb_summed_variable , vector<int> ivariable) const
-
-{
-  return sum_variable(error , nb_summed_variable , ivariable.data());
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Merging of variables of Sequences objects.
- *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] nb_sample  number of Sequences objects,
- *  \param[in] iseq       pointer on the Sequences objects,
- *  \param[in] ref_sample reference Sequences object for the identifiers.
- *
- *  \return               Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
                                      const Sequences **iseq , int ref_sample) const
 
 {
   bool status = true;
-  int i , j , k , m;
-  int inb_variable , *iidentifier , **ivertex_identifier;
-  variable_nature *itype;
+  register int i , j , k , m;
+  int inb_variable , *iidentifier , *itype , **ivertex_identifier;
   Sequences *seq;
   const Sequences **pseq;
 
@@ -2852,18 +2378,18 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
       error.update((error_message.str()).c_str());
     }
 
-    if ((iseq[i]->index_param_type != IMPLICIT_TYPE) &&
-        (iseq[i]->index_param_type != index_param_type)) {
+    if ((iseq[i]->index_parameter_type != IMPLICIT_TYPE) &&
+        (iseq[i]->index_parameter_type != index_parameter_type)) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_SAMPLE] << " " << i + 2 << ": "
                     << SEQ_error[SEQR_INDEX_PARAMETER_TYPE];
 
-      if (index_param_type == IMPLICIT_TYPE) {
+      if (index_parameter_type == IMPLICIT_TYPE) {
         error.update((error_message.str()).c_str());
       }
       else {
-        error.correction_update((error_message.str()).c_str() , SEQ_index_parameter_word[index_param_type]);
+        error.correction_update((error_message.str()).c_str() , SEQ_index_parameter_word[index_parameter_type]);
       }
     }
 
@@ -2901,15 +2427,15 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
             }
           }
 
-          if ((iseq[i]->index_param_type != IMPLICIT_TYPE) &&
-              (iseq[i]->index_param_type == index_param_type)) {
-            for (k = 0;k < (index_param_type == POSITION ? length[j] + 1 : length[j]);k++) {
+          if ((iseq[i]->index_parameter_type != IMPLICIT_TYPE) &&
+              (iseq[i]->index_parameter_type == index_parameter_type)) {
+            for (k = 0;k < (index_parameter_type == POSITION ? length[j] + 1 : length[j]);k++) {
               if (iseq[i]->index_parameter[j][k] != index_parameter[j][k]) {
                 status = false;
                 ostringstream error_message;
                 error_message << STAT_label[STATL_SAMPLE] << " " << i + 2 << ": "
                               << SEQ_label[SEQL_SEQUENCE] << " " << j + 1 << ": "
-                              << SEQ_label[SEQL_INDEX] << " " << k << ": "
+                              << SEQ_label[SEQL_INDEX_PARAMETER] << " " << k << ": "
                               << SEQ_error[SEQR_INDEX_PARAMETER];
                 error.update((error_message.str()).c_str());
               }
@@ -2936,7 +2462,7 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
       inb_variable += iseq[i - 1]->nb_variable;
     }
 
-    // comparison of sequence identifiers
+    // comparaison des identificateurs des sequences
 
     if (ref_sample == I_DEFAULT) {
       for (i = 0;i < nb_sequence;i++) {
@@ -2963,7 +2489,7 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
       iidentifier = pseq[ref_sample]->identifier;
     }
 
-    // comparison of vertex identifiers
+    // comparaison des identificateurs des vertex
 
     if (ref_sample == I_DEFAULT) {
       for (i = 0;i < nb_sample;i++) {
@@ -3008,7 +2534,7 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
       ivertex_identifier = pseq[ref_sample]->vertex_identifier;
     }
 
-    itype = new variable_nature[inb_variable];
+    itype = new int[inb_variable];
     inb_variable = 0;
     for (i = 0;i < nb_sample;i++) {
       for (j = 0;j < pseq[i]->nb_variable;j++) {
@@ -3021,7 +2547,7 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
     }
 
     seq = new Sequences(nb_sequence , iidentifier , length , ivertex_identifier ,
-                        index_param_type , inb_variable , itype);
+                        index_parameter_type , inb_variable , itype);
     delete [] itype;
 
     // copy of index parameters
@@ -3035,13 +2561,13 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
 
     if (index_parameter) {
       for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+        for (j = 0;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
           seq->index_parameter[i][j] = index_parameter[i][j];
         }
       }
     }
 
-    // copy of values
+    // copie des valeurs
 
     for (i = 0;i < nb_sequence;i++) {
       inb_variable = 0;
@@ -3088,323 +2614,19 @@ Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Merging of variables of Sequences objects.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] nb_sample  number of Sequences objects,
- *  \param[in] iseq       pointer on the Sequences objects,
- *  \param[in] ref_sample reference Sequences object for the identifiers.
+ *  Decalage d'une variable.
  *
- *  \return               Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
-                                     const vector<Sequences> iseq , int ref_sample) const
-
-{
-  int i;
-  Sequences *seq;
-  const Sequences **pseq;
-
-
-  pseq = new const Sequences*[nb_sample];
-  for (i = 0;i < nb_sample;i++) {
-    pseq[i] = new Sequences(iseq[i]);
-  }
-
-  seq = merge_variable(error , nb_sample , pseq , ref_sample);
-
-  for (i = 0;i < nb_sample;i++) {
-    delete pseq[i];
-  }
-  delete [] pseq;
-
-  return seq;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Differences between data and residuals in order to build auxiliary variables.
+ *  arguments : reference sur un objet StatError, indice de la variable, decalage.
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] residual reference on a Sequences object.
- *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::difference_variable(StatError &error , const Sequences &residual) const
-
-{
-  bool status = true;
-  int i , j , k , m;
-  int offset , inb_variable;
-  variable_nature *itype;
-  Sequences *seq;
-
-
-  seq = NULL;
-  error.init();
-
-  if (((residual.vertex_identifier) && (!vertex_identifier)) ||
-      ((!(residual.vertex_identifier)) && (vertex_identifier))) {
-    status = false;
-    error.update(SEQ_error[SEQR_SAMPLE_VERTEX_IDENTIFIER]);
-  }
-
-  if (residual.index_param_type != index_param_type) {
-    status = false;
-    ostringstream error_message;
-    error_message << SEQ_error[SEQR_INDEX_PARAMETER_TYPE];
-
-    if (index_param_type == IMPLICIT_TYPE) {
-      error.update((error_message.str()).c_str());
-    }
-    else {
-      error.correction_update((error_message.str()).c_str() , SEQ_index_parameter_word[index_param_type]);
-    }
-  }
-
-  if (residual.nb_sequence != nb_sequence) {
-    status = false;
-    error.update(SEQ_error[SEQR_NB_SEQUENCE]);
-  }
-
-  else {
-    for (i = 0;i < nb_sequence;i++) {
-      if (residual.identifier[i] != identifier[i]) {
-        status = false;
-        ostringstream error_message;
-        error_message << SEQ_label[SEQL_SEQUENCE] << " " << i + 1 << ": "
-                      << SEQ_error[SEQR_SEQUENCE_IDENTIFIER];
-        error.update((error_message.str()).c_str());
-      }
-
-      if (residual.length[i] != length[i]) {
-        status = false;
-        ostringstream error_message;
-        error_message << SEQ_label[SEQL_SEQUENCE] << " " << i + 1 << ": "
-                      << SEQ_error[SEQR_SEQUENCE_LENGTH];
-        error.update((error_message.str()).c_str());
-      }
-
-      else {
-        if ((residual.vertex_identifier) && (vertex_identifier)) {
-          for (j = 0;j < length[i];j++) {
-            if (residual.vertex_identifier[i][j] != vertex_identifier[i][j]) {
-              status = false;
-              ostringstream error_message;
-              error_message << SEQ_label[SEQL_SEQUENCE] << " " << i + 1 << ": "
-                            << SEQ_label[SEQL_VERTEX_IDENTIFIER] << " " << j << ": "
-                            << SEQ_error[SEQR_VERTEX_IDENTIFIER];
-              error.update((error_message.str()).c_str());
-            }
-          }
-        }
-
-        if ((residual.index_param_type != IMPLICIT_TYPE) &&
-            (residual.index_param_type == index_param_type)) {
-          for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
-            if (residual.index_parameter[i][j] != index_parameter[i][j]) {
-              status = false;
-              ostringstream error_message;
-              error_message << SEQ_label[SEQL_SEQUENCE] << " " << i + 1 << ": "
-                            << SEQ_label[SEQL_INDEX] << " " << j << ": "
-                            << SEQ_error[SEQR_INDEX_PARAMETER];
-              error.update((error_message.str()).c_str());
-            }
-          }
-        }
-      }
-    }
-  }
-
-  if (residual.nb_variable != nb_variable) {
-    status = false;
-    error.correction_update(STAT_error[STATR_NB_VARIABLE] , nb_variable);
-  }
-
-  else {
-    if (type[0] == STATE) {
-      offset = 1;
-
-      if (nb_variable == 1) {
-        status = false;
-        error.update(STAT_error[STATR_NB_VARIABLE]);
-      }
-
-      if (residual.type[0] != STATE) {
-        status = false;
-        ostringstream error_message;
-        error_message << STAT_label[STATL_VARIABLE] << " 1: "
-                      << STAT_error[STATR_VARIABLE_TYPE];
-        error.correction_update((error_message.str()).c_str() , STAT_variable_word[STATE]);
-      }
-
-      else {
-        for (i = 0;i < nb_sequence;i++) {
-          for (j = 0;j < length[i];j++) {
-            if (residual.int_sequence[i][0][j] != int_sequence[i][0][j]) {
-              status = false;
-              ostringstream error_message , correction_message;
-              error_message << SEQ_label[SEQL_SEQUENCE] << " " << i + 1 << ": "
-                            << SEQ_label[SEQL_INDEX_PARAMETER] << " " << j << ": "
-                            << SEQ_error[SEQR_STATE];
-              correction_message << STAT_label[STATL_STATE] << " " << int_sequence[i][0][j];
-              error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
-            }
-          }
-        }
-      }
-    }
-
-    else {
-      offset = 0;
-    }
-
-    for (i = offset;i < nb_variable;i++) {
-      if (residual.type[i] != REAL_VALUE) {
-        status = false;
-        ostringstream error_message;
-        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                      << STAT_error[STATR_VARIABLE_TYPE];
-        error.correction_update((error_message.str()).c_str() , STAT_variable_word[REAL_VALUE]);
-      }
-    }
-  }
-
-  if (status) {
-    inb_variable = offset + (nb_variable - offset) * 2;
-
-    itype = new variable_nature[inb_variable];
-
-    if (type[0] == STATE) {
-      itype[0] = type[0];
-    }
-    i = offset;
-    for (j = offset;j < nb_variable;j++) {
-      itype[i++] = type[j];
-      itype[i++] = AUXILIARY;
-    }
-
-    seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
-                        index_param_type , inb_variable , itype);
-    delete [] itype;
-
-    // copy of index parameters
-
-    if (index_parameter_distribution) {
-      seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
-    }
-    if (index_interval) {
-      seq->index_interval = new FrequencyDistribution(*index_interval);
-    }
-
-    if (index_parameter) {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
-          seq->index_parameter[i][j] = index_parameter[i][j];
-        }
-      }
-    }
-
-    // copy of variables and building of auxiliary variables
-
-    for (i = 0;i < nb_sequence;i++) {
-      if (type[0] == STATE) {
-        for (j = 0;j < length[i];j++) {
-          seq->int_sequence[i][0][j] = int_sequence[i][0][j];
-        }
-      }
-
-      j = offset;
-      for (k = offset;k < nb_variable;k++) {
-        switch (type[k]) {
-
-        case INT_VALUE : {
-          for (m = 0;m < length[i];m++) {
-            seq->int_sequence[i][j][m] = int_sequence[i][k][m];
-          }
-          j++;
-          for (m = 0;m < length[i];m++) {
-            seq->real_sequence[i][j][m] = int_sequence[i][k][m] - residual.real_sequence[i][k][m];
-          }
-          j++;
-          break;
-        }
-
-        case REAL_VALUE : {
-          for (m = 0;m < length[i];m++) {
-            seq->real_sequence[i][j][m] = real_sequence[i][k][m];
-          }
-          j++;
-          for (m = 0;m < length[i];m++) {
-            seq->real_sequence[i][j][m] = real_sequence[i][k][m] - residual.real_sequence[i][k][m];
-          }
-          j++;
-          break;
-        }
-        }
-      }
-    }
-
-    if (type[0] == STATE) {
-      seq->min_value[0] = min_value[0];
-      seq->max_value[0] = max_value[0];
-      seq->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
-    }
-
-    i = offset;
-    for (j = offset;j < nb_variable;j++) {
-      seq->min_value[i] = min_value[j];
-      seq->max_value[i] = max_value[j];
-
-      if (marginal_distribution[j]) {
-        seq->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[j]);
-      }
-      else {
-        seq->marginal_distribution[i] = NULL;
-      }
-
-      if (marginal_histogram[j]) {
-        seq->marginal_histogram[i] = new Histogram(*marginal_histogram[j]);
-      }
-      else {
-        seq->marginal_histogram[i] = NULL;
-      }
-      i++;
-
-      seq->min_value_computation(i);
-      seq->max_value_computation(i);
-      i++;
-    }
-  }
-
-  return seq;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Variable shift.
- *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] lag      lag.
- *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) const
 
 {
   bool status = true;
-  int i , j , k;
+  register int i , j , k;
   int inb_sequence , *iidentifier , *ilength , *index , *pvertex_id , *cvertex_id ,
       *pindex_param , *cindex_param , *pisequence , *cisequence;
   double *prsequence , *crsequence;
@@ -3414,7 +2636,7 @@ Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) 
   seq = NULL;
   error.init();
 
-  if (index_param_type == POSITION) {
+  if (index_parameter_type == POSITION) {
     error.update(SEQ_error[SEQR_INDEX_PARAMETER]);
     status = false;
   }
@@ -3443,7 +2665,7 @@ Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) 
 
   if (status) {
 
-    // computation of the sequence lengths
+    // calcul de la longueur des sequences
 
     iidentifier = new int[nb_sequence];
     ilength = new int[nb_sequence];
@@ -3459,7 +2681,7 @@ Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) 
     }
 
     seq = new Sequences(inb_sequence , iidentifier , ilength , vertex_identifier ,
-                        index_param_type , nb_variable , type , false);
+                        index_parameter_type , nb_variable , type , false);
 
     // copy of vertex identifiers
 
@@ -3502,7 +2724,7 @@ Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) 
       seq->index_interval_computation();
     }
 
-    // copy of values
+    // copie des valeurs
 
     for (i = 0;i < seq->nb_sequence;i++) {
       for (j = 0;j < seq->nb_variable;j++) {
@@ -3527,7 +2749,7 @@ Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) 
         else {
           prsequence = seq->real_sequence[i][j];
 
-          if ((j != variable) && (lag > 0)) {
+          if ((j != variable) && (lag > 0))  {
             crsequence = real_sequence[index[i]][j] + lag;
           }
           else if ((j == variable) && (lag < 0)) {
@@ -3562,15 +2784,13 @@ Sequences* Sequences::shift_variable(StatError &error , int variable , int lag) 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Reversing of the direction of sequences.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Inversion du sens de parcours des sequences.
  *
- *  \return          Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::reverse(StatError &error) const
 
@@ -3580,39 +2800,34 @@ Sequences* Sequences::reverse(StatError &error) const
 
   error.init();
 
-  if (index_param_type == TIME) {
+  if (index_parameter_type == TIME) {
     seq = NULL;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER]);
   }
 
   else {
-    seq = new Sequences(*this , REVERSE);
+    seq = new Sequences(*this , 'r');
   }
 
   return seq;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Selection of sequences on a sequence length criterion.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error       reference on a StatError object,
- *  \param[in] display     flag for displaying the selected individuals,
- *  \param[in] min_length  lowest sequence length,
- *  \param[in] imax_length highest sequence length,
- *  \param[in] keep        flag for keeping or rejecting the selected sequences.
+ *  Selection des sequences sur un critere de longueur.
  *
- *  \return                Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, bornes sur la longueur,
+ *              flag pour conserver ou rejeter les sequences selectionnees.
+ *
+ *--------------------------------------------------------------*/
 
-Sequences* Sequences::length_select(StatError &error , bool display , int min_length ,
+Sequences* Sequences::length_select(StatError &error , ostream &os , int min_length ,
                                     int imax_length , bool keep) const
 
 {
   bool status = true;
-  int i;
+  register int i;
   int inb_sequence , *index , *iidentifier;
   Sequences *seq;
 
@@ -3631,7 +2846,7 @@ Sequences* Sequences::length_select(StatError &error , bool display , int min_le
 
   if (status) {
 
-    // selection of sequences
+    // selection des sequences
 
     iidentifier = new int[nb_sequence];
     index = new int[nb_sequence];
@@ -3656,15 +2871,15 @@ Sequences* Sequences::length_select(StatError &error , bool display , int min_le
       error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
-    // copy of selected sequences
+    // copie des sequences selectionnees
 
     if (status) {
-      if ((display) && (inb_sequence <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+      if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
+        os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
         for (i = 0;i < inb_sequence;i++) {
-          cout << iidentifier[i] << ", ";
+          os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        os << endl;
       }
 
       seq = new Sequences(*this , inb_sequence , index);
@@ -3678,26 +2893,22 @@ Sequences* Sequences::length_select(StatError &error , bool display , int min_le
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Removing of the first/last run for a given value.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error          reference on a StatError object,
- *  \param[in] variable       variable index,
- *  \param[in] ivalue         value,
- *  \param[in] position       position (BEGIN_RUN/END_RUN),
- *  \param[in] max_run_length maximum length of the removed runs.
+ *  Suppression des premieres/dernieres series d'une valeur donne.
  *
- *  \return                   Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              valeur, position ('b' : begin, 'e' : end),
+ *              longueur maximum de la serie supprimee.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
-                                 run_position position , int max_run_length) const
+                                 char position , int max_run_length) const
 
 {
   bool status = true;
-  int i , j , k;
+  register int i , j , k;
   int smax_length , inb_sequence , *iidentifier , *ilength , *index , *pvertex_id ,
       *cvertex_id , *pindex_param , *cindex_param , *pisequence , *cisequence;
   double *prsequence , *crsequence;
@@ -3707,7 +2918,7 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
   seq = NULL;
   error.init();
 
-  if (index_param_type == POSITION) {
+  if (index_parameter_type == POSITION) {
     error.update(SEQ_error[SEQR_INDEX_PARAMETER]);
     status = false;
   }
@@ -3720,27 +2931,20 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
   else {
     variable--;
 
-    if ((type[variable] != INT_VALUE) && (type[variable] != STATE) &&
-        (type[variable] != REAL_VALUE)) {
+    if ((type[variable] != INT_VALUE) && (type[variable] != STATE)) {
       status = false;
       ostringstream correction_message;
-      correction_message << STAT_variable_word[INT_VALUE] << " or "
-                         << STAT_variable_word[STATE] << " or "
-                         << STAT_variable_word[REAL_VALUE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
       error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
     }
 
     else {
       if (!marginal_distribution[variable]) {
-        if ((ivalue < min_value[variable]) || (ivalue > max_value[variable])) {
-          status = false;
-          error.update(STAT_error[STATR_VALUE]);
-        }
-/*        status = false;
+        status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
                       << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
-        error.update((error_message.str()).c_str()); */
+        error.update((error_message.str()).c_str());
       }
 
       else if ((ivalue < marginal_distribution[variable]->offset) ||
@@ -3763,7 +2967,7 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
 
   if (status) {
 
-    // computation of the sequence lengths
+    // calcul de la longueur des sequences
 
     iidentifier = new int[nb_sequence];
     ilength = new int[nb_sequence];
@@ -3780,43 +2984,21 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
 
       switch (position) {
 
-      case BEGIN_RUN : {
-        if (type[variable] != REAL_VALUE) {
-          cisequence = int_sequence[i][variable];
-          for (j = 0;j < smax_length;j++) {
-            if (*cisequence++ != ivalue) {
-              break;
-            }
-          }
-        }
-
-        else {
-          crsequence = real_sequence[i][variable];
-          for (j = 0;j < smax_length;j++) {
-            if (*crsequence++ != (double)ivalue) {
-              break;
-            }
+      case 'b' : {
+        cisequence = int_sequence[i][variable];
+        for (j = 0;j < smax_length;j++) {
+          if (*cisequence++ != ivalue) {
+            break;
           }
         }
         break;
       }
 
-      case END_RUN : {
-        if (type[variable] != REAL_VALUE) {
-          cisequence = int_sequence[i][variable] + length[i];
-          for (j = 0;j < smax_length;j++) {
-            if (*--cisequence != ivalue) {
-              break;
-            }
-          }
-        }
-
-        else {
-          crsequence = real_sequence[i][variable] + length[i];
-          for (j = 0;j < smax_length;j++) {
-            if (*--crsequence != (double)ivalue) {
-              break;
-            }
+      case 'e' : {
+        cisequence = int_sequence[i][variable] + length[i];
+        for (j = 0;j < smax_length;j++) {
+          if (*--cisequence != ivalue) {
+            break;
           }
         }
         break;
@@ -3831,7 +3013,7 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
     }
 
     seq = new Sequences(inb_sequence , iidentifier , ilength , vertex_identifier ,
-                        index_param_type , nb_variable , type , false);
+                        index_parameter_type , nb_variable , type , false);
 
     // copy of vertex identifiers
 
@@ -3840,10 +3022,10 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
         pvertex_id = seq->vertex_identifier[i];
 
         switch (position) {
-        case BEGIN_RUN :
+        case 'b' :
           cvertex_id = vertex_identifier[index[i]] + length[index[i]] - seq->length[i];
           break;
-        case END_RUN :
+        case 'e' :
           cvertex_id = vertex_identifier[index[i]];
           break;
         }
@@ -3861,10 +3043,10 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
         pindex_param = seq->index_parameter[i];
 
         switch (position) {
-        case BEGIN_RUN :
+        case 'b' :
           cindex_param = index_parameter[index[i]] + length[index[i]] - seq->length[i];
           break;
-        case END_RUN :
+        case 'e' :
           cindex_param = index_parameter[index[i]];
           break;
         }
@@ -3878,7 +3060,7 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
       seq->index_interval_computation();
     }
 
-    // copy of values
+    // copie des valeurs
 
     for (i = 0;i < seq->nb_sequence;i++) {
       for (j = 0;j < seq->nb_variable;j++) {
@@ -3886,10 +3068,10 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
           pisequence = seq->int_sequence[i][j];
 
           switch (position) {
-          case BEGIN_RUN :
+          case 'b' :
             cisequence = int_sequence[index[i]][j] + length[index[i]] - seq->length[i];
             break;
-          case END_RUN :
+          case 'e' :
             cisequence = int_sequence[index[i]][j];
             break;
           }
@@ -3903,10 +3085,10 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
           prsequence = seq->real_sequence[i][j];
 
           switch (position) {
-          case BEGIN_RUN :
+          case 'b' :
             crsequence = real_sequence[index[i]][j] + length[index[i]] - seq->length[i];
             break;
-          case END_RUN :
+          case 'e' :
             crsequence = real_sequence[index[i]][j];
             break;
           }
@@ -3934,137 +3116,21 @@ Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Truncation of sequences.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error               reference on a StatError object,
- *  \param[in] max_index_parameter highest index parameter.
+ *  Extraction de sous-sequences.
  *
- *  \return                        Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::truncate(StatError &error , int max_index_parameter) const
-
-{
-  int i , j , k;
-  int *ilength;
-  Sequences *seq;
-
-
-  error.init();
-
-  if ((max_index_parameter < (index_parameter ? index_parameter_distribution->offset : 1)) ||
-      ((!index_parameter) && (max_index_parameter >= max_length))) {
-    seq = NULL;
-    error.update(SEQ_error[SEQR_MAX_INDEX_PARAMETER]);
-  }
-
-  else {
-    ilength = new int[nb_sequence];
-
-    // explicit index parameters
-
-    if (index_parameter) {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = length[i] - 1;j >= 0;j--) {
-          if (index_parameter[i][j] <= max_index_parameter) {
-            break;
-          }
-        }
-        ilength[i] = MAX(j + 1 , 1);
-
-#       ifdef MESSAGE
-        if (ilength[i] == 0) {
-          cout << "\n" << identifier[i] << " " << j << " " << length[i] << endl;
-        }
-#       endif
-
-      }
-    }
-
-    // implicit index parameters
-
-    else {
-      for (i = 0;i < nb_sequence;i++) {
-        ilength[i] = MIN(max_index_parameter + 1 , length[i]);
-      }
-    }
-
-    // extraction of truncated sequences
-
-    seq = new Sequences(nb_sequence , identifier , ilength , vertex_identifier ,
-                        index_param_type , nb_variable , type);
-    delete [] ilength;
-
-    // copy of index parameters
-
-    if (index_parameter) {
-      for (i = 0;i < seq->nb_sequence;i++) {
-        for (j = 0;j < seq->length[i];j++) {
-          seq->index_parameter[i][j] = index_parameter[i][j];
-        }
-
-        if (seq->index_param_type == POSITION) {
-          seq->index_parameter[i][seq->length[i]] = (index_interval->variance == 0. ? index_parameter[i][seq->length[i]] : index_parameter[i][seq->length[i] - 1]);
-        }
-      }
-
-      seq->build_index_parameter_frequency_distribution();
-      seq->index_interval_computation();
-    }
-
-    // copy of values
-
-    for (i = 0;i < seq->nb_sequence;i++) {
-      for (j = 0;j < seq->nb_variable;j++) {
-        if ((seq->type[j] != REAL_VALUE) && (seq->type[j] != AUXILIARY)) {
-          for (k = 0;k < seq->length[i];k++) {
-            seq->int_sequence[i][j][k] = int_sequence[i][j][k];
-          }
-        }
-
-        else {
-          for (k = 0;k < seq->length[i];k++) {
-            seq->real_sequence[i][j][k] = real_sequence[i][j][k];
-          }
-        }
-      }
-    }
-
-    for (i = 0;i < seq->nb_variable;i++) {
-      seq->min_value_computation(i);
-      seq->max_value_computation(i);
-
-      if (seq->type[i] != AUXILIARY) {
-        seq->build_marginal_frequency_distribution(i);
-      }
-    }
-  }
- 
-  return seq;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction of sub-sequences.
+ *  arguments : reference sur un objet StatError, parametres d'index minimum et
+ *              maximum dans la sequence.
  *
- *  \param[in] error               reference on a StatError object,
- *  \param[in] min_index_parameter lowest index parameter,
- *  \param[in] max_index_parameter highest index parameter.
- *
- *  \return                        Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_parameter ,
                                               int max_index_parameter) const
 
 {
   bool status = true;
-  int i , j , k;
+  register int i , j , k;
   int inb_sequence , *iidentifier , *ilength , *index , *first_index , *pvertex_id ,
       *cvertex_id , *pindex_param , *cindex_param , *pisequence , *cisequence;
   double *prsequence , *crsequence;
@@ -4074,28 +3140,27 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
   seq = NULL;
   error.init();
 
-  if ((min_index_parameter < (index_parameter ? index_parameter_distribution->offset : 1)) ||
-      ((!index_parameter) && (min_index_parameter >= max_length)) ||
+  if ((min_index_parameter < 0) || ((!index_parameter) && (min_index_parameter >= max_length)) ||
       ((max_index_parameter != I_DEFAULT) && (min_index_parameter > max_index_parameter))) {
     status = false;
     error.update(SEQ_error[SEQR_MIN_INDEX_PARAMETER]);
   }
-  if ((max_index_parameter != I_DEFAULT) && ((max_index_parameter < (index_parameter ? index_parameter_distribution->offset : 1)) ||
-       ((!index_parameter) && (max_index_parameter >= max_length)) || (max_index_parameter < min_index_parameter))) {
+  if ((max_index_parameter != I_DEFAULT) && ((max_index_parameter < 0) || ((!index_parameter) &&
+        (max_index_parameter >= max_length)) || (max_index_parameter < min_index_parameter))) {
     status = false;
     error.update(SEQ_error[SEQR_MAX_INDEX_PARAMETER]);
   }
 
   if (status) {
 
-    // selection of sequences
+    // selection des sequences
 
     iidentifier = new int[nb_sequence];
     ilength = new int[nb_sequence];
     index = new int[nb_sequence];
     inb_sequence = 0;
 
-    // explicit index parameters
+    // parametre d'index explicite
 
     if (index_parameter) {
       first_index = new int[nb_sequence];
@@ -4145,7 +3210,7 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
       }
     }
 
-    // implicit index parameters
+    // parametre d'index implicite
 
     else {
       if (max_index_parameter == I_DEFAULT) {
@@ -4174,11 +3239,11 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
       error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
-    // extraction of sub-sequences
+    // extraction des sous-sequences
 
     if (status) {
       seq = new Sequences(inb_sequence , iidentifier , ilength , vertex_identifier ,
-                          index_param_type , nb_variable , type , false);
+                          index_parameter_type , nb_variable , type , false);
 
       // copy of vertex identifiers
 
@@ -4186,7 +3251,7 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
         for (i = 0;i < seq->nb_sequence;i++) {
           pvertex_id = seq->vertex_identifier[i];
           cvertex_id = vertex_identifier[index[i]] + first_index[i];
-          for (j = 0;j < seq->length[i];j++) {
+          for (k = 0;k < seq->length[i];k++) {
             *pvertex_id++ = *cvertex_id++;
           }
         }
@@ -4198,22 +3263,22 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
         for (i = 0;i < seq->nb_sequence;i++) {
           pindex_param = seq->index_parameter[i];
           cindex_param = index_parameter[index[i]] + first_index[i];
-          for (j = 0;j < seq->length[i];j++) {
+          for (k = 0;k < seq->length[i];k++) {
             *pindex_param++ = *cindex_param++;
           }
 
-          if (seq->index_param_type == POSITION) {
+          if (seq->index_parameter_type == POSITION) {
             if (max_index_parameter == I_DEFAULT) {
               *pindex_param = *cindex_param;
             }
             else {
-              *pindex_param = (index_interval->variance == 0. ? max_index_parameter + index_interval->mean : max_index_parameter);
+              *pindex_param = max_index_parameter;
             }
           }
         }
       }
 
-      // copy of values
+      // copie des valeurs
 
       for (i = 0;i < seq->nb_sequence;i++) {
         for (j = 0;j < seq->nb_variable;j++) {
@@ -4275,20 +3340,15 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction by segmentation of a Sequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] variable      variable index,
- *  \param[in] nb_value      number of values,
- *  \param[in] ivalue        values,
- *  \param[in] keep          flag for keeping or rejecting the selected segments,
- *  \param[in] concatenation segments merged by sequence or not.
+ *  Extraction par segmentation d'un objet Sequences.
  *
- *  \return                  Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              nombre de valeurs, valeurs, flag segments correspondant aux valeurs
+ *              selectionnees ou non, segments concatenes par sequence ou non.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
                                            int nb_value , int *ivalue , bool keep ,
@@ -4296,11 +3356,10 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
 
 {
   bool status = true;
-  int i , j , k , m , n;
-  int nb_present_value , nb_selected_value , nb_segment , inb_sequence ,
-      *selected_value , *pvertex_id , *cvertex_id , *pindex_param , *cindex_param ,
+  register int i , j , k , m , n;
+  int nb_present_value , nb_selected_value , nb_segment , inb_sequence , *pfrequency ,
+      *selected_value , *itype , *pvertex_id , *cvertex_id , *pindex_param , *cindex_param ,
       *pisequence , *cisequence , *segment_length , *sequence_length , **segment_begin;
-  variable_nature *itype;
   double *prsequence , *crsequence;
   Sequences *seq;
 
@@ -4308,7 +3367,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
   seq = NULL;
   error.init();
 
-  if (index_param_type == POSITION) {
+  if (index_parameter_type == POSITION) {
     error.update(SEQ_error[SEQR_INDEX_PARAMETER]);
     status = false;
   }
@@ -4342,11 +3401,13 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
       }
 
       else {
+        pfrequency = marginal_distribution[variable]->frequency + marginal_distribution[variable]->offset;
         nb_present_value = 0;
         for (i = marginal_distribution[variable]->offset;i < marginal_distribution[variable]->nb_value;i++) {
-          if (marginal_distribution[variable]->frequency[i] > 0) {
+          if (*pfrequency > 0) {
             nb_present_value++;
           }
+          pfrequency++;
         }
 
         if ((nb_value < 1) || (nb_value > (keep ? nb_present_value : nb_present_value - 1))) {
@@ -4403,7 +3464,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
   }
 
   if (status) {
-    itype = new variable_nature[nb_variable - 1];
+    itype = new int[nb_variable - 1];
     for (i = 0;i < variable;i++) {
       itype[i] = type[i];
     }
@@ -4411,18 +3472,17 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
       itype[i - 1] = type[i];
     }
 
-    if (keep) {
-      nb_selected_value = nb_value;
-      selected_value = ivalue;
-    }
+    switch (keep) {
 
-    else {
+    case false : {
       nb_selected_value = nb_present_value - nb_value;
       selected_value = new int[nb_selected_value];
+
+      pfrequency = marginal_distribution[variable]->frequency + marginal_distribution[variable]->offset;
       i = 0;
 
       for (j = marginal_distribution[variable]->offset;j < marginal_distribution[variable]->nb_value;j++) {
-        if (marginal_distribution[variable]->frequency[j] > 0) {
+        if (*pfrequency > 0) {
           for (k = 0;k < nb_value;k++) {
             if (ivalue[k] == j) {
               break;
@@ -4433,10 +3493,20 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
             selected_value[i++] = j;
           }
         }
+
+        pfrequency++;
       }
+      break;
     }
 
-    // initializations
+    case true : {
+      nb_selected_value = nb_value;
+      selected_value = ivalue;
+      break;
+    }
+    }
+
+    // initialisations
 
     segment_length = new int[cumul_length];
 
@@ -4445,7 +3515,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
       segment_begin[i] = 0;
     }
 
-    // search for the sub-sequences to be extracted
+    // recherche des sequences a extraire
 
     i = -1;
 
@@ -4494,7 +3564,15 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
 
     nb_segment = i + 1;
 
-    if (concatenation) {
+    switch (concatenation) {
+
+    case false : {
+      inb_sequence = nb_segment;
+      sequence_length = segment_length;
+      break;
+    }
+
+    case true : {
       sequence_length = new int[nb_sequence];
 
       i = 0;
@@ -4508,17 +3586,14 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
       }
 
       inb_sequence = i + 1;
+      break;
+    }
     }
 
-    else {
-      inb_sequence = nb_segment;
-      sequence_length = segment_length;
-    }
-
-    // construction of the Sequences object
+    // creation de l'objet Sequences
 
     seq = new Sequences(inb_sequence , NULL , sequence_length , vertex_identifier ,
-                        index_param_type , nb_variable - 1 , itype , false);
+                        index_parameter_type , nb_variable - 1 , itype , false);
 
     // copy of vertex identifiers
 
@@ -4526,13 +3601,19 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
       i = -1;
 
       for (j = 0;j < nb_segment;j++) {
-        if (concatenation) {
+        switch (concatenation) {
+
+        case false : {
+          pvertex_id = seq->vertex_identifier[j];
+          break;
+        }
+
+        case true : {
           if ((j == 0) || (segment_begin[j][0] != segment_begin[j - 1][0])) {
             pvertex_id = seq->vertex_identifier[++i];
           }
+          break;
         }
-        else {
-          pvertex_id = seq->vertex_identifier[j];
         }
 
         cvertex_id = vertex_identifier[segment_begin[j][0]] + segment_begin[j][1];
@@ -4548,13 +3629,19 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
       i = -1;
 
       for (j = 0;j < nb_segment;j++) {
-        if (concatenation) {
+        switch (concatenation) {
+
+        case false : {
+          pindex_param = seq->index_parameter[j];
+          break;
+        }
+
+        case true : {
           if ((j == 0) || (segment_begin[j][0] != segment_begin[j - 1][0])) {
             pindex_param = seq->index_parameter[++i];
           }
+          break;
         }
-        else {
-          pindex_param = seq->index_parameter[j];
         }
 
         cindex_param = index_parameter[segment_begin[j][0]] + segment_begin[j][1];
@@ -4571,7 +3658,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
       seq->index_interval_computation();
     }
 
-    // copy of values
+    // copie des valeurs
 
     i = -1;
     for (j = 0;j < nb_segment;j++) {
@@ -4579,13 +3666,19 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
       for (m = 0;m < nb_variable;m++) {
         if (m != variable) {
           if ((type[m] != REAL_VALUE) && (type[m] != AUXILIARY)) {
-            if (concatenation) {
+            switch (concatenation) {
+
+            case false : {
+              pisequence = seq->int_sequence[j][k];
+              break;
+            }
+
+            case true : {
               if ((j == 0) || (segment_begin[j][0] != segment_begin[j - 1][0])) {
                 pisequence = seq->int_sequence[++i][k];
               }
+              break;
             }
-            else {
-              pisequence = seq->int_sequence[j][k];
             }
 
             cisequence = int_sequence[segment_begin[j][0]][m] + segment_begin[j][1];
@@ -4595,13 +3688,19 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
           }
 
           else {
-            if (concatenation) {
+            switch (concatenation) {
+
+            case false : {
+              prsequence = seq->real_sequence[j][k];
+              break;
+            }
+
+            case true : {
               if ((j == 0) || (segment_begin[j][0] != segment_begin[j - 1][0])) {
                 prsequence = seq->real_sequence[++i][k];
               }
+              break;
             }
-            else {
-              prsequence = seq->real_sequence[j][k];
             }
 
             crsequence = real_sequence[segment_begin[j][0]][m] + segment_begin[j][1];
@@ -4640,7 +3739,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
     }
 
 #   ifdef MESSAGE
-    if ((seq->index_param_type == TIME) && (seq->index_interval->variance > 0.)) {  // for the mango growth follow-ups
+    if ((seq->index_parameter_type == TIME) && (seq->index_interval->variance > 0.)) {  // pour les suivis de croissance manguier
       double average_diff , individual_mean , global_mean , diff , individual_variance , global_variance;
 
       for (i = 0;i < seq->nb_variable;i++) {
@@ -4679,7 +3778,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
           global_variance /= (seq->cumul_length - 1);
 
           cout << "\n" << STAT_label[STATL_VARIABLE] << " " << i + 1 << " - "
-               << "average difference: " << average_diff << " | "
+               << "average difference: " <<  average_diff << " | "
                << "within-individual variance: " << individual_variance << " | "
                << "global variance: " << global_variance << " | "
                << individual_variance / global_variance;
@@ -4695,67 +3794,28 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Extraction by segmentation of a Sequences object.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] variable      variable index,
- *  \param[in] nb_value      number of values,
- *  \param[in] ivalue        values,
- *  \param[in] keep          flag for keeping or rejecting the selected segments,
- *  \param[in] concatenation segments merged by sequence or not.
+ *  Cumul des valeurs successives des sequences.
  *
- *  \return                  Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
-                                           int nb_value , vector<int> ivalue , bool keep ,
-                                           bool concatenation) const
-
-{
-  return segmentation_extract(error , variable , nb_value , ivalue.data() , keep , concatenation);
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Summation of successive values along sequences.
+ *  arguments : reference sur un objet StatError, indice de la variable.
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index.
- *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::cumulate(StatError &error , int variable) const
 
 {
   bool status = true;
-  int i , j , k , m;
-  int offset , inb_variable;
-  variable_nature *itype;
+  register int i , j , k , m;
+  int inb_variable , *itype;
   Sequences *seq;
 
 
   seq = NULL;
   error.init();
 
-  if (type[0] == STATE) {
-    offset = 1;
-    if (nb_variable == 1) {
-      status = false;
-      error.update(STAT_error[STATR_NB_VARIABLE]);
-    }
-  }
-  else {
-    offset = 0;
-  }
-
   if (variable != I_DEFAULT) {
-    if ((variable < offset + 1) || (variable > nb_variable)) {
+    if ((variable < 1) || (variable > nb_variable)) {
       status = false;
       error.update(STAT_error[STATR_VARIABLE_INDEX]);
     }
@@ -4764,13 +3824,15 @@ Sequences* Sequences::cumulate(StatError &error , int variable) const
     }
   }
 
-  for (i = offset;i < nb_variable;i++) {
-    if (((variable == I_DEFAULT) || (variable == i)) && (type[i] != INT_VALUE) && (type[i] != REAL_VALUE)) {
+  for (i = 0;i < nb_variable;i++) {
+    if (((variable == I_DEFAULT) || (variable == i)) &&
+        ((type[i] != INT_VALUE) && (type[i] != STATE) && (type[i] != REAL_VALUE))) {
       status = false;
       ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
                     << STAT_error[STATR_VARIABLE_TYPE];
       correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE] << " or "
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
@@ -4781,22 +3843,13 @@ Sequences* Sequences::cumulate(StatError &error , int variable) const
       inb_variable = nb_variable;
       itype = type;
     }
-
     else {
-      inb_variable = offset + 1;
-      itype = new variable_nature[inb_variable];
-      if (type[0] == STATE) {
-        itype[0] = type[0];
-      }
-      itype[offset] = type[variable];
+      inb_variable = 1;
+      itype = type + variable;
     }
 
     seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
-                        index_param_type , inb_variable , itype);
-
-    if (variable != I_DEFAULT) {
-      delete [] itype;
-    }
+                        index_parameter_type , inb_variable , itype);
 
     // copy of index parameters
 
@@ -4809,31 +3862,17 @@ Sequences* Sequences::cumulate(StatError &error , int variable) const
 
     if (index_parameter) {
       for (i = 0;i < seq->nb_sequence;i++) {
-        for (j = 0;j < (seq->index_param_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
+        for (j = 0;j < (seq->index_parameter_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
           seq->index_parameter[i][j] = index_parameter[i][j];
         }
       }
     }
 
-    // copy of the state variable
-
-    if (type[0] == STATE) {
-      for (i = 0;i < seq->nb_sequence;i++) {
-        for (j = 0;j < seq->length[i];j++) {
-          seq->int_sequence[i][0][j] = int_sequence[i][0][j];
-        }
-      }
-
-      seq->min_value[0] = min_value[0];
-      seq->max_value[0] = max_value[0];
-      seq->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
-    }
-
-    // summation of values
+   // cumul des valeurs
 
     for (i = 0;i < nb_sequence;i++) {
-      j = offset;
-      for (k = offset;k < nb_variable;k++) {
+      j = 0;
+      for (k = 0;k < nb_variable;k++) {
         if ((variable == I_DEFAULT) || (variable == k)) {
           if (type[k] != REAL_VALUE) {
             seq->int_sequence[i][j][0] = int_sequence[i][k][0];
@@ -4854,7 +3893,7 @@ Sequences* Sequences::cumulate(StatError &error , int variable) const
       }
     }
 
-    for (i = offset;i < seq->nb_variable;i++) {
+    for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
       seq->max_value_computation(i);
 
@@ -4866,26 +3905,22 @@ Sequences* Sequences::cumulate(StatError &error , int variable) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief First-order differencing of sequences.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] variable      variable index,
- *  \param[in] first_element 1st element of the sequence kept or not.
+ *  Differenciation au 1er ordre des sequences.
  *
- *  \return                  Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              premier element de la sequence garde ou pas.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::difference(StatError &error , int variable , bool first_element) const
 
 {
   bool status = true;
-  int i , j , k , m;
-  int offset , inb_variable , *ilength , *pvertex_id , *cvertex_id , *pindex_param , *cindex_param ,
-      *pisequence , *cisequence;
-  variable_nature *itype;
+  register int i , j , k , m;
+  int inb_variable , *ilength , *itype , *pvertex_id , *cvertex_id ,
+      *pindex_param , *cindex_param , *pisequence , *cisequence;
   double *prsequence , *crsequence;
   Sequences *seq;
 
@@ -4893,23 +3928,12 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
   seq = NULL;
   error.init();
 
-  if (index_param_type == POSITION) {
+  if (index_parameter_type == POSITION) {
     status = increasing_index_parameter_checking(error , true , SEQ_label[SEQL_SEQUENCE]);
   }
 
-  if (type[0] == STATE) {
-    offset = 1;
-    if (nb_variable == 1) {
-      status = false;
-      error.update(STAT_error[STATR_NB_VARIABLE]);
-    }
-  }
-  else {
-    offset = 0;
-  }
-
   if (variable != I_DEFAULT) {
-    if ((variable < offset + 1) || (variable > nb_variable)) {
+    if ((variable < 1) || (variable > nb_variable)) {
       status = false;
       error.update(STAT_error[STATR_VARIABLE_INDEX]);
     }
@@ -4918,13 +3942,15 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
     }
   }
 
-  for (i = offset;i < nb_variable;i++) {
-    if (((variable == I_DEFAULT) || (variable == i)) && (type[i] != INT_VALUE) && (type[i] != REAL_VALUE)) {
+  for (i = 0;i < nb_variable;i++) {
+    if (((variable == I_DEFAULT) || (variable == i)) &&
+        ((type[i] != INT_VALUE) && (type[i] != STATE) && (type[i] != REAL_VALUE))) {
       status = false;
       ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
                     << STAT_error[STATR_VARIABLE_TYPE];
       correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE] << " or "
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
@@ -4952,16 +3978,13 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
       inb_variable = nb_variable;
     }
     else {
-      inb_variable = offset + 1;
+      inb_variable = 1;
     }
 
-    if ((index_param_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
+    if ((index_parameter_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
          (index_interval->variance > 0.))) {
-      itype = new variable_nature[inb_variable];
-      if (type[0] == STATE) {
-        itype[0] = type[0];
-      }
-      for (i = offset;i < inb_variable;i++) {
+      itype = new int[inb_variable];
+      for (i = 0;i < inb_variable;i++) {
         itype[i] = REAL_VALUE;
       }
     }
@@ -4971,22 +3994,18 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
         itype = type;
       }
       else {
-        itype = new variable_nature[inb_variable];
-        if (type[0] == STATE) {
-          itype[0] = type[0];
-        }
-        itype[offset] = type[variable];
+        itype = type + variable;
       }
     }
 
     seq = new Sequences(nb_sequence , identifier , ilength , vertex_identifier ,
-                        index_param_type , inb_variable , itype , false);
+                        index_parameter_type , inb_variable , itype , false);
 
     if (!first_element) {
       delete [] ilength;
     }
-    if (((index_param_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
-          (index_interval->variance > 0.))) || (variable != I_DEFAULT)) {
+    if ((index_parameter_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
+         (index_interval->variance > 0.))) {
       delete [] itype;
     }
 
@@ -5020,7 +4039,7 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
           cindex_param = index_parameter[i] + 1;
         }
 
-        for (j = 0;j < (seq->index_param_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
+        for (j = 0;j < (seq->index_parameter_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
           *pindex_param++ = *cindex_param++;
         }
       }
@@ -5042,44 +4061,13 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
       }
     }
 
-    // copy of the state variable
+    // differenciation des sequences
 
-    if (type[0] == STATE) {
-      for (i = 0;i < seq->nb_sequence;i++) {
-        pisequence = seq->int_sequence[i][0];
-        if (first_element) {
-          cisequence = int_sequence[i][0];
-        }
-        else {
-          cisequence = int_sequence[i][0] + 1;
-        }
-        for (j = 0;j < seq->length[i];j++) {
-          *pisequence++ = *cisequence++;
-        }
-      }
-
-      if (first_element) {
-        seq->min_value[0] = min_value[0];
-        seq->max_value[0] = max_value[0];
-
-        seq->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
-      }
-
-      else {
-        seq->min_value_computation(0);
-        seq->max_value_computation(0);
-
-        seq->build_marginal_frequency_distribution(0);
-      }
-    }
-
-    // differencing of sequences
-
-    if ((index_param_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
+    if ((index_parameter_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
          (index_interval->variance > 0.))) {
       for (i = 0;i < nb_sequence;i++) {
-        j = offset;
-        for (k = offset;k < nb_variable;k++) {
+        j = 0;
+        for (k = 0;k < nb_variable;k++) {
           if ((variable == I_DEFAULT) || (variable == k)) {
             prsequence = seq->real_sequence[i][j];
             cindex_param = index_parameter[i];
@@ -5132,8 +4120,8 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
 
     else {
       for (i = 0;i < nb_sequence;i++) {
-        j = offset;
-        for (k = offset;k < nb_variable;k++) {
+        j = 0;
+        for (k = 0;k < nb_variable;k++) {
           if ((variable == I_DEFAULT) || (variable == k)) {
             if (type[k] != REAL_VALUE) {
               pisequence = seq->int_sequence[i][j];
@@ -5167,7 +4155,7 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
       }
     }
 
-    for (i = offset;i < seq->nb_variable;i++) {
+    for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
       seq->max_value_computation(i);
 
@@ -5179,261 +4167,40 @@ Sequences* Sequences::difference(StatError &error , int variable , bool first_el
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Log-transform of values.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] base     base of the logarithm.
+ *  Computation of relative growth rates on the basis of cumulative dimensions.
  *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::log_transform(StatError &error , int variable , log_base base) const
-
-{
-  bool status = true;
-  int i , j , k , m;
-  int offset , inb_variable;
-  variable_nature *itype;
-  Sequences *seq;
-
-
-  seq = NULL;
-  error.init();
-
-  if (type[0] == STATE) {
-    offset = 1;
-    if (nb_variable == 1) {
-      status = false;
-      error.update(STAT_error[STATR_NB_VARIABLE]);
-    }
-  }
-  else {
-    offset = 0;
-  }
-
-  if (variable != I_DEFAULT) {
-    if ((variable < offset + 1) || (variable > nb_variable)) {
-      status = false;
-      error.update(STAT_error[STATR_VARIABLE_INDEX]);
-    }
-    else {
-      variable--;
-    }
-  }
-
-  for (i = offset;i < nb_variable;i++) {
-    if ((variable == I_DEFAULT) || (variable == i)) {
-      if ((type[i] != INT_VALUE) && (type[i] != REAL_VALUE)) {
-        status = false;
-        ostringstream error_message , correction_message;
-        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                      << STAT_error[STATR_VARIABLE_TYPE];
-        correction_message << STAT_variable_word[INT_VALUE] << " or "
-                           << STAT_variable_word[REAL_VALUE];
-        error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
-      }
-
-      else if (min_value[i] <= 0.) {
-        status = false;
-        ostringstream error_message;
-        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                      << STAT_error[STATR_POSITIVE_MIN_VALUE];
-        error.update((error_message.str()).c_str());
-      }
-    }
-  }
-
-  if (status) {
-    if (variable == I_DEFAULT) {
-      inb_variable = nb_variable;
-    }
-    else {
-      inb_variable = offset + 1;
-    }
-
-    itype = new variable_nature[inb_variable];
-    if (type[0] == STATE) {
-      itype[0] = type[0];
-    }
-    for (i = offset;i < inb_variable;i++) {
-      itype[i] = REAL_VALUE;
-    }
-
-    seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
-                        index_param_type , inb_variable , itype);
-    delete [] itype;
-
-    // copy of index parameters
-
-    if (index_parameter_distribution) {
-      seq->index_parameter_distribution = new FrequencyDistribution(*index_parameter_distribution);
-    }
-    if (index_interval) {
-      seq->index_interval = new FrequencyDistribution(*index_interval);
-    }
-
-    if (index_parameter) {
-      for (i = 0;i < seq->nb_sequence;i++) {
-        for (j = 0;j < (seq->index_param_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
-          seq->index_parameter[i][j] = index_parameter[i][j];
-        }
-      }
-    }
-
-    // copy of the state variable
-
-    if (type[0] == STATE) {
-      for (i = 0;i < seq->nb_sequence;i++) {
-        for (j = 0;j < seq->length[i];j++) {
-          seq->int_sequence[i][0][j] = int_sequence[i][0][j];
-        }
-      }
-
-      seq->min_value[0] = min_value[0];
-      seq->max_value[0] = max_value[0];
-
-      seq->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
-    }
-
-    // log-transform of values
-
-    switch (base) {
-
-    case NATURAL : {
-      for (i = 0;i < nb_sequence;i++) {
-        j = offset;
-        for (k = offset;k < nb_variable;k++) {
-          if ((variable == I_DEFAULT) || (variable == k)) {
-            if (type[k] != REAL_VALUE) {
-              for (m = 0;m < length[i];m++) {
-                seq->real_sequence[i][j][m] = log(int_sequence[i][k][m]);
-              }
-            }
-
-            else {
-              for (m = 0;m < length[i];m++) {
-                seq->real_sequence[i][j][m] = log(real_sequence[i][k][m]);
-              }
-            }
-
-            j++;
-          }
-        }
-      }
-      break;
-    }
-
-    case TWO : {
-      for (i = 0;i < nb_sequence;i++) {
-        j = offset;
-        for (k = offset;k < nb_variable;k++) {
-          if ((variable == I_DEFAULT) || (variable == k)) {
-            if (type[k] != REAL_VALUE) {
-              for (m = 0;m < length[i];m++) {
-                seq->real_sequence[i][j][m] = log2(int_sequence[i][k][m]);
-              }
-            }
-
-            else {
-              for (m = 0;m < length[i];m++) {
-                seq->real_sequence[i][j][m] = log2(real_sequence[i][k][m]);
-              }
-            }
-
-            j++;
-          }
-        }
-      }
-      break;
-    }
-
-    case TEN : {
-      for (i = 0;i < nb_sequence;i++) {
-        j = offset;
-        for (k = offset;k < nb_variable;k++) {
-          if ((variable == I_DEFAULT) || (variable == k)) {
-            if (type[k] != REAL_VALUE) {
-              for (m = 0;m < length[i];m++) {
-                seq->real_sequence[i][j][m] = log10(int_sequence[i][k][m]);
-              }
-            }
-
-            else {
-              for (m = 0;m < length[i];m++) {
-                seq->real_sequence[i][j][m] = log10(real_sequence[i][k][m]);
-              }
-            }
-
-            j++;
-          }
-        }
-      }
-      break;
-    }
-    }
-
-    for (i = offset;i < seq->nb_variable;i++) {
-      seq->min_value_computation(i);
-      seq->max_value_computation(i);
-
-      seq->build_marginal_histogram(i);
-    }
-  }
-
-  return seq;
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of relative growth rates on the basis of cumulative dimensions.
+ *  arguments : reference on an object StatError, growth factor for
+ *              computing the first relative growth rate.
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] growth_factor growth factor for computing the first relative growth rate.
- *
- *  \return                  Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::relative_growth_rate(StatError &error , double growth_factor) const
 
 {
   bool status = true , begin;
-  int i , j , k;
-  int offset;
-  variable_nature *itype;
+  register int i , j , k;
+  int *itype , *pindex_param , *cindex_param , *pisequence , *cisequence;
+  double *prsequence , *crsequence;
   Sequences *seq;
 
 
   seq = NULL;
   error.init();
 
-  if (index_param_type == POSITION) {
+  if (index_parameter_type == POSITION) {
     status = increasing_index_parameter_checking(error , true , SEQ_label[SEQL_SEQUENCE]);
   }
 
-  if (type[0] == STATE) {
-    offset = 1;
-    if (nb_variable == 1) {
-      status = false;
-      error.update(STAT_error[STATR_NB_VARIABLE]);
-    }
-  }
-  else {
-    offset = 0;
-  }
-
-  for (i = offset;i < nb_variable;i++) {
-    if ((type[i] != INT_VALUE) && (type[i] != REAL_VALUE)) {
+  for (i = 0;i < nb_variable;i++) {
+    if ((type[i] != INT_VALUE) && (type[i] != STATE) && (type[i] != REAL_VALUE)) {
       status = false;
       ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
                     << STAT_error[STATR_VARIABLE_TYPE];
       correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE] << " or "
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
@@ -5456,23 +4223,20 @@ Sequences* Sequences::relative_growth_rate(StatError &error , double growth_fact
   }
 
   if (status) {
-    itype = new variable_nature[nb_variable];
-    if (type[0] == STATE) {
-      itype[0] = type[0];
-    }
-    for (i = offset;i < nb_variable;i++) {
+    itype = new int[nb_variable];
+    for (i = 0;i < nb_variable;i++) {
       itype[i] = REAL_VALUE;
     }
 
     seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
-                        index_param_type , nb_variable , itype);
+                        index_parameter_type , nb_variable , itype);
     delete [] itype;
 
     // copy of index parameters
 
     if (index_parameter) {
       for (i = 0;i < seq->nb_sequence;i++) {
-        for (j = 0;j < (seq->index_param_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
+        for (j = 0;j < (seq->index_parameter_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
           seq->index_parameter[i][j] = index_parameter[i][j];
         }
       }
@@ -5485,63 +4249,61 @@ Sequences* Sequences::relative_growth_rate(StatError &error , double growth_fact
       seq->index_interval = new FrequencyDistribution(*index_interval);
     }
 
-    // copy of the state variable
+    // computaton of relative growth rate
 
-    if (type[0] == STATE) {
-      for (i = 0;i < seq->nb_sequence;i++) {
-        for (j = 0;j < seq->length[i];j++) {
-          seq->int_sequence[i][0][j] = int_sequence[i][0][j];
-        }
-      }
-
-      seq->min_value[0] = min_value[0];
-      seq->max_value[0] = max_value[0];
-
-      seq->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
-    }
-
-    // computaton of relative growth rates
-
-    if ((index_param_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
+    if ((index_parameter_type != IMPLICIT_TYPE) && ((index_interval->mean != 1.) ||
          (index_interval->variance > 0.))) {
       for (i = 0;i < nb_sequence;i++) {
-        for (j = offset;j < nb_variable;j++) {
-          seq->real_sequence[i][j][0] = 0.;
+        for (j = 0;j < nb_variable;j++) {
+          prsequence = seq->real_sequence[i][j];
+          cindex_param = index_parameter[i] + 1;
           begin = true;
 
           if (type[j] != REAL_VALUE) {
+            cisequence = int_sequence[i][j] + 1;
+            *prsequence++ = 0.;
+
             for (k = 1;k < length[i];k++) {
-              if ((int_sequence[i][j][k] > 0) && (int_sequence[i][j][k - 1] > 0)) {
-                seq->real_sequence[i][j][k] = (log(int_sequence[i][j][k]) - log(int_sequence[i][j][k - 1])) /
-                                              (index_parameter[i][k] - index_parameter[i][k - 1]);
+              if ((*cisequence > 0) && (*(cisequence - 1) > 0)) {
+                *prsequence = (log(*cisequence) - log(*(cisequence - 1))) /
+                              (*cindex_param - *(cindex_param - 1));
 
                 if (begin) {
                   begin = false;
-                  seq->real_sequence[i][j][k - 1] = seq->real_sequence[i][j][k] * growth_factor;
+                  *(prsequence - 1) = *prsequence * growth_factor;
                 }
+                prsequence++;
               }
 
               else {
-                seq->real_sequence[i][j][k] = 0.;
+                *prsequence++ = 0.;
               }
+              cindex_param++;
+              cisequence++;
             }
           }
 
           else {
+            crsequence = real_sequence[i][j] + 1;
+            *prsequence++ = 0.;
+
             for (k = 1;k < length[i];k++) {
-              if ((real_sequence[i][j][k] > 0.) && (real_sequence[i][j][k - 1] > 0.)) {
-                seq->real_sequence[i][j][k] = (log(real_sequence[i][j][k]) - log(real_sequence[i][j][k - 1])) /
-                                              (index_parameter[i][k] - index_parameter[i][k - 1]);
+              if ((*crsequence > 0.) && (*(crsequence - 1) > 0.)) {
+                *prsequence = (log(*crsequence) - log(*(crsequence - 1))) /
+                              (*cindex_param - *(cindex_param - 1));
 
                 if (begin) {
                   begin = false;
-                  seq->real_sequence[i][j][k - 1] = seq->real_sequence[i][j][k] * growth_factor;
+                  *(prsequence - 1) = *prsequence * growth_factor;
                 }
+                prsequence++;
               }
 
               else {
-                seq->real_sequence[i][j][k] = 0.;
+                *prsequence++ = 0.;
               }
+              cindex_param++;
+              crsequence++;
             }
           }
         }
@@ -5550,52 +4312,62 @@ Sequences* Sequences::relative_growth_rate(StatError &error , double growth_fact
 
     else {
       for (i = 0;i < nb_sequence;i++) {
-        for (j = offset;j < nb_variable;j++) {
-          seq->real_sequence[i][j][0] = 0.;
+        for (j = 0;j < nb_variable;j++) {
+          prsequence = seq->real_sequence[i][j];
           begin = true;
 
           if (type[j] != REAL_VALUE) {
+            cisequence = int_sequence[i][j] + 1;
+            *prsequence++ = 0.;
+
             for (k = 1;k < length[i];k++) {
-              if ((int_sequence[i][j][k] > 0) && (int_sequence[i][j][k - 1] > 0)) {
-                seq->real_sequence[i][j][k] = log(int_sequence[i][j][k]) - log(int_sequence[i][j][k - 1]);
+              if ((*cisequence > 0) && (*(cisequence - 1) > 0)) {
+                *prsequence = log(*cisequence) - log(*(cisequence - 1));
 
                 if (begin) {
                   begin = false;
-                  seq->real_sequence[i][j][k - 1] = seq->real_sequence[i][j][k] * growth_factor;
+                  *(prsequence - 1) = *prsequence * growth_factor;
                 }
+                prsequence++;
               }
 
               else {
-                seq->real_sequence[i][j][k] = 0.;
+                *prsequence++ = 0.;
               }
+              cisequence++;
             }
           }
 
           else {
+            crsequence = real_sequence[i][j] + 1;
+            *prsequence++ = 0.;
+
             for (k = 1;k < length[i];k++) {
-              if ((real_sequence[i][j][k] > 0.) && (real_sequence[i][j][k - 1] > 0.)) {
-                seq->real_sequence[i][j][k] = log(real_sequence[i][j][k]) - log(real_sequence[i][j][k - 1]);
+              if ((*crsequence > 0.) && (*(crsequence - 1) > 0.)) {
+                *prsequence = log(*crsequence) - log(*(crsequence - 1));
 
                 if (begin) {
                   begin = false;
-                  seq->real_sequence[i][j][k - 1] = seq->real_sequence[i][j][k] * growth_factor;
+                  *(prsequence - 1) = *prsequence * growth_factor;
                 }
+                prsequence++;
               }
 
               else {
-                seq->real_sequence[i][j][k] = 0.;
+                *prsequence++ = 0.;
               }
+              crsequence++;
             }
           }
         }
       }
     }
 
-    for (i = offset;i < seq->nb_variable;i++) {
+    for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
       seq->max_value_computation(i);
 
-      seq->build_marginal_histogram(i);
+      seq->build_marginal_frequency_distribution(i);
     }
   }
 
@@ -5603,24 +4375,20 @@ Sequences* Sequences::relative_growth_rate(StatError &error , double growth_fact
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Normalization of sequences (for mangoo GU growth profiles).
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index.
+ *  Normalisation des sequences.
  *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::sequence_normalization(StatError &error , int variable) const
 
 {
   bool status = true;
-  int i , j , k;
-  int offset , int_max;
-  variable_nature *itype;
+  register int i , j , k;
+  int int_max , *itype;
   double real_max;
   Sequences *seq;
 
@@ -5628,19 +4396,8 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
   seq = NULL;
   error.init();
 
-  if (type[0] == STATE) {
-    offset = 1;
-    if (nb_variable == 1) {
-      status = false;
-      error.update(STAT_error[STATR_NB_VARIABLE]);
-    }
-  }
-  else {
-    offset = 0;
-  }
-
   if (variable != I_DEFAULT) {
-    if ((variable < offset + 1) || (variable > nb_variable)) {
+    if ((variable < 1) || (variable > nb_variable)) {
       status = false;
       error.update(STAT_error[STATR_VARIABLE_INDEX]);
     }
@@ -5649,14 +4406,15 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
     }
   }
 
-  for (i = offset;i < nb_variable;i++) {
+  for (i = 0;i < nb_variable;i++) {
     if ((variable == I_DEFAULT) || (variable == i)) {
-      if ((type[i] != INT_VALUE) && (type[i] != REAL_VALUE)) {
+      if ((type[i] != INT_VALUE) && (type[i] != STATE) && (type[i] != REAL_VALUE)) {
         status = false;
         ostringstream error_message , correction_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
                       << STAT_error[STATR_VARIABLE_TYPE];
         correction_message << STAT_variable_word[INT_VALUE] << " or "
+                           << STAT_variable_word[STATE] << " or "
                            << STAT_variable_word[REAL_VALUE];
         error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
       }
@@ -5672,26 +4430,22 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
   }
 
   if (status) {
-    itype = new variable_nature[nb_variable];
-
-    if (type[0] == STATE) {
-      itype[0] = type[0];
-    }
+    itype = new int[nb_variable];
 
     if (variable == I_DEFAULT) {
-      for (i = offset;i < nb_variable;i++) {
+      for (i = 0;i < nb_variable;i++) {
         itype[i] = REAL_VALUE;
       }
     }
     else {
-      for (i = offset;i < nb_variable;i++) {
+      for (i = 0;i < nb_variable;i++) {
         itype[i] = type[i];
       }
       itype[variable] = REAL_VALUE;
     }
 
     seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
-                        index_param_type , nb_variable , itype);
+                        index_parameter_type , nb_variable , itype);
     delete [] itype;
 
     // copy of index parameters
@@ -5705,36 +4459,21 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
 
     if (index_parameter) {
       for (i = 0;i < seq->nb_sequence;i++) {
-        for (j = 0;j < (seq->index_param_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
+        for (j = 0;j < (seq->index_parameter_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
           seq->index_parameter[i][j] = index_parameter[i][j];
         }
       }
     }
 
-    // copy of the state variable
-
-    if (type[0] == STATE) {
-      for (i = 0;i < seq->nb_sequence;i++) {
-        for (j = 0;j < seq->length[i];j++) {
-          seq->int_sequence[i][0][j] = int_sequence[i][0][j];
-        }
-      }
-
-      seq->min_value[0] = min_value[0];
-      seq->max_value[0] = max_value[0];
-
-      seq->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
-    }
-
-   // normalization of sequences
+   // normalisation des sequences
 
     for (i = 0;i < nb_sequence;i++) {
-      for (j = offset;j < nb_variable;j++) {
+      for (j = 0;j < nb_variable;j++) {
         if ((variable == I_DEFAULT) || (variable == j)) {
           if (type[j] != REAL_VALUE) {
             int_max = int_sequence[i][j][0];
             for (k = 1;k < length[i];k++) {
-              if (int_sequence[i][j][k] > int_max) {
+              if (int_sequence[i][j][k] >  int_max) {
                 int_max = int_sequence[i][j][k];
               }
             }
@@ -5747,7 +4486,7 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
           else {
             real_max = real_sequence[i][j][0];
             for (k = 1;k < length[i];k++) {
-              if (real_sequence[i][j][k] > real_max) {
+              if (real_sequence[i][j][k] >  real_max) {
                 real_max = real_sequence[i][j][k];
               }
             }
@@ -5760,7 +4499,7 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
       }
     }
 
-    for (i = offset;i < seq->nb_variable;i++) {
+    for (i = 0;i < seq->nb_variable;i++) {
       if ((variable == I_DEFAULT) || (variable == i)) {
         seq->min_value_computation(i);
         seq->max_value[i] = 1.;
@@ -5786,33 +4525,25 @@ Sequences* Sequences::sequence_normalization(StatError &error , int variable) co
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Filtering of sequences using a symmetric smoothing filter.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error        reference on a StatError object,
- *  \param[in] nb_point     filter half width,
- *  \param[in] filter       filter,
- *  \param[in] variable     variable index,
- *  \param[in] begin_end    begin and end kept or not,
- *  \param[in] segmentation smoothing by segment or not using the state variable,
- *  \param[in] output       trend, substraction residuals or division residuals.
+ *  Filtrage de type moyenne mobile des sequences.
  *
- *  \return                 Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, demi-largeur du filtre,
+ *              filtre, indice de la variable, debut/fin garde ou pas,
+ *              tendance ou residus (par soustraction ou par division).
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::moving_average(StatError &error , int nb_point , double *filter ,
-                                     int variable , bool begin_end , bool segmentation ,
-                                     sequence_type output) const
+                                     int variable , bool begin_end , int output) const
 
 {
   bool status = true;
-  int i , j , k , m , n , p;
-  int offset , inb_variable , nb_segment , *ilength , *pvertex_id , *cvertex_id , *pindex_param , *cindex_param ,
-      *pisequence , *cisequence , *change_point;
-  variable_nature *itype;
-  double *prsequence , *crsequence , *pfilter;
+  register int i , j , k , m , n;
+  int inb_variable , *ilength , *itype , *pvertex_id , *cvertex_id ,
+      *pindex_param , *cindex_param , *pisequence , *cisequence;
+  double *prsequence , *crsequence , *ppoint;
   Sequences *seq;
 
 
@@ -5824,19 +4555,8 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     error.update(SEQ_error[SEQR_UNEQUAL_INDEX_INTERVALS]);
   }
 
-  if (type[0] == STATE) {
-    offset = 1;
-    if (nb_variable == 1) {
-      status = false;
-      error.update(STAT_error[STATR_NB_VARIABLE]);
-    }
-  }
-  else {
-    offset = 0;
-  }
-
   if (variable != I_DEFAULT) {
-    if ((variable < offset + 1) || (variable > nb_variable)) {
+    if ((variable < 1) || (variable > nb_variable)) {
       status = false;
       error.update(STAT_error[STATR_VARIABLE_INDEX]);
     }
@@ -5845,13 +4565,15 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     }
   }
 
-  for (i = offset;i < nb_variable;i++) {
-    if (((variable == I_DEFAULT) || (variable == i)) && (type[i] != INT_VALUE) && (type[i] != REAL_VALUE)) {
+  for (i = 0;i < nb_variable;i++) {
+    if (((variable == I_DEFAULT) || (variable == i)) &&
+        ((type[i] != INT_VALUE) && (type[i] != STATE) && (type[i] != REAL_VALUE))) {
       status = false;
       ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
                     << STAT_error[STATR_VARIABLE_TYPE];
       correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE] << " or "
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
@@ -5876,7 +4598,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     }
 
     if (variable == I_DEFAULT) {
-      inb_variable = nb_variable - offset;
+      inb_variable = nb_variable;
     }
     else {
       inb_variable = 1;
@@ -5885,17 +4607,12 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     if (output == SEQUENCE) {
       inb_variable *= 2;
     }
-    inb_variable += offset;
 
-    itype = new variable_nature[inb_variable];
-
-    if (type[0] == STATE) {
-      itype[0] = type[0];
-    }
+    itype = new int[inb_variable];
 
     if (output == SEQUENCE) {
-      i = offset;
-      for (j = offset;j < nb_variable;j++) {
+      i = 0;
+      for (j = 0;j < nb_variable;j++) {
         if ((variable == I_DEFAULT) || (variable == j)) {
           itype[i++] = type[j];
           itype[i++] = AUXILIARY;
@@ -5904,13 +4621,13 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     }
 
     else {
-      for (i = offset;i < inb_variable;i++) {
+      for (i = 0;i < inb_variable;i++) {
         itype[i] = REAL_VALUE;
       }
     }
 
     seq = new Sequences(nb_sequence , identifier , ilength , vertex_identifier ,
-                        index_param_type , inb_variable , itype , false);
+                        index_parameter_type , inb_variable , itype , false);
 
     if (!begin_end) {
       delete [] ilength;
@@ -5947,7 +4664,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
           cindex_param = index_parameter[i] + nb_point;
         }
 
-        for (j = 0;j < (seq->index_param_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
+        for (j = 0;j < (seq->index_parameter_type == POSITION ? seq->length[i] + 1 : seq->length[i]);j++) {
           *pindex_param++ = *cindex_param++;
         }
       }
@@ -5969,405 +4686,187 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
       }
     }
 
-    // copy of the state variable
+    // filtrage de type moyenne mobile
 
-    if (type[0] == STATE) {
-      for (i = 0;i < seq->nb_sequence;i++) {
-        pisequence = seq->int_sequence[i][0];
-        if (begin_end) {
-          cisequence = int_sequence[i][0];
-        }
-        else {
-          cisequence = int_sequence[i][0] + nb_point;
-        }
+    for (i = 0;i < nb_sequence;i++) {
+      j = 0;
+      for (k = 0;k < nb_variable;k++) {
+        if ((variable == I_DEFAULT) || (variable == k)) {
+          prsequence = seq->real_sequence[i][output == SEQUENCE ? j + 1 : j];
 
-        for (j = 0;j < seq->length[i];j++) {
-          *pisequence++ = *cisequence++;
-        }
-      }
-
-      if (begin_end) {
-        seq->min_value[0] = min_value[0];
-        seq->max_value[0] = max_value[0];
-        seq->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
-      }
-
-      else {
-        seq->min_value_computation(0);
-        seq->max_value_computation(0);
-        seq->build_marginal_frequency_distribution(0);
-      }
-    }
-
-    // filtering using a symmetric smoothing filter
-
-    if ((type[0] == STATE) && (begin_end) && (segmentation)) {
-      change_point = new int[max_length];
-
-      for (i = 0;i < nb_sequence;i++) {
-        change_point[0] = 0;
-        j = 1;
-        for (k = 1;k < length[i];k++) {
-          if (int_sequence[i][0][k] != int_sequence[i][0][k - 1]) {
-            change_point[j++] = k;
-          }
-        }
-        change_point[j] = length[i];
-        nb_segment = j;
-
-        j = 1;
-        for (k = 1;k < nb_variable;k++) {
-          if ((variable == I_DEFAULT) || (variable == k)) {
-            prsequence = seq->real_sequence[i][output == SEQUENCE ? j + 1 : j];
-
-            switch (type[k]) {
-
-            case INT_VALUE : {
-              for (m = 0;m < nb_segment;m++) {
-                for (n = change_point[m];n < MIN(change_point[m] + nb_point , change_point[m + 1]);n++) {
-                  cisequence = int_sequence[i][k] + change_point[m];
-                  pfilter = filter;
-                  *prsequence = 0.;
-                  for (p = 0;p < 2 * nb_point + 1;p++) {
-                    *prsequence += *cisequence * *pfilter++;
-                    if ((n - nb_point + p >= change_point[m]) && (n - nb_point + p < change_point[m + 1] - 1)) {
-                      cisequence++;
-                    }
-                  }
-                  prsequence++;
-                }
-
-                for (n = change_point[m] + nb_point;n < change_point[m + 1] - nb_point;n++) {
-                  cisequence = int_sequence[i][k] + n - nb_point;
-                  pfilter = filter;
-                  *prsequence = 0.;
-                  for (p = 0;p < 2 * nb_point + 1;p++) {
-                    *prsequence += *cisequence++ * *pfilter++;
-                  }
-                  prsequence++;
-                }
-
-                for (n = MAX(change_point[m + 1] - nb_point , change_point[m] + nb_point);n < change_point[m + 1];n++) {
-                  cisequence = int_sequence[i][k] + n - nb_point;
-                  pfilter = filter;
-                  *prsequence = 0.;
-                  for (p = 0;p < 2 * nb_point + 1;p++) {
-                    *prsequence += *cisequence * *pfilter++;
-                    if (n - nb_point + p < change_point[m + 1] - 1) {
-                      cisequence++;
-                    }
-                  }
-                  prsequence++;
-                }
-              }
-
-              cisequence = int_sequence[i][k];
-
-              switch (output) {
-
-              case SEQUENCE : {
-                pisequence = seq->int_sequence[i][j];
-                for (m = 0;m < seq->length[i];m++) {
-                  *pisequence++ = *cisequence++;
-                }
-                break;
-              }
-
-              case SUBTRACTION_RESIDUAL : {
-                prsequence = seq->real_sequence[i][j];
-                for (m = 0;m < seq->length[i];m++) {
-                  *prsequence = *cisequence++ - *prsequence;
-                  prsequence++;
-                }
-                break;
-              }
-
-              case DIVISION_RESIDUAL : {
-                prsequence = seq->real_sequence[i][j];
-                for (m = 0;m < seq->length[i];m++) {
-                  if (*prsequence != 0.) {
-                    *prsequence = *cisequence / *prsequence;
-                  }
-                  prsequence++;
-                  cisequence++;
-                }
-                break;
-              }
-              }
-              break;
-            }
-
-            case REAL_VALUE : {
-              for (m = 0;m < nb_segment;m++) {
-                for (n = change_point[m];n < MIN(change_point[m] + nb_point , change_point[m + 1]);n++) {
-                  crsequence = real_sequence[i][k] + change_point[m];
-                  pfilter = filter;
-                  *prsequence = 0.;
-                  for (p = 0;p < 2 * nb_point + 1;p++) {
-                    *prsequence += *crsequence * *pfilter++;
-                    if ((n - nb_point + p >= change_point[m]) && (n - nb_point + p < change_point[m + 1] - 1)) {
-                      crsequence++;
-                    }
-                  }
-                  prsequence++;
-                }
-
-                for (n = change_point[m] + nb_point;n < change_point[m + 1] - nb_point;n++) {
-                  crsequence = real_sequence[i][k] + n - nb_point;
-                  pfilter = filter;
-                  *prsequence = 0.;
-                  for (p = 0;p < 2 * nb_point + 1;p++) {
-                    *prsequence += *crsequence++ * *pfilter++;
-                  }
-                  prsequence++;
-                }
-
-                for (n = MAX(change_point[m + 1] - nb_point , change_point[m] + nb_point);n < change_point[m + 1];n++) {
-                  crsequence = real_sequence[i][k] + n - nb_point;
-                  pfilter = filter;
-                  *prsequence = 0.;
-                  for (p = 0;p < 2 * nb_point + 1;p++) {
-                    *prsequence += *crsequence * *pfilter++;
-                    if (n - nb_point + p < change_point[m + 1] - 1) {
-                      crsequence++;
-                    }
-                  }
-                  prsequence++;
-                }
-              }
-
-              prsequence = seq->real_sequence[i][j];
-              crsequence = real_sequence[i][k];
-
-              switch (output) {
-
-              case SEQUENCE : {
-                for (m = 0;m < seq->length[i];m++) {
-                  *prsequence++ = *crsequence++;
-                }
-                break;
-              }
-
-              case SUBTRACTION_RESIDUAL : {
-                for (m = 0;m < seq->length[i];m++) {
-                  *prsequence = *crsequence++ - *prsequence;
-                  prsequence++;
-                }
-                break;
-              }
-
-              case DIVISION_RESIDUAL : {
-                for (m = 0;m < seq->length[i];m++) {
-                  if (*prsequence != 0.) {
-                    *prsequence = *crsequence / *prsequence;
-                  }
-                  prsequence++;
-                  crsequence++;
-                }
-                break;
-              }
-              }
-              break;
-            }
-            }
-
-            if (output == SEQUENCE) {
-              j++;
-            }
-            j++;
-          }
-        }
-      }
-
-      delete [] change_point;
-    }
-
-    else {
-      for (i = 0;i < nb_sequence;i++) {
-        j = offset;
-        for (k = offset;k < nb_variable;k++) {
-          if ((variable == I_DEFAULT) || (variable == k)) {
-            prsequence = seq->real_sequence[i][output == SEQUENCE ? j + 1 : j];
-
-            switch (type[k]) {
-
-            case INT_VALUE : {
-              if (begin_end) {
-                for (m = 0;m < MIN(nb_point , length[i]);m++) {
-                  cisequence = int_sequence[i][k];
-                  pfilter = filter;
-                  *prsequence = 0.;
-                  for (n = 0;n < 2 * nb_point + 1;n++) {
-                    *prsequence += *cisequence * *pfilter++;
-                    if ((m - nb_point + n >= 0) && (m - nb_point + n < length[i] - 1)) {
-                      cisequence++;
-                    }
-                  }
-                  prsequence++;
-                }
-              }
-
-              for (m = nb_point;m < length[i] - nb_point;m++) {
-                cisequence = int_sequence[i][k] + m - nb_point;
-                pfilter = filter;
-                *prsequence = 0.;
-                for (n = 0;n < 2 * nb_point + 1;n++) {
-                  *prsequence += *cisequence++ * *pfilter++;
-                }
-                prsequence++;
-              }
-
-              if (begin_end) {
-                for (m = MAX(length[i] - nb_point , nb_point);m < length[i];m++) {
-                  cisequence = int_sequence[i][k] + m - nb_point;
-                  pfilter = filter;
-                  *prsequence = 0.;
-                  for (n = 0;n < 2 * nb_point + 1;n++) {
-                    *prsequence += *cisequence * *pfilter++;
-                    if (m - nb_point + n < length[i] - 1) {
-                      cisequence++;
-                    }
-                  }
-                  prsequence++;
-                }
-              }
-
-              if (begin_end) {
+          if (type[k] != REAL_VALUE) {
+            if (begin_end) {
+              for (m = 0;m < MIN(nb_point , length[i]);m++) {
                 cisequence = int_sequence[i][k];
-              }
-              else {
-                cisequence = int_sequence[i][k] + nb_point;
-              }
-
-              switch (output) {
-
-              case SEQUENCE : {
-                pisequence = seq->int_sequence[i][j];
-                for (m = 0;m < seq->length[i];m++) {
-                  *pisequence++ = *cisequence++;
-                }
-                break;
-              }
-
-              case SUBTRACTION_RESIDUAL : {
-                prsequence = seq->real_sequence[i][j];
-                for (m = 0;m < seq->length[i];m++) {
-                  *prsequence = *cisequence++ - *prsequence;
-                  prsequence++;
-                }
-                break;
-              }
-
-              case DIVISION_RESIDUAL : {
-                prsequence = seq->real_sequence[i][j];
-                for (m = 0;m < seq->length[i];m++) {
-                  if (*prsequence != 0.) {
-                    *prsequence = *cisequence / *prsequence;
-                  }
-                  prsequence++;
-                  cisequence++;
-                }
-                break;
-              }
-              }
-              break;
-            }
-
-            case REAL_VALUE : {
-              if (begin_end) {
-                for (m = 0;m < MIN(nb_point , length[i]);m++) {
-                  crsequence = real_sequence[i][k];
-                  pfilter = filter;
-                  *prsequence = 0.;
-                  for (n = 0;n < 2 * nb_point + 1;n++) {
-                  *prsequence += *crsequence * *pfilter++;
-                    if ((m - nb_point + n >= 0) && (m - nb_point + n < length[i] - 1)) {
-                      crsequence++;
-                    }
-                  }
-                  prsequence++;
-                }
-              }
-
-              for (m = nb_point;m < length[i] - nb_point;m++) {
-                crsequence = real_sequence[i][k] + m - nb_point;
-                pfilter = filter;
+                ppoint = filter;
                 *prsequence = 0.;
                 for (n = 0;n < 2 * nb_point + 1;n++) {
-                  *prsequence += *crsequence++ * *pfilter++;
+                  *prsequence += *cisequence * *ppoint++;
+                  if ((m - nb_point + n >= 0) && (m - nb_point + n < length[i] - 1)) {
+                    cisequence++;
+                  }
                 }
                 prsequence++;
               }
+            }
 
-              if (begin_end) {
-                for (m = MAX(length[i] - nb_point , nb_point);m < length[i];m++) {
-                  crsequence = real_sequence[i][k] + m - nb_point;
-                  pfilter = filter;
-                  *prsequence = 0.;
-                  for (n = 0;n < 2 * nb_point + 1;n++) {
-                    *prsequence += *crsequence * *pfilter++;
-                    if (m - nb_point + n < length[i] - 1) {
-                      crsequence++;
-                    }
-                  }
-                  prsequence++;
-                }
+            for (m = nb_point;m < length[i] - nb_point;m++) {
+              cisequence = int_sequence[i][k] + m - nb_point;
+              ppoint = filter;
+              *prsequence = 0.;
+              for (n = 0;n < 2 * nb_point + 1;n++) {
+                *prsequence += *cisequence++ * *ppoint++;
               }
+              prsequence++;
+            }
 
+            if (begin_end) {
+              for (m = MAX(length[i] - nb_point , nb_point);m < length[i];m++) {
+                cisequence = int_sequence[i][k] + m - nb_point;
+                ppoint = filter;
+                *prsequence = 0.;
+                for (n = 0;n < 2 * nb_point + 1;n++) {
+                  *prsequence += *cisequence * *ppoint++;
+                  if ((m - nb_point + n >= 0) && (m - nb_point + n < length[i] - 1)) {
+                    cisequence++;
+                  }
+                }
+                prsequence++;
+              }
+            }
+
+            if (begin_end) {
+              cisequence = int_sequence[i][k];
+            }
+            else {
+              cisequence = int_sequence[i][k] + nb_point;
+            }
+
+            switch (output) {
+
+            case SEQUENCE : {
+              pisequence = seq->int_sequence[i][j];
+              for (m = 0;m < seq->length[i];m++) {
+                *pisequence++ = *cisequence++;
+              }
+              break;
+            }
+
+            case SUBTRACTION_RESIDUAL : {
               prsequence = seq->real_sequence[i][j];
-              if (begin_end) {
-                crsequence = real_sequence[i][k];
+              for (m = 0;m < seq->length[i];m++) {
+                *prsequence = *cisequence++ - *prsequence;
+                prsequence++;
               }
-              else {
-                crsequence = real_sequence[i][k] + nb_point;
-              }
+              break;
+            }
 
-              switch (output) {
-
-              case SEQUENCE : {
-                for (m = 0;m < seq->length[i];m++) {
-                  *prsequence++ = *crsequence++;
+            case DIVISION_RESIDUAL : {
+              prsequence = seq->real_sequence[i][j];
+              for (m = 0;m < seq->length[i];m++) {
+                if (*prsequence != 0.) {
+                  *prsequence = *cisequence / *prsequence;
                 }
-                break;
-              }
-
-              case SUBTRACTION_RESIDUAL : {
-                for (m = 0;m < seq->length[i];m++) {
-                  *prsequence = *crsequence++ - *prsequence;
-                  prsequence++;
-                }
-                break;
-              }
-
-              case DIVISION_RESIDUAL : {
-                for (m = 0;m < seq->length[i];m++) {
-                  if (*prsequence != 0.) {
-                    *prsequence = *crsequence / *prsequence;
-                  }
-                  prsequence++;
-                  crsequence++;
-                }
-                break;
-              }
+                prsequence++;
+                cisequence++;
               }
               break;
             }
             }
+          }
 
-            if (output == SEQUENCE) {
-              j++;
+          else {
+            if (begin_end) {
+              for (m = 0;m < MIN(nb_point , length[i]);m++) {
+                crsequence = real_sequence[i][k];
+                ppoint = filter;
+                *prsequence = 0.;
+                for (n = 0;n < 2 * nb_point + 1;n++) {
+                  *prsequence += *crsequence * *ppoint++;
+                  if ((m - nb_point + n >= 0) && (m - nb_point + n < length[i] - 1)) {
+                    crsequence++;
+                  }
+                }
+                prsequence++;
+              }
             }
+
+            for (m = nb_point;m < length[i] - nb_point;m++) {
+              crsequence = real_sequence[i][k] + m - nb_point;
+              ppoint = filter;
+              *prsequence = 0.;
+              for (n = 0;n < 2 * nb_point + 1;n++) {
+                *prsequence += *crsequence++ * *ppoint++;
+              }
+              prsequence++;
+            }
+
+            if (begin_end) {
+              for (m = MAX(length[i] - nb_point , nb_point);m < length[i];m++) {
+                crsequence = real_sequence[i][k] + m - nb_point;
+                ppoint = filter;
+                *prsequence = 0.;
+                for (n = 0;n < 2 * nb_point + 1;n++) {
+                  *prsequence += *crsequence * *ppoint++;
+                  if ((m - nb_point + n >= 0) && (m - nb_point + n < length[i] - 1)) {
+                    crsequence++;
+                  }
+                }
+                prsequence++;
+              }
+            }
+
+            prsequence = seq->real_sequence[i][j];
+            if (begin_end) {
+              crsequence = real_sequence[i][k];
+            }
+            else {
+              crsequence = real_sequence[i][k] + nb_point;
+            }
+
+            switch (output) {
+
+            case SEQUENCE : {
+              for (m = 0;m < seq->length[i];m++) {
+                *prsequence++ = *crsequence++;
+              }
+              break;
+            }
+
+            case SUBTRACTION_RESIDUAL : {
+              for (m = 0;m < seq->length[i];m++) {
+                *prsequence = *crsequence++ - *prsequence;
+                prsequence++;
+              }
+              break;
+            }
+
+            case DIVISION_RESIDUAL : {
+              for (m = 0;m < seq->length[i];m++) {
+                if (*prsequence != 0.) {
+                  *prsequence = *crsequence / *prsequence;
+                }
+                prsequence++;
+                crsequence++;
+              }
+              break;
+            }
+            }
+          }
+
+          if (output == SEQUENCE) {
             j++;
           }
+          j++;
         }
       }
     }
 
     if (output == SEQUENCE) {
-      i = offset;
+      i = 0;
 
       if (begin_end) {
-        for (j = offset;j < nb_variable;j++) {
+        for (j = 0;j < nb_variable;j++) {
           if ((variable == I_DEFAULT) || (variable == j)) {
             seq->min_value[i] = min_value[j];
             seq->max_value[i] = max_value[j];
@@ -6388,7 +4887,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
       }
 
       else {
-        for (j = offset;j < nb_variable;j++) {
+        for (j = 0;j < nb_variable;j++) {
           if ((variable == I_DEFAULT) || (variable == j)) {
             seq->min_value_computation(i);
             seq->max_value_computation(i);
@@ -6405,7 +4904,7 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
     }
 
     else {
-      for (i = offset;i < seq->nb_variable;i++) {
+      for (i = 0;i < seq->nb_variable;i++) {
         seq->min_value_computation(i);
         seq->max_value_computation(i);
 
@@ -6418,49 +4917,18 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Filtering of sequences using a symmetric smoothing filter.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] nb_point  filter half width,
- *  \param[in] filter    filter,
- *  \param[in] variable  variable index,
- *  \param[in] begin_end begin and end kept or not,
- *  \param[in] state     smoothing by segment or not using the state variable,
- *  \param[in] output    trend, substraction residuals or division residuals.
+ *  Filtrage de type moyenne mobile des sequences.
  *
- *  \return              Sequences object.
- */
-/*--------------------------------------------------------------*/
-
-Sequences* Sequences::moving_average(StatError &error , int nb_point , vector<double> filter ,
-                                     int variable , bool begin_end , bool segmentation ,
-                                     sequence_type output) const
-
-{
-  return moving_average(error , nb_point , filter.data() , variable , begin_end , segmentation , output);
-}
-
-
-/*--------------------------------------------------------------*/
-/**
- *  \brief Filtering of sequences using a symmetric smoothing filter.
+ *  arguments : reference sur un objet StatError, loi symmetrique,
+ *              indice de la variable, debut/fin supprime ou pas,
+ *              tendance ou residus (par soustraction ou par division).
  *
- *  \param[in] error     reference on a StatError object,
- *  \param[in] dist      symmetric discrete distribution,
- *  \param[in] variable  variable index,
- *  \param[in] begin_end begin and end kept or not,
- *  \param[in] state     smoothing by segment or not using the state variable,
- *  \param[in] output    trend, substraction residuals or division residuals.
- *
- *  \return              Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::moving_average(StatError &error , const Distribution &dist ,
-                                     int variable , bool begin_end , bool segmentation ,
-                                     sequence_type output) const
+                                     int variable , bool begin_end , int output) const
 
 {
   bool status = true;
@@ -6485,39 +4953,34 @@ Sequences* Sequences::moving_average(StatError &error , const Distribution &dist
 
   if (status) {
     seq = moving_average(error , dist.nb_value / 2 , dist.mass , variable ,
-                         begin_end , segmentation , output);
+                         begin_end , output);
   }
 
   return seq;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of pointwise mean, median or mean direction of sequences and
- *         associated dispersion measures.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] frequency  frequencies for successive index parameter values,
- *  \param[in] dispersion flag computation of dispersion measures,
- *  \param[in] output     output (sequences, residuals or standardized residuals).
+ *  Ecriture des sequences de moyennes et d'ecart-types.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              tailles d'echantillons, flag calcul des ecart-types,
+ *              sortie (sequences, residus ou residus standardisees).
+ *
+ *--------------------------------------------------------------*/
 
-bool Sequences::pointwise_average_ascii_print(StatError &error , const string path ,
-                                              int *frequency , bool dispersion ,
-                                              sequence_type output) const
+bool Sequences::pointwise_average_ascii_print(StatError &error , const char *path ,
+                                              int *size , bool standard_deviation ,
+                                              int output) const
 
 {
   bool status;
-  int i , j , k , m;
+  register int i , j , k , m;
   int buff , inb_sequence , *width;
+  long old_adjust;
   double standard_normal_value , half_confidence_interval , *t_value;
-  ios_base::fmtflags format_flags;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -6530,9 +4993,9 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
   else {
     status = true;
 
-    format_flags = out_file.setf(ios::right , ios::adjustfield);
+    old_adjust = out_file.flags(ios::adjustfield);
 
-    if (dispersion) {
+    if (standard_deviation) {
 
 #     ifdef MESSAGE
       normal normal_dist;
@@ -6542,15 +5005,15 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
 
       t_value = new double[length[0]];
       for (i = 0;i < length[0];i++) {
-        if (frequency[i] > 1) {
-//          t_value[i] = t_value_computation(false , frequency[i] - 1 , 0.05);
-          students_t students_dist(frequency[i] - 1);
+        if (size[i] > 1) {
+//          t_value[i] = t_value_computation(false , size[i] - 1 , 0.05);
+          students_t students_dist(size[i] - 1);
           t_value[i] = quantile(complement(students_dist , 0.025));
         }
       }
 
 #     ifdef MESSAGE
-      cout << " | " << t_value[0] << " " << frequency[0] << endl;
+      cout << " | " << t_value[0] << " " << size[0] << endl;
 #     endif
 
     }
@@ -6559,10 +5022,10 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
       t_value = NULL;
     }
 
-    // computation of the column widths
+    // calcul des largeurs des colonnes
 
     inb_sequence = nb_sequence;
-    if (dispersion) {
+    if (standard_deviation) {
       inb_sequence--;
     }
 
@@ -6570,7 +5033,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
 
     for (i = 0;i < nb_variable;i++) {
       width[i] = column_width(length[0] , real_sequence[0][i]);
-      if (dispersion) {
+      if (standard_deviation) {
         buff = column_width(length[nb_sequence - 1] , real_sequence[nb_sequence - 1][i]);
         if (buff > width[i]) {
           width[i] = buff;
@@ -6601,6 +5064,8 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
       }
     }
 
+    out_file.setf(ios::right , ios::adjustfield);
+
     switch (output) {
     case SUBTRACTION_RESIDUAL :
       out_file << STAT_label[STATL_RESIDUAL] << "\n" << endl;
@@ -6613,7 +5078,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
     for (i = 0;i < nb_variable;i++) {
       out_file << STAT_label[STATL_VARIABLE] << " " << i + 1 << endl;
 
-      if (index_param_type == TIME) {
+      if (index_parameter_type == TIME) {
         out_file << "\n" << SEQ_label[SEQL_TIME];
       }
       else {
@@ -6621,11 +5086,11 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
       }
 
       out_file << "   " << STAT_label[STATL_MEAN];
-      if (dispersion) {
+      if (standard_deviation) {
         out_file << "   " << STAT_label[STATL_MEAN_CONFIDENCE_INTERVAL]
                  << "   " << STAT_label[STATL_STANDARD_DEVIATION];
       }
-      out_file << "   " << STAT_label[STATL_FREQUENCY];
+      out_file << "   " << STAT_label[STATL_SAMPLE_SIZE];
 
       if (nb_sequence < POINTWISE_AVERAGE_NB_SEQUENCE) {
         out_file << "   ";
@@ -6639,10 +5104,10 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
         out_file << setw(width[nb_variable]) << (index_parameter ? index_parameter[0][j] : j) << "  "
                  << setw(width[i]) << real_sequence[0][i][j];
 
-        if (dispersion) {
-          if (frequency[j] > 1) {
-//            half_confidence_interval = standard_normal_value * real_sequence[nb_sequence - 1][i][j] / sqrt((double)frequency[j]);
-            half_confidence_interval = t_value[j] * real_sequence[nb_sequence - 1][i][j] / sqrt((double)frequency[j]);
+        if (standard_deviation) {
+          if (size[j] > 1) {
+//            half_confidence_interval = standard_normal_value * real_sequence[nb_sequence - 1][i][j] / sqrt((double)size[j]);
+            half_confidence_interval = t_value[j] * real_sequence[nb_sequence - 1][i][j] / sqrt((double)size[j]);
             out_file << setw(width[i]) << real_sequence[0][i][j] - half_confidence_interval
                      << setw(width[i]) << real_sequence[0][i][j] + half_confidence_interval;
           }
@@ -6655,7 +5120,7 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
           out_file << setw(width[i]) << real_sequence[nb_sequence - 1][i][j];
         }
 
-        out_file << setw(width[nb_variable + 1]) << frequency[j];
+        out_file << setw(width[nb_variable + 1]) << size[j];
  
         if (inb_sequence - 1 < POINTWISE_AVERAGE_NB_SEQUENCE) {
           out_file << "   ";
@@ -6696,38 +5161,33 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const string pa
     delete [] width;
     delete [] t_value;
 
-    out_file.setf(format_flags , ios::adjustfield);
+    out_file.setf((FMTFLAGS)old_adjust , ios::adjustfield);
   }
 
   return status;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of the pointwise mean, median or mean direction of sequences and
- *         associated dispersion measures at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] frequency  frequencies for successive index parameter values,
- *  \param[in] dispersion flag computation of dispersion measures,
- *  \param[in] output     output (sequences, residuals or standardized residuals).
+ *  Ecriture des sequences de moyennes et d'ecart-types au format tableur.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              tailles d'echantillons, flag calcul des ecart-types,
+ *              sortie (sequences, residus ou residus standardisees).
+ *
+ *--------------------------------------------------------------*/
 
-bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const string path ,
-                                                    int *frequency , bool dispersion ,
-                                                    sequence_type output) const
+bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const char *path ,
+                                                    int *size , bool standard_deviation ,
+                                                    int output) const
 
 {
   bool status;
-  int i , j , k , m;
+  register int i , j , k , m;
   int inb_sequence;
   double standard_normal_value , half_confidence_interval , *t_value;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -6740,15 +5200,15 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
   else {
     status = true;
 
-    if (dispersion) {
+    if (standard_deviation) {
 //      normal normal_dist;
 //      standard_normal_value = quantile(complement(normal_dist , 0.025));
 
       t_value = new double[length[0]];
       for (i = 0;i < length[0];i++) {
-        if (frequency[i] > 1) {
-//          t_value[i] = t_value_computation(false , frequency[i] - 1 , 0.05);
-          students_t students_dist(frequency[i] - 1);
+        if (size[i] > 1) {
+//          t_value[i] = t_value_computation(false , size[i] - 1 , 0.05);
+          students_t students_dist(size[i] - 1);
           t_value[i] = quantile(complement(students_dist , 0.025));
         }
       }
@@ -6770,7 +5230,7 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
     for (i = 0;i < nb_variable;i++) {
       out_file << STAT_label[STATL_VARIABLE] << "\t" << i + 1 << endl;
 
-      if (index_param_type == TIME) {
+      if (index_parameter_type == TIME) {
         out_file << "\n" << SEQ_label[SEQL_TIME];
       }
       else {
@@ -6778,15 +5238,15 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
       }
 
       out_file << "\t" << STAT_label[STATL_MEAN];
-      if (dispersion) {
+      if (standard_deviation) {
         out_file << "\t" << STAT_label[STATL_MEAN_CONFIDENCE_INTERVAL]
                  << "\t\t" << STAT_label[STATL_STANDARD_DEVIATION];
       }
-      out_file << "\t" << STAT_label[STATL_FREQUENCY];
+      out_file << "\t" << STAT_label[STATL_SAMPLE_SIZE];
 
       if (nb_sequence < POINTWISE_AVERAGE_NB_SEQUENCE) {
         inb_sequence = nb_sequence;
-        if (dispersion) {
+        if (standard_deviation) {
           inb_sequence--;
         }
 
@@ -6801,10 +5261,10 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
         out_file << (index_parameter ? index_parameter[0][j] : j)
                  << "\t" << real_sequence[0][i][j];
 
-        if (dispersion) {
-          if (frequency[j] > 1) {
-//            half_confidence_interval = standard_normal_value * real_sequence[nb_sequence - 1][i][j] / sqrt((double)frequency[j]);
-            half_confidence_interval = t_value[j] * real_sequence[nb_sequence - 1][i][j] / sqrt((double)frequency[j]);
+        if (standard_deviation) {
+          if (size[j] > 1) {
+//            half_confidence_interval = standard_normal_value * real_sequence[nb_sequence - 1][i][j] / sqrt((double)size[j]);
+            half_confidence_interval = t_value[j] * real_sequence[nb_sequence - 1][i][j] / sqrt((double)size[j]);
             out_file << "\t" << real_sequence[0][i][j] - half_confidence_interval
                      << "\t" << real_sequence[0][i][j] + half_confidence_interval;
           }
@@ -6816,7 +5276,7 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
           out_file << "\t" << real_sequence[nb_sequence - 1][i][j];
         }
 
-        out_file << "\t" << frequency[j];
+        out_file << "\t" << size[j];
  
         if (inb_sequence - 1 < POINTWISE_AVERAGE_NB_SEQUENCE) {
           out_file << "\t";
@@ -6856,36 +5316,28 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const str
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the pointwise mean, median or mean direction of sequences and
- *         associated dispersion measures.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] circular   flag circular variables,
- *  \param[in] robust     flag computation of robust location and dispersion measures,
- *  \param[in] dispersion flag computation of dispersion measures,
- *  \param[in] output     output (sequences, residuals or standardized residuals),
- *  \param[in] path       file path,
- *  \param[in] format     format (ASCII/SPREADSHEET).
+ *  Calcul de la sequence des moyennes (et des ecart-types).
  *
- *  \return               Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, flag donnees circulaires,
+ *              flag calcul des ecart-types,
+ *              sortie (sequences, residus ou residus standardisees),
+ *              path, format ('a' : ASCII / 's' : Spreadsheet).
+ *
+ *--------------------------------------------------------------*/
 
-Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool robust ,
-                                        bool dispersion , sequence_type output ,
-                                        const string path , output_format format) const
+Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
+                                        bool standard_deviation , int output ,
+                                        const char *path , char format) const
 
 {
   bool status = true;
-  int i , j , k;
-  int inb_sequence , min_identifier , max_identifier , *iidentifier , *ilength ,
-      *pindex_param , *frequency , *index , *int_sample , *pisample;
-  variable_nature *itype;
-  angle_unit unit;
-  double diff , *prsequence , *plocation , *pdispersion , *real_sample , *prsample ,
-         *pmean_direction1 , *pmean_direction2 , ***mean_direction;
+  register int i , j , k;
+  int inb_sequence , min_identifier , max_identifier , unit , *iidentifier ,
+      *ilength , *itype , *pindex_param , *size;
+  double diff , *prsequence , *pmean , *pstandard_deviation , *pmean_direction1 ,
+         *pmean_direction2 , ***mean_direction;
   Sequences *seq;
 
 
@@ -6896,7 +5348,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
     status = false;
     error.update(SEQ_error[SEQR_SINGLE_SEQUENCE]);
   }
-  if ((index_param_type != IMPLICIT_TYPE) && (index_param_type != TIME)) {
+  if ((index_parameter_type != IMPLICIT_TYPE) && (index_parameter_type != TIME)) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
@@ -6915,11 +5367,11 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
   }
 
   if (status) {
-    if ((output == STANDARDIZED_RESIDUAL) && (!dispersion)) {
-      dispersion = true;
+    if ((output == STANDARDIZED_RESIDUAL) && (!standard_deviation)) {
+      standard_deviation = true;
     }
 
-    inb_sequence = nb_sequence + (dispersion ? 2 : 1);
+    inb_sequence = nb_sequence + (standard_deviation ? 2 : 1);
 
     iidentifier = new int[inb_sequence];
 
@@ -6934,7 +5386,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
 
     iidentifier[0] = min_identifier - 1;
 
-    if (dispersion) {
+    if (standard_deviation) {
       max_identifier = identifier[nb_sequence - 1];
       for (i = 0;i < nb_sequence - 1;i++) {
         if (identifier[i] > max_identifier) {
@@ -6963,17 +5415,17 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
       ilength[0] = max_length;
     }
 
-    if (dispersion) {
+    if (standard_deviation) {
       ilength[inb_sequence - 1] = ilength[0];
     }
 
-    itype = new variable_nature[nb_variable];
+    itype = new int[nb_variable];
     for (i = 0;i < nb_variable;i++) {
       itype[i] = REAL_VALUE;
     }
 
     seq = new Sequences(inb_sequence , iidentifier , ilength , NULL ,
-                        index_param_type , nb_variable , itype);
+                        index_parameter_type , nb_variable , itype);
 
     delete [] iidentifier;
     delete [] ilength;
@@ -6987,7 +5439,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
         }
       }
 
-      if (dispersion) {
+      if (standard_deviation) {
         for (i = 0;i < seq->length[seq->nb_sequence - 1];i++) {
           seq->index_parameter[seq->nb_sequence - 1][i] = seq->index_parameter[0][i];
         }
@@ -7005,41 +5457,174 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
       seq->index_interval_computation();
     }
 
-    // computation of frequencies for each index parameter value
+    // calcul des tailles d'echantillons
 
-    frequency = new int[seq->length[0]];
+    size = new int[seq->length[0]];
 
     if (index_parameter) {
       pindex_param = seq->index_parameter[0];
       i = 0;
       for (j = index_parameter_distribution->offset;j < index_parameter_distribution->nb_value;j++) {
         if (index_parameter_distribution->frequency[j] > 0) {
-          frequency[i++] = index_parameter_distribution->frequency[j];
+          size[i++] = index_parameter_distribution->frequency[j];
         }
       }
     }
 
     else {
-      frequency[0] = nb_sequence;
+      size[0] = nb_sequence;
       for (i = 1;i < max_length;i++) {
-        frequency[i] = frequency[i - 1] - length_distribution->frequency[i];
+        size[i] = size[i - 1] - length_distribution->frequency[i];
       }
     }
 
-    if (robust) {
+    switch (circular) {
+
+    case false : {
+
+      // calcul des moyennes
+
+      for (i = 0;i < seq->nb_variable;i++) {
+        for (j = 0;j < seq->length[0];j++) {
+          seq->real_sequence[0][i][j] = 0.;
+        }
+      }
+
       if (index_parameter) {
-        index = new int[nb_sequence];
+        for (i = 0;i < nb_sequence;i++) {
+          for (j = 0;j < nb_variable;j++) {
+            pindex_param = seq->index_parameter[0];
+            prsequence = seq->real_sequence[0][j];
+
+            if (type[j] != REAL_VALUE) {
+              for (k = 0;k < length[i];k++) {
+                while (*pindex_param < index_parameter[i][k]) {
+                  pindex_param++;
+                  prsequence++;
+                }
+                pindex_param++;
+                *prsequence++ += int_sequence[i][j][k];
+              }
+            }
+
+            else {
+              for (k = 0;k < length[i];k++) {
+                while (*pindex_param < index_parameter[i][k]) {
+                  pindex_param++;
+                  prsequence++;
+                }
+                pindex_param++;
+                *prsequence++ += real_sequence[i][j][k];
+              }
+            }
+          }
+        }
       }
+
       else {
-        index = NULL;
+        for (i = 0;i < nb_sequence;i++) {
+          for (j = 0;j < nb_variable;j++) {
+            if (type[j] != REAL_VALUE) {
+              for (k = 0;k < length[i];k++) {
+                seq->real_sequence[0][j][k] += int_sequence[i][j][k];
+              }
+            }
+
+            else {
+              for (k = 0;k < length[i];k++) {
+                seq->real_sequence[0][j][k] += real_sequence[i][j][k];
+              }
+            }
+          }
+        }
       }
-      int_sample = new int[nb_sequence];
-      real_sample = new double[nb_sequence];
+
+      for (i = 0;i < seq->nb_variable;i++) {
+        for (j = 0;j < seq->length[0];j++) {
+          seq->real_sequence[0][i][j] /= size[j];
+        }
+      }
+
+      // calcul des ecart-types
+
+      if (standard_deviation) {
+        for (i = 0;i < seq->nb_variable;i++) {
+          for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
+            seq->real_sequence[seq->nb_sequence - 1][i][j] = 0.;
+          }
+        }
+
+        if (index_parameter) {
+          for (i = 0;i < nb_sequence;i++) {
+            for (j = 0;j < nb_variable;j++) {
+              pindex_param = seq->index_parameter[seq->nb_sequence - 1];
+              prsequence = seq->real_sequence[seq->nb_sequence - 1][j];
+              pmean = seq->real_sequence[0][j];
+
+              if (type[j] != REAL_VALUE) {
+                for (k = 0;k < length[i];k++) {
+                  while (*pindex_param < index_parameter[i][k]) {
+                    pindex_param++;
+                    prsequence++;
+                    pmean++;
+                  }
+                  pindex_param++;
+                  diff = int_sequence[i][j][k] - *pmean++;
+                  *prsequence++ += diff * diff;
+                }
+              }
+
+              else {
+                for (k = 0;k < length[i];k++) {
+                  while (*pindex_param < index_parameter[i][k]) {
+                    pindex_param++;
+                    prsequence++;
+                    pmean++;
+                  }
+                  pindex_param++;
+                  diff = real_sequence[i][j][k] - *pmean++;
+                  *prsequence++ += diff * diff;
+                }
+              }
+            }
+          }
+        }
+
+        else {
+          for (i = 0;i < nb_sequence;i++) {
+            for (j = 0;j < nb_variable;j++) {
+              if (type[j] != REAL_VALUE) {
+                for (k = 0;k < length[i];k++) {
+                  diff = int_sequence[i][j][k] - seq->real_sequence[0][j][k];
+                  seq->real_sequence[seq->nb_sequence - 1][j][k] += diff * diff;
+                }
+              }
+
+              else {
+                for (k = 0;k < length[i];k++) {
+                  diff = real_sequence[i][j][k] - seq->real_sequence[0][j][k];
+                  seq->real_sequence[seq->nb_sequence - 1][j][k] += diff * diff;
+                }
+              }
+            }
+          }
+        }
+
+        for (i = 0;i < seq->nb_variable;i++) {
+          for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
+            if (size[j] > 1) {
+              seq->real_sequence[seq->nb_sequence - 1][i][j] = sqrt(seq->real_sequence[seq->nb_sequence - 1][i][j] /
+                                                                    (size[j] - 1));
+            }
+          }
+        }
+      }
+      break;
     }
 
-    if (circular) {
+    case true : {
 
-      // choice of the angle unit
+      // choix de l'unite
 
       unit = RADIAN;
       for (i = 0;i < nb_variable;i++) {
@@ -7049,7 +5634,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
         }
       }
 
-      // computation of mean directions
+      // calcul des directions moyennes
 
       mean_direction = new double**[seq->nb_variable];
       for (i = 0;i < seq->nb_variable;i++) {
@@ -7158,8 +5743,8 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
 
       for (i = 0;i < seq->nb_variable;i++) {
         for (j = 0;j < seq->length[0];j++) {
-          mean_direction[i][0][j] /= frequency[j];
-          mean_direction[i][1][j] /= frequency[j];
+          mean_direction[i][0][j] /= size[j];
+          mean_direction[i][1][j] /= size[j];
 
           mean_direction[i][2][j] = sqrt(mean_direction[i][0][j] * mean_direction[i][0][j] +
                                          mean_direction[i][1][j] * mean_direction[i][1][j]);
@@ -7181,9 +5766,9 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
         }
       }
 
-      // computation of circular standard deviations
+      // calcul des ecart-types
 
-      if (dispersion) {
+      if (standard_deviation) {
         for (i = 0;i < seq->nb_variable;i++) {
           for (j = 0;j < seq->length[0];j++) {
             if (mean_direction[i][2][j] > 0.) {
@@ -7207,300 +5792,13 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
         delete [] mean_direction[i];
       }
       delete [] mean_direction;
+      break;
     }
-
-    else {
-      if (robust) {
-
-        // computation of medians
-
-        if (index_parameter) {
-          for (i = 0;i < nb_variable;i++) {
-            for (j = 0;j < nb_sequence;j++) {
-              index[j] = 0;
-            }
-
-            if (type[i] != REAL_VALUE) {
-              for (j = 0;j < seq->length[0];j++) {
-                pisample = int_sample;
-                for (k = 0;k < nb_sequence;k++) {
-                  while ((index[k] < length[k]) && (index_parameter[k][index[k]] < seq->index_parameter[0][j])) {
-                    index[k]++;
-                  }
-                  if ((index[k] < length[k]) && (index_parameter[k][index[k]] == seq->index_parameter[0][j])) {
-                    *pisample++ = int_sequence[k][i][index[k]];
-                  }
-                }
-
-                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , int_sample , 0.5);
-              }
-            }
-
-            else {
-              for (j = 0;j < seq->length[0];j++) {
-                prsample = real_sample;
-                for (k = 0;k < nb_sequence;k++) {
-                  while ((index[k] < length[k]) && (index_parameter[k][index[k]] < seq->index_parameter[0][j])) {
-                    index[k]++;
-                  }
-                  if ((index[k] < length[k]) && (index_parameter[k][index[k]] == seq->index_parameter[0][j])) {
-                    *prsample++ = real_sequence[k][i][index[k]];
-                  }
-                }
-
-                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , real_sample , 0.5);
-              }
-            }
-          }
-        }
-
-        else {
-          for (i = 0;i < nb_variable;i++) {
-            if (type[i] != REAL_VALUE) {
-              for (j = 0;j < max_length;j++) {
-                pisample = int_sample;
-                for (k = 0;k < nb_sequence;k++) {
-                  if (j < length[k]) {
-                    *pisample++ = int_sequence[k][i][j];
-                  }
-                }
-
-                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , int_sample , 0.5);
-              }
-            }
-
-            else {
-              for (j = 0;j < max_length;j++) {
-                prsample = real_sample;
-                for (k = 0;k < nb_sequence;k++) {
-                  if (j < length[k]) {
-                    *prsample++ = real_sequence[k][i][j];
-                  }
-                }
-
-                seq->real_sequence[0][i][j] = quantile_computation(frequency[j] , real_sample , 0.5);
-              }
-            }
-          }
-        }
-
-        // computation of mean absolute deviations from the median
-
-        if (dispersion) {
-          for (i = 0;i < seq->nb_variable;i++) {
-            for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
-              seq->real_sequence[seq->nb_sequence - 1][i][j] = 0.;
-            }
-          }
-
-          if (index_parameter) {
-            for (i = 0;i < nb_sequence;i++) {
-              for (j = 0;j < nb_variable;j++) {
-                pindex_param = seq->index_parameter[seq->nb_sequence - 1];
-                prsequence = seq->real_sequence[seq->nb_sequence - 1][j];
-                plocation = seq->real_sequence[0][j];
-
-                if (type[j] != REAL_VALUE) {
-                  for (k = 0;k < length[i];k++) {
-                    while (*pindex_param < index_parameter[i][k]) {
-                      pindex_param++;
-                      prsequence++;
-                      plocation++;
-                    }
-                    pindex_param++;
-                    *prsequence++ += fabs(int_sequence[i][j][k] - *plocation++);
-                  }
-                }
-
-                else {
-                  for (k = 0;k < length[i];k++) {
-                    while (*pindex_param < index_parameter[i][k]) {
-                      pindex_param++;
-                      prsequence++;
-                      plocation++;
-                    }
-                    pindex_param++;
-                    *prsequence++ += fabs(real_sequence[i][j][k] - *plocation++);
-                  }
-                }
-              }
-            }
-          }
-
-          else {
-            for (i = 0;i < nb_sequence;i++) {
-              for (j = 0;j < nb_variable;j++) {
-                if (type[j] != REAL_VALUE) {
-                  for (k = 0;k < length[i];k++) {
-                    seq->real_sequence[seq->nb_sequence - 1][j][k] += fabs(int_sequence[i][j][k] - seq->real_sequence[0][j][k]);
-                  }
-                }
-
-                else {
-                  for (k = 0;k < length[i];k++) {
-                    seq->real_sequence[seq->nb_sequence - 1][j][k] += fabs(real_sequence[i][j][k] - seq->real_sequence[0][j][k]);
-                  }
-                }
-              }
-            }
-          }
-
-          for (i = 0;i < seq->nb_variable;i++) {
-            for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
-              if (frequency[j] > 1) {
-                seq->real_sequence[seq->nb_sequence - 1][i][j] = seq->real_sequence[seq->nb_sequence - 1][i][j] /
-                                                                 (frequency[j] - 1);
-              }
-            }
-          }
-        }
-      }
-
-      else {
-
-        // computation of means
-
-        for (i = 0;i < seq->nb_variable;i++) {
-          for (j = 0;j < seq->length[0];j++) {
-            seq->real_sequence[0][i][j] = 0.;
-          }
-        }
-
-        if (index_parameter) {
-          for (i = 0;i < nb_sequence;i++) {
-            for (j = 0;j < nb_variable;j++) {
-              pindex_param = seq->index_parameter[0];
-              prsequence = seq->real_sequence[0][j];
-
-              if (type[j] != REAL_VALUE) {
-                for (k = 0;k < length[i];k++) {
-                  while (*pindex_param < index_parameter[i][k]) {
-                    pindex_param++;
-                    prsequence++;
-                  }
-                  pindex_param++;
-                  *prsequence++ += int_sequence[i][j][k];
-                }
-              }
-
-              else {
-                for (k = 0;k < length[i];k++) {
-                  while (*pindex_param < index_parameter[i][k]) {
-                    pindex_param++;
-                    prsequence++;
-                  }
-                  pindex_param++;
-                  *prsequence++ += real_sequence[i][j][k];
-                }
-              }
-            }
-          }
-        }
-
-        else {
-          for (i = 0;i < nb_sequence;i++) {
-            for (j = 0;j < nb_variable;j++) {
-              if (type[j] != REAL_VALUE) {
-                for (k = 0;k < length[i];k++) {
-                  seq->real_sequence[0][j][k] += int_sequence[i][j][k];
-                }
-              }
-
-              else {
-                for (k = 0;k < length[i];k++) {
-                  seq->real_sequence[0][j][k] += real_sequence[i][j][k];
-                }
-              }
-            }
-          }
-        }
-
-        for (i = 0;i < seq->nb_variable;i++) {
-          for (j = 0;j < seq->length[0];j++) {
-            seq->real_sequence[0][i][j] /= frequency[j];
-          }
-        }
-
-        // computation of standard deviations
-
-        if (dispersion) {
-          for (i = 0;i < seq->nb_variable;i++) {
-            for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
-              seq->real_sequence[seq->nb_sequence - 1][i][j] = 0.;
-            }
-          }
-
-          if (index_parameter) {
-            for (i = 0;i < nb_sequence;i++) {
-              for (j = 0;j < nb_variable;j++) {
-                pindex_param = seq->index_parameter[seq->nb_sequence - 1];
-                prsequence = seq->real_sequence[seq->nb_sequence - 1][j];
-                plocation = seq->real_sequence[0][j];
-
-                if (type[j] != REAL_VALUE) {
-                  for (k = 0;k < length[i];k++) {
-                    while (*pindex_param < index_parameter[i][k]) {
-                      pindex_param++;
-                      prsequence++;
-                      plocation++;
-                    }
-                    pindex_param++;
-                    diff = int_sequence[i][j][k] - *plocation++;
-                    *prsequence++ += diff * diff;
-                  }
-                }
-
-                else {
-                  for (k = 0;k < length[i];k++) {
-                    while (*pindex_param < index_parameter[i][k]) {
-                      pindex_param++;
-                      prsequence++;
-                      plocation++;
-                    }
-                    pindex_param++;
-                    diff = real_sequence[i][j][k] - *plocation++;
-                    *prsequence++ += diff * diff;
-                  }
-                }
-              }
-            }
-          }
-
-          else {
-            for (i = 0;i < nb_sequence;i++) {
-              for (j = 0;j < nb_variable;j++) {
-                if (type[j] != REAL_VALUE) {
-                  for (k = 0;k < length[i];k++) {
-                    diff = int_sequence[i][j][k] - seq->real_sequence[0][j][k];
-                    seq->real_sequence[seq->nb_sequence - 1][j][k] += diff * diff;
-                  }
-                }
-
-                else {
-                  for (k = 0;k < length[i];k++) {
-                    diff = real_sequence[i][j][k] - seq->real_sequence[0][j][k];
-                    seq->real_sequence[seq->nb_sequence - 1][j][k] += diff * diff;
-                  }
-                }
-              }
-            }
-          }
-
-          for (i = 0;i < seq->nb_variable;i++) {
-            for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
-              if (frequency[j] > 1) {
-                seq->real_sequence[seq->nb_sequence - 1][i][j] = sqrt(seq->real_sequence[seq->nb_sequence - 1][i][j] /
-                                                                      (frequency[j] - 1));
-              }
-            }
-          }
-        }
-      }
     }
 
     switch (output) {
 
-    // copy of sequences
+    // copie des sequences
 
     case SEQUENCE : {
       for (i = 0;i < nb_sequence;i++) {
@@ -7521,32 +5819,86 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
       break;
     }
 
-    // computation of residuals
+    // calcul des residus
 
     case SUBTRACTION_RESIDUAL : {
-      if (circular) {
+      switch (circular) {
+
+      case false : {
         if (index_parameter) {
           for (i = 0;i < nb_sequence;i++) {
             for (j = 0;j < nb_variable;j++) {
               pindex_param = seq->index_parameter[0];
-              plocation = seq->real_sequence[0][j];
+              pmean = seq->real_sequence[0][j];
 
               if (type[j] != REAL_VALUE) {
                 for (k = 0;k < length[i];k++) {
                   while (*pindex_param < index_parameter[i][k]) {
                     pindex_param++;
-                    plocation++;
+                    pmean++;
+                  }
+                  pindex_param++;
+                  seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++;
+                }
+              }
+
+              else {
+                for (k = 0;k < length[i];k++) {
+                  while (*pindex_param < index_parameter[i][k]) {
+                    pindex_param++;
+                    pmean++;
+                  }
+                  pindex_param++;
+                  seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *pmean++;
+                }
+              }
+            }
+          }
+        }
+
+        else {
+          for (i = 0;i < nb_sequence;i++) {
+            for (j = 0;j < nb_variable;j++) {
+              if (type[j] != REAL_VALUE) {
+                for (k = 0;k < length[i];k++) {
+                  seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - seq->real_sequence[0][j][k];
+                }
+              }
+
+              else {
+                for (k = 0;k < length[i];k++) {
+                  seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - seq->real_sequence[0][j][k];
+                }
+              }
+            }
+          }
+        }
+        break;
+      }
+
+      case true : {
+        if (index_parameter) {
+          for (i = 0;i < nb_sequence;i++) {
+            for (j = 0;j < nb_variable;j++) {
+              pindex_param = seq->index_parameter[0];
+              pmean = seq->real_sequence[0][j];
+
+              if (type[j] != REAL_VALUE) {
+                for (k = 0;k < length[i];k++) {
+                  while (*pindex_param < index_parameter[i][k]) {
+                    pindex_param++;
+                    pmean++;
                   }
 
                   pindex_param++;
-                  if (fabs(int_sequence[i][j][k] - *plocation) <= 180) {
-                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++;
+                  if (fabs(int_sequence[i][j][k] - *pmean) <= 180) {
+                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++;
                   }
-                  else if (int_sequence[i][j][k] - *plocation > 180) {
-                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++ - 360;
+                  else if (int_sequence[i][j][k] - *pmean > 180) {
+                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++ - 360;
                   }
                   else {
-                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++ + 360;
+                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++ + 360;
                   }
                 }
               }
@@ -7558,18 +5910,18 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
                   for (k = 0;k < length[i];k++) {
                     while (*pindex_param < index_parameter[i][k]) {
                       pindex_param++;
-                      plocation++;
+                      pmean++;
                     }
 
                     pindex_param++;
-                    if (fabs(int_sequence[i][j][k] - *plocation) <= 180) {
-                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++;
+                    if (fabs(int_sequence[i][j][k] - *pmean) <= 180) {
+                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++;
                     }
-                    else if (int_sequence[i][j][k] - *plocation > 180) {
-                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++ - 360;
+                    else if (int_sequence[i][j][k] - *pmean > 180) {
+                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++ - 360;
                     }
                     else {
-                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++ + 360;
+                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++ + 360;
                     }
                   }
                   break;
@@ -7579,18 +5931,18 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
                   for (k = 0;k < length[i];k++) {
                     while (*pindex_param < index_parameter[i][k]) {
                       pindex_param++;
-                      plocation++;
+                      pmean++;
                     }
 
                     pindex_param++;
-                    if (fabs(real_sequence[i][j][k] - *plocation) <= M_PI) {
-                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *plocation++;
+                    if (fabs(real_sequence[i][j][k] - *pmean) <= M_PI) {
+                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *pmean++;
                     }
-                    else if (real_sequence[i][j][k] - *plocation > M_PI) {
-                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *plocation++ - 2 * M_PI;
+                    else if (real_sequence[i][j][k] - *pmean > M_PI) {
+                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *pmean++ - 2 * M_PI;
                     }
                     else {
-                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *plocation++ + 2 * M_PI;
+                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *pmean++ + 2 * M_PI;
                     }
                   }
                   break;
@@ -7655,88 +6007,39 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
             }
           }
         }
+        break;
       }
-
-      else {
-        if (index_parameter) {
-          for (i = 0;i < nb_sequence;i++) {
-            for (j = 0;j < nb_variable;j++) {
-              pindex_param = seq->index_parameter[0];
-              plocation = seq->real_sequence[0][j];
-
-              if (type[j] != REAL_VALUE) {
-                for (k = 0;k < length[i];k++) {
-                  while (*pindex_param < index_parameter[i][k]) {
-                    pindex_param++;
-                    plocation++;
-                  }
-                  pindex_param++;
-                  seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *plocation++;
-                }
-              }
-
-              else {
-                for (k = 0;k < length[i];k++) {
-                  while (*pindex_param < index_parameter[i][k]) {
-                    pindex_param++;
-                    plocation++;
-                  }
-                  pindex_param++;
-                  seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *plocation++;
-                }
-              }
-            }
-          }
-        }
-
-        else {
-          for (i = 0;i < nb_sequence;i++) {
-            for (j = 0;j < nb_variable;j++) {
-              if (type[j] != REAL_VALUE) {
-                for (k = 0;k < length[i];k++) {
-                  seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - seq->real_sequence[0][j][k];
-                }
-              }
-
-              else {
-                for (k = 0;k < length[i];k++) {
-                  seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - seq->real_sequence[0][j][k];
-                }
-              }
-            }
-          }
-        }
       }
       break;
     }
 
-    // computation of standardized residuals
+    // calcul des residus standardises
 
     case STANDARDIZED_RESIDUAL : {
       if (index_parameter) {
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < nb_variable;j++) {
             pindex_param = seq->index_parameter[0];
-            plocation = seq->real_sequence[0][j];
-            pdispersion = seq->real_sequence[seq->nb_sequence - 1][j];
+            pmean = seq->real_sequence[0][j];
+            pstandard_deviation = seq->real_sequence[seq->nb_sequence - 1][j];
 
             if (type[j] != REAL_VALUE) {
               for (k = 0;k < length[i];k++) {
                 while (*pindex_param < index_parameter[i][k]) {
                   pindex_param++;
-                  plocation++;
-                  pdispersion++;
+                  pmean++;
+                  pstandard_deviation++;
                 }
                 pindex_param++;
-                if (*pdispersion > 0.) {
-                  seq->real_sequence[i + 1][j][k] = (int_sequence[i][j][k] - *plocation) /
-                                                    *pdispersion;
+                if (*pstandard_deviation > 0.) {
+                  seq->real_sequence[i + 1][j][k] = (int_sequence[i][j][k] - *pmean) /
+                                                    *pstandard_deviation;
                 }
                 else {
                   seq->real_sequence[i + 1][j][k] = 0.;
                 }
-                plocation++;
-                pdispersion++;
+                pmean++;
+                pstandard_deviation++;
               }
             }
 
@@ -7744,19 +6047,19 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
               for (k = 0;k < length[i];k++) {
                 while (*pindex_param < index_parameter[i][k]) {
                   pindex_param++;
-                  plocation++;
-                  pdispersion++;
+                  pmean++;
+                  pstandard_deviation++;
                 }
                 pindex_param++;
-                if (*pdispersion > 0.) {
-                  seq->real_sequence[i + 1][j][k] = (real_sequence[i][j][k] - *plocation) /
-                                                    *pdispersion;
+                if (*pstandard_deviation > 0.) {
+                  seq->real_sequence[i + 1][j][k] = (real_sequence[i][j][k] - *pmean) /
+                                                    *pstandard_deviation;
                 }
                 else {
                   seq->real_sequence[i + 1][j][k] = 0.;
                 }
-                plocation++;
-                pdispersion++;
+                pmean++;
+                pstandard_deviation++;
               }
             }
           }
@@ -7796,7 +6099,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
     }
     }
 
-    if ((output == SEQUENCE) && (!dispersion)) {
+    if ((output == SEQUENCE) && (!standard_deviation)) {
       for (i = 0;i < seq->nb_variable;i++) {
         seq->min_value[i] = min_value[i];
         seq->max_value[i] = max_value[i];
@@ -7813,17 +6116,17 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
       seq->build_marginal_histogram(i);
     }
 
-    // writing of pointwise mean, median or mean direction of sequences and associated dispersion measures
+    // ecriture des sequences de moyennes et d'ecart-types
 
-    if (!path.empty()) {
+    if (path) {
       switch (format) {
-      case ASCII :
-        status = seq->pointwise_average_ascii_print(error , path , frequency ,
-                                                    dispersion , output);
+      case 'a' :
+        status = seq->pointwise_average_ascii_print(error , path , size ,
+                                                    standard_deviation , output);
         break;
-      case SPREADSHEET :
-        status = seq->pointwise_average_spreadsheet_print(error , path , frequency ,
-                                                          dispersion , output);
+      case 's' :
+        status = seq->pointwise_average_spreadsheet_print(error , path , size ,
+                                                          standard_deviation , output);
         break;
       }
 
@@ -7836,37 +6139,27 @@ Sequences* Sequences::pointwise_average(StatError &error , bool circular , bool 
       }
     }
 
-    delete [] frequency;
-
-    if (robust) {
-      delete [] index;
-      delete [] int_sample;
-      delete [] real_sample;
-    }
+    delete [] size;
   }
 
   return seq;
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of the recurrence time sequences for a value taken by
- *         an integer-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index,
- *  \param[in] value    value.
+ *  Calcul des sequences des temps de retour pour une valeur prise
+ *  par une variable entiere.
  *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable, valeur.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::recurrence_time_sequences(StatError &error , int variable , int value) const
 
 {
   bool status = true;
-  int i , j;
+  register int i , j;
   int inb_sequence , ilength , previous_index , *psequence;
   Sequences *seq;
 
@@ -7914,7 +6207,7 @@ Sequences* Sequences::recurrence_time_sequences(StatError &error , int variable 
   if (status) {
     seq = new Sequences(nb_sequence , 1);
 
-    // computation of the recurrence time sequences
+    // calcul des sequences des temps de retour
 
     inb_sequence = 0;
 
@@ -7956,24 +6249,20 @@ Sequences* Sequences::recurrence_time_sequences(StatError &error , int variable 
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of sojourn time sequences for an integer-valued variable.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error    reference on a StatError object,
- *  \param[in] variable variable index.
+ *  Calcul des sequences des temps de sejour par une variable entiere.
  *
- *  \return             Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, indice de la variable.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::sojourn_time_sequences(StatError &error , int variable) const
 
 {
   bool status = true;
-  int i , j;
-  int ilength , begin_run , *pstate , *psequence;
-  variable_nature itype[2];
+  register int i , j;
+  int ilength , begin_run , *pstate , *psequence , itype[2];
 //  int run_length;
   Sequences *seq;
 
@@ -8012,10 +6301,10 @@ Sequences* Sequences::sojourn_time_sequences(StatError &error , int variable) co
     seq = new Sequences(nb_sequence , identifier , length , NULL ,
                         IMPLICIT_TYPE , 2 , itype);
 
-    // computation of sojourn time sequences
+    // calcul des sequences de temps de sejour
 
-    if ((index_param_type == TIME) && (index_interval->variance > 0.)) {  // for the mango growth follow-ups and
-      for (i = 0;i < nb_sequence;i++) {                                   // the Arabidopsis rosettes
+    if ((index_parameter_type == TIME) && (index_interval->variance > 0.)) {  // pour les suivis de croissance manguier
+      for (i = 0;i < nb_sequence;i++) {                                       // et les pousses d'arabidopsis
         pstate = seq->int_sequence[i][0];
         psequence = seq->int_sequence[i][1];
         begin_run = index_parameter_distribution->offset;
@@ -8084,22 +6373,20 @@ Sequences* Sequences::sojourn_time_sequences(StatError &error , int variable) co
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Discretization of positions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] step  discretization step.
+ *  Discretisation des positions.
  *
- *  \return          Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError,
+ *              pas de discretisation.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::transform_position(StatError &error , int step) const
 
 {
   bool status = true;
-  int i , j , k , m;
+  register int i , j , k , m;
   int inter_position , nb_unit , *ilength , **pisequence;
   Sequences *seq;
 
@@ -8107,7 +6394,7 @@ Sequences* Sequences::transform_position(StatError &error , int step) const
   seq = NULL;
   error.init();
 
-  if (index_param_type != POSITION) {
+  if (index_parameter_type != POSITION) {
     status = false;
     error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE] , SEQ_index_parameter_word[POSITION]);
   }
@@ -8137,7 +6424,7 @@ Sequences* Sequences::transform_position(StatError &error , int step) const
     seq = new Sequences(nb_sequence , identifier , ilength , nb_variable);
     delete [] ilength;
 
-    // extraction of sequences
+    // extraction des sequences
 
     pisequence = new int*[nb_variable];
 
@@ -8197,21 +6484,19 @@ Sequences* Sequences::transform_position(StatError &error , int step) const
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Crossing of sequences.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object.
+ *  Croisement des sequences.
  *
- *  \return          Sequences object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : reference sur un objet StatError.
+ *
+ *--------------------------------------------------------------*/
 
 Sequences* Sequences::cross(StatError &error) const
 
 {
   bool status = true;
-  int i , j , k , m;
+  register int i , j , k , m;
   int sense = 0 , *ilength;
   Sequences *seq;
 
@@ -8265,7 +6550,7 @@ Sequences* Sequences::cross(StatError &error) const
                         nb_variable , type);
     delete [] ilength;
 
-    // construction of crossed sequences
+    // constitution des sequences croisees
 
     for (i = 0;i < seq->nb_sequence;i++) {
       j = 0;
@@ -8310,6 +6595,999 @@ Sequences* Sequences::cross(StatError &error) const
   }
 
   return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la longueur maximum des sequences.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::max_length_computation()
+
+{
+  register int i;
+
+
+  max_length = length[0];
+  for (i = 1;i < nb_sequence;i++) {
+    if (length[i] > max_length) {
+      max_length = length[i];
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la longueur cumulee des sequences.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::cumul_length_computation()
+
+{
+  register int i;
+
+
+  cumul_length = 0;
+  for (i = 0;i < nb_sequence;i++) {
+    cumul_length += length[i];
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction de la loi empirique des longueurs des sequences.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::build_length_frequency_distribution()
+
+{
+  register int i;
+
+
+  length_distribution = new FrequencyDistribution(max_length + 1);
+
+  length_distribution->nb_element = nb_sequence;
+  for (i = 0;i < nb_sequence;i++) {
+    (length_distribution->frequency[length[i]])++;
+  }
+
+  length_distribution->nb_value_computation();
+  length_distribution->offset_computation();
+  length_distribution->max_computation();
+  length_distribution->mean_computation();
+  length_distribution->variance_computation();
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des temps a partir des intervalles de temps /
+ *  calcul des positions a partir des intervalles inter-positions.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::index_parameter_computation()
+
+{
+  if ((index_parameter_type == TIME_INTERVAL) || (index_parameter_type == POSITION_INTERVAL)) {
+    register int i , j;
+
+
+    switch (index_parameter_type) {
+    case TIME_INTERVAL :
+      index_parameter_type = TIME;
+      break;
+    case POSITION_INTERVAL :
+      index_parameter_type = POSITION;
+      break;
+    }
+
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 1;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
+        index_parameter[i][j] += index_parameter[i][j - 1];
+      }
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la valeur minimum prise par le parametre d'index.
+ *
+ *--------------------------------------------------------------*/
+
+int Sequences::min_index_parameter_computation() const
+
+{
+  register int i;
+  int min_index_parameter = I_DEFAULT;
+
+
+  if (index_parameter) {
+    min_index_parameter = index_parameter[0][0];
+    for (i = 1;i < nb_sequence;i++) {
+      if (index_parameter[i][0] < min_index_parameter) {
+        min_index_parameter = index_parameter[i][0];
+      }
+    }
+  }
+
+  return min_index_parameter;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la valeur maximum prise par le parametre d'index.
+ *
+ *  argument : flag derniere position.
+ *
+ *--------------------------------------------------------------*/
+
+int Sequences::max_index_parameter_computation(bool last_position) const
+
+{
+  register int i;
+  int max_index_parameter = I_DEFAULT;
+
+
+  if (index_parameter) {
+    if ((index_parameter_type == TIME) || (last_position)) {
+      max_index_parameter = index_parameter[0][length[0] - 1];
+      for (i = 1;i < nb_sequence;i++) {
+        if (index_parameter[i][length[i] - 1] > max_index_parameter) {
+          max_index_parameter = index_parameter[i][length[i] - 1];
+        }
+      }
+    }
+
+    else {
+      max_index_parameter = index_parameter[0][length[0]];
+      for (i = 1;i < nb_sequence;i++) {
+        if (index_parameter[i][length[i]] > max_index_parameter) {
+          max_index_parameter = index_parameter[i][length[i]];
+        }
+      }
+    }
+  }
+
+  return max_index_parameter;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la loi empirique des parametres d'index.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::build_index_parameter_frequency_distribution()
+
+{
+  if (index_parameter) {
+    register int i , j;
+
+
+    index_parameter_distribution = new FrequencyDistribution(max_index_parameter_computation() + 1);
+
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
+        (index_parameter_distribution->frequency[index_parameter[i][j]])++;
+      }
+    }
+
+    index_parameter_distribution->offset_computation();
+    index_parameter_distribution->nb_element = cumul_length;
+    if (index_parameter_type == POSITION) {
+      index_parameter_distribution->nb_element += nb_sequence;
+    }
+    index_parameter_distribution->max_computation();
+    index_parameter_distribution->mean_computation();
+    index_parameter_distribution->variance_computation();
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Extraction de la loi empirique des intervalles entre index successifs.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::index_interval_computation()
+
+{
+//  if ((index_parameter_type == TIME) || ((index_parameter_type == POSITION) &&
+//       (type[0] != NB_INTERNODE))) {
+  if ((index_parameter_type == TIME) || (index_parameter_type == POSITION)) {
+    register int i , j;
+
+
+    index_interval = new FrequencyDistribution(max_index_parameter_computation(true) + 1);
+
+    // constitution de la loi empirique des intervalles entre index successifs
+
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 1;j < length[i];j++) {
+        (index_interval->frequency[index_parameter[i][j] - index_parameter[i][j - 1]])++;
+      }
+    }
+
+    index_interval->nb_value_computation();
+    index_interval->offset_computation();
+    index_interval->nb_element = cumul_length - nb_sequence;
+    index_interval->max_computation();
+    index_interval->mean_computation();
+    index_interval->variance_computation();
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Extraction de la loi empirique des intervalles entre index successifs
+ *  pour une valeur d'une variable entiere.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable, valeur.
+ *
+ *--------------------------------------------------------------*/
+
+FrequencyDistribution* Sequences::value_index_interval_computation(StatError &error , int variable ,
+                                                                   int value) const
+
+{
+  bool status = true;
+  register int i , j;
+  int previous_index_param , *pindex_param , *pisequence;
+  FrequencyDistribution *value_index_interval;
+
+
+  value_index_interval = NULL;
+  error.init();
+
+  if ((index_parameter_type != TIME) && (index_parameter_type != POSITION)) {
+    status = false;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+
+  if ((variable < 1) || (variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+
+    if (!marginal_distribution[variable]) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                    << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
+      error.update((error_message.str()).c_str());
+    }
+
+    else if ((value < marginal_distribution[variable]->offset) ||
+             (value >= marginal_distribution[variable]->nb_value) ||
+             (marginal_distribution[variable]->frequency[value] <= 1)) {
+      status = false;
+      error.update(SEQ_error[SEQR_VALUE]);
+    }
+  }
+
+  if (status) {
+    value_index_interval = new FrequencyDistribution(max_index_parameter_computation(true) + 1);
+
+    for (i = 0;i < nb_sequence;i++) {
+      pindex_param = index_parameter[i];
+      pisequence = int_sequence[i][variable];
+      previous_index_param = I_DEFAULT;
+
+      for (j = 0;j < length[i];j++) {
+        if (*pisequence == value) {
+          if (previous_index_param != I_DEFAULT) {
+            (value_index_interval->frequency[*pindex_param - previous_index_param])++;
+          }
+          previous_index_param = *pindex_param;
+        }
+
+        pindex_param++;
+        pisequence++;
+      }
+    }
+
+    // extraction des caracteristiques de la loi empirique
+
+    value_index_interval->nb_value_computation();
+    value_index_interval->offset_computation();
+    value_index_interval->nb_element_computation();
+
+    if (value_index_interval->nb_element == 0) {
+      delete value_index_interval;
+      value_index_interval = NULL;
+      error.update(STAT_error[STATR_EMPTY_SAMPLE]);
+    }
+
+    else {
+      value_index_interval->max_computation();
+      value_index_interval->mean_computation();
+      value_index_interval->variance_computation();
+    }
+  }
+
+  return value_index_interval;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la valeur minimum prise par une variable.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::min_value_computation(int variable)
+
+{
+  register int i , j;
+
+
+  if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
+    min_value[variable] = int_sequence[0][variable][0];
+
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < length[i];j++) {
+        if (int_sequence[i][variable][j] < min_value[variable]) {
+          min_value[variable] = int_sequence[i][variable][j];
+        }
+      }
+    }
+  }
+
+  else {
+    min_value[variable] = real_sequence[0][variable][0];
+
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < length[i];j++) {
+        if (real_sequence[i][variable][j] < min_value[variable]) {
+          min_value[variable] = real_sequence[i][variable][j];
+        }
+      }
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la valeur maximum prise par une variable.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::max_value_computation(int variable)
+
+{
+  register int i , j;
+
+
+  if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
+    max_value[variable] = int_sequence[0][variable][0];
+
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < length[i];j++) {
+        if (int_sequence[i][variable][j] > max_value[variable]) {
+          max_value[variable] = int_sequence[i][variable][j];
+        }
+      }
+    }
+  }
+
+  else {
+    max_value[variable] = real_sequence[0][variable][0];
+
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < length[i];j++) {
+        if (real_sequence[i][variable][j] > max_value[variable]) {
+          max_value[variable] = real_sequence[i][variable][j];
+        }
+      }
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la loi marginale empirique pour une variable entiere positive.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::marginal_frequency_distribution_computation(int variable)
+
+{
+  register int i , j;
+
+
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
+    marginal_distribution[variable]->frequency[i] = 0;
+  }
+
+  for (i = 0;i < nb_sequence;i++) {
+    for (j = 0;j < length[i];j++) {
+      (marginal_distribution[variable]->frequency[int_sequence[i][variable][j]])++;
+    }
+  }
+
+  marginal_distribution[variable]->offset = (int)min_value[variable];
+  marginal_distribution[variable]->nb_element_computation();
+//  marginal_distribution[variable]->nb_element = cumul_length;
+  marginal_distribution[variable]->max_computation();
+  marginal_distribution[variable]->mean_computation();
+  marginal_distribution[variable]->variance_computation();
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction de la loi marginale empirique pour une variable entiere positive.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::build_marginal_frequency_distribution(int variable)
+
+{
+  if (type[variable] != AUXILIARY) {
+    if ((type[variable] != REAL_VALUE) && (min_value[variable] >= 0) &&
+        (max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
+      marginal_distribution[variable] = new FrequencyDistribution((int)max_value[variable] + 1);
+      marginal_frequency_distribution_computation(variable);
+    }
+
+    else {
+      build_marginal_histogram(variable);
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction de l'histogramme marginal pour une variable.
+ *
+ *  arguments : indice de la variable, pas de regroupement, valeur minimum.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::build_marginal_histogram(int variable , double step , double imin_value)
+
+{
+  if ((!marginal_histogram[variable]) || (step != marginal_histogram[variable]->step) ||
+      (imin_value != D_INF)) {
+    register int i , j;
+    int *pisequence;
+    double *prsequence;
+
+
+    // construction de l'histogramme
+
+    if (step == D_DEFAULT) {
+      step = MAX(::round((max_value[variable] - min_value[variable]) * HISTOGRAM_FREQUENCY / cumul_length) , 1);
+
+#     ifdef MESSAGE
+      cout << "\n" << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - "
+           << STAT_label[STATL_STEP] << ": " << step << endl;
+//           << " (" << min_value[variable] << ", " << max_value[variable] << ")"
+#     endif
+
+    }
+
+    if (imin_value == D_INF) {
+      imin_value = floor(min_value[variable] / step) * step;
+    }
+
+    if (marginal_histogram[variable]) {
+      marginal_histogram[variable]->nb_category = (int)floor((max_value[variable] - imin_value) / step) + 1;
+
+      delete [] marginal_histogram[variable]->frequency;
+      marginal_histogram[variable]->frequency = new int[marginal_histogram[variable]->nb_category];
+    }
+
+    else {
+      marginal_histogram[variable] = new Histogram((int)floor((max_value[variable] - imin_value) / step) + 1 , false);
+
+      marginal_histogram[variable]->nb_element = cumul_length;
+      marginal_histogram[variable]->type = type[variable];
+    }
+
+    marginal_histogram[variable]->step = step;
+    marginal_histogram[variable]->min_value = imin_value;
+    marginal_histogram[variable]->max_value = ceil(max_value[variable] / step) * step;
+
+    // calcul des frequences
+
+    for (i = 0;i < marginal_histogram[variable]->nb_category;i++) {
+      marginal_histogram[variable]->frequency[i] = 0;
+    }
+
+    if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
+      for (i = 0;i < nb_sequence;i++) {
+        pisequence = int_sequence[i][variable];
+        for (j = 0;j < length[i];j++) {
+//          (marginal_histogram[variable]->frequency[(int)((*pisequence++ - imin_value) / step)])++;
+          (marginal_histogram[variable]->frequency[(int)floor((*pisequence++ - imin_value) / step)])++;
+        }
+      }
+    }
+
+    else {
+      for (i = 0;i < nb_sequence;i++) {
+        prsequence = real_sequence[i][variable];
+        for (j = 0;j < length[i];j++) {
+//          (marginal_histogram[variable]->frequency[(int)((*prsequence++ - imin_value) / step)])++;
+          (marginal_histogram[variable]->frequency[(int)floor((*prsequence++ - imin_value) / step)])++;
+        }
+      }
+    }
+
+    marginal_histogram[variable]->max_computation();
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Changement du pas de regroupement de l'histogramme marginal.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              pas de regroupement, valeur minimum.
+ *
+ *--------------------------------------------------------------*/
+
+bool Sequences::select_step(StatError &error , int variable ,
+                            double step , double imin_value)
+
+{
+  bool status = true;
+
+
+  error.init();
+
+  if ((variable < 1) || (variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+
+    if (!marginal_histogram[variable]) {
+      status = false;
+      error.update(STAT_error[STATR_MARGINAL_HISTOGRAM]);
+    }
+    if ((step <= 0.) || ((type[variable] != REAL_VALUE) && ((int)step != step))) {
+      status = false;
+      error.update(STAT_error[STATR_HISTOGRAM_STEP]);
+    }
+    if ((imin_value != D_INF) && ((imin_value <= min_value[variable] - step) ||
+         (imin_value > min_value[variable]) || ((type[variable] != REAL_VALUE) &&
+          ((int)imin_value != imin_value)))) {
+      status = false;
+      error.update(STAT_error[STATR_HISTOGRAM_MIN_VALUE]);
+    }
+  }
+
+  if (status) {
+    build_marginal_histogram(variable , step , imin_value);
+  }
+
+  return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la moyenne d'une variable.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
+
+double Sequences::mean_computation(int variable) const
+
+{
+  register int i , j;
+  double mean;
+
+
+  if (marginal_distribution[variable]) {
+    mean = marginal_distribution[variable]->mean;
+  }
+
+  else {
+    mean = 0.;
+
+    if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          mean += int_sequence[i][variable][j];
+        }
+      }
+    }
+
+    else {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          mean += real_sequence[i][variable][j];
+        }
+      }
+    }
+
+    mean /= cumul_length;
+  }
+
+  return mean;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la variance d'une variable.
+ *
+ *  arguments : indice de la variable, moyenne.
+ *
+ *--------------------------------------------------------------*/
+
+double Sequences::variance_computation(int variable , double mean) const
+
+{
+  register int i , j;
+  double variance , diff;
+
+
+  if (marginal_distribution[variable]) {
+    variance = marginal_distribution[variable]->variance;
+  }
+
+  else {
+    variance = 0.;
+
+    if (cumul_length > 1) {
+      if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
+        for (i = 0;i < nb_sequence;i++) {
+          for (j = 0;j < length[i];j++) {
+            diff = int_sequence[i][variable][j] - mean;
+            variance += diff * diff;
+          }
+        }
+      }
+
+      else {
+        for (i = 0;i < nb_sequence;i++) {
+          for (j = 0;j < length[i];j++) {
+            diff = real_sequence[i][variable][j] - mean;
+            variance += diff * diff;
+          }
+        }
+      }
+
+      variance /= (cumul_length - 1);
+    }
+  }
+
+  return variance;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de l'ecart absolu moyen d'une variable.
+ *
+ *  arguments : indice de la variable, moyenne.
+ *
+ *--------------------------------------------------------------*/
+
+double Sequences::mean_absolute_deviation_computation(int variable , double mean) const
+
+{
+  register int i , j;
+  double mean_absolute_deviation ;
+
+
+  if (marginal_distribution[variable]) {
+    mean_absolute_deviation = marginal_distribution[variable]->mean_absolute_deviation_computation();
+  }
+
+  else {
+    mean_absolute_deviation = 0.;
+
+    if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          mean_absolute_deviation += fabs(int_sequence[i][variable][j] - mean);
+        }
+      }
+    }
+
+    else {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          mean_absolute_deviation += fabs(real_sequence[i][variable][j] - mean);
+        }
+      }
+    }
+
+    mean_absolute_deviation /= cumul_length;
+  }
+
+  return mean_absolute_deviation;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la difference absolue moyenne d'une variable.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
+
+double Sequences::mean_absolute_difference_computation(int variable) const
+
+{
+  register int i , j , k , m;
+  double mean_absolute_difference;
+
+
+  mean_absolute_difference = 0.;
+
+  if (cumul_length > 1) {
+    if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          for (k = j + 1;k < length[i];k++) {
+            mean_absolute_difference += abs(int_sequence[i][variable][j] -
+                                            int_sequence[i][variable][k]);
+          }
+        }
+
+        for (j = i + 1;j < nb_sequence;j++) {
+          for (k = 0;k < length[i];k++) {
+            for (m = 0;m < length[j];m++) {
+              mean_absolute_difference += abs(int_sequence[i][variable][k] -
+                                              int_sequence[j][variable][m]);
+            }
+          }
+        }
+      }
+    }
+
+    else {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          for (k = j + 1;k < length[i];k++) {
+            mean_absolute_difference += fabs(real_sequence[i][variable][j] -
+                                             real_sequence[i][variable][k]);
+          }
+        }
+
+        for (j = i + 1;j < nb_sequence;j++) {
+          for (k = 0;k < length[i];k++) {
+            for (m = 0;m < length[j];m++) {
+              mean_absolute_difference += fabs(real_sequence[i][variable][k] -
+                                               real_sequence[j][variable][m]);
+            }
+          }
+        }
+      }
+    }
+
+    mean_absolute_difference = 2 * mean_absolute_difference /
+                               (cumul_length * (double)(cumul_length - 1));
+  }
+
+  return mean_absolute_difference;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul du coefficient d'asymetrie d'une variable.
+ *
+ *  arguments : indice de la variable, moyenne, variance.
+ *
+ *--------------------------------------------------------------*/
+
+double Sequences::skewness_computation(int variable , double mean , double variance) const
+
+{
+  register int i , j;
+  double skewness , diff;
+
+
+  if (marginal_distribution[variable]) {
+    skewness = marginal_distribution[variable]->skewness_computation();
+  }
+
+  else {
+    skewness = 0.;
+
+    if ((cumul_length > 2) && (variance > 0.)) {
+      if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
+        for (i = 0;i < nb_sequence;i++) {
+          for (j = 0;j < length[i];j++) {
+            diff = int_sequence[i][variable][j] - mean;
+            skewness += diff * diff * diff;
+          }
+        }
+      }
+
+      else {
+        for (i = 0;i < nb_sequence;i++) {
+          for (j = 0;j < length[i];j++) {
+            diff = real_sequence[i][variable][j] - mean;
+            skewness += diff * diff * diff;
+          }
+        }
+      }
+
+      skewness = skewness * cumul_length / ((cumul_length - 1) *
+                  (double)(cumul_length - 2) * pow(variance , 1.5));
+    }
+  }
+
+  return skewness;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de l'exces d'applatissement d'une variable :
+ *  exces d'applatissement = coefficient d'applatissement - 3.
+ *
+ *  arguments : indice de la variable, moyenne, variance.
+ *
+ *--------------------------------------------------------------*/
+
+double Sequences::kurtosis_computation(int variable , double mean , double variance) const
+
+{
+  register int i , j;
+  double kurtosis , diff;
+
+
+  if (marginal_distribution[variable]) {
+    kurtosis = marginal_distribution[variable]->kurtosis_computation();
+  }
+
+  else {
+    if (variance == 0.) {
+      kurtosis = -2.;
+    }
+
+    else {
+      kurtosis = 0.;
+
+      if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
+        for (i = 0;i < nb_sequence;i++) {
+          for (j = 0;j < length[i];j++) {
+            diff = int_sequence[i][variable][j] - mean;
+            kurtosis += diff * diff * diff * diff;
+          }
+        }
+      }
+
+      else {
+        for (i = 0;i < nb_sequence;i++) {
+          for (j = 0;j < length[i];j++) {
+            diff = real_sequence[i][variable][j] - mean;
+            kurtosis += diff * diff * diff * diff;
+          }
+        }
+      }
+
+      kurtosis = kurtosis / ((cumul_length - 1) * variance * variance) - 3.;
+    }
+  }
+
+  return kurtosis;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la direction moyenne d'une variable circulaire.
+ *
+ *  arguments : indice de la variable, unite (DEGREE/RADIAN).
+ *
+ *--------------------------------------------------------------*/
+
+double* Sequences::mean_direction_computation(int variable , int unit) const
+
+{
+  register int i , j;
+  double *mean_direction;
+
+
+  mean_direction = new double[4];
+//  mean_direction = new double[2];
+
+  mean_direction[0] = 0.;
+  mean_direction[1] = 0.;
+
+  switch (type[variable]) {
+
+  case INT_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < length[i];j++) {
+        mean_direction[0] += cos(int_sequence[i][variable][j] * M_PI / 180);
+        mean_direction[1] += sin(int_sequence[i][variable][j] * M_PI / 180);
+      }
+    }
+    break;
+  }
+
+  case REAL_VALUE : {
+    switch (unit) {
+
+    case DEGREE : {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          mean_direction[0] += cos(real_sequence[i][variable][j] * M_PI / 180);
+          mean_direction[1] += sin(real_sequence[i][variable][j] * M_PI / 180);
+        }
+      }
+      break;
+    }
+
+    case RADIAN : {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          mean_direction[0] += cos(real_sequence[i][variable][j]);
+          mean_direction[1] += sin(real_sequence[i][variable][j]);
+        }
+      }
+      break;
+    }
+    }
+    break;
+  }
+  }
+
+  mean_direction[0] /= cumul_length;
+  mean_direction[1] /= cumul_length;
+
+  mean_direction[2] = sqrt(mean_direction[0] * mean_direction[0] +
+                           mean_direction[1] * mean_direction[1]);
+
+  if (mean_direction[2] > 0.) {
+    mean_direction[3] = atan(mean_direction[1] / mean_direction[0]);
+
+    if (mean_direction[0] < 0.) {
+      mean_direction[3] += M_PI;
+    }
+    if (unit == DEGREE) {
+      mean_direction[3] *= (180 / M_PI);
+    }
+  }
+
+  else {
+    mean_direction[3] = D_DEFAULT;
+  }
+
+  return mean_direction;
 }
 
 

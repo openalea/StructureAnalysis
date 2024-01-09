@@ -13,10 +13,10 @@
     :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-    :Revision: $Id$
+    :Revision: $Id: top_parameters.py 9478 2010-08-31 16:33:16Z cokelaer $
     
 """
-__version__ = "$Id$"
+__version__ = "$Id: top_parameters.py 9478 2010-08-31 16:33:16Z cokelaer $"
 
 import os
 import openalea.stat_tool.interface as interface

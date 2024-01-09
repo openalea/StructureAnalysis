@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: convolution_algorithms.cpp 17986 2015-04-23 06:43:20Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -38,6 +38,7 @@
 
 #include <math.h>
 
+#include "stat_tools.h"
 #include "convolution.h"
 #include "stat_label.h"
 
@@ -48,23 +49,23 @@ namespace stat_tool {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of a convolution of discrete distributions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] min_nb_value    upper bound of the elementary distribution supports,
- *  \param[in] cumul_threshold threshold on the cumulative distribution function,
- *  \param[in] dist_flag       flags for computing elementary distributions.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul d'un produit de convolution de lois.
+ *
+ *  arguments : nombre minimum de valeurs de chaque loi,
+ *              seuil sur la fonction de repartition,
+ *              flags pour calculer les lois elementaires.
+ *
+ *--------------------------------------------------------------*/
 
 void Convolution::computation(int min_nb_value , double cumul_threshold , bool *dist_flag)
 
 {
-  int i;
+  register int i;
 
 
-  // computation of the elementary distributions
+  // calcul des lois elementaires
 
   if (dist_flag) {
     for (i = 0;i < nb_distribution;i++) {
@@ -74,7 +75,7 @@ void Convolution::computation(int min_nb_value , double cumul_threshold , bool *
     }
   }
 
-  // computation of the resulting convolution
+  // calcul de la loi resultante
 
   convolution(*distribution[0] , *distribution[1]);
   for (i = 2;i < nb_distribution;i++) {
@@ -89,22 +90,21 @@ void Convolution::computation(int min_nb_value , double cumul_threshold , bool *
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Computation of reestimation quantities (E-step of EM algorithm).
+/*--------------------------------------------------------------*
  *
- *  \param[in] histo          reference on a FrequencyDistribution object,
- *  \param[in] partial_convol pointer on the partial convolutions, 
- *  \param[in] reestim        pointer on the reestimation quantities.
- */
-/*--------------------------------------------------------------*/
+ *  Calcul des quantites de reestimation (estimateur EM).
+ *
+ *  arguments : reference sur la loi empirique, pointeurs sur les produits
+ *              de convolution "partiels" et sur les quantites de reestimation.
+ *
+ *--------------------------------------------------------------*/
 
 void Convolution::expectation_step(const FrequencyDistribution &histo ,
                                    const Distribution **partial_convol ,
                                    Reestimation<double> **reestim) const
 
 {
-  int i , j , k;
+  register int i , j , k;
   int min , max;
 
 
@@ -136,7 +136,7 @@ void Convolution::expectation_step(const FrequencyDistribution &histo ,
       reestim[i]->variance_computation();
 
 #     ifdef DEBUG
-      cout << "\nreestimation quantities distribution " << i << " :" << *reestim[i] << endl;
+      cout << "\nquantites de reestimation loi " << i << " :" << *reestim[i] << endl;
 #     endif
 
     }
@@ -144,36 +144,29 @@ void Convolution::expectation_step(const FrequencyDistribution &histo ,
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Deconvolution of an elementary distribution using the EM algorithm.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error        reference on a StatError object,
- *  \param[in] display      flag for displaying estimation intermediate results,
- *  \param[in] known_dist   reference on the known distribution,
- *  \param[in] unknown_dist reference on the unknown distribution,
- *  \param[in] estimator    estimator type (likelihood, penalized likelihood or 
- *                          estimation of a parametric distribution),
- *  \param[in] nb_iter      number of iterations,
- *  \param[in] weight       penalty weight,
- *  \param[in] pen_type     penalty type,
- *  \param[in] outside      management of side effects (zero outside the support or
- *                          continuation of the distribution).
+ *  Estimation des parametres d'un produit de convolution de lois
+ *  par l'algorithme EM.
  *
- *  \return                 Convolution object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, references sur
+ *              la loi connue et sur la loi inconnue, type d'estimateur (vraisemblance,
+ *              vraisemblance penalisee ou estimation d'une loi parametrique),
+ *              nombre d'iterations, poids de la penalisation, type de penalisation,
+ *              type de gestion des effets de bord (zero a l'exterieur du support ou
+ *              prolongation de la loi).
+ *
+ *--------------------------------------------------------------*/
 
-Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bool display ,
+Convolution* FrequencyDistribution::convolution_estimation(StatError &error , ostream &os ,
                                                            const DiscreteParametric &known_dist ,
                                                            const DiscreteParametric &unknown_dist ,
-                                                           estimation_criterion estimator , int nb_iter ,
-                                                           double weight , penalty_type pen_type ,
-                                                           side_effect outside) const
+                                                           int estimator , int nb_iter , double weight ,
+                                                           int penalty_type , int outside) const
 
 {
   bool status = true , dist_flag[2];
-  int i;
+  register int i;
   int nb_likelihood_decrease;
   double likelihood , previous_likelihood , hlikelihood , *penalty;
   const Distribution *partial_convol[2];
@@ -206,7 +199,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
 
   if (status) {
 
-    // construction of a Convolution object
+    // creation d'un objet Convolution
 
     convol = new Convolution(known_dist , unknown_dist);
     convol->convolution_data = new ConvolutionData(*this , convol->nb_distribution);
@@ -216,7 +209,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
       penalty = new double[convol->distribution[1]->alloc_nb_value];
 
       if (weight == D_DEFAULT) {
-        if (pen_type != ENTROPY) {
+        if (penalty_type != ENTROPY) {
           weight = CONVOLUTION_DIFFERENCE_WEIGHT;
         }
         else {
@@ -227,7 +220,8 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
       weight *= nb_element;
     }
 
-    // initialization of partial convolutions and construction of the reestimation quantities
+    // initialisation des produits de convolution partiels et
+    // creation des quantites de reestimation
 
     partial_convol[0] = convol->distribution[1];
     partial_convol[1] = convol->distribution[0];
@@ -240,7 +234,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
     convol->distribution[1]->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
 
 #   ifdef DEBUG
-    cout << " (" << convol->mean << " " << convol->variance << ")" << endl;
+    os << " (" << convol->mean << " " << convol->variance << ")" << endl;
 #   endif
 
     likelihood = D_INF;
@@ -249,7 +243,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
     do {
       i++;
 
-      // computation of the reestimation quantities
+      // calcul des quantites de reestimation
 
       convol->expectation_step(*this , partial_convol , reestim);
 
@@ -258,26 +252,27 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
       }
       else {
         reestim[1]->penalized_likelihood_estimation(convol->distribution[1] , weight ,
-                                                    pen_type , penalty , outside);
+                                                    penalty_type , penalty , outside);
       }
 
-      // computation of the estimated convolution and the corresponding log-likelihood
+      // calcul du produit de convolution estime et de la log-vraisemblance correspondante
 
       convol->computation(nb_value);
       previous_likelihood = likelihood;
       likelihood = convol->likelihood_computation(*this);
 
-      // display of estimation results
-
-      if ((display) && ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0))) {
-        cout << STAT_label[STATL_ITERATION] << " " << i << "   "
-             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-             << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation();
+#     ifdef MESSAGE
+      if ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0)) {
+        os << STAT_label[STATL_ITERATION] << " " << i << "   "
+           << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+           << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation();
         if (estimator == PENALIZED_LIKELIHOOD) {
-          cout << "   cumul: " << convol->distribution[1]->cumul[convol->distribution[1]->nb_value - 1];
+          os << "   cumul: " << convol->distribution[1]->cumul[convol->distribution[1]->nb_value - 1];
         }
-        cout << endl;
+        os << endl;
       }
+#     endif
+
     }
     while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (i < CONVOLUTION_NB_ITER) && 
              ((likelihood - previous_likelihood) / -likelihood > CONVOLUTION_LIKELIHOOD_DIFF)) ||
@@ -285,17 +280,15 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
 
     if (likelihood != D_INF) {
 
-      // display of estimation results
-
-      if (display) {
-        cout << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
-             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-             << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation();
-        if (estimator == PENALIZED_LIKELIHOOD) {
-          cout << "   cumul: " << convol->distribution[1]->cumul[convol->distribution[1]->nb_value - 1];
-        }
-        cout << endl;
+#     ifdef MESSAGE
+      os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+         << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+         << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation();
+      if (estimator == PENALIZED_LIKELIHOOD) {
+        os << "   cumul: " << convol->distribution[1]->cumul[convol->distribution[1]->nb_value - 1];
       }
+      os << endl;
+#     endif
 
       if (estimator == PARAMETRIC_REGULARIZATION) {
         dist_flag[0] = false;
@@ -308,7 +301,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
         do {
           i++;
 
-          // computation of the reestimation quantities
+          // calcul des quantites de reestimation
 
           convol->expectation_step(*this , partial_convol , reestim);
           convol_histo->frequency_distribution[1]->update(reestim[1] ,
@@ -322,7 +315,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
             likelihood = D_INF;
           }
 
-          // computation of the estimated convolution and the corresponding log-likelihood
+          // calcul du produit de convolution estime et de la log-vraisemblance correspondante
 
           else {
             convol->computation(nb_value , CONVOLUTION_THRESHOLD , dist_flag);
@@ -337,10 +330,10 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
             }
 
 #           ifdef DEBUG
-            if ((display) && ((i < 10) || (i % 10 == 0))) {
-              cout << STAT_label[STATL_ITERATION] << " " << i << "   "
-                   << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-                   << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation() << endl;
+            if ((i < 10) || (i % 10 == 0)) {
+              os << STAT_label[STATL_ITERATION] << " " << i << "   "
+                 << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+                 << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation() << endl;
             }
 #           endif
 
@@ -350,17 +343,20 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
                (((likelihood - previous_likelihood) / -likelihood > CONVOLUTION_LIKELIHOOD_DIFF) ||
                 (hlikelihood == D_INF) || (nb_likelihood_decrease == 1)));
 
-        if ((display) && (likelihood != D_INF)) {
-          cout << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
-               << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-               << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation() << endl;
+#       ifdef MESSAGE
+        if (likelihood != D_INF) {
+          os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+             << STAT_label[STATL_SMOOTHNESS] << ": " << convol->distribution[1]->second_difference_norm_computation() << endl;
         }
+#       endif
+
       }
     }
 
     if (likelihood != D_INF) {
 
-      // update of the number of free parameters
+      // mise a jour du nombre de parametres inconnus
 
       convol->distribution[1]->nb_parameter_update();
       convol->nb_parameter = convol->distribution[1]->nb_parameter;
@@ -391,31 +387,25 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Deconvolution of an elementary distribution using the EM algorithm.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error         reference on a StatError object,
- *  \param[in] display       flag for displaying estimation intermediate results,
- *  \param[in] known_dist    reference on the known distribution,
- *  \param[in] min_inf_bound minimum lower bound of the support,
- *  \param[in] estimator     estimator type (likelihood, penalized likelihood or 
- *                           estimation of a parametric distribution),
- *  \param[in] nb_iter       number of iterations,
- *  \param[in] weight        penalty weight,
- *  \param[in] pen_type      penalty type,
- *  \param[in] outside       management of side effects (zero outside the support or
- *                           continuation of the distribution).
+ *  Estimation des parametres d'un produit de convolution de lois
+ *  par l'algorithme EM.
  *
- *  \return                  Convolution object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, stream, reference sur la loi connue,
+ *              borne inferieure minimum, type d'estimateur (vraisemblance,
+ *              vraisemblance penalisee ou estimation d'une loi parametrique),
+ *              nombre d'iterations, poids de la penalisation, type de penalisation,
+ *              type de gestion des effets de bord (zero a l'exterieur du support ou
+ *              prolongation de la loi).
+ *
+ *--------------------------------------------------------------*/
 
-Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bool display ,
+Convolution* FrequencyDistribution::convolution_estimation(StatError &error , ostream &os ,
                                                            const DiscreteParametric &known_dist ,
-                                                           int min_inf_bound , estimation_criterion estimator ,
+                                                           int min_inf_bound , int estimator ,
                                                            int nb_iter , double weight ,
-                                                           penalty_type pen_type , side_effect outside) const
+                                                           int penalty_type , int outside) const
 
 {
   bool status = true;
@@ -457,8 +447,8 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
     unknown_dist->ascii_print(os);
 #   endif
 
-    convol = convolution_estimation(error , display , known_dist , *unknown_dist , estimator ,
-                                    nb_iter , weight , pen_type , outside);
+    convol = convolution_estimation(error , os , known_dist , *unknown_dist , estimator ,
+                                    nb_iter , weight , penalty_type , outside);
 
     delete unknown_dist;
   }
@@ -467,21 +457,18 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , bo
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Simulation using a convolution of discrete distributions.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error       reference on a StatError object,
- *  \param[in] nb_element  sample size.
+ *  Simulation par un produit de convolution de lois.
  *
- *  \return                ConvolutionData object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, effectif.
+ *
+ *--------------------------------------------------------------*/
 
 ConvolutionData* Convolution::simulation(StatError &error , int nb_element) const
 
 {
-  int i , j;
+  register int i , j;
   int value , sum;
   ConvolutionData *convol_histo;
 
@@ -495,7 +482,7 @@ ConvolutionData* Convolution::simulation(StatError &error , int nb_element) cons
 
   else {
 
-    // construction of a ConvolutionData object
+    // creation d'un objet ConvolutionData
 
     convol_histo = new ConvolutionData(*this);
     convol_histo->convolution = new Convolution(*this , false);
@@ -505,7 +492,7 @@ ConvolutionData* Convolution::simulation(StatError &error , int nb_element) cons
 
       for (j = 0;j < nb_distribution;j++) {
 
-        // elementary distribution
+        // loi elementaire
 
         value = distribution[j]->simulation();
         sum += value;
@@ -513,12 +500,12 @@ ConvolutionData* Convolution::simulation(StatError &error , int nb_element) cons
         (convol_histo->frequency_distribution[j]->frequency[value])++;
       }
 
-      // resulting convolution
+      // loi resultante
 
       (convol_histo->frequency[sum])++;
     }
 
-    // computation of frequency distribution characteristics
+    // extraction des caracteristiques des lois empiriques
 
     convol_histo->nb_value_computation();
     convol_histo->offset_computation();

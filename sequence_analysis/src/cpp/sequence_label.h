@@ -3,12 +3,12 @@
  *
  *       AMAPmod: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id: sequence_label.h 18668 2015-11-09 12:03:42Z guedon $
+ *       $Id: sequence_label.h 18071 2015-04-23 10:53:08Z guedon $
  *
  *       Forum for AMAPmod developers: amldevlp@cirad.fr
  *
@@ -46,11 +46,11 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Key word identifiers (file format)
+ *  Identificateurs des mots cles (format des fichiers) :
  */
 
 
-  enum sequence_analysis_keyword {
+  enum {
     SEQW_MARKOV_CHAIN ,
     SEQW_EQUILIBRIUM_MARKOV_CHAIN ,
     SEQW_HIDDEN_MARKOV_CHAIN ,
@@ -82,11 +82,11 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Label identifiers
+ *  Identificateurs des labels :
  */
 
 
-  enum sequence_analysis_label {
+  enum {
     SEQL_STATE_SEQUENCE_LIKELIHOOD ,
     SEQL_STATE_SEQUENCES_LIKELIHOOD ,
     SEQL_OBSERVED_SEQUENCES_LIKELIHOOD ,
@@ -101,8 +101,11 @@ namespace sequence_analysis {
     SEQL_EQUILIBRIUM_RENEWAL ,
     SEQL_OBSERVATION_TIME ,
     SEQL_INTER_EVENT ,
+    SEQL_BACKWARD ,
+    SEQL_FORWARD ,
     SEQL_RECURRENCE_TIME ,
     SEQL_LENGTH_BIASED ,
+    SEQL_OBSERVATION_INTER_EVENT ,
     SEQL_2_CENSORED_INTER_EVENT ,
     SEQL_1_CENSORED_INTER_EVENT ,
     SEQL_COMPLETE_INTER_EVENT ,
@@ -154,6 +157,7 @@ namespace sequence_analysis {
     SEQL_BIASED ,
     SEQL_OCCUPANCY ,
     SEQL_OCCUPANCY_WEIGHTS ,
+    SEQL_SOJOURN_TIME ,
     SEQL_INITIAL_RUN ,
     SEQL_FINAL_RUN ,
     SEQL_MIXTURE_OF ,
@@ -170,7 +174,6 @@ namespace sequence_analysis {
     SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY ,
     SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY_LOG_RATIO ,
     SEQL_STATE_BEGIN ,
-    SEQL_POSTERIOR_INITIAL_STATE_PROBABILITY ,
     SEQL_POSTERIOR_STATE_PROBABILITY ,
     SEQL_POSTERIOR_IN_STATE_PROBABILITY ,
     SEQL_POSTERIOR_OUT_STATE_PROBABILITY ,
@@ -197,7 +200,6 @@ namespace sequence_analysis {
     SEQL_RANK ,
     SEQL_LAG ,
     SEQL_MAX_LAG ,
-    SEQL_AUTOREGRESSIVE_MODEL ,
     SEQL_WHITE_NOISE ,
     SEQL_RANDOMNESS_95_CONFIDENCE_LIMIT ,
     SEQL_PAIR_FREQUENCY ,
@@ -229,32 +231,21 @@ namespace sequence_analysis {
     SEQL_OPTIMAL ,
     SEQL_CHANGE_POINT ,
     SEQL_CHANGE_POINTS ,
-    SEQL_CHANGE_POINT_AMPLITUDE ,
+    SEQL_MEAN_CHANGE_POINT_AMPLITUDE ,
     SEQL_SEGMENT ,
     SEQL_SEGMENTS ,
     SEQL_SEGMENT_SAMPLE_SIZE ,
     SEQL_GLOBAL_STANDARD_DEVIATION ,
-    SEQL_GLOBAL_RESIDUAL_STANDARD_DEVIATION ,
-    SEQL_ROOT_MEAN_SQUARE_ERROR ,
-    SEQL_MEAN_ABSOLUTE_ERROR ,
     SEQL_PIECEWISE_LINEAR_FUNCTION ,
-    SEQL_CONFIDENCE_INTERVAL ,
-    SEQL_CONFIDENCE_INTERVALS ,
-    SEQL_AUTOREGRESSIVE_COEFF ,
     SEQL_NB_SEGMENT ,
     SEQL_POSTERIOR_PROBABILITY ,
-    SEQL_DIMENSION_JUMP ,
-    SEQL_OPTIMAL_SLOPE ,
-    SEQL_PIECEWISE_STEP_FUNCTION ,
+    SEQL_PENALTY ,
     SEQL_NB_SEGMENTATION ,
     SEQL_SEGMENTATIONS ,
     SEQL_SEGMENTATION_LIKELIHOOD ,
     SEQL_POSSIBLE_SEGMENTATION_LIKELIHOOD ,
-    SEQL_CHANGE_POINT_UNCERTAINTY_INTERVALS ,
     SEQL_POSTERIOR_CHANGE_POINT_PROBABILITY ,
     SEQL_POSTERIOR_SEGMENT_PROBABILITY ,
-    SEQL_SEGMENT_LENGTH ,
-    SEQL_PRIOR_SEGMENT_LENGTH ,
     SEQL_SEGMENTATION_ENTROPY ,
     SEQL_FIRST_ORDER_ENTROPY ,
     SEQL_CHANGE_POINT_ENTROPY ,
@@ -280,11 +271,11 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Identifiers of error messages for lexical analysis of files
+ *  Identificateurs des messages d'erreur pour l'analyse des fichiers :
  */
 
 
-  enum sequence_analysis_parsing {
+  enum {
     SEQP_TIME_ORDER ,
     SEQP_MAX_TIME ,
     SEQP_NB_EVENT_ORDER ,
@@ -305,16 +296,22 @@ namespace sequence_analysis {
 
 /****************************************************************
  *
- *  Identifiers of error messages
+ *  Identificateurs des messages d'erreur de traitement :
  */
 
 
-  enum sequence_analysis_error {
+  enum {
     SEQR_BOTH_END_CENSORED_INTERVAL ,
     SEQR_INCOMPATIBLE_RENEWAL_DATA ,
     SEQR_MAX_NB_EVENT_TOO_SMALL ,
     SEQR_NB_EVENT_TOO_SMALL ,
     SEQR_TIME_UNIT ,
+    SEQR_NB_COMPLETE_INTERVAL_TOO_SMALL ,
+    SEQR_COMPLETE_MIN_VALUE ,
+    SEQR_FORWARD_MIN_VALUE ,
+    SEQR_NO_EVENT_MIN_VALUE ,
+    SEQR_MEAN_COMPUTATION_METHOD ,
+    SEQR_INTER_EVENT_SUPPORT ,
 
     SEQR_OBSERVATION_TIME ,
     SEQR_MIN_TIME ,
@@ -349,7 +346,6 @@ namespace sequence_analysis {
     SEQR_SHORT_SEQUENCE_LENGTH ,
     SEQR_LONG_SEQUENCE_LENGTH ,
     SEQR_CUMUL_SEQUENCE_LENGTH ,
-    SEQR_VARIABLE_SEQUENCE_LENGTH ,
     SEQR_STATES_NOT_REPRESENTED ,
     SEQR_STATE_SEQUENCE_COMPUTATION_FAILURE ,
     SEQR_REFERENCE_MODEL ,
@@ -360,7 +356,6 @@ namespace sequence_analysis {
     SEQR_VERTEX_IDENTIFIER ,
     SEQR_INDEX_PARAMETER_TYPE ,
     SEQR_INDEX_PARAMETER ,
-    SEQR_STATE ,
     SEQR_VARIABLE_INDICES ,
     SEQR_VARIABLE_LAG ,
     SEQR_DATE_ORDER ,
@@ -381,7 +376,6 @@ namespace sequence_analysis {
     SEQR_FREQUENCY ,
     SEQR_MAX_LAG ,
     SEQR_INCOMPATIBLE_CORRELATION_FUNCTION ,
-    SEQR_AUTOREGRESSIVE_COEFF ,
     SEQR_DIFFERENCING_ORDER ,
     SEQR_INITIAL_RUN_ALREADY_BUILT ,
     SEQR_RUN_LENGTH ,
@@ -393,7 +387,6 @@ namespace sequence_analysis {
     SEQR_CONSECUTIVE_VALUES ,
     SEQR_NON_EXISTING_CHARACTERISTIC_DISTRIBUTION ,
     SEQR_NON_EXISTING_FORWARD_DISTRIBUTION ,
-    SEQR_POSTERIOR_PROBABILITY_ORDER ,
     SEQR_INCOMPATIBLE_MODEL ,
     SEQR_SEQUENCE_INCOMPATIBLE_MODEL ,
 

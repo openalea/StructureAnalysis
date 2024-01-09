@@ -3,7 +3,7 @@
 :Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__version__ = "$Id$"
+__version__ = "$Id: test_convolution.py 8625 2010-04-13 11:34:37Z cokelaer $"
 
 from openalea.stat_tool import Convolution
 from openalea.stat_tool.distribution import Binomial, NegativeBinomial

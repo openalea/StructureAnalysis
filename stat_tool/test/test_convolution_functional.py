@@ -1,6 +1,6 @@
 """Convolution functional test extracted from original version of
 stat_tool_test.aml"""
-__version__ = "$Id$"
+__version__ = "$Id: test_convolution_functional.py 8552 2010-03-25 15:06:07Z cokelaer $"
 
 
 from openalea.stat_tool import Convolution, Histogram, Distribution

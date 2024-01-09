@@ -21,8 +21,17 @@
 
 #include "wrapper_util.h"
 
+#include "tool/config.h"
+
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
+#include "sequence_analysis/sequences.h"
 #include "sequence_analysis/variable_order_markov.h"
 #include "sequence_analysis/sequence_label.h"
 
@@ -52,7 +61,7 @@ public:
   {
     StatError error;
     VariableOrderMarkov *vom = NULL;
-    vom = VariableOrderMarkov::ascii_read(error, filename, length);
+    vom = variable_order_markov_ascii_read(error, filename, length);
     if (!vom)
       {
         sequence_analysis::wrap_util::throw_error(error);
@@ -74,9 +83,9 @@ public:
   }
 
   static DiscreteParametricModel*
-  extract(const VariableOrderMarkov &input, process_distribution dist_type, int variable, int value)
+  extract(const VariableOrderMarkov &input, int type, int variable, int value)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, dist_type, variable,
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, type, variable,
         value);
   }
 
@@ -270,7 +279,7 @@ void class_variable_order_markov() {
 
 
   VariableOrderMarkovData* get_markov_data() const { return markov_data; }
-  CategoricalSequenceProcess* get_nonparametric_process(int variable) const{ return nonparametric_process[variable]; }
+  NonparametricSequenceProcess* get_nonparametric_process(int variable) const{ return nonparametric_process[variable]; }
   DiscreteParametricProcess** get_parametric_process() const { return parametric_process; }
   DiscreteParametricProcess* get_parametric_process(int variable)const { return parametric_process[variable]; }
 */
@@ -323,7 +332,7 @@ void class_variable_order_markov_data() {
    ~VariableOrderMarkovData();
    VariableOrderMarkovData& operator=(const VariableOrderMarkovData &seq);
 
-   DiscreteDistributionData* extract(StatError &error , process_distribution histo_type ,
+   DiscreteDistributionData* extract(StatError &error , int type ,
                                      int variable , int value) const;
    VariableOrderMarkovData* remove_index_parameter(StatError &error) const;
 

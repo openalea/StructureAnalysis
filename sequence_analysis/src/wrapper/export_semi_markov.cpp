@@ -4,7 +4,7 @@
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
- *        File author(s): Yann Guedon <yann.guedon@cirad.fr>
+ *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
  *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
@@ -21,8 +21,17 @@
 
 #include "wrapper_util.h"
 
+#include "tool/config.h"
+
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
+#include "sequence_analysis/sequences.h"
 #include "sequence_analysis/semi_markov.h"
 #include "sequence_analysis/sequence_label.h"
 
@@ -54,7 +63,7 @@ public:
 
     SemiMarkov *semi_markov = NULL;
 
-    semi_markov = SemiMarkov::ascii_read(error, filename, length,
+    semi_markov = semi_markov_ascii_read(error, filename, length,
         counting_flag, cumul_threshold);
 
 
@@ -72,24 +81,17 @@ public:
   }
 
   static DiscreteParametricModel*
-  extract_histogram(const SemiMarkov &input, int state, process_distribution histo_type)
+  extract_histogram(const SemiMarkov &input, int state, int histogram_type)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, state, histo_type);
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, state, histogram_type);
   }
 
   static DiscreteParametricModel*
-  extract(const SemiMarkov &input, int idist_type, int variable, int value)
+  extract(const SemiMarkov &input, int type, int variable, int value)
   {
-     process_distribution dist_type = process_distribution(idist_type);
-     
-     DiscreteParametricModel *ret = NULL;
-     StatError error;
-     
-     ret = input.extract(error, dist_type, variable, value);
-     
-     if (ret == NULL)
-         sequence_analysis::wrap_util::throw_error(error);
-     return ret;
+
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, type, variable,
+        value);
   }
 
 
@@ -124,7 +126,15 @@ public:
       sequence_analysis::wrap_util::throw_error(error);
   }
 
-
+  static void
+  write_hidden_semi_markov_init_file(const SemiMarkov &d, const char *path)
+  {
+    bool result = true;
+    StatError error;
+    result = d.write_hidden_semi_markov_init_file(error, path);
+    if (!result)
+      sequence_analysis::wrap_util::throw_error(error);
+  }
 
   static SemiMarkov*
   thresholding(const SemiMarkov &input, double min_probability)
@@ -239,6 +249,7 @@ class_semi_markov()
     DEF_RETURN_VALUE_NO_ARGS("extract_data", SemiMarkovWrap::extract_data, "returns semi_markov_data")
 
     .def("file_ascii_write", SemiMarkovWrap::file_ascii_write,"Save vector summary into a file")
+    .def("write_hidden_semi_markov_init_file", SemiMarkovWrap::write_hidden_semi_markov_init_file, "save a SMM to a file in order to create a initialization file for HSMM")
     DEF_RETURN_VALUE("thresholding", SemiMarkovWrap::thresholding, args("index"), "todo")
 
     DEF_RETURN_VALUE("simulation_histogram", WRAP::simulation_histogram, args("todo"), "simulation")
@@ -258,7 +269,7 @@ class_semi_markov()
    *
    SemiMarkov();
    SemiMarkov(char itype , int inb_state , int inb_output_process , int *nb_value);
-   SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *poccupancy , const NonparametricProcess *pobservation , int length ,  bool counting_flag);
+   SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy , const NonparametricProcess *pobservation , int length ,  bool counting_flag);
    SemiMarkov(const SemiMarkov &smarkov , bool data_flag = true ,  int param = I_DEFAULT)  :Chain(smarkov) { copy(smarkov , data_flag , param); }
 
     bool spreadsheet_write(StatError &error , const char *path) const;
@@ -273,7 +284,7 @@ class_semi_markov()
 
    Forward** get_forward() const { return forward; }
 
-   CategoricalSequenceProcess* get_nonparametric_process(int variable)   const { return nonparametric_process[variable]; }
+   NonparametricSequenceProcess* get_nonparametric_process(int variable)   const { return nonparametric_process[variable]; }
    DiscreteParametricProcess** get_parametric_process() const { return parametric_process; }
 
 
@@ -296,18 +307,9 @@ public:
    }
 
    static DiscreteDistributionData*
-   extract(const SemiMarkovData &input, int ihisto_type, int variable, int value)
+   extract(const SemiMarkovData &input, int type, int variable, int value)
    {
-     process_distribution histo_type = process_distribution(ihisto_type);
-     
-     DiscreteDistributionData *ret = NULL;
-     StatError error;
-     
-     ret = input.extract(error, histo_type, variable, value);
-     
-     if (ret == NULL)
-         sequence_analysis::wrap_util::throw_error(error);
-     return ret;
+     SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteDistributionData, type, variable, value);
    }
 
  static MarkovianSequences*
@@ -330,8 +332,8 @@ class_semi_markov_data()
 
   class_<SemiMarkovData, bases<MarkovianSequences> > ("_SemiMarkovData", "SemiMarkovData")
     .def(init<MarkovianSequences> ())
-    .def(init< MarkovianSequences, sequence_transformation, bool> ())
-    .def(init<SemiMarkovData, bool, sequence_transformation> ())
+    .def(init< MarkovianSequences, char, bool> ())
+    .def(init<SemiMarkovData, bool, char> ())
 
     .add_property("likelihood", &SemiMarkovData::get_likelihood, "returns likelihood")
     .add_property("restoration_likelihood", &SemiMarkovData::get_restoration_likelihood, "returns restoration likelihood")

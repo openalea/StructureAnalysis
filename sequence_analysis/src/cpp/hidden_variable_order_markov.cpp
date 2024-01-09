@@ -3,12 +3,12 @@
  *
  *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id$
+ *       $Id: hidden_variable_order_markov.cpp 18052 2015-04-23 09:43:57Z guedon $
  *
  *       Forum for V-Plants developers:
  *
@@ -36,20 +36,26 @@
 
 
 
-#include <string>
 #include <sstream>
 
-#include <boost/tokenizer.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/classification.hpp>
+#include "tool/rw_tokenizer.h"
+#include "tool/rw_cstring.h"
+#include "tool/rw_locale.h"
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 
+#include "sequences.h"
+#include "variable_order_markov.h"
 #include "hidden_variable_order_markov.h"
 #include "sequence_label.h"
 
 using namespace std;
-using namespace boost;
 using namespace stat_tool;
 
 
@@ -57,18 +63,16 @@ namespace sequence_analysis {
 
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Constructor of the VariableOrderMarkov class.
+/*--------------------------------------------------------------*
  *
- *  \param[in] pmarkov                           pointer on a VariableOrderMarkovChain object,
- *  \param[in] inb_output_process                number of observation processes,
- *  \param[in] categorical_observation           pointer on CategoricalProcess objects,
- *  \param[in] discrete_parametric_observation   pointer on DiscreteParametricProcess objects,
- *  \param[in] continuous_parametric_observation pointer on ContinuousParametricProcess objects,
- *  \param[in] length                            sequence length.
- */
-/*--------------------------------------------------------------*/
+ *  Constructeur de la classe VariableOrderMarkov.
+ *
+ *  arguments : pointeur sur un objet VariableOrderMarkovChain,
+ *              nombre de processus d'observation, pointeurs sur des objets
+ *              CategoricalProcess, DiscreteParametricProcess et
+ *              ContinuousParametricProcess, longueur des sequences.
+ *
+ *--------------------------------------------------------------*/
 
 VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkovChain *pmarkov , int inb_output_process ,
                                          CategoricalProcess **categorical_observation ,
@@ -77,7 +81,7 @@ VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkovChain *pmarkov
                                          int length)
 
 {
-  int i;
+  register int i;
 
 
   build(*pmarkov);
@@ -113,30 +117,27 @@ VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkovChain *pmarkov
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Destructor of the HiddenVariableOrderMarkov class.
- */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *
+ *  Destructeur de la classe HiddenVariableOrderMarkov.
+ *
+ *--------------------------------------------------------------*/
 
 HiddenVariableOrderMarkov::~HiddenVariableOrderMarkov() {}
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Application of a threshold on the probability parameters of
- *         a hidden variable-order Markov chain.
+/*--------------------------------------------------------------*
  *
- *  \param[in] min_probability minimum probability.
+ *  Application d'un seuil sur les parametres d'une chaine de Markov cachee.
  *
- *  \return                    HiddenVariableOrderMarkov object.
- */
-/*--------------------------------------------------------------*/
+ *  argument : probabilite minimum.
+ *
+ *--------------------------------------------------------------*/
 
 HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::thresholding(double min_probability) const
 
 {
-  int i;
+  register int i;
   HiddenVariableOrderMarkov *hmarkov;
 
 
@@ -153,39 +154,34 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::thresholding(double min_pr
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Construction of a HiddenVariableOrderMarkov object from a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error           reference on a StatError object,
- *  \param[in] path            file path,
- *  \param[in] length          sequence length,
- *  \param[in] cumul_threshold threshold on the cumulative parametric distribution functions.
+ *  Construction d'un objet HiddenVariableOrderMarkov a partir d'un fichier.
  *
- *  \return                    HiddenVariableOrderMarkov object.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path, longueur des sequences,
+ *              seuil sur les fonctions de repartition des lois parametriques.
+ *
+ *--------------------------------------------------------------*/
 
-HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &error ,
-                                                                 const string path , int length ,
-                                                                 double cumul_threshold)
+HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &error ,
+                                                                   const char *path , int length ,
+                                                                   double cumul_threshold)
 
 {
-  string buffer;
+  RWLocaleSnapshot locale("en");
+  RWCString buffer , token;
   size_t position;
-  typedef tokenizer<char_separator<char>> tokenizer;
-  char_separator<char> separator(" \t");
-  process_type type = DEFAULT_TYPE;
+  char type = 'v';
   bool status , lstatus;
-  int i;
-  int line , nb_output_process , value , index;
-  observation_process obs_type;
+  register int i;
+  int line , nb_output_process , output_process_type , index;
+  long value;
   const VariableOrderMarkovChain *imarkov;
   CategoricalProcess **categorical_observation;
   DiscreteParametricProcess **discrete_parametric_observation;
   ContinuousParametricProcess **continuous_parametric_observation;
   HiddenVariableOrderMarkov *hmarkov;
-  ifstream in_file(path.c_str());
+  ifstream in_file(path);
 
 
   hmarkov = NULL;
@@ -208,38 +204,38 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
       error.update(SEQ_error[SEQR_LONG_SEQUENCE_LENGTH]);
     }
 
-    while (getline(in_file , buffer)) {
+    while (buffer.readLine(in_file , false)) {
       line++;
 
 #     ifdef DEBUG
       cout << line << "  " << buffer << endl;
 #     endif
 
-      position = buffer.find('#');
-      if (position != string::npos) {
-        buffer.erase(position);
+      position = buffer.first('#');
+      if (position != RW_NPOS) {
+        buffer.remove(position);
       }
       i = 0;
 
-      tokenizer tok_buffer(buffer , separator);
+      RWCTokenizer next(buffer);
 
-      for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+      while (!((token = next()).isNull())) {
 
-        // test (EQUILIBRIUM_)HIDDEN_MARKOV_CHAIN keyword
+        // test mot cle (EQUILIBRIUM) HIDDEN_MARKOV_CHAIN
 
         if (i == 0) {
-          if (*token == SEQ_word[SEQW_HIDDEN_MARKOV_CHAIN]) {
-            type = ORDINARY;
+          if (token == SEQ_word[SEQW_HIDDEN_MARKOV_CHAIN]) {
+            type = 'o';
           }
-          else if (*token == SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_MARKOV_CHAIN]) {
-            type = EQUILIBRIUM;
+          else if (token == SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_MARKOV_CHAIN]) {
+            type = 'e';
           }
           else {
             status = false;
             ostringstream correction_message;
             correction_message << SEQ_word[SEQW_HIDDEN_MARKOV_CHAIN] << " or "
                                << SEQ_word[SEQW_EQUILIBRIUM_HIDDEN_MARKOV_CHAIN];
-            error.correction_update(STAT_parsing[STATP_KEYWORD] ,
+            error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
                                     (correction_message.str()).c_str() , line);
           }
         }
@@ -256,13 +252,13 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
       }
     }
 
-    if (type != DEFAULT_TYPE) {
+    if (type != 'v') {
 
-      // analysis of the format and reading of the variable-order Markov chain
+      // analyse du format et lecture de la chaine de Markov d'ordre variable
 
-      imarkov = VariableOrderMarkovChain::parsing(error , in_file , line , type);
+      imarkov = variable_order_markov_parsing(error , in_file , line , type);
 
-      // analysis of the format and reading of the observation distributions
+      // analyse du format et lecture des lois d'observation
 
       if (imarkov) {
         nb_output_process = I_DEFAULT;
@@ -271,37 +267,28 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
         discrete_parametric_observation = NULL;
         continuous_parametric_observation = NULL;
 
-        while (getline(in_file , buffer)) {
+        while (buffer.readLine(in_file , false)) {
           line++;
 
 #         ifdef DEBUG
           cout << line << "  " << buffer << endl;
 #         endif
 
-          position = buffer.find('#');
-          if (position != string::npos) {
-            buffer.erase(position);
+          position = buffer.first('#');
+          if (position != RW_NPOS) {
+            buffer.remove(position);
           }
           i = 0;
 
-          tokenizer tok_buffer(buffer , separator);
+          RWCTokenizer next(buffer);
 
-          for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+          while (!((token = next()).isNull())) {
             switch (i) {
 
-            // test number of observation processes
+            // test nombre de processus d'observation
 
             case 0 : {
-              lstatus = true;
-
-/*              try {
-                value = stoi(*token);   in C++ 11
-              }
-              catch(invalid_argument &arg) {
-                lstatus = false;
-              } */
-              value = atoi(token->c_str());
-
+              lstatus = locale.stringToNum(token , &value);
               if (lstatus) {
                 if ((value < 1) || (value > NB_OUTPUT_PROCESS)) {
                   lstatus = false;
@@ -318,12 +305,12 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
               break;
             }
 
-            // test OUTPUT_PROCESS(ES) keyword
+            // test mot cle OUTPUT_PROCESS(ES)
 
             case 1 : {
-              if (*token != STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES]) {
+              if (token != STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES]) {
                 status = false;
-                error.correction_update(STAT_parsing[STATP_KEYWORD] ,
+                error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
                                         STAT_word[nb_output_process == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES] , line , i + 1);
               }
               break;
@@ -360,48 +347,41 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
 
           index = 0;
 
-          while (getline(in_file , buffer)) {
+          while (buffer.readLine(in_file , false)) {
             line++;
 
 #           ifdef DEBUG
             cout << line << "  " << buffer << endl;
 #           endif
 
-            position = buffer.find('#');
-            if (position != string::npos) {
-              buffer.erase(position);
+            position = buffer.first('#');
+            if (position != RW_NPOS) {
+              buffer.remove(position);
             }
             i = 0;
 
-            tokenizer tok_buffer(buffer , separator);
+            RWCTokenizer next(buffer);
 
-            for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++) {
+            while (!((token = next()).isNull())) {
               switch (i) {
 
-              // test OUTPUT_PROCESS keyword
+              // test mot cle OUTPUT_PROCESS
 
               case 0 : {
-                if (*token != STAT_word[STATW_OUTPUT_PROCESS]) {
+                if (token == STAT_word[STATW_OUTPUT_PROCESS]) {
+                  index++;
+                }
+                else {
                   status = false;
-                  error.correction_update(STAT_parsing[STATP_KEYWORD] , STAT_word[STATW_OUTPUT_PROCESS] , line , i + 1);
+                  error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_OUTPUT_PROCESS] , line , i + 1);
                 }
                 break;
               }
 
-              // test observation process index
+              // test indice du processus d'observation
 
               case 1 : {
-                index++;
-                lstatus = true;
-
-/*                try {
-                  value = stoi(*token);   in C++ 11
-                }
-                catch(invalid_argument &arg) {
-                  lstatus = false;
-                } */
-                value = atoi(token->c_str());
-
+                lstatus = locale.stringToNum(token , &value);
                 if ((lstatus) && ((value != index) || (value > nb_output_process))) {
                   lstatus = false;
                 }
@@ -413,38 +393,38 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
                 break;
               }
 
-              // test separator
+              // test separateur
 
               case 2 : {
-                if (*token != ":") {
+                if (token != ":") {
                   status = false;
                   error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
                 }
                 break;
               }
 
-              // test CATEGORICAL/DISCRETE_PARAMETRIC/CONTINUOUS_PARAMETRIC keyword
+              // test mot cle CATEGORICAL / DISCRETE_PARAMETRIC / CONTINUOUS_PARAMETRIC
 
               case 3 : {
-                if ((*token == STAT_word[STATW_CATEGORICAL]) ||
-                    (*token == STAT_word[STATW_NONPARAMETRIC])) {
-                  obs_type = CATEGORICAL_PROCESS;
+                if ((token == STAT_word[STATW_CATEGORICAL]) ||
+                    (token == STAT_word[STATW_NONPARAMETRIC])) {
+                  output_process_type = CATEGORICAL_PROCESS;
                 }
-                else if ((*token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
-                         (*token == STAT_word[STATW_PARAMETRIC])) {
-                  obs_type = DISCRETE_PARAMETRIC;
+                else if ((token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
+                         (token == STAT_word[STATW_PARAMETRIC])) {
+                  output_process_type = DISCRETE_PARAMETRIC;
                 }
-                else if (*token == STAT_word[STATW_CONTINUOUS_PARAMETRIC]) {
-                  obs_type = CONTINUOUS_PARAMETRIC;
+                else if (token == STAT_word[STATW_CONTINUOUS_PARAMETRIC]) {
+                  output_process_type = CONTINUOUS_PARAMETRIC;
                 }
                 else {
-                  obs_type = DEFAULT_PROCESS;
+                  output_process_type = CATEGORICAL_PROCESS - 1;
                   status = false;
                   ostringstream correction_message;
                   correction_message << STAT_word[STATW_CATEGORICAL] << " or "
                                      << STAT_word[STATW_DISCRETE_PARAMETRIC] << " or "
                                      << STAT_word[STATW_CONTINUOUS_PARAMETRIC];
-                  error.correction_update(STAT_parsing[STATP_KEYWORD] , (correction_message.str()).c_str() , line , i + 1);
+                  error.correction_update(STAT_parsing[STATP_KEY_WORD] , (correction_message.str()).c_str() , line , i + 1);
                 }
                 break;
               }
@@ -459,12 +439,12 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
                 error.update(STAT_parsing[STATP_FORMAT] , line);
               }
 
-              switch (obs_type) {
+              switch (output_process_type) {
 
               case CATEGORICAL_PROCESS : {
-                categorical_observation[index - 1] = CategoricalProcess::parsing(error , in_file , line ,
-                                                                                 ((Chain*)imarkov)->nb_state ,
-                                                                                 HIDDEN_MARKOV , true);
+                categorical_observation[index - 1] = categorical_observation_parsing(error , in_file , line ,
+                                                                                     ((Chain*)imarkov)->nb_state ,
+                                                                                     HIDDEN_MARKOV , true);
                 if (!categorical_observation[index - 1]) {
                   status = false;
                 }
@@ -472,10 +452,10 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
               }
 
               case DISCRETE_PARAMETRIC : {
-                discrete_parametric_observation[index - 1] = DiscreteParametricProcess::parsing(error , in_file , line ,
-                                                                                                ((Chain*)imarkov)->nb_state ,
-                                                                                                HIDDEN_MARKOV ,
-                                                                                                cumul_threshold);
+                discrete_parametric_observation[index - 1] = discrete_observation_parsing(error , in_file , line ,
+                                                                                          ((Chain*)imarkov)->nb_state ,
+                                                                                          HIDDEN_MARKOV ,
+                                                                                          cumul_threshold);
                 if (!discrete_parametric_observation[index - 1]) {
                   status = false;
                 }
@@ -483,10 +463,10 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
               }
 
               case CONTINUOUS_PARAMETRIC : {
-                continuous_parametric_observation[index - 1] = ContinuousParametricProcess::parsing(error , in_file , line ,
-                                                                                                    ((Chain*)imarkov)->nb_state ,
-                                                                                                    HIDDEN_MARKOV ,
-                                                                                                    ZERO_INFLATED_GAMMA);
+                continuous_parametric_observation[index - 1] = continuous_observation_parsing(error , in_file , line ,
+                                                                                              ((Chain*)imarkov)->nb_state ,
+                                                                                              HIDDEN_MARKOV ,
+                                                                                              ZERO_INFLATED_GAMMA);
                 if (!continuous_parametric_observation[index - 1]) {
                   status = false;
                 }
@@ -494,34 +474,11 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
               }
               }
             }
-
-            if (index == nb_output_process) {
-              break;
-            }
           }
 
-          if (index < nb_output_process) {
+          if (index != nb_output_process) {
             status = false;
             error.update(STAT_parsing[STATP_FORMAT] , line);
-          }
-
-          else {
-            while (getline(in_file , buffer)) {
-              line++;
-
-#             ifdef DEBUG
-              cout << line << " " << buffer << endl;
-#             endif
-
-              position = buffer.find('#');
-              if (position != string::npos) {
-                buffer.erase(position);
-              }
-              if (!(trim_right_copy_if(buffer , is_any_of(" \t")).empty())) {
-                status = false;
-                error.update(STAT_parsing[STATP_FORMAT] , line);
-              }
-            }
           }
 
           if (status) {
@@ -555,14 +512,13 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::ascii_read(StatError &erro
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a HiddenVariableOrderMarkov object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in,out] os         stream,
- *  \param[in]     exhaustive flag detail level.
- */
-/*--------------------------------------------------------------*/
+ *  Ecriture d'un objet HiddenVariableOrderMarkov dans un fichier.
+ *
+ *  arguments : stream, flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
 ostream& HiddenVariableOrderMarkov::ascii_write(ostream &os , bool exhaustive) const
 
@@ -573,24 +529,21 @@ ostream& HiddenVariableOrderMarkov::ascii_write(ostream &os , bool exhaustive) c
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a HiddenVariableOrderMarkov object in a file.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error      reference on a StatError object,
- *  \param[in] path       file path,
- *  \param[in] exhaustive flag detail level.
+ *  Ecriture d'un objet HiddenVariableOrderMarkov dans un fichier.
  *
- *  \return               error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path,
+ *              flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
 
-bool HiddenVariableOrderMarkov::ascii_write(StatError &error , const string path ,
+bool HiddenVariableOrderMarkov::ascii_write(StatError &error , const char *path ,
                                             bool exhaustive) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();
@@ -609,24 +562,20 @@ bool HiddenVariableOrderMarkov::ascii_write(StatError &error , const string path
 }
 
 
-/*--------------------------------------------------------------*/
-/**
- *  \brief Writing of a HiddenVariableOrderMarkov object in a file
- *         at the spreadsheet format.
+/*--------------------------------------------------------------*
  *
- *  \param[in] error reference on a StatError object,
- *  \param[in] path  file path.
+ *  Ecriture d'un objet HiddenVariableOrderMarkov dans un fichier au format tableur.
  *
- *  \return          error status.
- */
-/*--------------------------------------------------------------*/
+ *  arguments : reference sur un objet StatError, path.
+ *
+ *--------------------------------------------------------------*/
 
 bool HiddenVariableOrderMarkov::spreadsheet_write(StatError &error ,
-                                                  const string path) const
+                                                  const char *path) const
 
 {
   bool status;
-  ofstream out_file(path.c_str());
+  ofstream out_file(path);
 
 
   error.init();

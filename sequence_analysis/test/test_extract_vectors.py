@@ -3,7 +3,7 @@
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__revision__ = "$Id$"
+__revision__ = "$Id: test_extract_vectors.py 9885 2010-11-06 18:19:34Z cokelaer $"
 
 
 from openalea.sequence_analysis import *
