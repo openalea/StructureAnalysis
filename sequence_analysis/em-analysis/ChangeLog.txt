@@ -1,0 +1,30 @@
+xx-11-17
+
+* architecture reworked
+* requirements.txt is now generated using a python virtual environment pip freeze > requirements.txt
+* ggplot lib is replacing matplotlib and pandas plots
+* repo on github: large file deleted
+* compiled files have been git ignored for space and speed purposes.
+
+It is now necessary to recompile every module (stat_tools, sequence_analysis or ema) which has changed after pulling. Reminder: python2.7 ema/setup.py develop --user
+
+
+/!\ There are encoding issues in the new data file. Readmode is coding (-2, -1, 0, 1, 2) instead of (0, 1, 2, 3, 4).
+And TEXT_NO corresponds is not an identifier for the text but corresponds to the order the text has been displayed.
+
+_______________________________________________________________________________________________________________________
+08-12-17
+
+* eye_movement_data.py
+    * includes all the preprocessing
+    * can generate a preprocessed xlsx file
+    * data preprocessing before approval: preprocessed_data_nov17.xlsx
+    * filled missing values using wide 1 hidden layer MLPR with cross-validated regularization
+* png_plot.py
+    * now works with pandas structures
+    * new function: plot_col_scanpath which displays one or several cols as text for each fixation on the scanpath img
+    * test_png_plot.py (which is more like an example file atm)
+* model.py
+    * lightened. Input data is imperatively an eye_movement_data object because of high compatibility issues when passing a seq as input
+* oculometric_missing_values_estimation
+    * cross-validation on regularization parameter for inria' cluster

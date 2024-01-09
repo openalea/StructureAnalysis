@@ -1,0 +1,879 @@
+last test run:ven. oct. 27 16:27:10 CEST 2017
+2 failed, 7 passed, 1 error in 484.09 seconds
+MODEL_PARAMETERS
+INITIAL PROBABILITIES
+[ 0.    0.11  0.07  0.    0.82]
+
+TRANSITION_PROBABILITIES
+[[ 0.    1.    0.    0.    0.  ]
+ [ 0.24  0.    0.18  0.    0.58]
+ [ 0.17  0.    0.    0.83  0.  ]
+ [ 1.    0.    0.    0.    0.  ]
+ [ 0.01  0.99  0.    0.    0.  ]]
+
+OCCUPANCY_DISTRIBUTION
+state_number : 0
+state_type : RECURRENT
+distribution_name : NEGATIVE_BINOMIAL
+lower_bound : 1
+upper_bound : None
+parameter : 5.0
+probability : 0.1
+
+OCCUPANCY_DISTRIBUTION
+state_number : 1
+state_type : RECURRENT
+distribution_name : BINOMIAL
+lower_bound : 1
+upper_bound : 6
+parameter : None
+probability : 0.0664858
+
+OCCUPANCY_DISTRIBUTION
+state_number : 2
+state_type : RECURRENT
+distribution_name : NEGATIVE_BINOMIAL
+lower_bound : 1
+upper_bound : None
+parameter : 19.2935
+probability : 0.64164
+
+OCCUPANCY_DISTRIBUTION
+state_number : 3
+state_type : RECURRENT
+distribution_name : POISSON
+lower_bound : 3
+upper_bound : None
+parameter : 5.5772
+probability : None
+
+OCCUPANCY_DISTRIBUTION
+state_number : 4
+state_type : RECURRENT
+distribution_name : BINOMIAL
+lower_bound : 1
+upper_bound : 3
+parameter : None
+probability : 0.157904
+
+OUTPUT_PROCESS
+output_process_number : 1
+output_process_type : CATEGORICAL
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 0
+outputs : [0.1593, 0.0, 0.5007, 0.2003, 0.1397]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 1
+outputs : [0.6125, 0.3571, 0.0302, 0.0, 0.0002]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 2
+outputs : [0.5316, 0.2367, 0.0775, 0.0678, 0.0864]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 3
+outputs : [0.3925, 0.1567, 0.127, 0.0771, 0.2467]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 4
+outputs : [0.0, 0.521, 0.4641, 0.0108, 0.0041]
+
+
+MODEL_PARAMETERS
+INITIAL PROBABILITIES
+[ 0.    0.11  0.    0.07  0.82]
+
+TRANSITION_PROBABILITIES
+[[ 0.    1.    0.    0.    0.  ]
+ [ 0.24  0.    0.    0.18  0.58]
+ [ 1.    0.    0.    0.    0.  ]
+ [ 0.17  0.    0.83  0.    0.  ]
+ [ 0.01  0.99  0.    0.    0.  ]]
+
+OCCUPANCY_DISTRIBUTION
+state_number : 0
+state_type : RECURRENT
+distribution_name : NEGATIVE_BINOMIAL
+lower_bound : 1
+upper_bound : None
+parameter : 5.0
+probability : 0.1
+
+OCCUPANCY_DISTRIBUTION
+state_number : 1
+state_type : RECURRENT
+distribution_name : BINOMIAL
+lower_bound : 1
+upper_bound : 6
+parameter : None
+probability : 0.0664858
+
+OCCUPANCY_DISTRIBUTION
+state_number : 2
+state_type : RECURRENT
+distribution_name : POISSON
+lower_bound : 3
+upper_bound : None
+parameter : 5.5772
+probability : None
+
+OCCUPANCY_DISTRIBUTION
+state_number : 3
+state_type : RECURRENT
+distribution_name : NEGATIVE_BINOMIAL
+lower_bound : 1
+upper_bound : None
+parameter : 19.2935
+probability : 0.64164
+
+OCCUPANCY_DISTRIBUTION
+state_number : 4
+state_type : RECURRENT
+distribution_name : BINOMIAL
+lower_bound : 1
+upper_bound : 3
+parameter : None
+probability : 0.157904
+
+OUTPUT_PROCESS
+output_process_number : 1
+output_process_type : CATEGORICAL
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 0
+outputs : [0.1593, 0.0, 0.5007, 0.2003, 0.1397]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 1
+outputs : [0.6125, 0.3571, 0.0302, 0.0, 0.0002]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 2
+outputs : [0.3925, 0.1567, 0.127, 0.0771, 0.2467]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 3
+outputs : [0.5316, 0.2367, 0.0775, 0.0678, 0.0864]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 4
+outputs : [0.0, 0.521, 0.4641, 0.0108, 0.0041]
+
+
+HIDDEN_SEMI-MARKOV_CHAIN
+
+5 STATES
+
+INITIAL_PROBABILITIES
+0     0.11  0     0.07  0.82  
+
+TRANSITION_PROBABILITIES
+0     1     0     0     0     
+0.24  0     0     0.18  0.58  
+1     0     0     0     0     
+0.17  0     0.83  0     0     
+0.01  0.99  0     0     0     
+
+recurrent class: states 0 1 2 3 4
+
+time up to the first occurrence of state 0 distribution
+mean: 14.2643   variance: 117.92   standard deviation: 10.8591
+
+time up to the first occurrence of state 1 distribution
+mean: 5.87044   variance: 299.398   standard deviation: 17.3031
+
+time up to the first occurrence of state 2 distribution
+mean: 108.713   variance: 14360.2   standard deviation: 119.834
+
+time up to the first occurrence of state 3 distribution
+mean: 70.0366   variance: 8368.62   standard deviation: 91.4802
+
+time up to the first occurrence of state 4 distribution
+mean: 11.5939   variance: 1456.54   standard deviation: 38.1647
+
+state 0 recurrence time distribution
+mean: 1.28012   variance: 6.19963   standard deviation: 2.48991
+
+state 1 recurrence time distribution
+mean: 18.8237   variance: 790.734   standard deviation: 28.12
+
+state 2 recurrence time distribution
+mean: 19.5135   variance: 4387.09   standard deviation: 66.2351
+
+state 3 recurrence time distribution
+mean: 11.8256   variance: 2064.6   standard deviation: 45.4379
+
+state 4 recurrence time distribution
+mean: 32.8646   variance: 3557.72   standard deviation: 59.6466
+
+STATE 0 OCCUPANCY_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 5   PROBABILITY : 0.1
+mean: 46   variance: 450   standard deviation: 21.2132
+coefficient of skewness: 0.895669   coefficient of kurtosis: 1.20222
+
+state 0 forward sojourn time distribution
+mean: 28.3908   variance: 439.2   standard deviation: 20.9571
+
+STATE 1 OCCUPANCY_DISTRIBUTION
+BINOMIAL   INF_BOUND : 1   SUP_BOUND : 6   PROBABILITY : 0.0664858
+mean: 1.33243   variance: 0.310327   standard deviation: 0.55707
+coefficient of skewness: 1.55641   coefficient of kurtosis: 2.02241
+
+state 1 forward sojourn time distribution
+mean: 1.28267   variance: 0.273528   standard deviation: 0.522999
+
+STATE 2 OCCUPANCY_DISTRIBUTION
+POISSON   INF_BOUND : 3   PARAMETER : 5.5772   
+mean: 8.5772   variance: 5.5772   standard deviation: 2.36161
+coefficient of skewness: 0.42344   coefficient of kurtosis: 0.179301
+
+state 2 forward sojourn time distribution
+mean: 5.1137   variance: 8.94671   standard deviation: 2.9911
+
+STATE 3 OCCUPANCY_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 19.2935   PROBABILITY : 0.64164
+mean: 11.7755   variance: 16.7938   standard deviation: 4.09802
+coefficient of skewness: 0.516594   coefficient of kurtosis: 0.370532
+
+state 3 forward sojourn time distribution
+mean: 7.1008   variance: 20.3653   standard deviation: 4.51279
+
+STATE 4 OCCUPANCY_DISTRIBUTION
+BINOMIAL   INF_BOUND : 1   SUP_BOUND : 3   PROBABILITY : 0.157904
+mean: 1.31581   variance: 0.265941   standard deviation: 0.515694
+coefficient of skewness: 1.32674   coefficient of kurtosis: 0.760237
+
+state 4 forward sojourn time distribution
+mean: 1.25896   variance: 0.229798   standard deviation: 0.479373
+
+number of runs of state 0 per length 20 sequence distribution
+mean: 0.65776   variance: 0.233556   standard deviation: 0.483277
+coefficient of skewness: -0.552432   coefficient of kurtosis: -1.39639
+
+number of runs of state 1 per length 20 sequence distribution
+mean: 2.15014   variance: 2.8028   standard deviation: 1.67416
+coefficient of skewness: 1.30099   coefficient of kurtosis: 1.50717
+
+number of runs of state 2 per length 20 sequence distribution
+mean: 0.270129   variance: 0.197159   standard deviation: 0.444026
+coefficient of skewness: 1.0354   coefficient of kurtosis: -0.927955
+
+number of runs of state 3 per length 20 sequence distribution
+mean: 0.453663   variance: 0.247907   standard deviation: 0.497903
+coefficient of skewness: 0.186805   coefficient of kurtosis: -1.96334
+
+number of runs of state 4 per length 20 sequence distribution
+mean: 2.05625   variance: 2.93909   standard deviation: 1.71438
+coefficient of skewness: 1.35657   coefficient of kurtosis: 1.80654
+
+number of occurrences of state 0 per length 20 sequence distribution
+mean: 8.12882   variance: 54.1946   standard deviation: 7.3617
+coefficient of skewness: 0.0942955   coefficient of kurtosis: -1.69662
+
+number of occurrences of state 1 per length 20 sequence distribution
+mean: 2.8597   variance: 5.53165   standard deviation: 2.35195
+coefficient of skewness: 1.29809   coefficient of kurtosis: 1.45057
+
+number of occurrences of state 2 per length 20 sequence distribution
+mean: 1.48846   variance: 7.86538   standard deviation: 2.80453
+coefficient of skewness: 1.74138   coefficient of kurtosis: 1.80588
+
+number of occurrences of state 3 per length 20 sequence distribution
+mean: 4.82047   variance: 34.2249   standard deviation: 5.8502
+coefficient of skewness: 0.68044   coefficient of kurtosis: -1.03437
+
+number of occurrences of state 4 per length 20 sequence distribution
+mean: 2.70255   variance: 5.56127   standard deviation: 2.35823
+coefficient of skewness: 1.36118   coefficient of kurtosis: 1.76468
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : CATEGORICAL
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.1593
+OUTPUT 2 : 0.5007
+OUTPUT 3 : 0.2003
+OUTPUT 4 : 0.1397
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.6125
+OUTPUT 1 : 0.357
+OUTPUT 2 : 0.0302
+OUTPUT 4 : 0.0003
+
+STATE 2 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.3925
+OUTPUT 1 : 0.1567
+OUTPUT 2 : 0.127
+OUTPUT 3 : 0.0771
+OUTPUT 4 : 0.2467
+
+STATE 3 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.5316
+OUTPUT 1 : 0.2367
+OUTPUT 2 : 0.0775
+OUTPUT 3 : 0.0678
+OUTPUT 4 : 0.0864
+
+STATE 4 OBSERVATION_DISTRIBUTION
+OUTPUT 1 : 0.521
+OUTPUT 2 : 0.4641
+OUTPUT 3 : 0.0108
+OUTPUT 4 : 0.0041
+
+observation probability matrix
+
+   0       1       2       3       4       
+0  0.1593  0       0.5007  0.2003  0.1397  
+1  0.6125  0.3571  0.0302  0       0.0002  
+2  0.3925  0.1567  0.127   0.0771  0.2467  
+3  0.5316  0.2367  0.0775  0.0678  0.0864  
+4  0       0.521   0.4641  0.0108  0.0041  
+
+time up to the first occurrence of output 0 distribution
+mean: 2.42576   variance: 7.9197   standard deviation: 2.8142
+
+time up to the first occurrence of output 1 distribution
+mean: 5.45139   variance: 288.647   standard deviation: 16.9896
+
+time up to the first occurrence of output 2 distribution
+mean: 3.29733   variance: 24.6588   standard deviation: 4.96577
+
+time up to the first occurrence of output 3 distribution
+mean: 12.3322   variance: 75.8611   standard deviation: 8.70983
+
+time up to the first occurrence of output 4 distribution
+mean: 12.5112   variance: 68.9769   standard deviation: 8.30523
+
+output 0 recurrence time distribution
+mean: 4.16491   variance: 18.6283   standard deviation: 4.31605
+
+output 1 recurrence time distribution
+mean: 14.4779   variance: 722.658   standard deviation: 26.8823
+
+output 2 recurrence time distribution
+mean: 2.52765   variance: 7.03942   standard deviation: 2.65319
+
+output 3 recurrence time distribution
+mean: 6.07509   variance: 37.9636   standard deviation: 6.16146
+
+output 4 recurrence time distribution
+mean: 7.64911   variance: 55.381   standard deviation: 7.44184
+
+output 0 sojourn time distribution
+mean: 1.41398   variance: 0.748942   standard deviation: 0.865415
+
+output 1 sojourn time distribution
+mean: 1.44099   variance: 0.653734   standard deviation: 0.808538
+
+output 2 sojourn time distribution
+mean: 1.80696   variance: 1.60364   standard deviation: 1.26635
+
+output 3 sojourn time distribution
+mean: 1.22632   variance: 0.277981   standard deviation: 0.527239
+
+output 4 sojourn time distribution
+mean: 1.16547   variance: 0.191093   standard deviation: 0.437142
+
+number of runs of output 0 per length 20 sequence distribution
+mean: 4.07384   variance: 2.203   standard deviation: 1.48425
+coefficient of skewness: -0.058478   coefficient of kurtosis: -0.32861
+
+number of runs of output 1 per length 20 sequence distribution
+mean: 2.61404   variance: 2.88056   standard deviation: 1.69722
+coefficient of skewness: 0.451721   coefficient of kurtosis: -0.571321
+
+number of runs of output 2 per length 20 sequence distribution
+mean: 3.846   variance: 3.13652   standard deviation: 1.77102
+coefficient of skewness: -0.0834372   coefficient of kurtosis: -0.6581
+
+number of runs of output 3 per length 20 sequence distribution
+mean: 1.76855   variance: 1.77318   standard deviation: 1.33161
+coefficient of skewness: 0.526758   coefficient of kurtosis: -0.23291
+
+number of runs of output 4 per length 20 sequence distribution
+mean: 1.66949   variance: 1.43709   standard deviation: 1.19879
+coefficient of skewness: 0.482235   coefficient of kurtosis: -0.148217
+
+number of occurrences of output 0 per length 20 sequence distribution
+mean: 6.19327   variance: 9.23265   standard deviation: 3.03853
+coefficient of skewness: 0.36895   coefficient of kurtosis: -0.569127
+
+number of occurrences of output 1 per length 20 sequence distribution
+mean: 3.80347   variance: 6.98398   standard deviation: 2.64272
+coefficient of skewness: 0.645381   coefficient of kurtosis: -0.0662956
+
+number of occurrences of output 2 per length 20 sequence distribution
+mean: 5.97334   variance: 11.822   standard deviation: 3.43832
+coefficient of skewness: 0.198609   coefficient of kurtosis: -0.932945
+
+number of occurrences of output 3 per length 20 sequence distribution
+mean: 2.09898   variance: 2.90835   standard deviation: 1.70539
+coefficient of skewness: 0.781071   coefficient of kurtosis: 0.28502
+
+number of occurrences of output 4 per length 20 sequence distribution
+mean: 1.93094   variance: 2.16945   standard deviation: 1.47291
+coefficient of skewness: 0.691953   coefficient of kurtosis: 0.27854
+
+distances between observation distributions for consecutive states
+_       0.8103  _       _       _       
+0.8103  _       _       0.2013  0.6125  
+0.4969  _       _       _       _       
+0.609   _       0.2191  _       _       
+0.521   0.6125  _       _       _       
+
+.EFF...MODEL_PARAMETERS
+INITIAL PROBABILITIES
+[ 0.    0.11  0.07  0.    0.82]
+
+TRANSITION_PROBABILITIES
+[[ 0.    1.    0.    0.    0.  ]
+ [ 0.24  0.    0.18  0.    0.58]
+ [ 0.17  0.    0.    0.83  0.  ]
+ [ 1.    0.    0.    0.    0.  ]
+ [ 0.01  0.99  0.    0.    0.  ]]
+
+OCCUPANCY_DISTRIBUTION
+state_number : 0
+state_type : RECURRENT
+distribution_name : NEGATIVE_BINOMIAL
+lower_bound : 1
+upper_bound : None
+parameter : 5.0
+probability : 0.1
+
+OCCUPANCY_DISTRIBUTION
+state_number : 1
+state_type : RECURRENT
+distribution_name : BINOMIAL
+lower_bound : 1
+upper_bound : 6
+parameter : None
+probability : 0.0664858
+
+OCCUPANCY_DISTRIBUTION
+state_number : 2
+state_type : RECURRENT
+distribution_name : NEGATIVE_BINOMIAL
+lower_bound : 1
+upper_bound : None
+parameter : 19.2935
+probability : 0.64164
+
+OCCUPANCY_DISTRIBUTION
+state_number : 3
+state_type : RECURRENT
+distribution_name : POISSON
+lower_bound : 3
+upper_bound : None
+parameter : 5.5772
+probability : None
+
+OCCUPANCY_DISTRIBUTION
+state_number : 4
+state_type : RECURRENT
+distribution_name : BINOMIAL
+lower_bound : 1
+upper_bound : 3
+parameter : None
+probability : 0.157904
+
+OUTPUT_PROCESS
+output_process_number : 1
+output_process_type : CATEGORICAL
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 0
+outputs : [0.1593, 0.0, 0.5007, 0.2003, 0.1397]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 1
+outputs : [0.6125, 0.3571, 0.0302, 0.0, 0.0002]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 2
+outputs : [0.5316, 0.2367, 0.0775, 0.0678, 0.0864]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 3
+outputs : [0.3925, 0.1567, 0.127, 0.0771, 0.2467]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 4
+outputs : [0.0, 0.521, 0.4641, 0.0108, 0.0041]
+
+
+MODEL_PARAMETERS
+INITIAL PROBABILITIES
+[ 0.    0.11  0.    0.07  0.82]
+
+TRANSITION_PROBABILITIES
+[[ 0.    1.    0.    0.    0.  ]
+ [ 0.24  0.    0.    0.18  0.58]
+ [ 1.    0.    0.    0.    0.  ]
+ [ 0.17  0.    0.83  0.    0.  ]
+ [ 0.01  0.99  0.    0.    0.  ]]
+
+OCCUPANCY_DISTRIBUTION
+state_number : 0
+state_type : RECURRENT
+distribution_name : NEGATIVE_BINOMIAL
+lower_bound : 1
+upper_bound : None
+parameter : 5.0
+probability : 0.1
+
+OCCUPANCY_DISTRIBUTION
+state_number : 1
+state_type : RECURRENT
+distribution_name : BINOMIAL
+lower_bound : 1
+upper_bound : 6
+parameter : None
+probability : 0.0664858
+
+OCCUPANCY_DISTRIBUTION
+state_number : 2
+state_type : RECURRENT
+distribution_name : POISSON
+lower_bound : 3
+upper_bound : None
+parameter : 5.5772
+probability : None
+
+OCCUPANCY_DISTRIBUTION
+state_number : 3
+state_type : RECURRENT
+distribution_name : NEGATIVE_BINOMIAL
+lower_bound : 1
+upper_bound : None
+parameter : 19.2935
+probability : 0.64164
+
+OCCUPANCY_DISTRIBUTION
+state_number : 4
+state_type : RECURRENT
+distribution_name : BINOMIAL
+lower_bound : 1
+upper_bound : 3
+parameter : None
+probability : 0.157904
+
+OUTPUT_PROCESS
+output_process_number : 1
+output_process_type : CATEGORICAL
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 0
+outputs : [0.1593, 0.0, 0.5007, 0.2003, 0.1397]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 1
+outputs : [0.6125, 0.3571, 0.0302, 0.0, 0.0002]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 2
+outputs : [0.3925, 0.1567, 0.127, 0.0771, 0.2467]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 3
+outputs : [0.5316, 0.2367, 0.0775, 0.0678, 0.0864]
+OBSERVATION_DISTRIBUTION
+observation_distribution_number : 4
+outputs : [0.0, 0.521, 0.4641, 0.0108, 0.0041]
+
+
+HIDDEN_SEMI-MARKOV_CHAIN
+
+5 STATES
+
+INITIAL_PROBABILITIES
+0     0.11  0     0.07  0.82  
+
+TRANSITION_PROBABILITIES
+0     1     0     0     0     
+0.24  0     0     0.18  0.58  
+1     0     0     0     0     
+0.17  0     0.83  0     0     
+0.01  0.99  0     0     0     
+
+recurrent class: states 0 1 2 3 4
+
+time up to the first occurrence of state 0 distribution
+mean: 14.2643   variance: 117.92   standard deviation: 10.8591
+
+time up to the first occurrence of state 1 distribution
+mean: 5.87044   variance: 299.398   standard deviation: 17.3031
+
+time up to the first occurrence of state 2 distribution
+mean: 108.713   variance: 14360.2   standard deviation: 119.834
+
+time up to the first occurrence of state 3 distribution
+mean: 70.0366   variance: 8368.62   standard deviation: 91.4802
+
+time up to the first occurrence of state 4 distribution
+mean: 11.5939   variance: 1456.54   standard deviation: 38.1647
+
+state 0 recurrence time distribution
+mean: 1.28012   variance: 6.19963   standard deviation: 2.48991
+
+state 1 recurrence time distribution
+mean: 18.8237   variance: 790.734   standard deviation: 28.12
+
+state 2 recurrence time distribution
+mean: 19.5135   variance: 4387.09   standard deviation: 66.2351
+
+state 3 recurrence time distribution
+mean: 11.8256   variance: 2064.6   standard deviation: 45.4379
+
+state 4 recurrence time distribution
+mean: 32.8646   variance: 3557.72   standard deviation: 59.6466
+
+STATE 0 OCCUPANCY_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 5   PROBABILITY : 0.1
+mean: 46   variance: 450   standard deviation: 21.2132
+coefficient of skewness: 0.895669   coefficient of kurtosis: 1.20222
+
+state 0 forward sojourn time distribution
+mean: 28.3908   variance: 439.2   standard deviation: 20.9571
+
+STATE 1 OCCUPANCY_DISTRIBUTION
+BINOMIAL   INF_BOUND : 1   SUP_BOUND : 6   PROBABILITY : 0.0664858
+mean: 1.33243   variance: 0.310327   standard deviation: 0.55707
+coefficient of skewness: 1.55641   coefficient of kurtosis: 2.02241
+
+state 1 forward sojourn time distribution
+mean: 1.28267   variance: 0.273528   standard deviation: 0.522999
+
+STATE 2 OCCUPANCY_DISTRIBUTION
+POISSON   INF_BOUND : 3   PARAMETER : 5.5772   
+mean: 8.5772   variance: 5.5772   standard deviation: 2.36161
+coefficient of skewness: 0.42344   coefficient of kurtosis: 0.179301
+
+state 2 forward sojourn time distribution
+mean: 5.1137   variance: 8.94671   standard deviation: 2.9911
+
+STATE 3 OCCUPANCY_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 19.2935   PROBABILITY : 0.64164
+mean: 11.7755   variance: 16.7938   standard deviation: 4.09802
+coefficient of skewness: 0.516594   coefficient of kurtosis: 0.370532
+
+state 3 forward sojourn time distribution
+mean: 7.1008   variance: 20.3653   standard deviation: 4.51279
+
+STATE 4 OCCUPANCY_DISTRIBUTION
+BINOMIAL   INF_BOUND : 1   SUP_BOUND : 3   PROBABILITY : 0.157904
+mean: 1.31581   variance: 0.265941   standard deviation: 0.515694
+coefficient of skewness: 1.32674   coefficient of kurtosis: 0.760237
+
+state 4 forward sojourn time distribution
+mean: 1.25896   variance: 0.229798   standard deviation: 0.479373
+
+number of runs of state 0 per length 20 sequence distribution
+mean: 0.65776   variance: 0.233556   standard deviation: 0.483277
+coefficient of skewness: -0.552432   coefficient of kurtosis: -1.39639
+
+number of runs of state 1 per length 20 sequence distribution
+mean: 2.15014   variance: 2.8028   standard deviation: 1.67416
+coefficient of skewness: 1.30099   coefficient of kurtosis: 1.50717
+
+number of runs of state 2 per length 20 sequence distribution
+mean: 0.270129   variance: 0.197159   standard deviation: 0.444026
+coefficient of skewness: 1.0354   coefficient of kurtosis: -0.927955
+
+number of runs of state 3 per length 20 sequence distribution
+mean: 0.453663   variance: 0.247907   standard deviation: 0.497903
+coefficient of skewness: 0.186805   coefficient of kurtosis: -1.96334
+
+number of runs of state 4 per length 20 sequence distribution
+mean: 2.05625   variance: 2.93909   standard deviation: 1.71438
+coefficient of skewness: 1.35657   coefficient of kurtosis: 1.80654
+
+number of occurrences of state 0 per length 20 sequence distribution
+mean: 8.12882   variance: 54.1946   standard deviation: 7.3617
+coefficient of skewness: 0.0942955   coefficient of kurtosis: -1.69662
+
+number of occurrences of state 1 per length 20 sequence distribution
+mean: 2.8597   variance: 5.53165   standard deviation: 2.35195
+coefficient of skewness: 1.29809   coefficient of kurtosis: 1.45057
+
+number of occurrences of state 2 per length 20 sequence distribution
+mean: 1.48846   variance: 7.86538   standard deviation: 2.80453
+coefficient of skewness: 1.74138   coefficient of kurtosis: 1.80588
+
+number of occurrences of state 3 per length 20 sequence distribution
+mean: 4.82047   variance: 34.2249   standard deviation: 5.8502
+coefficient of skewness: 0.68044   coefficient of kurtosis: -1.03437
+
+number of occurrences of state 4 per length 20 sequence distribution
+mean: 2.70255   variance: 5.56127   standard deviation: 2.35823
+coefficient of skewness: 1.36118   coefficient of kurtosis: 1.76468
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : CATEGORICAL
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.1593
+OUTPUT 2 : 0.5007
+OUTPUT 3 : 0.2003
+OUTPUT 4 : 0.1397
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.6125
+OUTPUT 1 : 0.357
+OUTPUT 2 : 0.0302
+OUTPUT 4 : 0.0003
+
+STATE 2 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.3925
+OUTPUT 1 : 0.1567
+OUTPUT 2 : 0.127
+OUTPUT 3 : 0.0771
+OUTPUT 4 : 0.2467
+
+STATE 3 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.5316
+OUTPUT 1 : 0.2367
+OUTPUT 2 : 0.0775
+OUTPUT 3 : 0.0678
+OUTPUT 4 : 0.0864
+
+STATE 4 OBSERVATION_DISTRIBUTION
+OUTPUT 1 : 0.521
+OUTPUT 2 : 0.4641
+OUTPUT 3 : 0.0108
+OUTPUT 4 : 0.0041
+
+observation probability matrix
+
+   0       1       2       3       4       
+0  0.1593  0       0.5007  0.2003  0.1397  
+1  0.6125  0.3571  0.0302  0       0.0002  
+2  0.3925  0.1567  0.127   0.0771  0.2467  
+3  0.5316  0.2367  0.0775  0.0678  0.0864  
+4  0       0.521   0.4641  0.0108  0.0041  
+
+time up to the first occurrence of output 0 distribution
+mean: 2.42576   variance: 7.9197   standard deviation: 2.8142
+
+time up to the first occurrence of output 1 distribution
+mean: 5.45139   variance: 288.647   standard deviation: 16.9896
+
+time up to the first occurrence of output 2 distribution
+mean: 3.29733   variance: 24.6588   standard deviation: 4.96577
+
+time up to the first occurrence of output 3 distribution
+mean: 12.3322   variance: 75.8611   standard deviation: 8.70983
+
+time up to the first occurrence of output 4 distribution
+mean: 12.5112   variance: 68.9769   standard deviation: 8.30523
+
+output 0 recurrence time distribution
+mean: 4.16491   variance: 18.6283   standard deviation: 4.31605
+
+output 1 recurrence time distribution
+mean: 14.4779   variance: 722.658   standard deviation: 26.8823
+
+output 2 recurrence time distribution
+mean: 2.52765   variance: 7.03942   standard deviation: 2.65319
+
+output 3 recurrence time distribution
+mean: 6.07509   variance: 37.9636   standard deviation: 6.16146
+
+output 4 recurrence time distribution
+mean: 7.64911   variance: 55.381   standard deviation: 7.44184
+
+output 0 sojourn time distribution
+mean: 1.41398   variance: 0.748942   standard deviation: 0.865415
+
+output 1 sojourn time distribution
+mean: 1.44099   variance: 0.653734   standard deviation: 0.808538
+
+output 2 sojourn time distribution
+mean: 1.80696   variance: 1.60364   standard deviation: 1.26635
+
+output 3 sojourn time distribution
+mean: 1.22632   variance: 0.277981   standard deviation: 0.527239
+
+output 4 sojourn time distribution
+mean: 1.16547   variance: 0.191093   standard deviation: 0.437142
+
+number of runs of output 0 per length 20 sequence distribution
+mean: 4.07384   variance: 2.203   standard deviation: 1.48425
+coefficient of skewness: -0.058478   coefficient of kurtosis: -0.32861
+
+number of runs of output 1 per length 20 sequence distribution
+mean: 2.61404   variance: 2.88056   standard deviation: 1.69722
+coefficient of skewness: 0.451721   coefficient of kurtosis: -0.571321
+
+number of runs of output 2 per length 20 sequence distribution
+mean: 3.846   variance: 3.13652   standard deviation: 1.77102
+coefficient of skewness: -0.0834372   coefficient of kurtosis: -0.6581
+
+number of runs of output 3 per length 20 sequence distribution
+mean: 1.76855   variance: 1.77318   standard deviation: 1.33161
+coefficient of skewness: 0.526758   coefficient of kurtosis: -0.23291
+
+number of runs of output 4 per length 20 sequence distribution
+mean: 1.66949   variance: 1.43709   standard deviation: 1.19879
+coefficient of skewness: 0.482235   coefficient of kurtosis: -0.148217
+
+number of occurrences of output 0 per length 20 sequence distribution
+mean: 6.19327   variance: 9.23265   standard deviation: 3.03853
+coefficient of skewness: 0.36895   coefficient of kurtosis: -0.569127
+
+number of occurrences of output 1 per length 20 sequence distribution
+mean: 3.80347   variance: 6.98398   standard deviation: 2.64272
+coefficient of skewness: 0.645381   coefficient of kurtosis: -0.0662956
+
+number of occurrences of output 2 per length 20 sequence distribution
+mean: 5.97334   variance: 11.822   standard deviation: 3.43832
+coefficient of skewness: 0.198609   coefficient of kurtosis: -0.932945
+
+number of occurrences of output 3 per length 20 sequence distribution
+mean: 2.09898   variance: 2.90835   standard deviation: 1.70539
+coefficient of skewness: 0.781071   coefficient of kurtosis: 0.28502
+
+number of occurrences of output 4 per length 20 sequence distribution
+mean: 1.93094   variance: 2.16945   standard deviation: 1.47291
+coefficient of skewness: 0.691953   coefficient of kurtosis: 0.27854
+
+distances between observation distributions for consecutive states
+_       0.8103  _       _       _       
+0.8103  _       _       0.2013  0.6125  
+0.4969  _       _       _       _       
+0.609   _       0.2191  _       _       
+0.521   0.6125  _       _       _       
+
+.
+..
+
+==================================== ERRORS ====================================
+_____________________ ERROR at setup of test_nb_sequences ______________________
+
+    def setup_func():
+        global s3a, s3b, model, model_init
+        # import data (pandas)
+        data = EyeMovementData()
+        # remove fixations that have negative word frequencies
+        data.drop_negative_wfreq_fixations()
+        # data filtered with excel
+        excel_data = os.path.join(MODELS_PATH,"../../../hmm_oculo/Scripts/Python/data.txt")
+>       f = open(excel_data)
+E       IOError: [Errno 2] No such file or directory: '/home/boli/cw/ema/ema/src/ema/../../share/models/../../../hmm_oculo/Scripts/Python/data.txt'
+
+../test/test_fixations_with_non_negative_frequencies.py:27: IOError
+=================================== FAILURES ===================================
+____________________________ test_sequence_lengths _____________________________
+
+    def test_sequence_lengths():
+        """Test whether all sequences in both data sets have same lengths"""
+        msg = "At least two sequences have different lengths: ("
+        msge = "Excel: "
+        msgp = "Pandas: "
+        i = 0
+>       while len(s3a[i]) == len(s3b[i]) and i < min(len(s3a)-1, len(s3b)-1):
+E       NameError: global name 's3a' is not defined
+
+../test/test_fixations_with_non_negative_frequencies.py:58: NameError
+____________________________ test_sequence_contents ____________________________
+
+    def test_sequence_contents():
+        """Test whether all sequences in both data sets have same contents"""
+        msg = "At least two sequences have different contents: ("
+        msge = "Excel: "
+        msgp = "Pandas: "
+        i = 0
+>       while str(s3a[i]) == str(s3b[i]) and i < min(len(s3a)-1, len(s3b)-1):
+E       NameError: global name 's3a' is not defined
+
+../test/test_fixations_with_non_negative_frequencies.py:72: NameError
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+to show a full traceback on KeyboardInterrupt use --fulltrace
+/home/boli/cw/ema/ema/src/ema/model.py:458: KeyboardInterrupt
+2 failed, 7 passed, 1 error in 484.09 seconds

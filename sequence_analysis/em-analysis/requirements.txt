@@ -1,0 +1,4 @@
+numpy>=1.13.3
+OpenAlea.Core>=1.0.0
+OpenAlea.Deploy>=1.0.0
+pandas>=0.20.3
