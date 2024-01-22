@@ -1,0 +1,172 @@
+HIDDEN_SEMI-MARKOV_CHAIN
+
+5 STATES
+
+INITIAL_PROBABILITIES
+0.983184     0.0167856    1e-005       1e-005       1e-005
+
+TRANSITION_PROBABILITIES
+0            0.344161     0.655819     1e-005       1e-005
+0            0            0.529125     1e-005       0.470865
+0            0            0            0.999756     0.000243555
+0            0            0            0            1
+0            0            0            0            1
+
+STATE 0 OCCUPANCY_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 1.214   PROBABILITY : 0.164955
+# mean: 7.14556   variance: 37.2559   standard deviation: 6.10376
+# coefficient of skewness: 1.82256   coefficient of kurtosis: 4.96919
+# coefficient of variation: 0.854203
+
+# state 0 sojourn time frequency distribution - sample size: 116
+# mean: 7.50862   variance: 42.7391   standard deviation: 6.53751
+
+# final run - state 0 sojourn time frequency distribution - sample size: 0
+
+STATE 1 OCCUPANCY_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 9.51496   PROBABILITY : 0.318924
+# mean: 21.3196   variance: 63.7131   standard deviation: 7.98205
+# coefficient of skewness: 0.660368   coefficient of kurtosis: 0.646281
+# coefficient of variation: 0.374399
+
+# state 1 sojourn time frequency distribution - sample size: 43
+# mean: 21.2326   variance: 67.3732   standard deviation: 8.20812
+
+# final run - state 1 sojourn time frequency distribution - sample size: 0
+
+STATE 2 OCCUPANCY_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 4.28511   PROBABILITY : 0.180089
+# mean: 20.5092   variance: 108.331   standard deviation: 10.4082
+# coefficient of skewness: 0.970925   coefficient of kurtosis: 1.40943
+# coefficient of variation: 0.507489
+
+# state 2 sojourn time frequency distribution - sample size: 95
+# mean: 20.6421   variance: 107.658   standard deviation: 10.3758
+
+# final run - state 2 sojourn time frequency distribution - sample size: 1
+# mean: 32   variance: 0   standard deviation: 0
+
+STATE 3 OCCUPANCY_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 0.670372   PROBABILITY : 0.0389384
+# mean: 17.5459   variance: 424.925   standard deviation: 20.6137
+# coefficient of skewness: 2.44319   coefficient of kurtosis: 8.95261
+# coefficient of variation: 1.17485
+
+# state 3 sojourn time frequency distribution - sample size: 55
+# mean: 5.6   variance: 30.6519   standard deviation: 5.53641
+
+# final run - state 3 sojourn time frequency distribution - sample size: 40
+# mean: 14.4   variance: 26.4   standard deviation: 5.13809
+
+
+3 OUTPUT_PROCESSES
+
+OUTPUT_PROCESS 1 : CATEGORICAL
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.837599
+OUTPUT 1 : 0.043112
+OUTPUT 2 : 0.00187668
+OUTPUT 3 : 0.0144115
+OUTPUT 4 : 0.103
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.198527
+OUTPUT 1 : 0.657862
+OUTPUT 2 : 0.108052
+OUTPUT 3 : 0.0299297
+OUTPUT 4 : 0.00562959
+
+STATE 2 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.376836
+OUTPUT 1 : 0.57858
+OUTPUT 2 : 0.0352186
+OUTPUT 3 : 0.00909654
+OUTPUT 4 : 0.000268293
+
+STATE 3 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.124423
+OUTPUT 1 : 0.22101
+OUTPUT 2 : 0.462468
+OUTPUT 3 : 0.192089
+OUTPUT 4 : 1e-005
+
+STATE 4 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.145512
+OUTPUT 1 : 0.0419245
+OUTPUT 2 : 0.206654
+OUTPUT 3 : 0.6059
+OUTPUT 4 : 1e-005
+
+# observation probability matrix
+
+#    0            1            2            3            4
+# 0  0.837599     0.043112     0.00187668   0.0144115    0.103
+# 1  0.198527     0.657862     0.108052     0.0299297    0.00562959
+# 2  0.376836     0.57858      0.0352186    0.00909654   0.000268293
+# 3  0.124423     0.22101      0.462468     0.192089     1e-005
+# 4  0.145512     0.0419245    0.206654     0.6059       1e-005
+
+OUTPUT_PROCESS 2 : CATEGORICAL
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.995312
+OUTPUT 1 : 0.0012052
+OUTPUT 2 : 0.0034729
+OUTPUT 3 : 1e-005
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.969859
+OUTPUT 1 : 0.00451974
+OUTPUT 2 : 0.0107587
+OUTPUT 3 : 0.0148629
+
+STATE 2 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.99997
+OUTPUT 1 : 1e-005
+OUTPUT 2 : 1e-005
+OUTPUT 3 : 1e-005
+
+STATE 3 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.975647
+OUTPUT 1 : 0.00283823
+OUTPUT 2 : 0.0215051
+OUTPUT 3 : 1e-005
+
+STATE 4 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.251944
+OUTPUT 1 : 0.147155
+OUTPUT 2 : 0.273018
+OUTPUT 3 : 0.327883
+
+OUTPUT_PROCESS 3 : CATEGORICAL
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.99889
+OUTPUT 1 : 0.00110962
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.301492
+OUTPUT 1 : 0.698508
+
+STATE 2 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.985937
+OUTPUT 1 : 0.014063
+
+STATE 3 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.742475
+OUTPUT 1 : 0.257525
+
+STATE 4 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.244794
+OUTPUT 1 : 0.755206
+
+# observation probability matrix
+
+#    0           1
+# 0  0.99889     0.00110962
+# 1  0.301492    0.698508
+# 2  0.985937    0.014063
+# 3  0.742475    0.257525
+# 4  0.244794    0.755206
+
