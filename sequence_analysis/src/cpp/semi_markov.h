@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -224,14 +224,14 @@ namespace sequence_analysis {
     SemiMarkovData* simulation(stat_tool::StatError &error , int nb_sequence ,
                                const MarkovianSequences &iseq , bool counting_flag = true) const;
 
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream *os , int nb_model ,
                                                       const SemiMarkov **ismarkov ,
                                                       stat_tool::FrequencyDistribution **hlength ,
                                                       const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream *os , int nb_model ,
                                                       const SemiMarkov **smarkov , int nb_sequence ,
                                                       int length , const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream *os , int nb_model ,
                                                       const SemiMarkov **smarkov , int nb_sequence ,
                                                       const MarkovianSequences **seq , const std::string path = "") const;
 
@@ -337,6 +337,7 @@ namespace sequence_analysis {
 
     std::ostream& ascii_data_write(std::ostream &os , output_sequence_format format = COLUMN ,
                                    bool exhaustive = false) const;
+    std::string ascii_data_write(output_sequence_format format = COLUMN , bool exhaustive = false) const;
     bool ascii_data_write(stat_tool::StatError &error , const std::string path ,
                           output_sequence_format format = COLUMN , bool exhaustive = false) const;
 

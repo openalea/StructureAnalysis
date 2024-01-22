@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: change_points1.cpp 18669 2015-11-09 12:08:08Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,7 +36,8 @@
 
 
 
-#include <math.h>
+#include <cmath>
+
 #include <sstream>
 #include <iomanip>
 
@@ -3449,7 +3450,7 @@ double Sequences::continuous_piecewise_linear_function(ostream &os , int index ,
  *  \param[in] nb_segment      number of segments,
  *  \param[in] model_type      segment model types,
  *  \param[in] common_contrast flag contrast functions common to the individuals,
- *  \param[in] display         flag for displaying the segmentation,
+ *  \param[in] os              stream for displaying the segmentation,
  *  \param[in] output          output type (sequence or residuals),
  *  \param[in] ichange_point   change points,
  *  \param[in] continuity      flag continuous piecewise linear function.
@@ -3459,7 +3460,7 @@ double Sequences::continuous_piecewise_linear_function(ostream &os , int index ,
 /*--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_type ,
-                                          bool common_contrast , bool display , sequence_type output ,
+                                          bool common_contrast , ostream *os , sequence_type output ,
                                           int *ichange_point , bool continuity)
 
 {
@@ -3731,51 +3732,51 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
                                               slope_standard_deviation[i] , index_parameter_mean[i] ,
                                               index_parameter_variance[i] , determination_coeff[i]);
 
-      if ((display) && (((i == 1) && ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE))) ||
+      if ((os) && (((i == 1) && ((model_type[0] == MEAN_CHANGE) || (model_type[0] == INTERCEPT_SLOPE_CHANGE))) ||
            (model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
            (model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == AUTOREGRESSIVE_MODEL_CHANGE) ||
            (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE))) {
-        cout << "\n2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * likelihood << endl;
+        *os << "\n2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * likelihood << endl;
       }
     }
   }
 
-  if (display) {
+  if (os) {
     if (!ichange_point) {
-      cout << (nb_segment == 2 ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_CHANGE_POINTS]) << ": ";
+      *os << (nb_segment == 2 ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_CHANGE_POINTS]) << ": ";
 
       for (i = 1;i < nb_segment;i++) {
-        cout << seq_index_parameter[change_point[i]];
+        *os << seq_index_parameter[change_point[i]];
         if (i < nb_segment - 1) {
-          cout << ", ";
+          *os << ", ";
         }
       }
     }
 
     if ((index_interval) && (index_interval->variance > 0.)) {
       if (!ichange_point) {
-        cout << "   ";
+        *os << "   ";
       }
-      cout << SEQ_label[SEQL_SEGMENT_SAMPLE_SIZE] << ": ";
+      *os << SEQ_label[SEQL_SEGMENT_SAMPLE_SIZE] << ": ";
       for (i = 0;i < nb_segment;i++) {
-        cout << nb_sequence * (change_point[i + 1] - change_point[i]);
+        *os << nb_sequence * (change_point[i + 1] - change_point[i]);
         if (i < nb_segment - 1) {
-          cout << ", ";
+          *os << ", ";
         }
       }
-      cout << endl;
+      *os << endl;
     }
 
     else if (!ichange_point) {
-      cout << endl;
+      *os << endl;
     }
 
     if (nb_variable > 2) {
-      cout << "\n";
+      *os << "\n";
     }
 
     for (i = 1;i < nb_variable;i++) {
-      piecewise_linear_function_ascii_print(cout , (nb_sequence == 1 ? 0 : I_DEFAULT) , i , nb_segment , model_type[i - 1] ,
+      piecewise_linear_function_ascii_print(*os , (nb_sequence == 1 ? 0 : I_DEFAULT) , i , nb_segment , model_type[i - 1] ,
                                             common_contrast , change_point , seq_index_parameter ,
                                             mean[i] , variance[i] , intercept[i] , slope[i] ,
                                             autoregressive_coeff[i] , correlation[i] , slope_standard_deviation[i] ,
@@ -3802,37 +3803,37 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
             change_point_amplitude /= (nb_sequence * (nb_segment - 1));
           }
 
-          cout << STAT_label[STATL_MEAN] << " " << SEQ_label[SEQL_CHANGE_POINT_AMPLITUDE] << ": "
-               << change_point_amplitude << "   ";
+          *os << STAT_label[STATL_MEAN] << " " << SEQ_label[SEQL_CHANGE_POINT_AMPLITUDE] << ": "
+              << change_point_amplitude << "   ";
         }
 
-        cout << SEQ_label[SEQL_ROOT_MEAN_SQUARE_ERROR] << ": " << sqrt(global_variance[i]);
+        *os << SEQ_label[SEQL_ROOT_MEAN_SQUARE_ERROR] << ": " << sqrt(global_variance[i]);
         if (nb_segment > 1) {
-          cout << "   " << STAT_label[STATL_RATIO] << ": "
-               << change_point_amplitude / sqrt(global_variance[i]);
+          *os << "   " << STAT_label[STATL_RATIO] << ": "
+              << change_point_amplitude / sqrt(global_variance[i]);
         }
-        cout << endl;
+        *os << endl;
       }
 
       else if ((model_type[i - 1] == LINEAR_MODEL_CHANGE) || (model_type[i - 1] == STATIONARY_AUTOREGRESSIVE_MODEL_CHANGE)) {
-        cout << SEQ_label[SEQL_ROOT_MEAN_SQUARE_ERROR] << ": " << sqrt(global_variance[i]) << endl;
+        *os << SEQ_label[SEQL_ROOT_MEAN_SQUARE_ERROR] << ": " << sqrt(global_variance[i]) << endl;
       }
 
       else if (model_type[0] == MEAN_CHANGE) {
-        cout << SEQ_label[SEQL_GLOBAL_STANDARD_DEVIATION] << ": "  << sqrt(global_variance[i]) << endl;
+        *os << SEQ_label[SEQL_GLOBAL_STANDARD_DEVIATION] << ": "  << sqrt(global_variance[i]) << endl;
       }
       else if (model_type[0] == INTERCEPT_SLOPE_CHANGE) {
-        cout << SEQ_label[SEQL_GLOBAL_RESIDUAL_STANDARD_DEVIATION] << ": "  << sqrt(global_variance[i]) << endl;
+        *os << SEQ_label[SEQL_GLOBAL_RESIDUAL_STANDARD_DEVIATION] << ": "  << sqrt(global_variance[i]) << endl;
       }
 
       if (continuity) {
-        corrected_likelihood = continuous_piecewise_linear_function(cout , (nb_sequence == 1 ? 0 : I_DEFAULT) , i ,
+        corrected_likelihood = continuous_piecewise_linear_function(*os , (nb_sequence == 1 ? 0 : I_DEFAULT) , i ,
                                                                     nb_segment , model_type[i - 1] , common_contrast ,
                                                                     change_point , seq_index_parameter , intercept[i][0] ,
                                                                     slope[i][0] , corrected_intercept[i][0] , corrected_slope[i][0]);
 
-        cout << "2 * " << STAT_label[STATL_LIKELIHOOD] << ": "
-              << 2 * corrected_likelihood << " | " << 2 * likelihood << endl;
+        *os << "2 * " << STAT_label[STATL_LIKELIHOOD] << ": "
+            << 2 * corrected_likelihood << " | " << 2 * likelihood << endl;
       }
     }
   }
@@ -4770,7 +4771,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
  *  \brief Segmentation of a single sequence or a sample of sequences.
  *
  *  \param[in] error           reference on a StatError object,
- *  \param[in] display         flag for displaying the segmentation,
+ *  \param[in] os              stream for displaying the segmentation,
  *  \param[in] iidentifier     sequence identifier,
  *  \param[in] nb_segment      number of segments,
  *  \param[in] ichange_point   change points,
@@ -4784,7 +4785,7 @@ Sequences* Sequences::segmentation_output(int nb_segment , segment_model *model_
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::segmentation(StatError &error , bool display , int iidentifier ,
+Sequences* Sequences::segmentation(StatError &error , ostream *os , int iidentifier ,
                                    int nb_segment , int *ichange_point , segment_model *model_type ,
                                    bool common_contrast , double *shape_parameter ,
                                    sequence_type output , bool continuity) const
@@ -6188,7 +6189,7 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
 
       seq->build_marginal_frequency_distribution(0);
 
-      if (display) {
+      if (os) {
         segment_penalty = 0.;
         for (i = 0;i < nb_segment;i++) {
           segment_penalty += log((double)(change_point[i + 1] - change_point[i]));
@@ -6200,14 +6201,14 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
         penalized_likelihood = 2 * segmentation_likelihood - nb_parameter *
                                log((double)((seq->nb_variable - 1) * seq->length[0])) - segment_penalty;
 
-        cout << "\n" << nb_segment << " " << (nb_segment == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
-             << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * segmentation_likelihood << "   "
-             << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
-             << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (Modified "  << STAT_criterion_word[BIC] << "): "
-             << penalized_likelihood << endl;
+        *os << "\n" << nb_segment << " " << (nb_segment == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
+            << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * segmentation_likelihood << "   "
+            << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
+            << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (Modified "  << STAT_criterion_word[BIC] << "): "
+            << penalized_likelihood << endl;
       }
 
-      oseq = seq->segmentation_output(nb_segment , model_type , common_contrast , display , output ,
+      oseq = seq->segmentation_output(nb_segment , model_type , common_contrast , os , output ,
                                       change_point , continuity);
 
       if ((output == SEQUENCE) || (output == ABSOLUTE_RESIDUAL)) {
@@ -6257,7 +6258,7 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
  *  \brief Segmentation of a single sequence or a sample of sequences.
  *
  *  \param[in] error           reference on a StatError object,
- *  \param[in] display         flag for displaying the segmentation,
+ *  \param[in] os              stream for displaying the segmentation,
  *  \param[in] iidentifier     sequence identifier,
  *  \param[in] nb_segment      number of segments,
  *  \param[in] ichange_point   change points,
@@ -6271,13 +6272,13 @@ Sequences* Sequences::segmentation(StatError &error , bool display , int iidenti
  */
 /*--------------------------------------------------------------*/
 
-Sequences* Sequences::segmentation(StatError &error , bool display , int iidentifier ,
-                                   int nb_segment , vector<int> ichange_point , vector<segment_model> model_type ,
-                                   bool common_contrast , vector<double> shape_parameter ,
+Sequences* Sequences::segmentation(StatError &error , ostream *os , int iidentifier ,
+                                   int nb_segment , vector<int> &ichange_point , vector<segment_model> &model_type ,
+                                   bool common_contrast , vector<double> &shape_parameter ,
                                    sequence_type output , bool continuity) const
 
 {
-  return segmentation(error , display , iidentifier , nb_segment , ichange_point.data() , model_type.data() ,
+  return segmentation(error , os , iidentifier , nb_segment , ichange_point.data() , model_type.data() ,
                       common_contrast , shape_parameter.data() , output , continuity);
 }
 

@@ -36,7 +36,6 @@ void wrapper_8470eec064f35f569821a3873bd503cd()
     if(autowig::Held< class ::stat_tool::ChainData >::is_class)
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::ChainData >::Type, autowig::Held< class ::stat_tool::ChainReestimation< int > >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::ChainData >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::ChainData, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::ChainData >::Type, class ::stat_tool::ChainData > > >();
     }
 
 }

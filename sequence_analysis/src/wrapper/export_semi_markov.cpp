@@ -166,7 +166,7 @@ public:
     HEADER_OS(DistanceMatrix);
     CREATE_ARRAY(input_markov, const SemiMarkov*, markov);
     CREATE_ARRAY(input_histogram_length, FrequencyDistribution*, hlength);
-    ret = input.divergence_computation(error, os, markov_size, markov.get(), hlength.get(), filename);
+    ret = input.divergence_computation(error, &os, markov_size, markov.get(), hlength.get(), filename);
     FOOTER_OS;
   }
 
@@ -177,7 +177,7 @@ public:
   {
     HEADER_OS(DistanceMatrix);
     CREATE_ARRAY(input_markov, const SemiMarkov*, markov);
-    ret = input.divergence_computation(error, os, markov_size, markov.get(),
+    ret = input.divergence_computation(error, &os, markov_size, markov.get(),
         nb_sequence, length, filename);
     FOOTER_OS;
   }
@@ -196,7 +196,7 @@ public:
     CREATE_ARRAY(input_markov, const SemiMarkov*, markov);
     CREATE_ARRAY(input_sequences, const MarkovianSequences*, sequences);
 
-    ret = input.divergence_computation(error, os, markov_size, markov.get(),
+    ret = input.divergence_computation(error, &os, markov_size, markov.get(),
         nb_seq, sequences.get(), filename);
     FOOTER_OS;
   }

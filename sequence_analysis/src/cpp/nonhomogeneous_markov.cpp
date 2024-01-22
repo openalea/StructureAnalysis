@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: nonhomogeneous_markov.cpp 3257 2007-06-06 12:56:12Z dufourko $
  *
- *       Forum for V-Plants developers: amldevlp@cirad.fr
+ *       Forum for StructureAnalysis developers: amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,11 +36,12 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
-#include <string>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>

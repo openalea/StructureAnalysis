@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,9 +36,10 @@
 
 
 
-#include <string>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -3409,6 +3410,29 @@ ostream& SemiMarkovData::ascii_data_write(ostream &os , output_sequence_format f
   ascii_print(os , format , false , posterior_probability , entropy , nb_state_sequence , posterior_state_probability);
 
   return os;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a SemiMarkovData object.
+ *
+ *  \param[in] format     format (line/column),
+ *  \param[in] exhaustive flag detail level,
+ *
+ *  \return    string.
+ */
+/*--------------------------------------------------------------*/
+
+string SemiMarkovData::ascii_data_write(output_sequence_format format , bool exhaustive) const
+
+{
+  ostringstream oss;
+
+
+  ascii_data_write(oss , format , exhaustive);
+
+  return oss.str();
 }
 
 

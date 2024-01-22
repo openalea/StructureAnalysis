@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
  *       $Source$
  *       $Id: plotable.cpp 16835 2016-01-05 14:36:51Z durandjb $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -33,6 +33,7 @@
  *
  *  ----------------------------------------------------------------------------
  */
+
 
 #ifndef PLOTABLE_TCC
 #define PLOTABLE_TCC

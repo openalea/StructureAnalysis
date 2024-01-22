@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -39,11 +39,9 @@
 #ifndef REESTIMATION_H
 #define REESTIMATION_H
 
-
-
 #include <iostream>
 
-
+#include "config.h"
 
 namespace stat_tool {
 
@@ -176,7 +174,7 @@ namespace stat_tool {
   };
 
 
-  double interval_bisection(Reestimation<double> *distribution_reestim ,
+  STAT_TOOL_API double interval_bisection(Reestimation<double> *distribution_reestim ,
                             Reestimation<double> *length_bias_reestim);
 
 

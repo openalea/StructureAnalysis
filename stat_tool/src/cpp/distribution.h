@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -50,7 +50,7 @@ namespace stat_tool {
 
   /// \brief Discrete parametric distribution
 
-  class DiscreteParametricModel : public StatInterface , public DiscreteParametric {
+  class STAT_TOOL_API DiscreteParametricModel : public StatInterface , public DiscreteParametric {
 
     friend class Distribution;  // Hack for Windows
     friend class FrequencyDistribution;
@@ -81,6 +81,9 @@ namespace stat_tool {
                             double iparameter , double iprobability ,
                             double cumul_threshold = CUMUL_THRESHOLD)
     :DiscreteParametric(iident , iinf_bound , isup_bound , iparameter , iprobability , cumul_threshold)
+    { frequency_distribution = NULL; }
+    DiscreteParametricModel(int iinf_bound , int ino_segment , int isequence_length)
+    :DiscreteParametric(iinf_bound , ino_segment , isequence_length)
     { frequency_distribution = NULL; }
     DiscreteParametricModel(const FrequencyDistribution &histo);
     DiscreteParametricModel(const Distribution &dist)
@@ -114,7 +117,7 @@ namespace stat_tool {
 
   // \brief Frequency distribution
 
-  class DiscreteDistributionData : public StatInterface , public FrequencyDistribution {
+  class STAT_TOOL_API DiscreteDistributionData : public StatInterface , public FrequencyDistribution {
 
     friend class DiscreteParametricModel;
 
@@ -135,8 +138,10 @@ namespace stat_tool {
     :FrequencyDistribution(dist) { distribution = NULL; }
     DiscreteDistributionData(const FrequencyDistribution &histo)
     :FrequencyDistribution(histo) { distribution = NULL; }
-    DiscreteDistributionData(int inb_element , int *pelement)
-    :FrequencyDistribution(inb_element , pelement) { distribution = NULL; }
+    DiscreteDistributionData(int inb_element , int *ielement)
+    :FrequencyDistribution(inb_element , ielement) { distribution = NULL; }
+    DiscreteDistributionData(const std::vector<int> &ielement)
+    :FrequencyDistribution(ielement) { distribution = NULL; }
     DiscreteDistributionData(const FrequencyDistribution &histo ,
                              frequency_distribution_transformation transform ,
                              int param , rounding mode = FLOOR)

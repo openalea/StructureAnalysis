@@ -9,11 +9,8 @@ void wrapper_fe202c1f62ab5724b611e7a0685a88c5()
     boost::python::scope().attr("stat_tool") = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::scope scope_0cdd446515295e8e8373e99f328c3748 = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::enum_< enum ::stat_tool::estimation_criterion > enum_fe202c1f62ab5724b611e7a0685a88c5("estimation_criterion");
-
     enum_fe202c1f62ab5724b611e7a0685a88c5.value("LIKELIHOOD", ::stat_tool::LIKELIHOOD);
-
     enum_fe202c1f62ab5724b611e7a0685a88c5.value("PENALIZED_LIKELIHOOD", ::stat_tool::PENALIZED_LIKELIHOOD);
-
     enum_fe202c1f62ab5724b611e7a0685a88c5.value("PARAMETRIC_REGULARIZATION", ::stat_tool::PARAMETRIC_REGULARIZATION);
 
 }

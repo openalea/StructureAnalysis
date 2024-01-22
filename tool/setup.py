@@ -6,11 +6,20 @@ from os.path import join as pj
 
 from setuptools import setup, find_packages
 
-from openalea.deploy.metainfo import read_metainfo
+#from openalea.deploy.metainfo import read_metainfo
 
-metadata = read_metainfo('metainfo.ini', verbose=True)
-for key,value in metadata.iteritems():
-    exec("%s = '%s'" % (key, value))
+# metadata = read_metainfo('metainfo.ini', verbose=True)
+# for key,value in metadata.iteritems():
+#     exec("%s = '%s'" % (key, value))
+
+# Meta information
+name="OpenAlea.Tool"
+version="1.2.0"
+authors="Christophe Pradal, Frederic Boudon"
+authors_email="christophe.pradal@cirad.fr"
+description="Tool library"
+url="https://github.com/openalea/StructureAnalysis"
+license="CeCILL-C"
 
 # Scons build directory
 build_prefix = "build-scons"
@@ -55,6 +64,6 @@ if __name__ == '__main__':
           # Dependencies
           setup_requires   = setup_requires ,
           install_requires = install_requires,
-          dependency_links = ['http://openalea.gforge.inria.fr/pi'],
+          #dependency_links = ['http://openalea.gforge.inria.fr/pi'],
           )
 

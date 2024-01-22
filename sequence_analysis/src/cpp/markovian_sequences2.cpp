@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,10 +36,10 @@
 
 
 
-#include <string>
-// #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
 
 #include <boost/math/distributions/normal.hpp>
 
@@ -417,6 +417,29 @@ ostream& MarkovianSequences::ascii_data_write(ostream &os , output_sequence_form
   ascii_print(os , format , false);
 
   return os;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a MarkovianSequences object.
+ *
+ *  \param[in] format     format (LINE/COLUMN/VECTOR/POSTERIOR_PROBABILITY),
+ *  \param[in] exhaustive flag detail level,
+ *
+ *  \return    string.
+ */
+/*--------------------------------------------------------------*/
+
+string MarkovianSequences::ascii_data_write(output_sequence_format format , bool exhaustive) const
+
+{
+  ostringstream oss;
+
+
+  ascii_data_write(oss , format , exhaustive);
+
+  return oss.str();
 }
 
 

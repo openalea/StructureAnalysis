@@ -57,7 +57,6 @@ void wrapper_acbc6c0efe495dce91ea3a9523ac2fa9()
     if(autowig::Held< class ::stat_tool::Dendrogram >::is_class)
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::Dendrogram >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::Dendrogram >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::Dendrogram, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::Dendrogram >::Type, class ::stat_tool::Dendrogram > > >();
     }
 
 }

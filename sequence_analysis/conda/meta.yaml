@@ -1,0 +1,35 @@
+package:
+  name: openalea.sequence_analysis
+  version: 2.0.0
+
+source:
+  path: ..
+
+about:
+  home: http://openalea.gforge.inria.fr
+  license: GPL/LGPL
+  summary: Models and algorithms for sequence analysis
+
+# needs boost - this is now in defaults.  the ioos boost is broken (and has been
+# deprecated but still appears in the channel - 2015-08-02)
+build:
+  preserve_egg_dir: True
+  number: 0
+  script: python setup.py install --prefix=$PREFIX
+
+
+requirements:
+  # it doesn't really require python, but maybe that will fix
+  # the missing bin directory
+  build:
+   - python
+   - setuptools
+   - openalea.deploy
+   - scons
+   - openalea.sconsx
+   - boost
+   - openalea.stat_tool
+  run:
+   - python
+   - boost
+   - openalea.stat_tool

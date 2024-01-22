@@ -432,10 +432,10 @@ public:
   static std::string
   ascii_data_write(const Vectors& d, bool exhaustive)
   {
-    std::stringstream s;
+    ostringstream os;
     std::string res;
 
-    d.ascii_data_write(s, exhaustive);
+    d.ascii_data_write(os, exhaustive);
     res = s.str();
 
     return res;
@@ -460,8 +460,7 @@ public:
   {
     StatError error;
     Vectors * ret = NULL;
-    //std::stringstream s;
-    bool display = true;
+    ostringstream os;
 
     boost::python::extract<int> get_min(min);
     boost::python::extract<int> get_max(max);
@@ -471,19 +470,19 @@ public:
       {
         int mi = get_min();
         int ma = get_max();
-        ret = v.value_select(error, display, variable, mi, ma, keep);
+        ret = v.value_select(error, &os, variable, mi, ma, keep);
       }
     else
       {
         double mi = extract<double> (min);
         double ma = extract<double> (max);
-        ret = v.value_select(error, display, variable, mi, ma, keep);
+        ret = v.value_select(error, &os, variable, mi, ma, keep);
       }
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    //cout << s.str() << endl;
+    // cout << os.str() << endl;
 
     return ret;
   }
@@ -776,18 +775,17 @@ public:
       const string& filename, int iformat)
   {
     StatError error;
-    //std::stringstream s;
-    bool display = true;
+    ostringstream os;
     bool ret;
     output_format format = output_format(iformat);
 
-    ret = v.contingency_table(error, display, variable1, variable2, filename.c_str(),
+    ret = v.contingency_table(error, &os, variable1, variable2, filename.c_str(),
         format);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    return string();
+    return os.str();
   }
 
   static string
@@ -796,36 +794,34 @@ public:
       int iformat)
   {
     StatError error;
-    //std::stringstream s;
-    bool display = true;
+    ostringstream os;
 
     bool ret;
     output_format format = output_format(iformat);
 
-    ret = v.variance_analysis(error, display, class_variable, response_variable,
+    ret = v.variance_analysis(error, &os, class_variable, response_variable,
         response_type, filename.c_str(), format);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    return string();
+    return os.str();
   }
 
   static string
   rank_correlation_computation(const Vectors& input, int icorrel_type, const string &filename)
   {
     StatError error;
-    //std::stringstream os;
-    bool display = true;
+    ostringstream os;
 
     bool ret;
     correlation_type correl_type = correlation_type(icorrel_type);
 
-    ret = input.rank_correlation_computation(error, display, correl_type, filename.c_str());
+    ret = input.rank_correlation_computation(error, &os, correl_type, filename.c_str());
     //std::cout << os.str()<<endl;
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
-    return string();
+    return os.str();
   }
 
   static MultiPlotSet*

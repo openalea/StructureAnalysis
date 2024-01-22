@@ -122,7 +122,7 @@ public:
   {
     HEADER_OS(DistanceMatrix);CREATE_ARRAY(input_markov, const VariableOrderMarkov*, markov);
     CREATE_ARRAY(input_histogram_length, FrequencyDistribution*, hlength);
-    ret = input.divergence_computation(error, os, markov_size, markov.get(),
+    ret = input.divergence_computation(error, &os, markov_size, markov.get(),
         hlength.get(), filename);
     FOOTER_OS;
   }
@@ -133,7 +133,7 @@ public:
       const char *filename)
   {
     HEADER_OS(DistanceMatrix);CREATE_ARRAY(input_markov, const VariableOrderMarkov*, markov);
-    ret = input.divergence_computation(error, os, markov_size, markov.get(),
+    ret = input.divergence_computation(error, &os, markov_size, markov.get(),
         nb_sequence, length, filename);
     FOOTER_OS;
   }
@@ -151,7 +151,7 @@ public:
     CREATE_ARRAY(input_markov, const VariableOrderMarkov*, markov);
     CREATE_ARRAY(input_sequence, const MarkovianSequences*, sequence);
 
-    ret = input.divergence_computation(error, os, markov_size + 1, markov.get(),
+    ret = input.divergence_computation(error, &os, markov_size + 1, markov.get(),
         sequence_size, sequence.get(), filename);
 
     FOOTER_OS;

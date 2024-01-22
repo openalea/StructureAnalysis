@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,10 +36,11 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
-#include <string>
 #include <sstream>
+#include <fstream>
+#include <string>
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -79,6 +80,7 @@ void DiscreteParametric::init(int iinf_bound , int isup_bound ,
   sup_bound = isup_bound;
   parameter = iparameter;
   probability = iprobability;
+  sequence_length = I_DEFAULT;
 }
 
 
@@ -104,6 +106,7 @@ void DiscreteParametric::init(discrete_parametric iident , int iinf_bound , int 
   sup_bound = isup_bound;
   parameter = iparameter;
   probability = iprobability;
+  sequence_length = I_DEFAULT;
 }
 
 
@@ -126,12 +129,7 @@ DiscreteParametric::DiscreteParametric(int inb_value , discrete_parametric iiden
 :Distribution(inb_value)
 
 {
-  ident = iident;
-
-  inf_bound = iinf_bound;
-  sup_bound = isup_bound;
-  parameter = iparameter;
-  probability = iprobability;
+  init(iident , iinf_bound , isup_bound , iparameter , iprobability);
 }
 
 
@@ -153,21 +151,12 @@ DiscreteParametric::DiscreteParametric(discrete_parametric iident , int iinf_bou
                                        double iprobability , double cumul_threshold)
 
 {
-  ident = iident;
-
-  inf_bound = iinf_bound;
-  sup_bound = isup_bound;
-  parameter = iparameter;
-  probability = iprobability;
+  init(iident , iinf_bound , isup_bound , iparameter , iprobability);
 
   nb_value = 0;
 
   if ((ident == BINOMIAL) || (ident == UNIFORM)) {
     nb_value = sup_bound + 1;
-  }
-
-  else if (ident == PRIOR_SEGMENT_LENGTH) {
-    nb_value = sequence_length - no_segment + 2;
   }
 
   else if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
@@ -181,6 +170,34 @@ DiscreteParametric::DiscreteParametric(discrete_parametric iident , int iinf_bou
   Distribution::init(nb_value);
 
   computation(1 , cumul_threshold);
+}
+
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the DiscreteParametric class (prior segment length distribution).
+ *
+ *  \param[in] iinf_bound       lower bound,
+ *  \param[in] ino_segment      number of segments,
+ *  \param[in] isequence_length sequence length.
+ */
+/*--------------------------------------------------------------*/
+
+DiscreteParametric::DiscreteParametric(int iinf_bound , int ino_segment , int isequence_length)
+
+{
+  ident = PRIOR_SEGMENT_LENGTH;
+  inf_bound = iinf_bound;
+  no_segment = ino_segment;
+  sequence_length = isequence_length;
+  parameter = D_DEFAULT;
+  probability = D_DEFAULT;
+
+  nb_value = sequence_length - inf_bound * (no_segment - 1) + 1;
+  Distribution::init(nb_value);
+
+  computation(inf_bound);
 }
 
 
@@ -203,6 +220,7 @@ DiscreteParametric::DiscreteParametric(const Distribution &dist , int ialloc_nb_
   sup_bound = I_DEFAULT;
   parameter = D_DEFAULT;
   probability = D_DEFAULT;
+  sequence_length = I_DEFAULT;
 }
 
 
@@ -226,6 +244,7 @@ DiscreteParametric::DiscreteParametric(const Distribution &dist , double scaling
   sup_bound = I_DEFAULT;
   parameter = D_DEFAULT;
   probability = D_DEFAULT;
+  sequence_length = I_DEFAULT;
 }
 
 
@@ -255,6 +274,7 @@ DiscreteParametric::DiscreteParametric(const DiscreteParametric &dist , double s
   sup_bound = I_DEFAULT;
   parameter = D_DEFAULT;
   probability = D_DEFAULT;
+  sequence_length = I_DEFAULT;
 
   shifted_mean = scaled_mean - inf_bound;
   ratio = scaled_variance / shifted_mean;
@@ -309,6 +329,7 @@ DiscreteParametric::DiscreteParametric(const FrequencyDistribution &histo)
   sup_bound = I_DEFAULT;
   parameter = D_DEFAULT;
   probability = D_DEFAULT;
+  sequence_length = I_DEFAULT;
 }
 
 
@@ -329,6 +350,7 @@ void DiscreteParametric::copy(const DiscreteParametric &dist)
   sup_bound = dist.sup_bound;
   parameter = dist.parameter;
   probability = dist.probability;
+  sequence_length = dist.sequence_length;
 }
 
 
@@ -403,13 +425,10 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
   bool status = true , lstatus;
   int i , j;
   discrete_parametric ident = CATEGORICAL;
-  union {
-    int inf_bound;
-    int no_segment;
-  };
+  int inf_bound , sequence_length;
   union {
     int sup_bound = I_DEFAULT;
-    int sequence_length;
+    int no_segment;
   };
   double parameter = D_DEFAULT , probability = D_DEFAULT;
   DiscreteParametric *dist;
@@ -459,24 +478,18 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
         case 0 : {
           switch ((i - 1) / 3) {
 
-          // 1st parameter: lower bound or number of segments (prior segment length)
+          // 1st parameter: lower bound
 
           case 0 : {
-            if (((ident == BINOMIAL) || (ident == POISSON) || (ident == NEGATIVE_BINOMIAL) ||
-                 (ident == POISSON_GEOMETRIC) || (ident == UNIFORM)) && (*token != STAT_word[STATW_INF_BOUND])) {
+            if (*token != STAT_word[STATW_INF_BOUND]) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_INF_BOUND] , line , i + 1);
-            }
-
-            if ((ident == PRIOR_SEGMENT_LENGTH) && (*token != STAT_word[STATW_NO_SEGMENT])) {
-              status = false;
-              error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_NO_SEGMENT] , line , i + 1);
             }
             break;
           }
 
           // 2nd parameter: upper bound (binomial, uniform), parameter (Poisson, negative binomial, Poisson geometric)
-          // or sequence length (prior segment length)
+          // or number of segments (prior segment length)
 
           case 1 : {
             if (((ident == BINOMIAL) || (ident == UNIFORM)) && (*token != STAT_word[STATW_SUP_BOUND])) {
@@ -490,20 +503,26 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_PARAMETER] , line , i + 1);
             }
 
-            if ((ident == PRIOR_SEGMENT_LENGTH) && (*token != STAT_word[STATW_SEQUENCE_LENGTH])) {
+            if ((ident == PRIOR_SEGMENT_LENGTH) && (*token != STAT_word[STATW_NO_SEGMENT])) {
               status = false;
-              error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SEQUENCE_LENGTH] , line , i + 1);
+              error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_NO_SEGMENT] , line , i + 1);
             }
             break;
           }
 
           // 3rd parameter: probability (binomial, negative binomial, Poisson geometric)
+          // or sequence length (prior segment length)
 
           case 2 : {
             if (((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) &&
                 (*token != STAT_word[STATW_PROBABILITY])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_PROBABILITY] , line , i + 1);
+            }
+
+            if ((ident == PRIOR_SEGMENT_LENGTH) && (*token != STAT_word[STATW_SEQUENCE_LENGTH])) {
+              status = false;
+              error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SEQUENCE_LENGTH] , line , i + 1);
             }
             break;
           }
@@ -529,42 +548,25 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
 
           switch ((i - 1) / 3) {
 
-          // 1st parameter: lower bound or number of segments (prior segment length)
+          // 1st parameter: lower bound
 
           case 0 : {
-            if ((ident == BINOMIAL) || (ident == POISSON) || (ident == NEGATIVE_BINOMIAL) ||
-                (ident == POISSON_GEOMETRIC) || (ident == UNIFORM)) {
-/*              try {
-                inf_bound = stoi(*token);   in C++ 11
-              }
-              catch (invalid_argument &arg) {
-                lstatus = false;
-              } */
-              inf_bound = atoi(token->c_str());
-
-              if ((lstatus) && ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND))) {
-                lstatus = false;
-              }
+/*            try {
+              inf_bound = stoi(*token);   in C++ 11
             }
+            catch (invalid_argument &arg) {
+              lstatus = false;
+            } */
+            inf_bound = atoi(token->c_str());
 
-            if (ident == PRIOR_SEGMENT_LENGTH) {
-/*              try {
-                no_segment = stoi(*token);   in C++ 11
-              }
-              catch(invalid_argument &arg) {
-                lstatus = false;
-              } */
-              no_segment = atoi(token->c_str());
-
-              if ((lstatus) && (no_segment < 2)) {
-                lstatus = false;
-              }
+            if ((lstatus) && ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND))) {
+              lstatus = false;
             }
             break;
           }
 
           // 2nd parameter: upper bound (binomial, uniform), parameter (Poisson, negative binomial, Poisson geometric)
-          // or sequence length (prior segment length)
+          // or number of segments (prior segment length)
 
           case 1 : {
             if ((ident == BINOMIAL) || (ident == UNIFORM)) {
@@ -612,14 +614,14 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
 
             if (ident == PRIOR_SEGMENT_LENGTH) {
 /*              try {
-                sequence_length = stoi(*token);   in C++ 11
+                no_segment = stoi(*token);   in C++ 11
               }
               catch(invalid_argument &arg) {
                 lstatus = false;
               } */
-              sequence_length = atoi(token->c_str());
+              no_segment = atoi(token->c_str());
 
-              if ((lstatus) && (status) && (sequence_length <= no_segment)) {
+              if ((lstatus) && (no_segment < 2)) {
                 lstatus = false;
               }
             }
@@ -627,6 +629,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
           }
 
           // 3rd parameter: probability (binomial, negative binomial, Poisson geometric)
+          // or sequence length (prior segment length)
 
           case 2 : {
             if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
@@ -670,6 +673,20 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
                 }
               }
             }
+
+            if (ident == PRIOR_SEGMENT_LENGTH) {
+/*              try {
+                sequence_length = stoi(*token);   in C++ 11
+              }
+              catch(invalid_argument &arg) {
+                lstatus = false;
+              } */
+              sequence_length = atoi(token->c_str());
+
+              if ((lstatus) && (status) && ((sequence_length < no_segment * inf_bound) || (sequence_length > MAX_SEQUENCE_LENGTH))) {
+                lstatus = false;
+              }
+            }
             break;
           }
           }
@@ -687,8 +704,8 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
     }
 
     if (i > 0) {
-      if ((((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) && (i != 10)) ||
-          (((ident == POISSON) || (ident == UNIFORM) || (ident == PRIOR_SEGMENT_LENGTH)) && (i != 7))) {
+      if ((((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC) || (ident == PRIOR_SEGMENT_LENGTH)) && (i != 10)) ||
+          (((ident == POISSON) || (ident == UNIFORM)) && (i != 7))) {
         status = false;
         error.update(STAT_parsing[STATP_FORMAT] , line);
       }
@@ -703,8 +720,13 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
   }
 
   if (status) {
-    dist = new DiscreteParametric(ident , inf_bound , sup_bound ,
-                                  parameter , probability , cumul_threshold);
+    if (ident != PRIOR_SEGMENT_LENGTH) {
+      dist = new DiscreteParametric(ident , inf_bound , sup_bound ,
+                                    parameter , probability , cumul_threshold);
+    }
+    else {
+      dist = new DiscreteParametric(inf_bound , no_segment , sequence_length);
+    }
   }
 
   return dist;
@@ -724,24 +746,25 @@ ostream& DiscreteParametric::ascii_print(ostream &os) const
 {
   os << STAT_discrete_distribution_word[ident];
 
-  if (ident != PRIOR_SEGMENT_LENGTH) {
-    if (inf_bound != I_DEFAULT) {
+  if (ident != CATEGORICAL) {
+    if (ident != PRIOR_SEGMENT_LENGTH) {
       os << "   " << STAT_word[STATW_INF_BOUND] << " : " << inf_bound;
+      if (sup_bound != I_DEFAULT) {
+        os << "   " << STAT_word[STATW_SUP_BOUND] << " : " << sup_bound;
+      }
+      if (parameter != D_DEFAULT) {
+        os << "   " << STAT_word[STATW_PARAMETER] << " : " << parameter;
+      }
+      if (probability != D_DEFAULT) {
+        os << "   " << STAT_word[STATW_PROBABILITY] << " : " << probability;
+      }
     }
-    if (sup_bound != I_DEFAULT) {
-      os << "   " << STAT_word[STATW_SUP_BOUND] << " : " << sup_bound;
-    }
-    if (parameter != D_DEFAULT) {
-      os << "   " << STAT_word[STATW_PARAMETER] << " : " << parameter;
-    }
-    if (probability != D_DEFAULT) {
-      os << "   " << STAT_word[STATW_PROBABILITY] << " : " << probability;
-    }
-  }
 
-  else {
-    os << "   " << STAT_word[STATW_NO_SEGMENT] << " : " << no_segment
-       << "   " << STAT_word[STATW_SEQUENCE_LENGTH] << " : " << sequence_length;
+    else {
+      os << "   " << STAT_word[STATW_INF_BOUND] << " : " << inf_bound
+         << "   " << STAT_word[STATW_NO_SEGMENT] << " : " << no_segment
+         << "   " << STAT_word[STATW_SEQUENCE_LENGTH] << " : " << sequence_length;
+    }
   }
   os << endl;
 
@@ -762,24 +785,25 @@ ostream& DiscreteParametric::spreadsheet_print(ostream &os) const
 {
   os << STAT_discrete_distribution_word[ident];
 
-  if (ident != PRIOR_SEGMENT_LENGTH) {
-    if (inf_bound != I_DEFAULT) {
+  if (ident != CATEGORICAL) {
+    if (ident != PRIOR_SEGMENT_LENGTH) {
       os << "\t" << STAT_word[STATW_INF_BOUND] << "\t" << inf_bound;
+      if (sup_bound != I_DEFAULT) {
+        os << "\t" << STAT_word[STATW_SUP_BOUND] << "\t" << sup_bound;
+      }
+      if (parameter != D_DEFAULT) {
+        os << "\t" << STAT_word[STATW_PARAMETER] << "\t" << parameter;
+      }
+      if (probability != D_DEFAULT) {
+        os << "\t" << STAT_word[STATW_PROBABILITY] << "\t" << probability;
+      }
     }
-    if (sup_bound != I_DEFAULT) {
-      os << "\t" << STAT_word[STATW_SUP_BOUND] << "\t" << sup_bound;
-    }
-    if (parameter != D_DEFAULT) {
-      os << "\t" << STAT_word[STATW_PARAMETER] << "\t" << parameter;
-    }
-    if (probability != D_DEFAULT) {
-      os << "\t" << STAT_word[STATW_PROBABILITY] << "\t" << probability;
-    }
-  }
 
-  else {
-    os << "\t" << STAT_word[STATW_NO_SEGMENT] << "\t" << no_segment
-       << "\t" << STAT_word[STATW_SEQUENCE_LENGTH] << "\t" << sequence_length;
+    else {
+      os << "\t" << STAT_word[STATW_INF_BOUND] << "\t" << inf_bound
+         << "\t" << STAT_word[STATW_NO_SEGMENT] << "\t" << no_segment
+         << "\t" << STAT_word[STATW_SEQUENCE_LENGTH] << "\t" << sequence_length;
+    }
   }
   os << endl;
 
@@ -915,7 +939,7 @@ ostream& DiscreteParametric::plot_title_print(ostream &os) const
     }
 
     else {
-      os << no_segment << ", " << sequence_length;
+      os << inf_bound << ", " << no_segment << ", " << sequence_length;
     }
     os << ")";
   }
@@ -982,7 +1006,7 @@ int DiscreteParametric::nb_parameter_computation()
     bnb_parameter = 2;
     break;
   case PRIOR_SEGMENT_LENGTH :
-    bnb_parameter = 2;
+    bnb_parameter = 3;
     break;
   default :
     bnb_parameter = 0;
@@ -1080,10 +1104,18 @@ double DiscreteParametric::parametric_variance_computation() const
     parametric_variance = (double)((sup_bound - inf_bound + 2) *
                           (sup_bound - inf_bound)) / 12.;
     break;
-  case PRIOR_SEGMENT_LENGTH :
-    parametric_variance = ((double)sequence_length * (sequence_length - no_segment) * (no_segment - 1)) /
-                          ((double)no_segment * no_segment * (no_segment + 1));
+  case PRIOR_SEGMENT_LENGTH : {
+/*    if (inf_bound == 1) {
+      parametric_variance = ((double)sequence_length * (sequence_length - no_segment) * (no_segment - 1)) /
+                            ((double)no_segment * no_segment * (no_segment + 1));
+    }
+    else { */
+      parametric_variance = ((double)(sequence_length - (inf_bound - 1) * no_segment) *
+                             (sequence_length - inf_bound * no_segment) * (no_segment - 1)) /
+                            ((double)no_segment * no_segment * (no_segment + 1));
+//    }
     break;
+  }
   default :
     parametric_variance = variance;
     break;
@@ -1143,8 +1175,15 @@ double DiscreteParametric::parametric_skewness_computation() const
   }
 
   case PRIOR_SEGMENT_LENGTH : {
-    parametric_skewness = (((double)(no_segment - 2) * (2 * sequence_length - no_segment)) / (double)(no_segment + 2)) *
-                          sqrt((double)(no_segment + 1) / ((double)sequence_length * (sequence_length - no_segment) * (no_segment - 1)));
+/*    if (inf_bound == 1) {
+      parametric_skewness = (((double)(no_segment - 2) * (2 * sequence_length - no_segment)) / (double)(no_segment + 2)) *
+                            sqrt((double)(no_segment + 1) / ((double)sequence_length * (sequence_length - no_segment) * (no_segment - 1)));
+    }
+    else { */
+      parametric_skewness = (((double)(no_segment - 2) * (2 * sequence_length - (2 * inf_bound - 1) * no_segment)) / (double)(no_segment + 2)) *
+                            sqrt((double)(no_segment + 1) / ((double)(sequence_length - (inf_bound - 1) * no_segment) *
+                                  (sequence_length - inf_bound * no_segment) * (no_segment - 1)));
+//    }
     break;
   }
 
@@ -1203,12 +1242,22 @@ double DiscreteParametric::parametric_kurtosis_computation() const
   }
 
   case PRIOR_SEGMENT_LENGTH : {
-    parametric_kurtosis = ((double)(no_segment + 1) * (-no_segment * no_segment * no_segment * (no_segment - 1) * (no_segment - 6) +
-                            2 * no_segment * no_segment * sequence_length * (5 * no_segment * no_segment - 14 * no_segment + 12) +
-                            3 * sequence_length * sequence_length * (sequence_length - 2 * no_segment) *
-                            (3 * no_segment * no_segment - 7 * no_segment + 6))) /
-                          ((double)sequence_length * (sequence_length - no_segment) * (sequence_length - no_segment) * (no_segment - 1) *
-                           (no_segment + 2) * (no_segment + 3)) - 3.;;
+/*    if (inf_bound == 1) {
+      parametric_kurtosis = ((double)(no_segment + 1) * (-no_segment * no_segment * no_segment * (no_segment - 1) * (no_segment - 6) +
+                              2 * no_segment * no_segment * sequence_length * (5 * no_segment * no_segment - 14 * no_segment + 12) +
+                              3 * sequence_length * sequence_length * (sequence_length - 2 * no_segment) *
+                              (3 * no_segment * no_segment - 7 * no_segment + 6))) /
+                            ((double)sequence_length * (sequence_length - no_segment) * (sequence_length - no_segment) * (no_segment - 1) *
+                             (no_segment + 2) * (no_segment + 3)) - 3.;
+    }
+    else { */
+      parametric_kurtosis = ((double)(no_segment + 1) * (-no_segment * no_segment * no_segment * (no_segment - 1) * (no_segment - 6) +
+                              2 * no_segment * no_segment * (sequence_length - (inf_bound - 1) * no_segment) * (5 * no_segment * no_segment - 14 * no_segment + 12) +
+                              3 * (sequence_length - (inf_bound - 1) * no_segment) * (sequence_length - (inf_bound - 1) * no_segment) *
+                              (sequence_length - (inf_bound + 1) * no_segment) * (3 * no_segment * no_segment - 7 * no_segment + 6))) /
+                             ((double)(sequence_length - (inf_bound - 1) * no_segment) * (sequence_length - inf_bound * no_segment) *
+                              (sequence_length - inf_bound * no_segment) * (no_segment - 1) * (no_segment + 2) * (no_segment + 3)) - 3.;
+//    }
     break;
   }
 

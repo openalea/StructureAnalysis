@@ -5,9 +5,9 @@
 namespace autowig
 {
 
-    void method_decorator_beaa574a87dd59068311360e573c777c(class ::std::vector< double, class ::std::allocator< double > > & instance, ::std::vector< double, class ::std::allocator< double > >::size_type  param_in_0, const ::std::vector< double, class ::std::allocator< double > >::reference  param_out)     { instance.at(param_in_0) = param_out; }
-    void method_decorator_22f52ccf4b785404ada1e9bcb9fa01aa(class ::std::vector< double, class ::std::allocator< double > > & instance, const ::std::vector< double, class ::std::allocator< double > >::reference  param_out)     { instance.front() = param_out; }
-    void method_decorator_cae6ded0197f5723954a48c02008c60c(class ::std::vector< double, class ::std::allocator< double > > & instance, const ::std::vector< double, class ::std::allocator< double > >::reference  param_out)     { instance.back() = param_out; }
+    void method_decorator_807b8927890750b8a86c6ad1f6b386c2(class ::std::vector< double, class ::std::allocator< double > > & instance, ::std::vector< double, class ::std::allocator< double > >::size_type  param_in_0, double param_out) { instance.at(param_in_0) = param_out; }
+    void method_decorator_1339251591c5515a98e83a0050706699(class ::std::vector< double, class ::std::allocator< double > > & instance, double param_out) { instance.front() = param_out; }
+    void method_decorator_9d019f4c78a1536db0954a15a9df10be(class ::std::vector< double, class ::std::allocator< double > > & instance, double param_out) { instance.back() = param_out; }
 }
 
 #if defined(_MSC_VER)
@@ -28,44 +28,46 @@ void wrapper_107131f9768c56e794a9b0de728d1738()
     boost::python::object module_a5e4e9231d6351ccb0e06756b389f0af(boost::python::handle<  >(boost::python::borrowed(PyImport_AddModule(name_a5e4e9231d6351ccb0e06756b389f0af.c_str()))));
     boost::python::scope().attr("std") = module_a5e4e9231d6351ccb0e06756b389f0af;
     boost::python::scope scope_a5e4e9231d6351ccb0e06756b389f0af = module_a5e4e9231d6351ccb0e06756b389f0af;
-    void  (::std::vector< double, ::std::allocator< double > >::*method_pointer_3fcbcdd89dc951b39073e310b61a04e9)(::std::vector< double, class ::std::allocator< double > >::size_type , ::std::vector< double, class ::std::allocator< double > >::value_type const &) = &::std::vector< double, class ::std::allocator< double > >::assign;
-    ::std::vector< double, class ::std::allocator< double > >::size_type  (::std::vector< double, ::std::allocator< double > >::*method_pointer_2762c9c3801851f798933620de2a38c5)() const = &::std::vector< double, class ::std::allocator< double > >::size;
-    ::std::vector< double, class ::std::allocator< double > >::size_type  (::std::vector< double, ::std::allocator< double > >::*method_pointer_441a8fd7a6105f52ab269c45a59d8985)() const = &::std::vector< double, class ::std::allocator< double > >::max_size;
-    ::std::vector< double, class ::std::allocator< double > >::size_type  (::std::vector< double, ::std::allocator< double > >::*method_pointer_5c9706119c135c8ca0dbcadbab171935)() const = &::std::vector< double, class ::std::allocator< double > >::capacity;
-    bool  (::std::vector< double, ::std::allocator< double > >::*method_pointer_fbb341f4fc855b39aa2eeb3c29aefdd1)() const = &::std::vector< double, class ::std::allocator< double > >::empty;
-    void  (::std::vector< double, ::std::allocator< double > >::*method_pointer_56d1f2045f5952b983dea94ad5c12052)(::std::vector< double, class ::std::allocator< double > >::size_type ) = &::std::vector< double, class ::std::allocator< double > >::reserve;
-    ::std::vector< double, class ::std::allocator< double > >::reference  (::std::vector< double, ::std::allocator< double > >::*method_pointer_beaa574a87dd59068311360e573c777c)(::std::vector< double, class ::std::allocator< double > >::size_type ) = &::std::vector< double, class ::std::allocator< double > >::at;
-    ::std::vector< double, class ::std::allocator< double > >::const_reference  (::std::vector< double, ::std::allocator< double > >::*method_pointer_25da210bb3c75c269af3895505a003fd)(::std::vector< double, class ::std::allocator< double > >::size_type ) const = &::std::vector< double, class ::std::allocator< double > >::at;
-    ::std::vector< double, class ::std::allocator< double > >::reference  (::std::vector< double, ::std::allocator< double > >::*method_pointer_22f52ccf4b785404ada1e9bcb9fa01aa)() = &::std::vector< double, class ::std::allocator< double > >::front;
-    ::std::vector< double, class ::std::allocator< double > >::const_reference  (::std::vector< double, ::std::allocator< double > >::*method_pointer_fb2421b769975570ac8387adada3a0b2)() const = &::std::vector< double, class ::std::allocator< double > >::front;
-    ::std::vector< double, class ::std::allocator< double > >::reference  (::std::vector< double, ::std::allocator< double > >::*method_pointer_cae6ded0197f5723954a48c02008c60c)() = &::std::vector< double, class ::std::allocator< double > >::back;
-    ::std::vector< double, class ::std::allocator< double > >::const_reference  (::std::vector< double, ::std::allocator< double > >::*method_pointer_e34e38388a585de3aaa97622256cd858)() const = &::std::vector< double, class ::std::allocator< double > >::back;
-    void  (::std::vector< double, ::std::allocator< double > >::*method_pointer_f6adc78c87285d669260e4289dd02852)(::std::vector< double, class ::std::allocator< double > >::value_type const &) = &::std::vector< double, class ::std::allocator< double > >::push_back;
-    void  (::std::vector< double, ::std::allocator< double > >::*method_pointer_0d34433fdbe7506180094ce87fae6cab)() = &::std::vector< double, class ::std::allocator< double > >::pop_back;
-    void  (::std::vector< double, ::std::allocator< double > >::*method_pointer_331520d5c9a25683a40120b524320d20)(class ::std::vector< double, class ::std::allocator< double > > &) = &::std::vector< double, class ::std::allocator< double > >::swap;
-    void  (::std::vector< double, ::std::allocator< double > >::*method_pointer_a4208670622158c3a2376d15176ceee2)() = &::std::vector< double, class ::std::allocator< double > >::clear;
+    void  (::std::vector< double, ::std::allocator< double > >::*method_pointer_bd3b0a01510b53d6a23ffb47de810871)(::std::vector< double, class ::std::allocator< double > >::size_type , ::std::vector< double, class ::std::allocator< double > >::const_reference ) = &::std::vector< double, class ::std::allocator< double > >::assign;
+    ::std::vector< double, class ::std::allocator< double > >::size_type  (::std::vector< double, ::std::allocator< double > >::*method_pointer_532fefd4df105fd5b03b5056bfbc96d2)() const = &::std::vector< double, class ::std::allocator< double > >::size;
+    ::std::vector< double, class ::std::allocator< double > >::size_type  (::std::vector< double, ::std::allocator< double > >::*method_pointer_840d124381ff523a8a307316e85df988)() const = &::std::vector< double, class ::std::allocator< double > >::capacity;
+    bool  (::std::vector< double, ::std::allocator< double > >::*method_pointer_194feced398858e6b0520c20d9b56f05)() const = &::std::vector< double, class ::std::allocator< double > >::empty;
+    ::std::vector< double, class ::std::allocator< double > >::size_type  (::std::vector< double, ::std::allocator< double > >::*method_pointer_9a5efa6fac8555b9bbc3931a8e59029e)() const = &::std::vector< double, class ::std::allocator< double > >::max_size;
+    void  (::std::vector< double, ::std::allocator< double > >::*method_pointer_57072bfde93f5e9ebb4b00b299e11b85)(::std::vector< double, class ::std::allocator< double > >::size_type ) = &::std::vector< double, class ::std::allocator< double > >::reserve;
+    ::std::vector< double, class ::std::allocator< double > >::reference  (::std::vector< double, ::std::allocator< double > >::*method_pointer_807b8927890750b8a86c6ad1f6b386c2)(::std::vector< double, class ::std::allocator< double > >::size_type ) = &::std::vector< double, class ::std::allocator< double > >::at;
+    ::std::vector< double, class ::std::allocator< double > >::const_reference  (::std::vector< double, ::std::allocator< double > >::*method_pointer_9c305f05d46d542b8424268d38c945d0)(::std::vector< double, class ::std::allocator< double > >::size_type ) const = &::std::vector< double, class ::std::allocator< double > >::at;
+    ::std::vector< double, class ::std::allocator< double > >::reference  (::std::vector< double, ::std::allocator< double > >::*method_pointer_1339251591c5515a98e83a0050706699)() = &::std::vector< double, class ::std::allocator< double > >::front;
+    ::std::vector< double, class ::std::allocator< double > >::const_reference  (::std::vector< double, ::std::allocator< double > >::*method_pointer_b7286d66b5185ce3a82408c1c08d0321)() const = &::std::vector< double, class ::std::allocator< double > >::front;
+    ::std::vector< double, class ::std::allocator< double > >::reference  (::std::vector< double, ::std::allocator< double > >::*method_pointer_9d019f4c78a1536db0954a15a9df10be)() = &::std::vector< double, class ::std::allocator< double > >::back;
+    ::std::vector< double, class ::std::allocator< double > >::const_reference  (::std::vector< double, ::std::allocator< double > >::*method_pointer_cfc57d90d8f95ead97edfdb47ab2158f)() const = &::std::vector< double, class ::std::allocator< double > >::back;
+    void  (::std::vector< double, ::std::allocator< double > >::*method_pointer_dbfb61dd68505d29bb323f7f7721e7b8)(::std::vector< double, class ::std::allocator< double > >::const_reference ) = &::std::vector< double, class ::std::allocator< double > >::push_back;
+    void  (::std::vector< double, ::std::allocator< double > >::*method_pointer_67d448aeb7eb55bcbb1a622756f299cf)() = &::std::vector< double, class ::std::allocator< double > >::pop_back;
+    void  (::std::vector< double, ::std::allocator< double > >::*method_pointer_198c30f4c28f58918a7a6006b9664857)() = &::std::vector< double, class ::std::allocator< double > >::clear;
+    void  (::std::vector< double, ::std::allocator< double > >::*method_pointer_e961430f7bb95b32a0e5f04c4005d642)(class ::std::vector< double, class ::std::allocator< double > > &) = &::std::vector< double, class ::std::allocator< double > >::swap;
+    bool  (::std::vector< double, ::std::allocator< double > >::*method_pointer_8217412730d054eb8e62f4e4052e2174)() const = &::std::vector< double, class ::std::allocator< double > >::__invariants;
+    void  (::std::vector< double, ::std::allocator< double > >::*method_pointer_c7692583b02e5a13abd18a32600e5a96)(class ::std::move_iterator< class ::std::__wrap_iter< double * > > , class ::std::move_iterator< class ::std::__wrap_iter< double * > > ) = &::std::vector< double, class ::std::allocator< double > >::assign;
     boost::python::class_< class ::std::vector< double, class ::std::allocator< double > >, autowig::Held< class ::std::vector< double, class ::std::allocator< double > > >::Type > class_107131f9768c56e794a9b0de728d1738("_Vector_107131f9768c56e794a9b0de728d1738", "", boost::python::no_init);
-    class_107131f9768c56e794a9b0de728d1738.def(boost::python::init<  >(""));
-    class_107131f9768c56e794a9b0de728d1738.def(boost::python::init< class ::std::vector< double, class ::std::allocator< double > > const & >(""));
-    class_107131f9768c56e794a9b0de728d1738.def("assign", method_pointer_3fcbcdd89dc951b39073e310b61a04e9, "");
-    class_107131f9768c56e794a9b0de728d1738.def("__len__", method_pointer_2762c9c3801851f798933620de2a38c5, "");
-    class_107131f9768c56e794a9b0de728d1738.def("max_size", method_pointer_441a8fd7a6105f52ab269c45a59d8985, "");
-    class_107131f9768c56e794a9b0de728d1738.def("capacity", method_pointer_5c9706119c135c8ca0dbcadbab171935, "");
-    class_107131f9768c56e794a9b0de728d1738.def("empty", method_pointer_fbb341f4fc855b39aa2eeb3c29aefdd1, "");
-    class_107131f9768c56e794a9b0de728d1738.def("reserve", method_pointer_56d1f2045f5952b983dea94ad5c12052, "");
-    class_107131f9768c56e794a9b0de728d1738.def("at", method_pointer_beaa574a87dd59068311360e573c777c, boost::python::return_value_policy< boost::python::return_by_value >(), "");
-    class_107131f9768c56e794a9b0de728d1738.def("at", autowig::method_decorator_beaa574a87dd59068311360e573c777c);
-    class_107131f9768c56e794a9b0de728d1738.def("at", method_pointer_25da210bb3c75c269af3895505a003fd, boost::python::return_value_policy< boost::python::return_by_value >(), "");
-    class_107131f9768c56e794a9b0de728d1738.def("front", method_pointer_22f52ccf4b785404ada1e9bcb9fa01aa, boost::python::return_value_policy< boost::python::return_by_value >(), "");
-    class_107131f9768c56e794a9b0de728d1738.def("front", autowig::method_decorator_22f52ccf4b785404ada1e9bcb9fa01aa);
-    class_107131f9768c56e794a9b0de728d1738.def("front", method_pointer_fb2421b769975570ac8387adada3a0b2, boost::python::return_value_policy< boost::python::return_by_value >(), "");
-    class_107131f9768c56e794a9b0de728d1738.def("back", method_pointer_cae6ded0197f5723954a48c02008c60c, boost::python::return_value_policy< boost::python::return_by_value >(), "");
-    class_107131f9768c56e794a9b0de728d1738.def("back", autowig::method_decorator_cae6ded0197f5723954a48c02008c60c);
-    class_107131f9768c56e794a9b0de728d1738.def("back", method_pointer_e34e38388a585de3aaa97622256cd858, boost::python::return_value_policy< boost::python::return_by_value >(), "");
-    class_107131f9768c56e794a9b0de728d1738.def("push_back", method_pointer_f6adc78c87285d669260e4289dd02852, "");
-    class_107131f9768c56e794a9b0de728d1738.def("pop_back", method_pointer_0d34433fdbe7506180094ce87fae6cab, "");
-    class_107131f9768c56e794a9b0de728d1738.def("swap", method_pointer_331520d5c9a25683a40120b524320d20, "");
-    class_107131f9768c56e794a9b0de728d1738.def("clear", method_pointer_a4208670622158c3a2376d15176ceee2, "");
+    class_107131f9768c56e794a9b0de728d1738.def("assign", method_pointer_bd3b0a01510b53d6a23ffb47de810871, "");
+    class_107131f9768c56e794a9b0de728d1738.def("__len__", method_pointer_532fefd4df105fd5b03b5056bfbc96d2, "");
+    class_107131f9768c56e794a9b0de728d1738.def("capacity", method_pointer_840d124381ff523a8a307316e85df988, "");
+    class_107131f9768c56e794a9b0de728d1738.def("empty", method_pointer_194feced398858e6b0520c20d9b56f05, "");
+    class_107131f9768c56e794a9b0de728d1738.def("max_size", method_pointer_9a5efa6fac8555b9bbc3931a8e59029e, "");
+    class_107131f9768c56e794a9b0de728d1738.def("reserve", method_pointer_57072bfde93f5e9ebb4b00b299e11b85, "");
+    class_107131f9768c56e794a9b0de728d1738.def("at", method_pointer_807b8927890750b8a86c6ad1f6b386c2, boost::python::return_value_policy< boost::python::return_by_value >(), "");
+    class_107131f9768c56e794a9b0de728d1738.def("at", autowig::method_decorator_807b8927890750b8a86c6ad1f6b386c2);
+    class_107131f9768c56e794a9b0de728d1738.def("at", method_pointer_9c305f05d46d542b8424268d38c945d0, boost::python::return_value_policy< boost::python::return_by_value >(), "");
+    class_107131f9768c56e794a9b0de728d1738.def("front", method_pointer_1339251591c5515a98e83a0050706699, boost::python::return_value_policy< boost::python::return_by_value >(), "");
+    class_107131f9768c56e794a9b0de728d1738.def("front", autowig::method_decorator_1339251591c5515a98e83a0050706699);
+    class_107131f9768c56e794a9b0de728d1738.def("front", method_pointer_b7286d66b5185ce3a82408c1c08d0321, boost::python::return_value_policy< boost::python::return_by_value >(), "");
+    class_107131f9768c56e794a9b0de728d1738.def("back", method_pointer_9d019f4c78a1536db0954a15a9df10be, boost::python::return_value_policy< boost::python::return_by_value >(), "");
+    class_107131f9768c56e794a9b0de728d1738.def("back", autowig::method_decorator_9d019f4c78a1536db0954a15a9df10be);
+    class_107131f9768c56e794a9b0de728d1738.def("back", method_pointer_cfc57d90d8f95ead97edfdb47ab2158f, boost::python::return_value_policy< boost::python::return_by_value >(), "");
+    class_107131f9768c56e794a9b0de728d1738.def("push_back", method_pointer_dbfb61dd68505d29bb323f7f7721e7b8, "");
+    class_107131f9768c56e794a9b0de728d1738.def("pop_back", method_pointer_67d448aeb7eb55bcbb1a622756f299cf, "");
+    class_107131f9768c56e794a9b0de728d1738.def("clear", method_pointer_198c30f4c28f58918a7a6006b9664857, "");
+    class_107131f9768c56e794a9b0de728d1738.def("swap", method_pointer_e961430f7bb95b32a0e5f04c4005d642, "");
+    class_107131f9768c56e794a9b0de728d1738.def("invariants", method_pointer_8217412730d054eb8e62f4e4052e2174, "");
+    class_107131f9768c56e794a9b0de728d1738.def("assign", method_pointer_c7692583b02e5a13abd18a32600e5a96, "");
 
     struct vector_107131f9768c56e794a9b0de728d1738_from_python
     {

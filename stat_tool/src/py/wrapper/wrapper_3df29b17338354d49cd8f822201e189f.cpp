@@ -43,7 +43,6 @@ void wrapper_3df29b17338354d49cd8f822201e189f()
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::CompoundData >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::CompoundData >::Type, autowig::Held< class ::stat_tool::FrequencyDistribution >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::CompoundData >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::CompoundData, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::CompoundData >::Type, class ::stat_tool::CompoundData > > >();
     }
 
 }

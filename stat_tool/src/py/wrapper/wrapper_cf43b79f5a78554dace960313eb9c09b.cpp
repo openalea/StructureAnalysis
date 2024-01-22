@@ -55,7 +55,6 @@ void wrapper_cf43b79f5a78554dace960313eb9c09b()
     if(autowig::Held< class ::stat_tool::Clusters >::is_class)
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::Clusters >::Type, autowig::Held< class ::stat_tool::DistanceMatrix >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::Clusters >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::Clusters, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::Clusters >::Type, class ::stat_tool::Clusters > > >();
     }
 
 }

@@ -1,8 +1,11 @@
 # -*-python-*-
 
-from openalea.sconsx import config, environ
 import os
 import sys
+import platform
+
+from openalea.sconsx import config, environ
+
 pj = os.path.join
 ALEASolution = config.ALEASolution
 
@@ -10,22 +13,41 @@ options = Variables(['../options.py', 'options.py'], ARGUMENTS)
 options.Add(BoolVariable('with_efence', 'build tests with efence library', 0))
 options.Add(BoolVariable('DEBUG', 'my debug', 0))
 
-tools = ['boost_python'] #, 'vplants.tool','qt4', 'install', 'alea']
+tools = ['boost_python']
 
 env = ALEASolution(options, tools)
-env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++0x'])
+env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++11'])
+
+if (platform.system() != 'Windows' and
+    os.environ.get('CC') and
+    os.environ.get('CXX')):
+
+    env.AppendUnique(CFLAGS=["-std=c11"])
+    if (platform.system() == 'Darwin'):
+        env.AppendUnique(CXXFLAGS=['-stdlib=libc++'])
+    conda_prefix = os.environ['CONDA_PREFIX']
+    conda_bin = pj(os.environ['CONDA_PREFIX'], 'bin')
+# To work with conda toolchain
+    env['AR'] = os.environ['AR']
+    env['AS'] = os.environ['AS']
+    env['CC'] = os.environ['CLANG'] #pj(conda_bin, os.environ['CC'])
+    env['CXX'] = os.environ['CLANG__'] #pj(conda_bin, os.environ['CXX'])
+    env.PrependUnique(
+        CPPPATH=['%s/include'%(conda_prefix)],
+        CCFLAGS=['-fvisibility=hidden'],
+        LIBPATH=['%s/lib'%(conda_prefix)])
 
 # Fix for Conda
-env.AppendUnique(CPPPATH=[sys.prefix + '/include'],
-                 LIBPATH=[sys.prefix + '/lib'])
+#env.AppendUnique(CPPPATH=[sys.prefix + '/include'],
+#                 LIBPATH=[sys.prefix + '/lib'])
 
 # Build stage
 prefix = env['build_prefix']
 SConscript(pj(prefix,"src/cpp/SConscript"),
            exports='env')
-# SConscript(pj(prefix,"src/py/wrapper/SConscript"),
-#            exports='env')
-# SConscript(pj(prefix,"src/wrapper/SConscript"),
-#            exports='env')
+#SConscript(pj(prefix,"src/py/wrapper/SConscript"),
+#           exports='env')
+#SConscript(pj(prefix,"src/wrapper/SConscript"),
+#           exports='env')
 
 Default("build")

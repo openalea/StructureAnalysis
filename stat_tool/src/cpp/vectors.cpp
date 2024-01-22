@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,13 +36,14 @@
 
 
 
-#include <limits.h>
-#include <math.h>
+#include <climits>
+#include <cmath>
 
-#include <string>
-#include <vector>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
+#include <vector>
 
 #include <boost/tokenizer.hpp>
 
@@ -350,6 +351,164 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable , variable
 /**
  *  \brief Constructor of the Vectors class.
  *
+ *  \param[in] inb_vector       number of individuals,
+ *  \param[in] iidentifier      individual identifiers,
+ *  \param[in] nb_int_variable  number of integer variables,
+ *  \param[in] nb_real_variable number of real variables,
+ *  \param[in] iint_vector      integer variables,
+ *  \param[in] ireal_vector     real variables.
+ */
+/*--------------------------------------------------------------*/
+
+Vectors::Vectors(int inb_vector , const vector<int> &iidentifier , int nb_int_variable , int nb_real_variable ,
+                 const vector<vector<int> > &iint_vector , const vector<vector<double> > &ireal_vector)
+
+{
+  int i , j , k;
+  variable_nature *itype;
+
+
+  itype = new variable_nature[nb_int_variable + nb_real_variable];
+
+  i= 0;
+  for (j = 0;j < nb_int_variable;j++) {
+    itype[i++] = INT_VALUE;
+  }
+  for (j = 0;j < nb_real_variable;j++) {
+    itype[i++] = REAL_VALUE;
+  }
+
+  init(inb_vector , NULL , nb_int_variable + nb_real_variable , itype , false);
+  delete [] itype;
+
+  if (!iidentifier.empty()) {
+    for (i = 0;i < nb_vector;i++) {
+      identifier[i] = iidentifier[i];
+    }
+  }
+
+  for (i = 0;i < nb_vector;i++) {
+    j = 0;
+    for (k = 0;k < nb_int_variable;k++) {
+      int_vector[i][j++] = iint_vector[i][k];
+    }
+    for (k = 0;k < nb_real_variable;k++) {
+      real_vector[i][j++] = ireal_vector[i][k];
+    }
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    min_value_computation(i);
+    max_value_computation(i);
+
+    switch (type[i]) {
+
+    case INT_VALUE : {
+      build_marginal_frequency_distribution(i);
+      break;
+    }
+
+    case REAL_VALUE : {
+      build_marginal_histogram(i);
+
+      mean_computation(i);
+      variance_computation(i);
+      break;
+    }
+    }
+
+    min_interval_computation(i);
+  }
+
+  covariance_computation();
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a Vectors objects from arrays of discrete values, real values and identifiers.
+ *
+ *  \param[in] error        reference on a StatError object,
+ *  \param[in] iint_vector  integer variables,
+ *  \param[in] ireal_vector real variables,
+ *  \param[in] iidentifier  individual identifiers.
+ */
+/*--------------------------------------------------------------*/
+
+Vectors* Vectors::build(StatError &error , const vector<vector<int> > &iint_vector ,
+                        const vector<vector<double> > &ireal_vector , const vector<int> &iidentifier)
+
+{
+  bool status = true;
+  int i;
+  int inb_vector , nb_int_variable , nb_real_variable;
+  Vectors *vec;
+
+
+  vec = NULL;
+  inb_vector = I_DEFAULT;
+  error.init();
+
+  if (!iint_vector.empty()) {
+    inb_vector = iint_vector.size();
+  }
+  else if (!ireal_vector.empty()) {
+    inb_vector = ireal_vector.size();
+  }
+  else {
+    status = false;
+    error.update(STAT_error[STATR_EMPTY_SAMPLE]);
+  }
+
+  if ((!iint_vector.empty()) && (!ireal_vector.empty()) && (iint_vector.size() != ireal_vector.size())) {
+    status = false;
+    error.update(STAT_error[STATR_NB_VECTOR]);
+  }
+  if ((!iidentifier.empty()) && (iidentifier.size() != inb_vector)) {
+    status = false;
+    error.update(STAT_error[STATR_NB_VECTOR]);
+  }
+
+  if (status) {
+    if (!iint_vector.empty()) {
+      nb_int_variable = iint_vector[0].size();
+      for (i = 1;i < inb_vector;i++) {
+        if (iint_vector[i].size() != nb_int_variable) {
+          status = false;
+          error.update(STAT_error[STATR_NB_VARIABLE] , i);
+        }
+      }
+    }
+    else {
+      nb_int_variable = 0;
+    }
+
+    if (!ireal_vector.empty()) {
+      nb_real_variable = ireal_vector[0].size();
+      for (i = 1;i < inb_vector;i++) {
+        if (ireal_vector[i].size() != nb_real_variable) {
+          status = false;
+          error.update(STAT_error[STATR_NB_VARIABLE] , i);
+        }
+      }
+    }
+    else {
+      nb_real_variable = 0;
+    }
+
+    if (status) {
+      vec = new Vectors(inb_vector , iidentifier , nb_int_variable , nb_real_variable , iint_vector , ireal_vector);
+    }
+  }
+
+  return vec;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Vectors class.
+ *
  *  \param[in] vec      reference on a Vectors object,
  *  \param[in] variable variable index,
  *  \param[in] itype    variable type.
@@ -637,7 +796,7 @@ void Vectors::add_state_variable(const Vectors &vec)
   type[0] = STATE;
   min_value[0] = 0.;
   max_value[0] = 0.;
-  min_interval[0] = 0.; 
+  min_interval[0] = 0.;
   marginal_distribution[0] = NULL;
   marginal_histogram[0] = NULL;
 
@@ -1143,7 +1302,7 @@ Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec)
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::merge(StatError &error , int nb_sample , const vector<Vectors> ivec) const
+Vectors* Vectors::merge(StatError &error , int nb_sample , const vector<Vectors> &ivec) const
 
 {
   int i;
@@ -1887,7 +2046,7 @@ Vectors* Vectors::transcode(StatError &error , int variable , int *category) con
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::transcode(StatError &error , int variable , vector<int> category) const
+Vectors* Vectors::transcode(StatError &error , int variable , vector<int> &category) const
 
 {
   return transcode(error , variable , category.data());
@@ -2012,7 +2171,7 @@ Vectors* Vectors::cluster(StatError &error , int variable ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::cluster(StatError &error , int variable ,
-                          int nb_class , vector<int> ilimit) const
+                          int nb_class , vector<int> &ilimit) const
 
 {
   return cluster(error , variable , nb_class , ilimit.data());
@@ -2141,7 +2300,7 @@ Vectors* Vectors::cluster(StatError &error , int variable ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::cluster(StatError &error , int variable ,
-                          int nb_class , vector<double> ilimit) const
+                          int nb_class , vector<double> &ilimit) const
 
 {
   return cluster(error , variable , nb_class , ilimit.data());
@@ -2673,7 +2832,7 @@ Vectors* Vectors::log_transform(StatError &error , int variable , log_base base)
  *  \brief Selection of individuals taking values in a given range for a variable.
  *
  *  \param[in] error      reference on a StatError object,
- *  \param[in] display    flag for displaying the selected individuals,
+ *  \param[in] os         stream for displaying the selected individuals,
  *  \param[in] variable   variable index,
  *  \param[in] imin_value lowest integer value,
  *  \param[in] imax_value highest integer value,
@@ -2683,7 +2842,7 @@ Vectors* Vectors::log_transform(StatError &error , int variable , log_base base)
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
+Vectors* Vectors::value_select(StatError &error , ostream *os , int variable ,
                                int imin_value , int imax_value , bool keep) const
 
 {
@@ -2762,12 +2921,12 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
     // copy of vectors
 
     if (status) {
-      if ((display) && (inb_vector <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
+      if ((os) && (inb_vector <= DISPLAY_NB_INDIVIDUAL)) {
+        *os << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
         for (i = 0;i < inb_vector;i++) {
-          cout << iidentifier[i] << ", ";
+          *os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        *os << endl;
       }
 
       vec = new Vectors(*this , inb_vector , index);
@@ -2786,7 +2945,7 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
  *  \brief Selection of individuals taking values in a given range for a real-valued variable.
  *
  *  \param[in] error      reference on a StatError object,
- *  \param[in] display    flag for displaying the selected individuals,
+ *  \param[in] os         stream for displaying the selected individuals,
  *  \param[in] variable   variable index,
  *  \param[in] imin_value lowest real value,
  *  \param[in] imax_value highest real value,
@@ -2796,7 +2955,7 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
+Vectors* Vectors::value_select(StatError &error , ostream *os , int variable ,
                                double imin_value , double imax_value , bool keep) const
 
 {
@@ -2821,7 +2980,7 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
       status = false;
       error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , STAT_variable_word[REAL_VALUE]);
     }
-    
+
     if ((imin_value > max_value[variable]) || (imin_value > imax_value)) {
       status = false;
       error.update(STAT_error[STATR_MIN_VALUE]);
@@ -2862,12 +3021,12 @@ Vectors* Vectors::value_select(StatError &error , bool display , int variable ,
     // copy of vectors
 
     if (status) {
-      if ((display) && (inb_vector <= DISPLAY_NB_INDIVIDUAL)) {
-        cout << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
+      if ((os) && (inb_vector <= DISPLAY_NB_INDIVIDUAL)) {
+        *os << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
         for (i = 0;i < inb_vector;i++) {
-          cout << iidentifier[i] << ", ";
+          *os << iidentifier[i] << ", ";
         }
-        cout << endl;
+        *os << endl;
       }
 
       vec = new Vectors(*this , inb_vector , index);
@@ -3068,7 +3227,7 @@ Vectors* Vectors::select_individual(StatError &error , int inb_vector ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::select_individual(StatError &error , int inb_vector ,
-                                    vector<int> iidentifier , bool keep) const
+                                    vector<int> &iidentifier , bool keep) const
 
 {
   return select_individual(error , inb_vector , iidentifier.data() , keep);
@@ -3300,7 +3459,7 @@ Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
-                                  vector<int>ivariable , bool keep) const
+                                  vector<int> &ivariable , bool keep) const
 
 {
   return select_variable(error , inb_variable , ivariable.data() , keep);
@@ -3576,7 +3735,7 @@ Vectors* Vectors::sum_variable(StatError &error , int nb_summed_variable , int *
  */
 /*--------------------------------------------------------------*/
 
-Vectors* Vectors::sum_variable(StatError &error , int nb_summed_variable , vector<int>ivariable) const
+Vectors* Vectors::sum_variable(StatError &error , int nb_summed_variable , vector<int> &ivariable) const
 
 {
   return sum_variable(error , nb_summed_variable , ivariable.data());
@@ -3735,7 +3894,7 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
 /*--------------------------------------------------------------*/
 
 Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
-                                 const vector<Vectors> ivec , int ref_sample) const
+                                 const vector<Vectors> &ivec , int ref_sample) const
 
 {
   int i;
@@ -4437,7 +4596,7 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
 ostream& Vectors::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  return ascii_write(os, exhaustive, false);
+  return ascii_write(os , exhaustive , false);
 }
 
 
@@ -4577,6 +4736,28 @@ ostream& Vectors::ascii_data_write(ostream &os , bool exhaustive) const
   ascii_print(os , false);
 
   return os;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Vectors object.
+ *
+ *  \param[in] exhaustive flag detail level,
+ *
+ *  \return    string.
+ */
+/*--------------------------------------------------------------*/
+
+string Vectors::ascii_data_write(bool exhaustive) const
+
+{
+  ostringstream oss;
+
+
+  ascii_data_write(oss , exhaustive);
+
+  return oss.str();
 }
 
 
@@ -5481,7 +5662,7 @@ void Vectors::build_marginal_histogram(int variable , double bin_width , double 
 
 #   ifdef DEBUG
     cout << "\nTEST: " << marginal_histogram[variable]->min_value << " " << marginal_histogram[variable]->max_value
-         << " | " << marginal_histogram[variable]->nb_bin 
+         << " | " << marginal_histogram[variable]->nb_bin
         << " " << (marginal_histogram[variable]->max_value - marginal_histogram[variable]->min_value) / marginal_histogram[variable]->bin_width << endl;
 #    endif
 

@@ -1,7 +1,12 @@
-from data import *
+""" StructureAnalysis.StatTool Documentation
 
-from plot import *
+Doc
 
-from __stat_tool.stat_tool import discrete_parametric
+"""
+# License
 
-from __stat_tool.stat_tool import model_selection_criterion
+import stat_tool
+from . import _data
+from stat_tool.mplotlib import get_plotables
+
+get_plotables(stat_tool.__stat_tool.stat_tool)

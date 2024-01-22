@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -102,7 +102,7 @@ namespace stat_tool {
 
   /// \brief Distance matrix
 
-  class DistanceMatrix : public StatInterface {
+  class STAT_TOOL_API DistanceMatrix : public StatInterface {
 
     friend class Clusters;
     friend class Dendrogram;
@@ -160,7 +160,7 @@ namespace stat_tool {
     DistanceMatrix* select_individual(StatError &error , int inb_pattern ,
                                       int *iidentifier , bool keep = true) const;
     DistanceMatrix* select_individual(StatError &error , int inb_pattern ,
-                                      std::vector<int> iidentifier , bool keep = true) const;
+                                      std::vector<int> &iidentifier , bool keep = true) const;
     DistanceMatrix* symmetrize(StatError &error) const;
     DistanceMatrix* unnormalize(StatError &error) const;
 
@@ -182,16 +182,16 @@ namespace stat_tool {
                 double itransposition_distance = 0. , int inb_transposition = 0);
     void update(int irow_identifier , int icolumn_identifier , double idistance , int ilength);
 
-    Clusters* partitioning(StatError &error , bool display , int nb_cluster ,
+    Clusters* partitioning(StatError &error , std::ostream *os , int nb_cluster ,
                            int *prototype = NULL , int initialization = 1 , int algorithm = 1) const;
-    Clusters* partitioning(StatError &error , bool display , int nb_cluster ,
+    Clusters* partitioning(StatError &error , std::ostream *os , int nb_cluster ,
                            int *cluster_nb_pattern , int **cluster_pattern) const;
 
     Dendrogram* agglomerative_hierarchical_clustering(hierarchical_strategy strategy ,
                                                       linkage criterion = AVERAGE_NEIGHBOR) const;
     Dendrogram* divisive_hierarchical_clustering() const;
 
-    bool hierarchical_clustering(StatError &error , bool display ,
+    bool hierarchical_clustering(StatError &error , std::ostream *os ,
                                  hierarchical_strategy strategy = AGGLOMERATIVE ,
                                  linkage criterion = AVERAGE_NEIGHBOR ,
                                  const std::string path = "" , output_format format = ASCII) const;
@@ -207,42 +207,42 @@ namespace stat_tool {
     int get_length(int row , int column) const
     { return length[row][column]; }
     double get_deletion_distance(int row , int column) const
-    { return deletion_distance[row][column]; }
+    { if (deletion_distance) return deletion_distance[row][column]; else return -D_INF; }
     int get_nb_deletion(int row , int column) const
-    { return nb_deletion[row][column]; }
+    { if (nb_deletion) return nb_deletion[row][column]; else return I_DEFAULT; }
     double get_insertion_distance(int row , int column) const
-    { return insertion_distance[row][column]; }
+    { if (insertion_distance) return insertion_distance[row][column]; else return -D_INF; }
     int get_nb_insertion(int row , int column) const
-    { return nb_insertion[row][column]; }
+    { if (nb_insertion) return nb_insertion[row][column]; else return I_DEFAULT; }
     int get_nb_match(int row , int column) const
-    { if (nb_match) return nb_match[row][column];}
+    { if (nb_match) return nb_match[row][column]; else return I_DEFAULT; }
     double get_substitution_distance(int row , int column) const
-    { return substitution_distance[row][column]; }
+    { if (substitution_distance) return substitution_distance[row][column]; else return -D_INF; }
     int get_nb_substitution(int row , int column) const
-    { return nb_substitution[row][column]; }
+    { if (nb_substitution) return nb_substitution[row][column]; else return I_DEFAULT; }
     double get_transposition_distance(int row , int column) const
-    { return transposition_distance[row][column]; }
+    { if (transposition_distance) return transposition_distance[row][column]; else return -D_INF; }
     int get_nb_transposition(int row , int column) const
-    { return nb_transposition[row][column]; }
+    { if (nb_transposition) return nb_transposition[row][column]; else return I_DEFAULT; }
     int get_label_size() const { return label_size; }
     char* get_label() const { return label; }
 
     bool is_deletion()
-    { if (nb_deletion != NULL) return true; else return false; }
+    { if (nb_deletion) return true; else return false; }
     bool is_insertion()
-    { if (nb_insertion != NULL) return true; else return false; }
+    { if (nb_insertion) return true; else return false; }
     bool is_match()
-    { if (nb_match != NULL) return true; else return false; }
+    { if (nb_match) return true; else return false; }
     bool is_substitution()
-    { if (nb_substitution != NULL) return true; else return false; }
+    { if (nb_substitution) return true; else return false; }
     bool is_transposition()
-    { if (nb_transposition != NULL) return true; else return false; }
+    { if (nb_transposition) return true; else return false; }
   };
 
 
   /// \brief Partitioning clustering results
 
-  class Clusters : public DistanceMatrix {
+  class STAT_TOOL_API Clusters : public DistanceMatrix {
 
     friend class DistanceMatrix;
 
@@ -324,7 +324,7 @@ namespace stat_tool {
 
   /// \brief Hierarchical clustering results
 
-  class Dendrogram : public StatInterface {
+  class STAT_TOOL_API Dendrogram : public StatInterface {
 
     friend class DistanceMatrix;
 

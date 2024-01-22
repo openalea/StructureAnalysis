@@ -35,7 +35,6 @@ void wrapper_e4b407b97f515e8bbcdf5a6f0e8aa41c()
     if(autowig::Held< class ::stat_tool::Forward >::is_class)
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::Forward >::Type, autowig::Held< class ::stat_tool::DiscreteParametric >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::Forward >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::Forward, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::Forward >::Type, class ::stat_tool::Forward > > >();
     }
 
 }

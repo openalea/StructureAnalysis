@@ -9,13 +9,9 @@ void wrapper_ed1db0c35af1528792e2875aed1f9caf()
     boost::python::scope().attr("stat_tool") = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::scope scope_0cdd446515295e8e8373e99f328c3748 = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::enum_< enum ::stat_tool::output_format > enum_ed1db0c35af1528792e2875aed1f9caf("output_format");
-
     enum_ed1db0c35af1528792e2875aed1f9caf.value("ASCII", ::stat_tool::ASCII);
-
     enum_ed1db0c35af1528792e2875aed1f9caf.value("SPREADSHEET", ::stat_tool::SPREADSHEET);
-
     enum_ed1db0c35af1528792e2875aed1f9caf.value("GNUPLOT", ::stat_tool::GNUPLOT);
-
     enum_ed1db0c35af1528792e2875aed1f9caf.value("PLOT", ::stat_tool::PLOT);
 
 }

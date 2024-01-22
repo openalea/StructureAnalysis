@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -77,7 +77,7 @@ namespace stat_tool {
 
   /// \brief Convolution of discrete distributions
 
-  class Convolution : public StatInterface , public Distribution {
+  class STAT_TOOL_API Convolution : public StatInterface , public Distribution {
 
     friend class FrequencyDistribution;
     friend class ConvolutionData;
@@ -108,7 +108,7 @@ namespace stat_tool {
 
     Convolution();
     Convolution(int nb_dist , const DiscreteParametric **pdist);
-    Convolution(int nb_dist , const std::vector<DiscreteParametric> idist);
+    Convolution(int nb_dist , const std::vector<DiscreteParametric> &idist);
     Convolution(const DiscreteParametric &known_dist , const DiscreteParametric &unknown_dist);
     Convolution(const Convolution &convol , bool data_flag = true)
     :Distribution(convol) { copy(convol , data_flag); }
@@ -118,10 +118,8 @@ namespace stat_tool {
     DiscreteParametricModel* extract(StatError &error , int index) const;
     ConvolutionData* extract_data(StatError &error) const;
 
-    static Convolution* building(StatError &error , int nb_dist ,
-                                 const DiscreteParametric **dist);
-    static Convolution* building(StatError &error , int nb_dist ,
-                                 const std::vector<DiscreteParametric> dist);
+    static Convolution* build(StatError &error , int nb_dist , const DiscreteParametric **dist);
+    static Convolution* build(StatError &error , const std::vector<DiscreteParametric> &dist);
     static Convolution* ascii_read(StatError &error , const std::string path ,
                                    double cumul_threshold = CONVOLUTION_THRESHOLD);
 
@@ -147,7 +145,7 @@ namespace stat_tool {
 
   /// \brief Data structure corresponding to a convolution of discrete distributions
 
-  class ConvolutionData : public StatInterface , public FrequencyDistribution {
+  class STAT_TOOL_API ConvolutionData : public StatInterface , public FrequencyDistribution {
 
     friend class FrequencyDistribution;
     friend class Convolution;

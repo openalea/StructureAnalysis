@@ -28,6 +28,8 @@ void wrapper_42d9fc9d560e519a8cee703c630b1d4b()
     void  (::stat_tool::Curves::*method_pointer_8204b1f9428953b793ca6a11c508e6c0)(class ::stat_tool::Curves const &) = &::stat_tool::Curves::copy;
     void  (::stat_tool::Curves::*method_pointer_dbd677cf5bd1512fb46974b8e337b517)(class ::stat_tool::Curves const &, int ) = &::stat_tool::Curves::smooth;
     void  (::stat_tool::Curves::*method_pointer_d941510568995943b11f44a2dfd1e379)() = &::stat_tool::Curves::remove;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::Curves::*method_pointer_b7c4c0f6e1af57669ae27ed3d493dd4c)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, bool , class ::stat_tool::Curves const *) const = &::stat_tool::Curves::ascii_print;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::Curves::*method_pointer_c67075366e29526295826ca7a5cefbd7)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, class ::stat_tool::Curves const *) const = &::stat_tool::Curves::spreadsheet_print;
     int  (::stat_tool::Curves::*method_pointer_0e94622c5d265fca996dfce88a750f4c)() const = &::stat_tool::Curves::plot_length_computation;
     void  (::stat_tool::Curves::*method_pointer_60d8c3bcd5b85350996fb9d25c4809f9)(int , class ::stat_tool::SinglePlot &) const = &::stat_tool::Curves::plotable_write;
     void  (::stat_tool::Curves::*method_pointer_0e6ca46a684b5037acf82119fb1cd1dc)(class ::stat_tool::MultiPlot &) const = &::stat_tool::Curves::plotable_write;
@@ -45,6 +47,8 @@ void wrapper_42d9fc9d560e519a8cee703c630b1d4b()
     class_42d9fc9d560e519a8cee703c630b1d4b.def("copy", method_pointer_8204b1f9428953b793ca6a11c508e6c0, "");
     class_42d9fc9d560e519a8cee703c630b1d4b.def("smooth", method_pointer_dbd677cf5bd1512fb46974b8e337b517, "");
     class_42d9fc9d560e519a8cee703c630b1d4b.def("remove", method_pointer_d941510568995943b11f44a2dfd1e379, "");
+    class_42d9fc9d560e519a8cee703c630b1d4b.def("ascii_print", method_pointer_b7c4c0f6e1af57669ae27ed3d493dd4c, boost::python::return_internal_reference<>(), "");
+    class_42d9fc9d560e519a8cee703c630b1d4b.def("spreadsheet_print", method_pointer_c67075366e29526295826ca7a5cefbd7, boost::python::return_internal_reference<>(), "");
     class_42d9fc9d560e519a8cee703c630b1d4b.def("plot_length_computation", method_pointer_0e94622c5d265fca996dfce88a750f4c, "");
     class_42d9fc9d560e519a8cee703c630b1d4b.def("plotable_write", method_pointer_60d8c3bcd5b85350996fb9d25c4809f9, "");
     class_42d9fc9d560e519a8cee703c630b1d4b.def("plotable_write", method_pointer_0e6ca46a684b5037acf82119fb1cd1dc, "");

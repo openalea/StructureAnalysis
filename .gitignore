@@ -1,6 +1,7 @@
 build-scons
-build-cmake
 build
+dist
+build-cmake
 .ipynb_checkpoints
 *.egg-info
 *~
@@ -12,5 +13,6 @@ build
 */doc/latex/
 options.py
 /.project
+.DS_Store
 .vscode
 test_choicetable.dump

@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,9 +36,10 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
 #include <sstream>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -111,7 +112,7 @@ Convolution::Convolution(int nb_dist , const DiscreteParametric **pdist)
  */
 /*--------------------------------------------------------------*/
 
-Convolution::Convolution(int nb_dist , const vector<DiscreteParametric> idist)
+Convolution::Convolution(int nb_dist , const vector<DiscreteParametric> &idist)
 
 {
   int i;
@@ -334,7 +335,7 @@ ConvolutionData* Convolution::extract_data(StatError &error) const
  */
 /*--------------------------------------------------------------*/
 
-Convolution* Convolution::building(StatError &error , int nb_dist , const DiscreteParametric **dist)
+Convolution* Convolution::build(StatError &error , int nb_dist , const DiscreteParametric **dist)
 
 {
   Convolution *convol;
@@ -361,21 +362,22 @@ Convolution* Convolution::building(StatError &error , int nb_dist , const Discre
  *         elementary distributions.
  *
  *  \param[in] error   reference on a StatError object,
- *  \param[in] nb_dist number of distributions,
  *  \param[in] dist    pointer on the distributions.
  *
  *  \return            Convolution object.
  */
 /*--------------------------------------------------------------*/
 
-Convolution* Convolution::building(StatError &error , int nb_dist , const vector<DiscreteParametric> dist)
+Convolution* Convolution::build(StatError &error , const vector<DiscreteParametric> &dist)
 
 {
+  int nb_dist;
   Convolution *convol;
 
 
   error.init();
 
+  nb_dist = dist.size();
   if ((nb_dist < 2) || (nb_dist > CONVOLUTION_NB_DISTRIBUTION)) {
     convol = NULL;
     error.update(STAT_parsing[STATP_NB_DISTRIBUTION]);

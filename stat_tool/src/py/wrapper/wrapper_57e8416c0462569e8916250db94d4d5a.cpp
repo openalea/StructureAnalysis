@@ -59,21 +59,23 @@ void wrapper_57e8416c0462569e8916250db94d4d5a()
     boost::python::object module_0cdd446515295e8e8373e99f328c3748(boost::python::handle<  >(boost::python::borrowed(PyImport_AddModule(name_0cdd446515295e8e8373e99f328c3748.c_str()))));
     boost::python::scope().attr("stat_tool") = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::scope scope_0cdd446515295e8e8373e99f328c3748 = module_0cdd446515295e8e8373e99f328c3748;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::StatInterface::*method_pointer_109e8f598f3c51bca3b606de4d27c07e)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &) const = &::stat_tool::StatInterface::line_write;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::StatInterface::*method_pointer_5f38643402d45a93b04e0b6016f90e73)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &, bool ) const = &::stat_tool::StatInterface::ascii_write;
     class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > >  (::stat_tool::StatInterface::*method_pointer_a928a20806fb5a658f4b4fa2eb451e9d)(bool ) const = &::stat_tool::StatInterface::ascii_write;
-    bool  (::stat_tool::StatInterface::*method_pointer_6b5902f9934c5554a6353ccff2b1a515)(class ::stat_tool::StatError &, class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > > const, bool ) const = &::stat_tool::StatInterface::ascii_write;
-    bool  (::stat_tool::StatInterface::*method_pointer_bd276ccaa460550a83aad184454495de)(class ::stat_tool::StatError &, class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > > const) const = &::stat_tool::StatInterface::spreadsheet_write;
+    bool  (::stat_tool::StatInterface::*method_pointer_68c734f08f13501ba14d57e85abbc5e4)(class ::stat_tool::StatError &, class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > > const, bool ) const = &::stat_tool::StatInterface::ascii_write;
+    bool  (::stat_tool::StatInterface::*method_pointer_358914f49a5c5b7fabe0adf15f780079)(class ::stat_tool::StatError &, class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > > const) const = &::stat_tool::StatInterface::spreadsheet_write;
     ::stat_tool::MultiPlotSet * (::stat_tool::StatInterface::*method_pointer_dcd5f5dbeaed52b1a46267335ba3f07b)() const = &::stat_tool::StatInterface::get_plotable;
     boost::python::class_< autowig::Wrap_57e8416c0462569e8916250db94d4d5a, autowig::Held< autowig::Wrap_57e8416c0462569e8916250db94d4d5a >::Type, boost::noncopyable > class_57e8416c0462569e8916250db94d4d5a("StatInterface", "Abstract class defining a common interface\n\n", boost::python::no_init);
+    class_57e8416c0462569e8916250db94d4d5a.def("line_write", boost::python::pure_virtual(method_pointer_109e8f598f3c51bca3b606de4d27c07e), boost::python::return_internal_reference<>(), "");
+    class_57e8416c0462569e8916250db94d4d5a.def("ascii_write", boost::python::pure_virtual(method_pointer_5f38643402d45a93b04e0b6016f90e73), boost::python::return_internal_reference<>(), "");
     class_57e8416c0462569e8916250db94d4d5a.def("ascii_write", method_pointer_a928a20806fb5a658f4b4fa2eb451e9d, "");
-    class_57e8416c0462569e8916250db94d4d5a.def("ascii_write", boost::python::pure_virtual(method_pointer_6b5902f9934c5554a6353ccff2b1a515), "");
-    class_57e8416c0462569e8916250db94d4d5a.def("spreadsheet_write", boost::python::pure_virtual(method_pointer_bd276ccaa460550a83aad184454495de), "");
+    class_57e8416c0462569e8916250db94d4d5a.def("ascii_write", boost::python::pure_virtual(method_pointer_68c734f08f13501ba14d57e85abbc5e4), "");
+    class_57e8416c0462569e8916250db94d4d5a.def("spreadsheet_write", boost::python::pure_virtual(method_pointer_358914f49a5c5b7fabe0adf15f780079), "");
     class_57e8416c0462569e8916250db94d4d5a.def("get_plotable", method_pointer_dcd5f5dbeaed52b1a46267335ba3f07b, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     if(autowig::Held< class ::stat_tool::StatInterface >::is_class)
     {
         boost::python::implicitly_convertible< autowig::Held< autowig::Wrap_57e8416c0462569e8916250db94d4d5a >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
         boost::python::register_ptr_to_python< autowig::Held< class ::stat_tool::StatInterface >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::StatInterface >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::StatInterface, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::StatInterface >::Type, class ::stat_tool::StatInterface > > >();
-        //boost::python::implicitly_convertible< autowig::Held< autowig::Wrap_57e8416c0462569e8916250db94d4d5a >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
     }    
 
 }

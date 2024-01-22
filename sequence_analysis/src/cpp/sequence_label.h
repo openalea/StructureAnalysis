@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: sequence_label.h 18668 2015-11-09 12:03:42Z guedon $
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for StructureAnalysis developers: amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
  *
@@ -250,7 +250,7 @@ namespace sequence_analysis {
     SEQL_SEGMENTATIONS ,
     SEQL_SEGMENTATION_LIKELIHOOD ,
     SEQL_POSSIBLE_SEGMENTATION_LIKELIHOOD ,
-    SEQL_CHANGE_POINT_UNCERTAINTY_INTERVALS ,
+    SEQL_CHANGE_POINT_CREDIBILITY_INTERVALS ,
     SEQL_POSTERIOR_CHANGE_POINT_PROBABILITY ,
     SEQL_POSTERIOR_SEGMENT_PROBABILITY ,
     SEQL_SEGMENT_LENGTH ,
@@ -316,6 +316,7 @@ namespace sequence_analysis {
     SEQR_NB_EVENT_TOO_SMALL ,
     SEQR_TIME_UNIT ,
 
+    SEQR_TIME_NB_EVENT_PAIR ,
     SEQR_OBSERVATION_TIME ,
     SEQR_MIN_TIME ,
     SEQR_MAX_TIME ,

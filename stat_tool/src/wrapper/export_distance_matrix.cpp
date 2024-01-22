@@ -57,28 +57,27 @@ public:
     Clusters *ret;
     StatError error;
 
-    bool display = true;
-    //std::stringstream output;
+    ostringstream os;
     int nb_proto = len(prototype);
 
-    //ostringstream error_message;
+    // ostringstream error_message;
 
     if (nb_proto != 0)
       {
         stat_tool::wrap_util::auto_ptr_array<int> protos(new int[nb_proto]);
         for (int i = 0; i < nb_proto; i++)
           protos[i] = extract<int> (prototype[i]);
-        ret = dm.partitioning(error, display, nb_cluster, protos.get(),
+        ret = dm.partitioning(error, &os, nb_cluster, protos.get(),
             initialization, algorithm);
       }
     else
       {
         int *protos = 0;
-        ret = dm.partitioning(error, display, nb_cluster, protos,
+        ret = dm.partitioning(error, &os, nb_cluster, protos,
             initialization, algorithm);
       }
 
-    //cout << output.str() << endl;
+    // cout << os.str() << endl;
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
@@ -92,8 +91,7 @@ public:
     Clusters *ret;
     StatError error;
 
-    // std::stringstream output;
-    bool display = true;
+    ostringstream os;
 
     int nb_cluster = len(clusters);
     int* cluster_nb_pattern;
@@ -130,7 +128,7 @@ public:
         delete[] cluster_pattern;
       }
 
-    ret = dm.partitioning(error, display, nb_cluster, cluster_nb_pattern,
+    ret = dm.partitioning(error, &os, nb_cluster, cluster_nb_pattern,
         cluster_pattern);
 
     // Free memory
@@ -148,15 +146,14 @@ public:
 
   static std::string
   hierarchical_clustering(const DistanceMatrix& dm, hierarchical_strategy algorithm,
-      linkage criterion, const char*path, output_format format)
+      linkage criterion, const char*path, &os_format format)
   {
     StatError error;
-    //std::stringstream output;
-    bool display = true;
+    ostringstream os;
 
     bool ret;
 
-    ret = dm.hierarchical_clustering(error, display, algorithm, criterion, path,
+    ret = dm.hierarchical_clustering(error, &os, algorithm, criterion, path,
         format);
 
     if (!ret)

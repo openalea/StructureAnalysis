@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -128,15 +128,15 @@ namespace sequence_analysis {
     double likelihood_computation(const MarkovianSequences &seq , double *posterior_probability = NULL ,
                                   int index = stat_tool::I_DEFAULT) const;
 
-    bool state_profile_ascii_write(StatError &error , const MarkovianSequences &iseq , int identifier ,
-                                   latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
+    bool state_profile_ascii_write(StatError &error , std::ostream &os , const MarkovianSequences &iseq ,
+                                   int identifier , latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                                    int nb_state_sequence = NB_STATE_SEQUENCE) const;
     bool state_profile_write(stat_tool::StatError &error , const std::string path ,
                              const MarkovianSequences &iseq , int identifier ,
                              stat_tool::output_format format = stat_tool::ASCII ,
                              latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_ascii_write(stat_tool::StatError &error , int identifier ,
+    bool state_profile_ascii_write(stat_tool::StatError &error , std::ostream &os , int identifier ,
                                    latent_structure_algorithm state_sequence = GENERALIZED_VITERBI ,
                                    int nb_state_sequence = NB_STATE_SEQUENCE) const;
     bool state_profile_write(stat_tool::StatError &error , const std::string path , int identifier ,
@@ -169,14 +169,14 @@ namespace sequence_analysis {
                                         const MarkovianSequences &iseq ,
                                         bool counting_flag = true) const;
 
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream *os , int nb_model ,
                                                       const HiddenVariableOrderMarkov **ihmarkov ,
                                                       FrequencyDistribution **hlength ,
                                                       const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream *os , int nb_model ,
                                                       const HiddenVariableOrderMarkov **hmarkov , int nb_sequence ,
                                                       int length , const std::string path = "") const;
-    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , bool display , int nb_model ,
+    stat_tool::DistanceMatrix* divergence_computation(stat_tool::StatError &error , std::ostream *os , int nb_model ,
                                                       const HiddenVariableOrderMarkov **hmarkov , int nb_sequence ,
                                                       const MarkovianSequences **seq , const std::string path = "") const;
   };

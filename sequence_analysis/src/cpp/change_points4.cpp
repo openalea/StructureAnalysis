@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: change_points4.cpp 11914 2012-03-26 06:29:13Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,11 +36,12 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
-#include <string>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
 
 #include "sequences.h"
 #include "sequence_label.h"
@@ -472,7 +473,7 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
 
     if (i < inb_segmentation) {
       cout << i << ": ";
-      for (j = 0;j < MIN((i < seq_length - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
+      for (j = 1;j < MIN((i < seq_length - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
         cout << nb_segmentation_forward[i][j] << " " << nb_segmentation[j] << " | ";
       }
       cout << endl;
@@ -571,16 +572,11 @@ double Sequences::N_segmentation(int index , int nb_segment , segment_model *mod
 # ifdef MESSAGE
   streamsize nb_digits;
 
-  buff = 1.;
-  for (i = 1;i < nb_segment;i++) {
-    buff *= (double)(seq_length - i) / (double)i;
-//    buff = buff * (seq_length - i) / i;
-  }
-
   nb_digits = os.precision(10);
 
   os << "\n" << SEQ_label[SEQL_NB_SEGMENTATION] << ": "
-     << nb_segmentation_forward[seq_length - 1][nb_segment - 1] << " (" << buff << ")" << endl;
+     << nb_segmentation_forward[seq_length - 1][nb_segment - 1]
+     << " (" << nb_segmentation_computation(index , nb_segment , model_type , common_contrast) << ")" << endl;
 
   os.precision(nb_digits);
 
@@ -2174,8 +2170,8 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
 /*--------------------------------------------------------------*/
 
 bool Sequences::segment_profile_ascii_write(StatError &error , int iidentifier ,
-                                            int nb_segment , vector<segment_model> model_type ,
-                                            bool common_contrast , vector<double> shape_parameter ,
+                                            int nb_segment , vector<segment_model> &model_type ,
+                                            bool common_contrast , vector<double> &shape_parameter ,
                                             change_point_profile output ,
                                             latent_structure_algorithm segmentation , int nb_segmentation) const
 
@@ -2209,8 +2205,8 @@ bool Sequences::segment_profile_ascii_write(StatError &error , int iidentifier ,
 /*--------------------------------------------------------------*/
 
 bool Sequences::segment_profile_write(StatError &error , const string path , int iidentifier ,
-                                      int nb_segment , vector<segment_model> model_type ,
-                                      bool common_contrast , vector<double> shape_parameter ,
+                                      int nb_segment , vector<segment_model> &model_type ,
+                                      bool common_contrast , vector<double> &shape_parameter ,
                                       change_point_profile output , output_format format ,
                                       latent_structure_algorithm segmentation , int nb_segmentation) const
 
@@ -3293,8 +3289,8 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 /*--------------------------------------------------------------*/
 
 MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int iidentifier ,
-                                                        int nb_segment , vector<segment_model> model_type ,
-                                                        bool common_contrast , vector<double> shape_parameter ,
+                                                        int nb_segment , vector<segment_model> &model_type ,
+                                                        bool common_contrast , vector<double> &shape_parameter ,
                                                         change_point_profile output) const
 
 {

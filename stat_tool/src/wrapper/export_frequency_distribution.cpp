@@ -82,37 +82,37 @@ public:
   static std::string
   f_comparison(const FrequencyDistribution &h, const FrequencyDistribution &histo)
   {
-    ostringstream output;
-    h.F_comparison(true , histo);
-    return output.str();
+    ostringstream os;
+    h.F_comparison(os , histo);
+    return os.str();
 
   }
 
   static std::string
   t_comparison(const FrequencyDistribution &h, const FrequencyDistribution &histo)
   {
-    ostringstream output;
-    h.t_comparison(true , histo);
-    return output.str();
+    ostringstream os;
+    h.t_comparison(os , histo);
+    return os.str();
   }
 
   static std::string
   wmw_comparison(const FrequencyDistribution &h, const FrequencyDistribution &histo)
   {
-    ostringstream output;
+    ostringstream os;
     StatError error;
-    if (!h.wilcoxon_mann_whitney_comparison(error, true , histo))
+    if (!h.wilcoxon_mann_whitney_comparison(error, os , histo))
       {
         stat_tool::wrap_util::throw_error(error);
       }
-    return output.str();
+    return os.str();
   }
 
   static std::string
   comparison(const FrequencyDistribution &h, boost::python::tuple& histos, variable_type type,
       const char* filename, output_format format)
   {
-    ostringstream output;
+    ostringstream os;
     StatError error;
     int nb_histo = boost::python::len(histos);
 
@@ -128,13 +128,13 @@ public:
       ihisto[i] = boost::python::extract<FrequencyDistribution*>(histos[i]);
 
     // call comparaison
-    bool res = h.comparison(error, true , nb_histo, ihisto.get(), type,
+    bool res = h.comparison(error, &os , nb_histo, ihisto.get(), type,
                             filename, format);
 
     if (!res)
       stat_tool::wrap_util::throw_error(error);
 
-    return output.str();
+    return os.str();
   }
 
   // Estimation functions
@@ -169,8 +169,7 @@ public:
       int min_inf_bound, bool flag, bool component_flag, model_selection_criterion criterion)
   {
     DiscreteMixture* ret;
-    //ostringstream output;
-    bool display = true;
+    ostringstream os;
     StatError error;
 
     int nb_component = boost::python::len(ident_list);
@@ -179,13 +178,13 @@ public:
     for (int i = 0; i < nb_component; i++)
       ident[i] = (discrete_parametric)((int)boost::python::extract<int>(ident_list[i]));
 
-    ret = h.discrete_mixture_estimation(error, display, 1, nb_component, ident,
+    ret = h.discrete_mixture_estimation(error, &os, 1, nb_component, ident,
         min_inf_bound, flag, component_flag, criterion);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    // cout << output.str() << endl;
+    // cout << os.str() << endl;
 
     return ret;
   }
@@ -196,11 +195,10 @@ public:
       double weight, penalty_type pen_type, side_effect outside)
   {
     Convolution* ret;
-    // ostringstream *output;
-    bool display = true;
+    ostringstream os;
     StatError error;
 
-    ret = h.convolution_estimation(error, display, known_dist, unknown_dist,
+    ret = h.convolution_estimation(error, &os, known_dist, unknown_dist,
         estimator, nb_iter, weight, pen_type, outside);
 
     if (!ret)
@@ -215,11 +213,10 @@ public:
       penalty_type pen_type, side_effect outside)
   {
     Convolution* ret;
-    // ostringstream *output;
-    bool display = true;
+    ostringstream os;
     StatError error;
 
-    ret = h.convolution_estimation(error, display, known_dist, min_inf_bound,
+    ret = h.convolution_estimation(error, &os, known_dist, min_inf_bound,
         estimator, nb_iter, weight, pen_type, outside);
 
     if (!ret)
@@ -234,11 +231,10 @@ public:
       double weight, penalty_type pen_type, side_effect outside)
   {
     Compound* ret;
-    //ostringstream output;
-    bool display = true;
+    ostringstream os;
     StatError error;
 
-    ret = h.compound_estimation(error, display, sum_dist, dist, type, estimator,
+    ret = h.compound_estimation(error, &os, sum_dist, dist, type, estimator,
         nb_iter, weight, pen_type, outside);
 
     if (!ret)
@@ -253,11 +249,10 @@ public:
       penalty_type pen_type, side_effect outside)
   {
     Compound* ret;
-    //ostringstream output;
-    bool display = true;
+    ostringstream os;
     StatError error;
 
-    ret = h.compound_estimation(error, display, known_dist, type, min_inf_bound,
+    ret = h.compound_estimation(error, &os, known_dist, type, min_inf_bound,
         estimator, nb_iter, weight, pen_type, outside);
 
     if (!ret)
@@ -312,10 +307,9 @@ public:
   cluster_information(const FrequencyDistribution &h, float ratio)
   {
     StatError error;
-    //std::stringstream output;
-    bool display = true;
+    ostringstream os;
 
-    DiscreteDistributionData* ret = h.cluster(error, ratio, display);
+    DiscreteDistributionData* ret = h.cluster(error, ratio, &os);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);

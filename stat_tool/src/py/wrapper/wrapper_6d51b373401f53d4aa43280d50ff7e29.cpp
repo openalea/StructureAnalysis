@@ -40,7 +40,6 @@ void wrapper_6d51b373401f53d4aa43280d50ff7e29()
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::Regression >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::Regression >::Type, autowig::Held< class ::stat_tool::RegressionKernel >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::Regression >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::Regression, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::Regression >::Type, class ::stat_tool::Regression > > >();
     }
 
 }

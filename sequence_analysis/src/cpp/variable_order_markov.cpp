@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,11 +36,12 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
-#include <string>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -6108,6 +6109,29 @@ ostream& VariableOrderMarkovData::ascii_data_write(ostream &os , output_sequence
   ascii_print(os , format , false , posterior_probability , entropy , nb_state_sequence);
 
   return os;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a VariableOrderMarkovData object.
+ *
+ *  \param[in] format     format (line/column),
+ *  \param[in] exhaustive flag detail level,
+ *
+ *  \return    string.
+ */
+/*--------------------------------------------------------------*/
+
+string VariableOrderMarkovData::ascii_data_write(output_sequence_format format , bool exhaustive) const
+
+{
+  ostringstream oss;
+
+
+  ascii_data_write(oss , format , exhaustive);
+
+  return oss.str();
 }
 
 

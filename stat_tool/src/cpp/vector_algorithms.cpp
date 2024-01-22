@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,11 +36,12 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
-#include <string>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
 
 #include "vectors.h"
 #include "stat_label.h"
@@ -421,7 +422,7 @@ bool Vectors::rank_correlation_ascii_write(StatError &error , const string path 
  *         (either in the Spearman or in the Kendall sense).
  *
  *  \param[in] error       reference on a StatError object,
- *  \param[in] display     flag for displaying the rank correlation coefficient matrix,
+ *  \param[in] os          stream for displaying the rank correlation coefficient matrix,
  *  \param[in] correl_type rank correlation coefficient type (SPEARMAN/KENDALL),
  *  \param[in] path        file path.
  *
@@ -429,7 +430,7 @@ bool Vectors::rank_correlation_ascii_write(StatError &error , const string path 
  */
 /*--------------------------------------------------------------*/
 
-bool Vectors::rank_correlation_computation(StatError &error , bool display ,
+bool Vectors::rank_correlation_computation(StatError &error , ostream *os ,
                                            correlation_type correl_type , const string path) const
 
 {
@@ -476,8 +477,8 @@ bool Vectors::rank_correlation_computation(StatError &error , bool display ,
       break;
     }
 
-    if (display) {
-      rank_correlation_ascii_write(cout , correl_type , correlation);
+    if (os) {
+      rank_correlation_ascii_write(*os , correl_type , correlation);
     }
     if (!path.empty()) {
       status = rank_correlation_ascii_write(error , path , correl_type , correlation);
@@ -1291,7 +1292,7 @@ bool Vectors::contingency_table_spreadsheet_write(StatError &error , const strin
  *  \brief Computation of a contingency table for 2 categorical variables.
  *
  *  \param[in] error     reference on a StatError object,
- *  \param[in] display   flag for displaying the contingency table,
+ *  \param[in] os        stream for displaying the contingency table,
  *  \param[in] variable1 variable 1 index,
  *  \param[in] variable2 variable 2 index,
  *  \param[in] path      file path,
@@ -1301,7 +1302,7 @@ bool Vectors::contingency_table_spreadsheet_write(StatError &error , const strin
  */
 /*--------------------------------------------------------------*/
 
-bool Vectors::contingency_table(StatError &error , bool display , int variable1 ,
+bool Vectors::contingency_table(StatError &error , ostream *os , int variable1 ,
                                 int variable2 , const string path , output_format format) const
 
 {
@@ -1443,8 +1444,8 @@ bool Vectors::contingency_table(StatError &error , bool display , int variable1 
     test = new Test(CHI2 , true , df , I_DEFAULT , value);
     test->chi2_critical_probability_computation();
 
-    if (display) {
-      contingency_table_ascii_write(cout , variable1 , variable2 , frequency ,
+    if (os) {
+      contingency_table_ascii_write(*os , variable1 , variable2 , frequency ,
                                     deviation , chi2_contribution , *test);
     }
 
@@ -2120,7 +2121,7 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const strin
  *  \brief One-way analysis of variance.
  *
  *  \param[in] error             reference on a StatError object,
- *  \param[in] display           flag for displaying the ANOVA results,
+ *  \param[in] os                stream for displaying the ANOVA results,
  *  \param[in] class_variable    explanatory variable index,
  *  \param[in] response_variable response variable index,
  *  \param[in] response_type     response variable type (ORDINAL/NUMERIC),
@@ -2131,7 +2132,7 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const strin
  */
 /*--------------------------------------------------------------*/
 
-bool Vectors::variance_analysis(StatError &error , bool display , int class_variable ,
+bool Vectors::variance_analysis(StatError &error , ostream *os , int class_variable ,
                                 int response_variable , int response_type ,
                                 const string path , output_format format) const
 
@@ -2235,8 +2236,8 @@ bool Vectors::variance_analysis(StatError &error , bool display , int class_vari
     }
     delete [] value_nb_vector;
 
-    if (display) {
-      vec->variance_analysis_ascii_write(cout , response_type , value_vec , false);
+    if (os) {
+      vec->variance_analysis_ascii_write(*os , response_type , value_vec , false);
     }
 
     if (!path.empty()) {
@@ -2273,14 +2274,14 @@ bool Vectors::variance_analysis(StatError &error , bool display , int class_vari
  *  \brief Computation of sup norm distance between two empirical continuous distributions.
  *
  *  \param[in] error   reference on a StatError object,
- *  \param[in] display flag for displaying the sup norm distance,
+ *  \param[in] os      stream for displaying the sup norm distance,
  *  \param[in] ivec    reference on a Vector object.
  *
  *  \return           error status.
  */
 /*--------------------------------------------------------------*/
 
-bool Vectors::sup_norm_distance(StatError &error , bool display , const Vectors &ivec) const
+bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &ivec) const
 
 {
   bool status = true , **selected_value;
@@ -2380,10 +2381,8 @@ bool Vectors::sup_norm_distance(StatError &error , bool display , const Vectors 
           }
 
           if ((previous_sign != 0) && (sign != 0) && (sign != previous_sign)) {
-            if (display) {
-              cout << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << max
-                   << "   sup norm value: " << sup_value << "   crossing value: " << i;
-            }
+            os << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << max
+               << "   sup norm value: " << sup_value << "   crossing value: " << i;
 
             nb_crossing++;
             sup_norm += max;
@@ -2415,12 +2414,10 @@ bool Vectors::sup_norm_distance(StatError &error , bool display , const Vectors 
         delete [] cumul[0];
         delete [] cumul[1];
 
-        if (display) {
-          cout << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << sup_norm << "   "
-               << STAT_label[STATL_OVERLAP] << ": " << overlap
-               << "   number of crossings of cdfs: " << nb_crossing << "   sup norm value: " << sup_value
-               << "   (" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << ")";
-        }
+        os << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << sup_norm << "   "
+           << STAT_label[STATL_OVERLAP] << ": " << overlap
+           << "   number of crossings of cdfs: " << nb_crossing << "   sup norm value: " << sup_value
+           << "   (" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << ")";
       }
 
       // computation of ranks on the basis of the two samples
@@ -2539,10 +2536,8 @@ bool Vectors::sup_norm_distance(StatError &error , bool display , const Vectors 
         }
 
         if ((previous_sign != 0) && (sign != 0) && (sign != previous_sign)) {
-          if (display) {
-            cout << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << max
-                 << "   sup norm value: " << sup_value << "   crossing value: " << int_value;
-          }
+          os << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << max
+             << "   sup norm value: " << sup_value << "   crossing value: " << int_value;
 
           nb_crossing++;
           sup_norm += max;
@@ -2669,10 +2664,8 @@ bool Vectors::sup_norm_distance(StatError &error , bool display , const Vectors 
         }
 
         if ((previous_sign != 0) && (sign != 0) && (sign != previous_sign)) {
-          if (display) {
-            cout << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << max
-                 << "   sup norm value: " << sup_value << "   crossing value: " << real_value;
-          }
+          os << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << max
+             << "   sup norm value: " << sup_value << "   crossing value: " << real_value;
 
           nb_crossing++;
           sup_norm += max;
@@ -2691,11 +2684,9 @@ bool Vectors::sup_norm_distance(StatError &error , bool display , const Vectors 
     }
     }
 
-    if (display) {
-      cout << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << sup_norm << "   "
-           << STAT_label[STATL_OVERLAP] << ": " << 1. - sup_norm
-           << "   number of crossings of cdfs: " << nb_crossing << "   sup norm value: " << sup_value << endl;
-    }
+    os << "\n" << STAT_label[STATL_SUP_NORM_DISTANCE] << ": " << sup_norm << "   "
+       << STAT_label[STATL_OVERLAP] << ": " << 1. - sup_norm
+       << "   number of crossings of cdfs: " << nb_crossing << "   sup norm value: " << sup_value << endl;
 
     delete [] selected_value[0];
     delete [] selected_value[1];

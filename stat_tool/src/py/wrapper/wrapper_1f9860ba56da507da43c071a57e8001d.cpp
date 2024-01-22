@@ -9,9 +9,7 @@ void wrapper_1f9860ba56da507da43c071a57e8001d()
     boost::python::scope().attr("stat_tool") = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::scope scope_0cdd446515295e8e8373e99f328c3748 = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::enum_< enum ::stat_tool::moving_average_method > enum_1f9860ba56da507da43c071a57e8001d("moving_average_method");
-
     enum_1f9860ba56da507da43c071a57e8001d.value("AVERAGING", ::stat_tool::AVERAGING);
-
     enum_1f9860ba56da507da43c071a57e8001d.value("LEAST_SQUARES", ::stat_tool::LEAST_SQUARES);
 
 }

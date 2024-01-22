@@ -69,7 +69,7 @@ public:
   {
     StatError error;
     TimeEvents *time_events = NULL;
-    time_events = TimeEvents::building(error, input, itime);
+    time_events = TimeEvents::build(error, input, itime);
     if(!time_events)
     {
       sequence_analysis::wrap_util::throw_error(error);
@@ -163,7 +163,7 @@ public:
                  double weight, penalty_type pen_type, side_effect outside)
   {
     HEADER_OS(Renewal);
-    ret = input.estimation(error, os, type, estimator, nb_iter, equilibrium_estimator,
+    ret = input.estimation(error, &os, type, estimator, nb_iter, equilibrium_estimator,
                            mean_estimator, weight, pen_type, outside);
 
     FOOTER_OS;
@@ -179,7 +179,7 @@ public:
     HEADER_OS(Renewal);
 
 
-    ret = input.estimation(error, os, type, input_dist, estimator, nb_iter,
+    ret = input.estimation(error, &os, type, input_dist, estimator, nb_iter,
         equilibrium_estimator, mean_estimator, weight, pen_type, outside);
 
     FOOTER_OS;

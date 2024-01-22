@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -133,7 +133,7 @@ namespace stat_tool {
 
   /// \brief Markov chain
 
-  class Chain {
+  class STAT_TOOL_API Chain {
 
     friend std::ostream& operator<<(std::ostream &os , const Chain &chain)
     { return chain.ascii_print(os , true); }
@@ -194,7 +194,7 @@ namespace stat_tool {
 
   /// \brief Data structure corresponding to a Markov chain
 
-  class ChainData : public ChainReestimation<int> {
+  class STAT_TOOL_API ChainData : public ChainReestimation<int> {
   public :
 
     ChainData(process_type itype , int inb_state , int inb_row , bool init_flag = false)
@@ -209,7 +209,7 @@ namespace stat_tool {
 
   /// \brief Categorical observation process
 
-  class CategoricalProcess {
+  class STAT_TOOL_API CategoricalProcess {
 
   public :
 
@@ -266,7 +266,7 @@ namespace stat_tool {
 
   /// \brief Discrete parametric observation process
 
-  class DiscreteParametricProcess {
+  class STAT_TOOL_API DiscreteParametricProcess {
 
   public :
 
@@ -321,7 +321,7 @@ namespace stat_tool {
 
   /// \brief Continuous parametric observation process
 
-  class ContinuousParametricProcess {
+  class STAT_TOOL_API ContinuousParametricProcess {
 
   public :
 
@@ -387,8 +387,8 @@ namespace stat_tool {
   };
 
 
-  void log_computation(int nb_value , const double *pmass , double *plog);
-  double von_mises_concentration_computation(double mean_direction);
+  STAT_TOOL_API void log_computation(int nb_value , const double *pmass , double *plog);
+  STAT_TOOL_API double von_mises_concentration_computation(double mean_direction);
 
 
 };  // namespace stat_tool
