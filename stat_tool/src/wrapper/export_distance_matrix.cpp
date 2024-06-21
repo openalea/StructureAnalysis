@@ -146,7 +146,7 @@ public:
 
   static std::string
   hierarchical_clustering(const DistanceMatrix& dm, hierarchical_strategy algorithm,
-      linkage criterion, const char*path, &os_format format)
+      linkage criterion, const char* path, output_format& format)
   {
     StatError error;
     ostringstream os;

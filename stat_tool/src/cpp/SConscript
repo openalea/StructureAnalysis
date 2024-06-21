@@ -22,15 +22,6 @@ includes += lib_env.ALEAGlob('*.hpp')
 sources = lib_env.ALEAGlob('*.cpp')
 
 
-# files to exclude from sources
-excludes = Split( """
-""")
-
-for f in excludes:
-    for cpp in sources:
-	if f in cpp:
-            sources.remove(cpp)
-	    break
 
 # Add defines to export symbols
 lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])

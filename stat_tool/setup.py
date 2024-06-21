@@ -3,7 +3,7 @@
 
 import os, sys
 from setuptools import setup, find_packages
-from openalea.deploy.binary_deps import binary_deps
+#from openalea.deploy.binary_deps import binary_deps
 from openalea.deploy.setup import *
 from os.path import join as pj
 
@@ -29,8 +29,6 @@ scons_parameters = ["build_prefix=" + build_prefix]
 
 
 # platform dependencies
-if sys.platform.startswith('win'):
-    install_requires += [binary_deps("boost")]
 install_requires = []
 setup_requires = ['openalea.deploy']
 

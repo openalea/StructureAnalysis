@@ -16,18 +16,19 @@ options.Add(BoolVariable('DEBUG', 'my debug', 0))
 tools = ['boost_python']
 
 env = ALEASolution(options, tools)
-env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++11'])
+env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++14'])
 
 if (platform.system() != 'Windows' and
     os.environ.get('CC') and
     os.environ.get('CXX')):
 
-    env.AppendUnique(CFLAGS=["-std=c11"])
+    env.AppendUnique(CFLAGS=["-std=c14"])
     if (platform.system() == 'Darwin'):
         env.AppendUnique(CXXFLAGS=['-stdlib=libc++'])
     conda_prefix = os.environ['CONDA_PREFIX']
     conda_bin = pj(os.environ['CONDA_PREFIX'], 'bin')
-# To work with conda toolchain
+    
+    # To work with conda toolchain
     env['AR'] = os.environ['AR']
     env['AS'] = os.environ['AS']
     env['CC'] = os.environ['CLANG'] #pj(conda_bin, os.environ['CC'])
@@ -47,7 +48,7 @@ SConscript(pj(prefix,"src/cpp/SConscript"),
            exports='env')
 #SConscript(pj(prefix,"src/py/wrapper/SConscript"),
 #           exports='env')
-#SConscript(pj(prefix,"src/wrapper/SConscript"),
-#           exports='env')
+SConscript(pj(prefix,"src/wrapper/SConscript"),
+           exports='env')
 
 Default("build")

@@ -104,7 +104,7 @@ public:
 
       }
 
-    mix = DiscreteMixture::building(error, nb_component, weight.get(), component.get());
+    mix = DiscreteMixture::build(error, nb_component, weight.get(), component.get());
 
     if (!mix)
       stat_tool::wrap_util::throw_error(error);

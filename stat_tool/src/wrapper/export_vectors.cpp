@@ -436,7 +436,7 @@ public:
     std::string res;
 
     d.ascii_data_write(os, exhaustive);
-    res = s.str();
+    res = os.str();
 
     return res;
 

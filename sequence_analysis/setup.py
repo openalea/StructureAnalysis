@@ -35,7 +35,7 @@ install_requires = []
 setup_requires = install_requires + ['openalea.deploy']
 
 if sys.platform.startswith('win'):
-    install_requires = [binary_deps('openalea.stat_tool')]
+    install_requires = [binary_deps('openalea.stattool')]
     install_requires += [binary_deps("boost")]
     setup_requires += [binary_deps("boost")]
 
