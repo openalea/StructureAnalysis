@@ -16,7 +16,7 @@ __all__ = ["Simulate"]
 
 
 from . import error
-from .enum import *
+from .enums import *
 
 
 def Simulate(obj, *args):

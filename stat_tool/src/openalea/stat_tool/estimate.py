@@ -15,19 +15,18 @@
     function
 """
 
-from . import error
-from .enum import *
+from . import error, interface
+from .enums import *
 
-from stat_tool.__stat_tool.stat_tool import *
-import stat_tool.__stat_tool.stat_tool as cst
+import openalea.stat_tool._stat_tool as cst
 
-_DiscreteParametricModel = cst.DiscreteParametricModel
-_DiscreteParametric = cst.DiscreteParametric
-_Compound = cst.Compound
-_Convolution = cst.Convolution
-_Distribution = cst.Distribution
-_DiscreteMixture = cst.DiscreteMixture
-_FrequencyDistribution = cst.FrequencyDistribution
+_DiscreteParametricModel = cst._DiscreteParametricModel
+_DiscreteParametric = cst._DiscreteParametric
+_Compound = cst._Compound
+_Convolution = cst._Convolution
+_Distribution = cst._Distribution
+_DiscreteMixture = cst._DiscreteMixture
+_FrequencyDistribution = cst._FrequencyDistribution
 
 # from enums import likelihood_penalty_type
 # from enums import smoothing_penalty_type
@@ -48,7 +47,7 @@ _FrequencyDistribution = cst.FrequencyDistribution
 
 __all__ = ["Estimate", "EstimateFunctions"]
 
-class EstimateFunctions(object):
+class EstimateFunctions:
     """
     Class containing histogram estimation functions
     This class must not be used alone, but through an histogram object

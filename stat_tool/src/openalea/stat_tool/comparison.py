@@ -21,14 +21,15 @@ from .enums import variable_type
 from .enums import format_type
 
 
-from openalea.stat_tool._stat_tool import \
-    _CompoundData,\
-    _DiscreteDistributionData,\
-    _DiscreteMixtureData,\
-    _ConvolutionData,\
-    _Vectors,\
-    _VectorDistance,\
+from openalea.stat_tool._stat_tool import (
+    _CompoundData,
+    _DiscreteDistributionData,
+    _DiscreteMixtureData,
+    _ConvolutionData,
+    _Vectors,
+    _VectorDistance,
     _FrequencyDistribution
+)
 
 __all__ = ['Compare', 'ComparisonTest']
 
