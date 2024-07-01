@@ -238,7 +238,7 @@ class mplotlib(plotter):
             pylab.figure(fig_id + g )
 
             # Select Subplot
-            pylab.subplot(group_size[g]%nbcol+group_size[g]/nbcol,
+            pylab.subplot(group_size[g]%nbcol+group_size[g]//nbcol,
                           nbcol , group_index[g] + 1)
             group_index[g] += 1
             pylab.title(multiplot.title)
