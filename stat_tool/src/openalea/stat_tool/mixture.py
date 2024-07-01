@@ -84,7 +84,7 @@ def Mixture(*args):
         # Extract weights ands distributions
         weights = []
         dists = []
-        for i in xrange(nb_param / 2):
+        for i in range(nb_param / 2):
             weights.append(args[i * 2])
             error.CheckType([args[i * 2 + 1]], [types], arg_id=[i * 2 + 1])
             error.CheckType([args[i * 2]], [float], arg_id=[i * 2])

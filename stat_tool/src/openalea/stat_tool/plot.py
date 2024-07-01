@@ -132,7 +132,7 @@ class gnuplot(plotter):
 
 
             g.plot(*plot_list)
-            input("Press Enter to continue")
+            eval(input("Press Enter to continue"))
 
 
 class mplotlib(plotter):

@@ -22,7 +22,7 @@ import warnings, numpy as np, copy, math, time
 from numpy import ndarray
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import gzip, cPickle as pickle
+import gzip, pickle as pickle
 
 from sklearn.cluster import SpectralClustering, Ward, DBSCAN
 from sklearn import metrics
@@ -44,8 +44,8 @@ def distance_matrix_from_vector(data, var_type, no_dist_index = []):
     dist_mat = np.zeros( shape = [N,N], dtype=float )
 
     if var_type.lower() == "numeric":
-        for i in xrange(N):
-            for j in xrange(i+1,N):# we skip when i=j because in that case the distance is 0.
+        for i in range(N):
+            for j in range(i+1,N):# we skip when i=j because in that case the distance is 0.
                 if data[i] is None or data[j] is None or i in no_dist_index or j in no_dist_index:
                     dist_mat[i,j] = dist_mat[j,i] = None
                 else:
@@ -53,8 +53,8 @@ def distance_matrix_from_vector(data, var_type, no_dist_index = []):
 
     elif var_type.lower() == "ordinal":
         rank = data.argsort() # In case of ordinal variables, observed values are replaced by ranked values.
-        for i in xrange(N):
-            for j in xrange(i+1,N): # we skip when i=j because in that case the distance is 0.
+        for i in range(N):
+            for j in range(i+1,N): # we skip when i=j because in that case the distance is 0.
                 if data[i] is None or data[j] is None or i in no_dist_index or j in no_dist_index:
                     dist_mat[i,j] = dist_mat[j,i] = None
                 else:
@@ -76,7 +76,7 @@ def mad_based_outlier(points, thresh=3.5):
     """
     isdict = False
     if isinstance(points, dict):
-        keys, points = points.keys(), points.values()
+        keys, points = list(points.keys()), list(points.values())
         isdict = True
     if not isinstance(points, ndarray):
         points = np.array(points)
@@ -178,7 +178,7 @@ def _within_cluster_distances(distance_matrix, clustering):
         D_within[q] = 2. * sum( [distance_matrix[i,j] for i in index_q for j in index_q if j>i] ) / ( (nb_ids_by_clusters[n]-1) * nb_ids_by_clusters[n])
 
     if nb_clusters == 1:
-        return D_within.values()[0]
+        return list(D_within.values())[0]
     else:
         return D_within
 
@@ -210,7 +210,7 @@ def _between_cluster_distances(distance_matrix, clustering):
         D_between[q] = sum( [distance_matrix[i,j] for i in index_q for j in index_not_q] ) / ( (N-nb_ids_by_clusters[n]) * nb_ids_by_clusters[n])
 
     if nb_clusters == 1:
-        return D_between.values()[0]
+        return list(D_between.values())[0]
     else:
         return D_between
 
@@ -278,14 +278,14 @@ def contiguous_ids(dic, starting_id = 0):
     """
     uniq, mini, maxi = list(set(dic.values())), min(dic.values()), max(dic.values())
     N_ids = len(uniq)
-    if (N_ids == len(range(mini, maxi+1))) and (mini==starting_id):
+    if (N_ids == len(list(range(mini, maxi+1)))) and (mini==starting_id):
         return dic
-    elif (N_ids == len(range(mini, maxi+1))) and (mini!=starting_id):
+    elif (N_ids == len(list(range(mini, maxi+1)))) and (mini!=starting_id):
         diff = mini - starting_id
-        return dict([(k,v-diff) for k,v in dic.iteritems()])
+        return dict([(k,v-diff) for k,v in dic.items()])
     else:
-        diffs = np.array(uniq) - range(starting_id, N_ids)
-        return dict([(k,v-diffs[uniq.index(v)]) for k,v in dic.iteritems()])
+        diffs = np.array(uniq) - list(range(starting_id, N_ids))
+        return dict([(k,v-diffs[uniq.index(v)]) for k,v in dic.items()])
 
 
 def cluster2labels(clusters_dict):
@@ -293,7 +293,7 @@ def cluster2labels(clusters_dict):
     Create a dict *key=clusters; *labels=ids from a dict *key=ids; *labels=clusters.
     """
     cluster2labels = {}
-    for k,v in clusters_dict.iteritems():
+    for k,v in clusters_dict.items():
         try:
             cluster2labels[v].append(k)
         except:
@@ -333,8 +333,8 @@ def ensemble_cost_function( cluster2labels_1, cluster2labels_2, similarity = Fal
      - `similarity` (bool) - if True, return similarity function instead of dissimilarity
     """
     cost_triplets = []
-    for clusters_1, ids_1 in cluster2labels_1.iteritems():
-        for clusters_2, ids_2 in cluster2labels_2.iteritems():
+    for clusters_1, ids_1 in cluster2labels_1.items():
+        for clusters_2, ids_2 in cluster2labels_2.items():
             if set(ids_1) & set(ids_2) != set([]):
                 cost_triplets.append([clusters_1, clusters_2, cost_function(ids_1, ids_2, similarity)])
 
@@ -353,7 +353,7 @@ def cluster_matching(clusters_dict_1, clusters_dict_2, return_all = False):
     from openalea.tree_matching.bipartitematching import BipartiteMatching
     c2l1 = cluster2labels(clusters_dict_1)
     c2l2 = cluster2labels(clusters_dict_2)
-    res = BipartiteMatching(c2l1.keys(), c2l2.keys(), ensemble_cost_function(c2l1,c2l2), [1.0 for i in xrange(len(c2l1))], [1.0 for i in xrange(len(c2l2))])
+    res = BipartiteMatching(list(c2l1.keys()), list(c2l2.keys()), ensemble_cost_function(c2l1,c2l2), [1.0 for i in range(len(c2l1))], [1.0 for i in range(len(c2l2))])
     match = res.match()
 
     if return_all:
@@ -370,29 +370,29 @@ def clustering_naming(clustering_method, nb_clusters, global_distance_weights, g
     else:
         out_name = '-deleted_outliers'
 
-    return str(clustering_method)+"_"+str(nb_clusters)+"_"+str([str(global_distance_weights[n])+"*"+str(global_distance_variables[n]) for n in xrange(len(global_distance_weights))])+out_name
+    return str(clustering_method)+"_"+str(nb_clusters)+"_"+str([str(global_distance_weights[n])+"*"+str(global_distance_variables[n]) for n in range(len(global_distance_weights))])+out_name
 
 
 def load_mvpd(fname):
     """
     Save the object on disk under `fname`.
     """
-    print "Trying to open the mvpd_matrix file {}...".format(fname)
+    print("Trying to open the mvpd_matrix file {}...".format(fname))
     t_start = time.time()
     with open(fname, 'rb') as input:
         loaded_mvpd = pickle.load(input)
 
-    print "Time to load the mvpd_matrix: {}s".format(round(time.time()-t_start,3))
+    print("Time to load the mvpd_matrix: {}s".format(round(time.time()-t_start,3)))
 
     tmp_obj = mvpd_matrix()
     unknown_att = set(loaded_mvpd.__dict__.keys())-set(tmp_obj.__dict__.keys())
     if unknown_att != set([]):
-        print "Unknown attribute '{}' added to the object... please check versions!".format(unknown_att)
+        print("Unknown attribute '{}' added to the object... please check versions!".format(unknown_att))
 
     unfound_att = set(tmp_obj.__dict__.keys())-set(loaded_mvpd.__dict__.keys())
     if unfound_att != set([]):
-        print "Some attributes could not be found in the loaded object: '{}'".format(unfound_att)
-        print "... please check versions!"
+        print("Some attributes could not be found in the loaded object: '{}'".format(unfound_att))
+        print("... please check versions!")
 
     return loaded_mvpd
 
@@ -431,7 +431,7 @@ class mvpd_matrix:
         if len(variable_units) != 0:
             assert self._nb_var == len(variable_units)
         else:
-            variable_units = [None for i in xrange(self._nb_var)]
+            variable_units = [None for i in range(self._nb_var)]
 
         # -- Attributes saving 'initial' informations about variables:
         self._nb_values = None
@@ -456,9 +456,9 @@ class mvpd_matrix:
 
         # -- If a list of variable observations, names and types are provided, we compute the NON-standardized pairwise distance matrix
         if self._nb_var != 0:
-            for i in xrange(self._nb_var):
+            for i in range(self._nb_var):
                 self.add_variable(variable_list[i], variable_names[i], variable_types[i], variable_units[i])
-            print "Done integrating variables {} as separate NON-standardised pairwise distance matrices.".format(variable_names)
+            print("Done integrating variables {} as separate NON-standardised pairwise distance matrices.".format(variable_names))
 
         # -- If the weigths are also provided, we can compute the multi-variate pairwise distance matrix rigth now:
         if len(variable_weights) > 0:
@@ -471,7 +471,7 @@ class mvpd_matrix:
         """
         Save the object on disk under `fname`.
         """
-        import cPickle as pickle, gzip, time
+        import pickle as pickle, gzip, time
 
         t_start = time.time()
         with open(fname, 'wb') as output:
@@ -492,7 +492,7 @@ class mvpd_matrix:
          - `MAD_outliers_thres` (int) - (Optional) threshold used for the detection of outliers using MeanAbsDev.
         """
         # NEED to check if we already have a pairwise distance matrix and if the data to add have the adequate number of observations!!
-        if len(self._distance_matrix_dict.keys())!=0:
+        if len(list(self._distance_matrix_dict.keys()))!=0:
             if vectorORarray(var_data) == "vector":
                 nb_values = len(var_data)
             else:
@@ -503,10 +503,10 @@ class mvpd_matrix:
             raise ValueError("You have to give a name to your variable if you want to use it!")
 
         # - We make sure self._distance_matrix_dict can receive the pairwise distance matrix with the name `var_name`:
-        if self._distance_matrix_dict.has_key(var_name):
+        if var_name in self._distance_matrix_dict:
             raise KeyError("You already have a property named '{}'".format(var_name))
 
-        print("Computing the pairwise distance matrix for the variable '{}'...".format(var_name))
+        print(("Computing the pairwise distance matrix for the variable '{}'...".format(var_name)))
         if vectorORarray(var_data) == 'vector':
             self._var_data_dict[var_name] = var_data # kept to be able to represent data dispersion in each cluster;
             self._distance_matrix_dict[var_name] = distance_matrix_from_vector(var_data, var_type) # used for clustering purposes;
@@ -515,7 +515,7 @@ class mvpd_matrix:
 
         # - Adding its infos tho the list
         self._distance_matrix_info[var_name] = (var_type.lower(), var_unit)
-        self._nb_values = self._distance_matrix_dict.values()[0].shape[0]
+        self._nb_values = list(self._distance_matrix_dict.values())[0].shape[0]
 
         if MAD_outliers_thres is not None:
             if vectorORarray(var_data) != "vector":
@@ -586,7 +586,7 @@ class mvpd_matrix:
          - `delete_outliers` (bool) - if True 'delete outliers' (values set to np.nan) of pairwise distance matrix;
          - `return_data` (bool) - if true the function return the sorted ids list `ids` & a dictionary of pairwise distance matrix `global_matrix`.
         """
-        print "# -- Computing the multi-variate pairwise distance matrix..."
+        print("# -- Computing the multi-variate pairwise distance matrix...")
         if isinstance(variable_names,str):
             variable_names = [variable_names]
         if isinstance(variable_weights,int) or isinstance(variable_weights,float):
@@ -596,7 +596,7 @@ class mvpd_matrix:
 
         # -- Checking the presence of all requested information (i.e. variables names) in the dictionary `self._distance_matrix_dict`:
         for var_name in variable_names:
-            if not self._distance_matrix_dict.has_key(var_name):
+            if var_name not in self._distance_matrix_dict:
                 raise KeyError("'{}' is not in the dictionary `self._distance_matrix_dict`".format(var_name))
 
         if ((not ignore_outliers) and (not delete_outliers)):
@@ -611,7 +611,7 @@ class mvpd_matrix:
             if return_data:
                 return self._global_distance_ids, self._global_distance_matrix
             else:
-                print "- The global pairwise distance matrix was already computed!"
+                print("- The global pairwise distance matrix was already computed!")
                 return None
         else: # Otherwise, clean any possible clustering:
             self._method = None
@@ -621,7 +621,7 @@ class mvpd_matrix:
             self._clusterings_dict = None
 
         # By default we use all the given observations of the variables:
-        ids = range(self._nb_values) ## SHOULD BE MODIFIED according to the way outliers should be handdled !!
+        ids = list(range(self._nb_values)) ## SHOULD BE MODIFIED according to the way outliers should be handdled !!
 
         # -- Standardization step:
         standard_distance_matrix = {}
@@ -629,7 +629,7 @@ class mvpd_matrix:
         nb_var = 0
         if standardize_over is not None:
             self._standardize_over_variables(standardize_over, variable_names)
-            print "- Found the following standardisation values: {}".format(self._standardisation_values)
+            print("- Found the following standardisation values: {}".format(self._standardisation_values))
 
         nb_std_var = 0
         for n, var_name in enumerate(variable_names):
@@ -651,7 +651,7 @@ class mvpd_matrix:
 
         # -- Checking for a simple case: to 'combine' only ONE pairwise distance matrix (no re-weighting to do !)
         if nb_var == 1:
-            global_matrix = standard_distance_matrix.values()[0]
+            global_matrix = list(standard_distance_matrix.values())[0]
         else:
             # - Creating weight matrix and replacing nan by zeros for computation in standardized matrix.
             N = len(ids)
@@ -663,7 +663,7 @@ class mvpd_matrix:
             # Finally making the global weighted pairwise standard distance matrix:
             for w, w_m in zip(variable_weights, weight_matrix):
                 binary = ~np.isnan(w_m)
-                weight_matrix = [weight_matrix[r]*(binary+~binary*w) for r in xrange(nb_var)]
+                weight_matrix = [weight_matrix[r]*(binary+~binary*w) for r in range(nb_var)]
 
             global_matrix = np.zeros( shape = [N,N], dtype=float )
             for wei_mat, standard_mat in zip(weight_matrix, standardized_matrix):
@@ -678,14 +678,14 @@ class mvpd_matrix:
         if return_data:
             return ids, global_matrix
         else:
-            print "...done !"
+            print("...done !")
 
     def _standardize_over_variables(self, standardize_over, variable_names):
         self._standardisation_values = {}
         if isinstance(standardize_over, list) and isinstance(standardize_over[0], int):
             standardize_over = [standardize_over]
         for var_list in standardize_over:
-            print "Computing common standarisation value for variables {}...".format(var_list)
+            print("Computing common standarisation value for variables {}...".format(var_list))
             big_vector = []
             for var_id in var_list:
                 var_name = variable_names[var_id]
@@ -710,7 +710,7 @@ class mvpd_matrix:
             try:
                 outliers_index = self._outliers_index_dict[var_name]
             except:
-                print "No outliers defined for property '{}'... skipping that part.".format(var_name)
+                print("No outliers defined for property '{}'... skipping that part.".format(var_name))
 
         if (vectorORarray(data)=='array'):
             return matrix_outliers2nan(data, outliers_index)
@@ -788,8 +788,8 @@ class mvpd_matrix:
             assert n_clusters < full_tree.n_leaves_
             self._nb_clusters = n_clusters
             # If the clustering already exist, return the desired clustering as 'cluster' function would:
-            if (self._clusterings_dict is not None) and self._clusterings_dict.has_key(n_clusters):
-                print "Returning clustering previously computed by Cluster.full_tree()."
+            if (self._clusterings_dict is not None) and n_clusters in self._clusterings_dict:
+                print("Returning clustering previously computed by Cluster.full_tree().")
                 clustering = self._clusterings_dict[n_clusters]
                 self._clustering = clustering
                 return clustering
@@ -798,20 +798,20 @@ class mvpd_matrix:
                 m = 5
                 while m*n_clusters > full_tree.n_leaves_:
                     m-=1
-                range_clusters = range(2, m*n_clusters)
+                range_clusters = list(range(2, m*n_clusters))
             elif n_clusters+5 < full_tree.n_leaves_:
-                range_clusters = range(2, n_clusters+5)
+                range_clusters = list(range(2, n_clusters+5))
             else:
-                range_clusters = range(2, n_clusters)
+                range_clusters = list(range(2, n_clusters))
 
         # Check: if we already computed that and if yes if it contain what we need (the clustering associated to each `n_clusters` in `range_clusters`) otherwise we compute it:
-        if (self._clusterings_dict is None) or (sum([self._clusterings_dict.has_key(k) for k in range_clusters])!=len(range_clusters)):
+        if (self._clusterings_dict is None) or (sum([k in self._clusterings_dict for k in range_clusters])!=len(range_clusters)):
             from sklearn.cluster.hierarchical import _hc_cut
             clusterings_dict = {}
             for n, c in enumerate(range_clusters):
                 clust_labels = _hc_cut(c, full_tree.children_, full_tree.n_leaves_)
-                clusterings_dict[c] = dict(zip(self._global_distance_ids, clust_labels))
-                if n > 0 and clusterings_dict.has_key(range_clusters[n-1]):
+                clusterings_dict[c] = dict(list(zip(self._global_distance_ids, clust_labels)))
+                if n > 0 and range_clusters[n-1] in clusterings_dict:
                     clust_comp = ClustererComparison(clusterings_dict[range_clusters[n-1]], clusterings_dict[range_clusters[n]])
                     clusterings_dict[c] = clust_comp.relabel_clustering_2()
 
@@ -835,7 +835,7 @@ class mvpd_matrix:
         sil = {}
         assert k_min>1
 
-        for k in xrange(k_min, k_max+1):
+        for k in range(k_min, k_max+1):
             if clustering_method.lower() == "ward":
                 clustering = Ward(n_clusters=k, compute_full_tree=True).fit(self._global_distance_matrix)
                 clustering_labels[k] = clustering.labels_
@@ -848,7 +848,7 @@ class mvpd_matrix:
 
         if plot_estimator:
             fig = plt.figure(figsize=(4,4),dpi=100)
-            plt.plot(xrange(k_min, k_max+1), sil.values(), color='red')
+            plt.plot(range(k_min, k_max+1), list(sil.values()), color='red')
             plt.title("Silhouette estimator")
 
         return sil
@@ -867,7 +867,7 @@ class mvpd_matrix:
         CH, sil = {}, {}
         assert k_min>=1
 
-        for k in xrange(k_min, k_max+1):
+        for k in range(k_min, k_max+1):
             if clustering_method.lower() == "ward":
                 clustering = Ward(n_clusters=k, compute_full_tree=True).fit(self._global_distance_matrix)
                 clustering_labels[k] = clustering.labels_
@@ -884,18 +884,18 @@ class mvpd_matrix:
             else:
                 w[k] = _within_cluster_distances(self._global_distance_matrix, clustering_labels[k])
 
-        Hartigan = dict( [(k, Hartigan_estimator(k,w,N[k])) for k in xrange(k_min, k_max)] )
+        Hartigan = dict( [(k, Hartigan_estimator(k,w,N[k])) for k in range(k_min, k_max)] )
 
         if plot_estimator:
             fig = plt.figure(figsize=(12,4),dpi=100)
             fig.add_subplot(131)
-            plt.plot(xrange(k_min if k_min>1 else 2, k_max+1),CH.values())
+            plt.plot(range(k_min if k_min>1 else 2, k_max+1),list(CH.values()))
             plt.title("Calinski and Harabasz estimator")
             fig.add_subplot(132)
-            plt.plot(xrange(k_min, k_max), Hartigan.values(), color='green')
+            plt.plot(range(k_min, k_max), list(Hartigan.values()), color='green')
             plt.title("Hartigan estimator")
             fig.add_subplot(133)
-            plt.plot(xrange(k_min if k_min>1 else 2, k_max+1), sil.values(), color='red')
+            plt.plot(range(k_min if k_min>1 else 2, k_max+1), list(sil.values()), color='red')
             plt.title("Silhouette estimator")
 
         return CH, Hartigan, sil
@@ -924,14 +924,14 @@ class mvpd_matrix:
         cid = min(regions2group_index)
         regions_left = list(set(regions2group_index)-set([cid]))
         clust = {}
-        for k, v in self._clustering.iteritems():
+        for k, v in self._clustering.items():
             clust[k] = cid if v in regions_left else v
 
         if make_contiguous_ids:
             clust = contiguous_ids(clust, 0)
 
         self._clustering = clust
-        self._nb_clusters = len(np.unique(self._clustering.values()))
+        self._nb_clusters = len(np.unique(list(self._clustering.values())))
 
 
 
@@ -943,7 +943,7 @@ class ClustererChecker:
         # - Paranoia :
         assert mvpd_matrix.__class__.__name__ == 'mvpd_matrix'
         # - Initialisation
-        self._clustering = mvpd_matrix._clustering.values()
+        self._clustering = list(mvpd_matrix._clustering.values())
         self._distance_matrix = mvpd_matrix._global_distance_matrix
         self._var_data_dict = dict([(var_name, mvpd_matrix._var_data_dict[var_name]) for var_name in mvpd_matrix._global_distance_variables])
         self._var_units_dict = dict([(var_name, mvpd_matrix._distance_matrix_info[var_name][1]) for var_name in mvpd_matrix._global_distance_variables])
@@ -965,10 +965,10 @@ class ClustererChecker:
         # - Check for undesirable situtations:
         if min(self._nb_ids_by_clusters.values()) <=1:
             raise ValueError("In the provided clustering a cluster has only one element, this is wrong!")
-            print "Provided clustering: {}".format(self.clustering_name)
+            print("Provided clustering: {}".format(self.clustering_name))
 
         # -- DONE!
-        print "ClustererChecker object initialisation done!"
+        print("ClustererChecker object initialisation done!")
 
 
     def cluster_distance_matrix(self, round_digits = 3):
@@ -1013,8 +1013,8 @@ class ClustererChecker:
         fig = plt.figure(figsize=(6,5))
         ax1 = fig.add_subplot(111)
         plt.imshow(cluster_distances, cmap=cm.winter, interpolation='nearest')
-        plt.xticks(range(numcols), range(numcols), fontsize=14, fontweight='bold')
-        plt.yticks(range(numrows), range(numrows), fontsize=14, fontweight='bold')
+        plt.xticks(list(range(numcols)), list(range(numcols)), fontsize=14, fontweight='bold')
+        plt.yticks(list(range(numrows)), list(range(numrows)), fontsize=14, fontweight='bold')
 
         if print_values:
             font = {'family': 'monospace', 'color': 'white', 'weight': 'bold', 'size': 16}
@@ -1023,7 +1023,7 @@ class ClustererChecker:
                 for ncol in range(numcols):
                     plt.text(nrow, ncol, cluster_distances[nrow,ncol], fontdict=font, **alignment)
 
-        if kwargs.has_key('title'):
+        if 'title' in kwargs:
             if isinstance(kwargs['title'],str):
                 plt.title(kwargs['title'])
             elif kwargs['title']:
@@ -1062,7 +1062,7 @@ class ClustererChecker:
             diameters[q] = np.round(max([self._distance_matrix[i,j] for i in index_q for j in index_q]),round_digits)
 
         if self._nb_clusters == 1:
-            return diameters.values()
+            return list(diameters.values())
         else:
             return diameters
 
@@ -1088,7 +1088,7 @@ class ClustererChecker:
             separation[q] = np.round(min([self._distance_matrix[i,j] for i in index_q for j in index_not_q ]),round_digits)
 
         if self._nb_clusters == 1:
-            return separation.values()
+            return list(separation.values())
         else:
             return separation
 
@@ -1128,13 +1128,13 @@ class ClustererChecker:
             else:
                 compare_groups = False
 
-            clustering_dict = dict(zip(self._vtx_list, self._clustering))
+            clustering_dict = dict(list(zip(self._vtx_list, self._clustering)))
             not_found = []
             labels_true, labels_pred = [], []
             max1 = max(dict_labels_expert.values())+1
             max2 = max(clustering_dict.values())+1
-            for k,v in dict_labels_expert.iteritems():
-                if clustering_dict.has_key(k):
+            for k,v in dict_labels_expert.items():
+                if k in clustering_dict:
                     v2 = clustering_dict[k]
                     if compare_groups:
                         labels_true.append(v if (v in groups2compare[:,0]) else max1)
@@ -1265,7 +1265,7 @@ class ClustererChecker:
             index_q[q] = [i for i,j in enumerate(self._clustering) if j==q]
 
         vertex_cluster_distance = {}
-        for i in xrange(self._N):
+        for i in range(self._N):
             tmp = np.zeros( shape=[self._nb_clusters], dtype=float )
             for n,q in enumerate(self._clusters_ids):
                 tmp[n] = sum([self._distance_matrix[i,j] for j in index_q[q] if i!=j])/(self._nb_ids_by_clusters[n]-1)
@@ -1287,7 +1287,7 @@ class ClustererChecker:
         """
         D_iq = self.vertex2clusters_distance()
         vertex_distance2center = {}
-        for i in xrange(self._N):
+        for i in range(self._N):
             vertex_distance2center[i] = D_iq[i][self._clustering[i]]
 
         return vertex_distance2center
@@ -1311,7 +1311,7 @@ class ClustererChecker:
         """
         vtx2center = self.vertex2clusters_distance()
         sorted_ids_by_clusters, sorted_dist_by_clusters = {}, {}
-        for clust, ids in self._ids_by_clusters.iteritems():
+        for clust, ids in self._ids_by_clusters.items():
             dist2center = [vtx2center[i][clust] for i in ids]
             sorted_ids_by_clusters[clust] = [ids[i] for i in np.argsort(dist2center)]
             sorted_dist_by_clusters[clust] = sorted(dist2center)
@@ -1346,7 +1346,7 @@ class ClustererChecker:
         colors_rgba = cmap(colors_i)
 
         fig = plt.figure(figsize=(10,5))
-        for clust_id, distances in sorted_dist_by_clusters.iteritems():
+        for clust_id, distances in sorted_dist_by_clusters.items():
             if cluster_names is None:
                 plt.plot( distances, '.-', label = "Cluster "+str(self._clusters_ids[clust_id]), figure=fig, color=tuple(colors_rgba[clust_id]) )
             else:
@@ -1380,7 +1380,7 @@ class ClustererChecker:
         self.mvpd_matrix._clustering = [old2new_labels[k] for k in self._clustering]
 
         self.__init__( self.mvpd_matrix, contruct_clustered_graph )
-        print "Clustering labels have been udpated !"
+        print("Clustering labels have been udpated !")
 
 
     def properties_boxplot_by_cluster(self, cluster_names=None, print_clustering_name=True, savefig=None):
@@ -1411,7 +1411,7 @@ class ClustererChecker:
                 plt.setp(xtickNames, rotation=90, fontsize=9)
                 fig.subplots_adjust(bottom=0.2)
             else:
-                xtickNames = plt.setp(ax, xticklabels=["{}".format(n) for n in xrange(self._nb_clusters)])
+                xtickNames = plt.setp(ax, xticklabels=["{}".format(n) for n in range(self._nb_clusters)])
                 fig.subplots_adjust(bottom=0.05)
             plt.yticks(fontsize=9)
             if print_clustering_name:

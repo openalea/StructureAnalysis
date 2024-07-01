@@ -143,9 +143,6 @@ algorithm_type = {
      "Ordering":        AlgoType.ORDERING,
      }
 
-
-
-
 # used by Clustering
 format_type = {
     "ASCII" :'a',
@@ -153,8 +150,7 @@ format_type = {
     "" : 'n'
     }
 
-cluster_type =
-    {
+cluster_type = {
      "Step":        "cluster_step",
      "Limit":       "cluster_limit",
      "Information": "cluster_information"

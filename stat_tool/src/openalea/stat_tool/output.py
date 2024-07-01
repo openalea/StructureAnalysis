@@ -431,7 +431,7 @@ class StatInterface(object):
             f = open(plot_file, "w")
             f.write(ctrp)
             f.close()
-            print(plot_file, "\n")
+            print((plot_file, "\n"))
 
         try:
             import Gnuplot
@@ -483,7 +483,7 @@ class StatInterface(object):
             self.plot_write(prefix, title)
 
         plot_file = prefix + suffix + ".print"
-        print("Graph printed into file:",  prefix + suffix + ".ps")
+        print(("Graph printed into file:",  prefix + suffix + ".ps"))
         f = open(plot_file, "r")
         f.readline()
         contents = f.read()
@@ -505,7 +505,7 @@ class StatInterface(object):
             f = open(plot_file, "w")
             f.write(ctrp)
             f.close()
-            print(plot_file, "\n")
+            print((plot_file, "\n"))
 
         try:
             import Gnuplot

@@ -34,7 +34,7 @@ from openalea.stat_tool._stat_tool import (
 )
 
 
-from enums import distribution_identifier_type
+from .enums import distribution_identifier_type
 
 __all__ = ["_Distribution",
            "_DiscreteParametricModel",
@@ -119,13 +119,13 @@ def Distribution(utype, *args):
         elif utype in ["U", "UNIFORM"]:
             result = Uniform(*args)
         else:
-            raise KeyError(" %s not found. Allowed keys are %s"
-                           % (utype, distribution_identifier_type.keys()))
+            raise KeyError(" %s not found. Allowed keys are %s" 
+                           % (utype, list(distribution_identifier_type.keys())))
 
     return result
 
 
-def Binomial(inf_bound, sup_bound=I_DEFAULT, \
+def Binomial(inf_bound, sup_bound=I_DEFAULT, 
              proba=D_DEFAULT):
     """
     Construction of a binomial distribution
@@ -185,11 +185,11 @@ def Poisson(inf_bound, param=D_DEFAULT):
     sup_bound = I_DEFAULT
     proba = D_DEFAULT
 
-    return _DiscreteParametricModel(POISSON, \
+    return _DiscreteParametricModel(POISSON, 
         inf_bound, sup_bound, param, proba)
 
 
-def NegativeBinomial(inf_bound, param=D_DEFAULT, \
+def NegativeBinomial(inf_bound, param=D_DEFAULT,
                      proba=D_DEFAULT):
     """
     Construction of a negative binomial distribution
@@ -218,7 +218,7 @@ def NegativeBinomial(inf_bound, param=D_DEFAULT, \
 
     sup_bound = I_DEFAULT
 
-    return _DiscreteParametricModel(NEGATIVE_BINOMIAL, \
+    return _DiscreteParametricModel(NEGATIVE_BINOMIAL,
         inf_bound, sup_bound, param, proba)
 
 
@@ -252,7 +252,7 @@ def Uniform(inf_bound, sup_bound=I_DEFAULT):
     param = D_DEFAULT
     proba = D_DEFAULT
     cumul_threshold = CUMUL_THRESHOLD
-    return _DiscreteParametricModel(UNIFORM, \
+    return _DiscreteParametricModel(UNIFORM,
         inf_bound, sup_bound, param, proba, cumul_threshold)
 
 

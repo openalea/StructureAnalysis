@@ -184,7 +184,7 @@ def Vectors(*args, **kargs):
             for i, vec in enumerate(obj):
                 identifiers.append(i+1)
     
-            print identifiers
+            print(identifiers)
             #if InputTypes:
             ret = _Vectors(obj, identifiers, InputTypes)
             #else:
@@ -253,12 +253,12 @@ def VectorDistance(*args, **kargs):
 
 
     # Case VectorDistance("O", "N", "S")
-    if args[0] in variable_type.keys():
+    if args[0] in list(variable_type.keys()):
         # check that all following arguments (if any) are correct
         types = []
-        for arg, index in zip(args, range(0, len(args))):
+        for arg, index in zip(args, list(range(0, len(args)))):
             # check that the arguments are correct
-            if arg not in variable_type.keys():
+            if arg not in list(variable_type.keys()):
                 raise ValueError(error_arguments[1])
             else:
                 types.append(variable_type[arg])
@@ -278,13 +278,13 @@ def VectorDistance(*args, **kargs):
         error.CheckType(weights, [[int, float]]*len(weights))
 
         # convert to vector_distance_type
-        for arg, index in zip(types, range(0, len(types))):
+        for arg, index in zip(types, list(range(0, len(types)))):
             types[index] = variable_type[types[index]]
 
         return _VectorDistance(types, weights, distance)
     # filename case
     elif isinstance(args[0], str) and len(args)==1 and \
-            args[0] not in variable_type.keys():
+            args[0] not in list(variable_type.keys()):
         return _VectorDistance(args[0])
 
 
@@ -342,7 +342,7 @@ def VarianceAnalysis(*args, **kargs):
     try:
         utype = variance_type[args[3]]
     except KeyError:
-        raise KeyError("Possible type are : " + str(variance_type.keys()))
+        raise KeyError("Possible type are : " + str(list(variance_type.keys())))
 
 
     return vec.variance_analysis(class_variable, response_variable, utype,
@@ -381,7 +381,7 @@ def ContingencyTable(*args, **kargs):
     error.CheckArgumentsLength(args, 3, 3)
     error.CheckKargs(kargs, possible_kargs = ["FileName", "Format"])
 
-    possible_v = [str(f) for f in OutputFormat.values.values()] # possible output formats
+    possible_v = [str(f) for f in list(OutputFormat.values.values())] # possible output formats
     #kargs
     filename = error.ParseKargs(kargs, "FileName", default="result")
     format = error.ParseKargs(kargs, "Format", default="ASCII",

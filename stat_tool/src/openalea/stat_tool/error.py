@@ -84,7 +84,7 @@ def CheckType(variables, types, **kargs):
                  you've reached the limit""")
     else:
         for var in variable_pos:
-            if var in arguments_labels.keys():
+            if var in list(arguments_labels.keys()):
                 labels.append(arguments_labels[var])
             else:
                 labels.append("unknown position (larger than 10)")
@@ -146,7 +146,7 @@ def CheckValue(variables, values, **kargs):
                  you've reached the limit""")
     else:
         for var in variable_pos:
-            if var in arguments_labels.keys():
+            if var in list(arguments_labels.keys()):
                 labels.append(arguments_labels[var])
             else:
                 labels.append("unknown position (larger than 10)")
@@ -207,9 +207,9 @@ def CheckDictKeys(key, udict):
 
     """
     CheckType([key], [str])
-    if key not in udict.keys():
+    if key not in list(udict.keys()):
         raise KeyError('Key %s not found. Possible choices are %s.' %
-                            (key, udict.keys()))
+                            (key, list(udict.keys())))
     else:
         return udict[key]
 
@@ -245,9 +245,9 @@ def ParseKargs(kargs, keyword, default=None, possible=None):
                              % (keyword, possible))
 
     elif possible and type(possible)==dict:
-        if ret not in possible.keys():
+        if ret not in list(possible.keys()):
             raise ValueError("keyword **%s** can only take those values %s."
-                             % (keyword, possible.keys()))
+                             % (keyword, list(possible.keys())))
         ret = possible[ret]
 
     return ret
