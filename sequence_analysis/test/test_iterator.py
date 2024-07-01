@@ -61,7 +61,7 @@ def _test_renewal_iterator2():
 def _test_renewal_iterator():
     """to be fixed"""
     ren = Renewal(path + "abri13.ren")
-    print type(ren)
+    print((type(ren)))
     smi = sa._RenewalIterator(ren)
     sim = smi.simulation(N, True)
 

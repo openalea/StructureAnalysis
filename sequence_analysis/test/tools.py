@@ -79,7 +79,7 @@ class interface():
 
     def print_data(self):
         """test that print command exists"""
-        print self.data
+        print(self.data)
 
     def display(self):
         """check that .display/Display is callable"""
@@ -135,7 +135,7 @@ class interface():
             c1_read = self.structure('test1.dat')
             c2_read = self.structure('test2.dat')
 
-            print c1_read
+            print(c1_read)
 
             assert c1 and c1_read and c2_read
             assert str(c1_read) == str(c2_read)
