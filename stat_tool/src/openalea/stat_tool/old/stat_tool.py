@@ -75,7 +75,7 @@ class _PlotManager:
                 if pos != -1:
                     endlpos=c_commands.find("\n",pos)
                     file_name=c_commands[pos+len(strseek):endlpos]
-                    print "graph printed to" + str(file_name) + "\n"
+                    print("graph printed to" + str(file_name) + "\n")
                 g(c_commands)
                 del g
         for tmpfile in file_list:
@@ -129,8 +129,8 @@ class Histogram:
             # ... or a sample of int
             try:
                 chisto=cstat_tool.Histogram(histogram)
-            except RuntimeError, error:
-                raise FormatError, error
+            except RuntimeError as error:
+                raise FormatError(error)
             else:
                 self.__histo=chisto
 
@@ -150,37 +150,37 @@ class Histogram:
             elif type(Detail)!=int:
                 msg="Bad type for 'Detail' argument:"+str(type(Detail)) \
                 +" - expecting type 'int'"
-                raise TypeError, msg
+                raise TypeError(msg)
             else:
                 msg="Bad value for 'Detail' argument:"+str(Detail) \
                 +" - expecting 1 or 2"
-                raise ValueError, msg
+                raise ValueError(msg)
             try:
                 # s=cstat_tool.Histogram.display(self.__histo, exhaustive)
                 s=self.__histo.display(exhaustive)
-            except RuntimeError, f:
-                raise FormatError, f
-            print s
+            except RuntimeError as f:
+                raise FormatError(f)
+            print(s)
         else:
             # Display(ViewPoint="Survival")
             if Detail is None:
                 if type(ViewPoint)!=str:
                     msg="bad type for 'ViewPoint' argument:" + \
                         str(type(ViewPoint)) + " - expecting type 'str'"
-                    raise TypeError, msg
+                    raise TypeError(msg)
                 elif ViewPoint.upper()!="SURVIVAL":
                     msg="Bad value for 'ViewPoint' argument:" + str(Detail) \
                     +" - expecting 'Survival'"
-                    raise ValueError, msg
+                    raise ValueError(msg)
                 try:
                     s=self.__histo.display_survival()
-                except RuntimeError, f:
-                    raise FormatError, f
-                print s
+                except RuntimeError as f:
+                    raise FormatError(f)
+                print(s)
             else:
                 msg="Display must be used with either 'Detail' or with " + \
                     "'ViewPoint' parameter, not both"
-                raise ValueError, msg
+                raise ValueError(msg)
 
     def Plot(self, ViewPoint=None, Title=""):
         """Graphical output of the Histogram using Gnuplot.py.
@@ -191,11 +191,11 @@ class Histogram:
             if type(ViewPoint)!=str:
                 msg="bad type for 'ViewPoint' argument:"+str(type(ViewPoint)) \
                 +" - expecting type 'str'"
-                raise TypeError, msg
+                raise TypeError(msg)
             elif ViewPoint.upper()!="SURVIVAL":
                 msg="Bad value for 'ViewPoint' argument:"+str(Detail) \
                 +" - expecting 'Survival'"
-                raise ValueError, msg
+                raise ValueError(msg)
         import os
         prefix="ftmp"
         file_created=False
@@ -231,10 +231,10 @@ class Histogram:
                         file_list+=[filename+'.dat']
             file_list+=[prefix+extension
                 for extension in [".plot", ".print"]]
-        except RuntimeError, f:
+        except RuntimeError as f:
             for tmpfile in file_list:
                 os.remove(os.getcwd()+'/'+tmpfile)
-            raise FormatError, f
+            raise FormatError(f)
         else:
             if ViewPoint==None:
                 nb_windows=1
@@ -251,7 +251,7 @@ class Histogram:
         if not (Format.upper()=="ASCII" 
                 or Format.upper()=="SPREADSHEET"):
             msg="unknown file format: "+str(format)
-            raise ValueError, msg
+            raise ValueError(msg)
 ##        elif not (ViewPoint.upper()=="DATA" 
 ##                or ViewPoint.upper()=="SURVIVAL"):
 ##            msg="unknown viewpoint: "+str(format)
@@ -262,20 +262,20 @@ class Histogram:
             exhaustive=True
         elif type(Detail)==int:
             msg="invalid level of detail: "+str(Detail)
-            raise ValueError, msg
+            raise ValueError(msg)
         else:
             msg="invalid type for detail: "+str(type(Detail))
-            raise TypeError, msg
+            raise TypeError(msg)
         if Format.upper()=="ASCII":
             try:
                 self.__histo.ascii_write(file_name, exhaustive)
-            except RuntimeError, error:
-                raise FormatError, error
+            except RuntimeError as error:
+                raise FormatError(error)
         else:
             try:
                 self.__histo.spreadsheet_write(file_name)#, exhaustive)
-            except RuntimeError, error:
-                raise FormatError, error
+            except RuntimeError as error:
+                raise FormatError(error)
 
     def _chisto(self):
         return(self.__histo)
