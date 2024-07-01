@@ -1,21 +1,21 @@
 """Stores a HSMM model and its parameters."""
 from .config import OUTPUT_PATH
-import initial_probabilities
+from . import initial_probabilities
 import logging
-import model_parameters
+from . import model_parameters
 import numpy as np
-import observation_distribution
-import occupancy_distribution
+from . import observation_distribution
+from . import occupancy_distribution
 from openalea.sequence_analysis._sequence_analysis import _MarkovianSequences
 from openalea.sequence_analysis import Estimate
 from openalea.sequence_analysis import HiddenSemiMarkov
 from openalea.sequence_analysis import Sequences
 import os
-import output_process
+from . import output_process
 import random
 import shutil
 import tempfile
-import transition_probabilities
+from . import transition_probabilities
 
 
 class Model(object):
@@ -50,7 +50,7 @@ class Model(object):
         else:
             my_output_path = output_path
             self._hsmc_file = os.path.join(output_path, self._model_id + '.hsmc')
-        print self._hsmc_file
+        print(self._hsmc_file)
 
         # init with hsmc file
         if init_hsmc_file is not None and not random_init and \
@@ -427,7 +427,7 @@ class Model(object):
                     self._k = int(l.split()[0])
                 if 'INITIAL_PROBABILITIES' in l:
                     l = f.readline()
-                    row = map(float, l.split())
+                    row = list(map(float, l.split()))
                     assert (len(row) == self._k)
                     init_p = initial_probabilities.InitialProbabilities(
                         self, row)
@@ -436,7 +436,7 @@ class Model(object):
                         shape=(self._k, self._k))
                     for i in range(0, self._k):
                         l = f.readline()
-                        row = map(float, l.split())
+                        row = list(map(float, l.split()))
                         trans_p[i, :] = row
                     trans_p = transition_probabilities.TransitionProbabilities(
                         self, trans_p)
@@ -637,11 +637,11 @@ class Model(object):
                 # tirage uniforme avec remise
                 # mais pas deux fois le meme qui se suit
                 random_sequence = iseq[sequence_number][:]
-                current_hidden_state = random.sample(range(0, self._k), 1)[0]
+                current_hidden_state = random.sample(list(range(0, self._k)), 1)[0]
                 random_sequence[0].insert(0, current_hidden_state)
                 for i in range(1, sequence_length):
                     if i in transition_instants:
-                        possible_new_state = range(0, self._k)
+                        possible_new_state = list(range(0, self._k))
                         possible_new_state.remove(current_hidden_state)
                         current_hidden_state = random.sample(possible_new_state, 1)[0]
                     random_sequence[i].insert(0, current_hidden_state)
@@ -840,7 +840,7 @@ class Model(object):
                     k = int(l.split()[0])
                 if 'INITIAL_PROBABILITIES' in l:
                     l = f.readline()
-                    initial_probabilities = map(float, l.split())
+                    initial_probabilities = list(map(float, l.split()))
                     assert (len(initial_probabilities) == k)
                     initial_probabilities = np.array(initial_probabilities)
                 if 'TRANSITION_PROBABILITIES' in l:
@@ -848,7 +848,7 @@ class Model(object):
                         shape=(k, k))
                     for i in range(0, k):
                         l = f.readline()
-                        row = map(float, l.split())
+                        row = list(map(float, l.split()))
                         transition_probabilities[i, :] = row
                     break
 

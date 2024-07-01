@@ -37,10 +37,10 @@ class PySeqDataFrame(pd.DataFrame):
         for i in self.index[is_first]:    
             if i < max(self.index[is_first]):
                 seq_end_index = self.index[is_first][seq_id]
-                data.append(self.loc[range(i, seq_end_index), col_names].values.tolist())
+                data.append(self.loc[list(range(i, seq_end_index)), col_names].values.tolist())
                 seq_id += 1
         seq_end_index = max(self.index)+1
-        data.append(self.loc[range(i, seq_end_index), col_names].values.tolist())
+        data.append(self.loc[list(range(i, seq_end_index)), col_names].values.tolist())
         return data
 
     def get_input_sequence(self, col_names):

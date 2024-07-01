@@ -47,7 +47,7 @@ class Htmlreport(object):
                                decimals_displayed=self._graph_decimals_displayed, display=False)
 
     def _generate_sojourn_distribution_plots(self):
-        for i in xrange(0, self._model.k):
+        for i in range(0, self._model.k):
             try:
                 plot_file = os.path.join(".", self._model.model_id +
                                          '-sojourn-distribution-state-' + str(i))
@@ -73,8 +73,8 @@ class Htmlreport(object):
                 logging.warning(e)
 
     def _generate_emission_distribution_plots(self):
-        for i in xrange(0, len(self._model.parameters.output_processes)):
-            for j in xrange(0, self._model.k):
+        for i in range(0, len(self._model.parameters.output_processes)):
+            for j in range(0, self._model.k):
                     try:
                         plot_file = os.path.join(".", self._model.model_id + '-output-process-' +
                                                  str(i + 1) + '-state-' + str(j))
@@ -97,7 +97,7 @@ class Htmlreport(object):
                             except:
                                 os.remove(os.path.join(self._output_path, f))
                                 shutil.move(f, self._output_path)
-                    except Exception, e:
+                    except Exception as e:
                         logging.warning(e)
 
 
@@ -140,7 +140,7 @@ class Htmlreport(object):
         self._html_code += '<div id="model_criterion">'
         self._html_code += '<h1>Model criterion</h1>\n'
         if bool(self._model.criterion):
-            for key, value in self._model.criterion.iteritems():
+            for key, value in self._model.criterion.items():
                 self._html_code += '<p>'
                 self._html_code += key + ' : ' + str(value)
                 self._html_code += '</p>\n'
@@ -148,16 +148,16 @@ class Htmlreport(object):
         self._html_code += '</div>\n'
         self._html_code += '<div id="sojourn_emission_plot_wrap">\n'
         self._html_code += '<div><h1>Sojourn distribution bar charts</h1></div>\n'
-        for i in xrange(0, len(self._model.parameters.output_processes)):
+        for i in range(0, len(self._model.parameters.output_processes)):
             self._html_code += '<div><h1>Emission distribution bar charts : Output process ' + str(i) + '</h1></div>\n'
         # sojourn
-        for i in xrange(0, self._model.k):
+        for i in range(0, self._model.k):
             self._html_code += '<div><img src="'
             self._html_code += os.path.join(".", self._model.model_id + '-sojourn-distribution-state-' +
                                             str(i) + '.png')
             self._html_code += '" alt="N/D"></div>\n'
             # emission
-            for j in xrange(0, len(self._model.parameters.output_processes)):
+            for j in range(0, len(self._model.parameters.output_processes)):
                 self._html_code += '<div><img src="'
                 self._html_code += os.path.join(".", self._model.model_id + '-output-process-' +
                                                 str(j + 1) + '-state-' + str(i) + '.png')

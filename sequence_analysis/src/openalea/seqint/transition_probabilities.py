@@ -47,13 +47,13 @@ class TransitionProbabilities(object):
         """
 
         if isinstance(value, np.matrixlib.defmatrix.matrix):
-            for i in xrange(0, value.shape[0]):
+            for i in range(0, value.shape[0]):
                 assert(pytest.approx(np.sum(value[i, :])) == 1)
                 if value[i, i] == 1:
                     self._model.parameters.occupancy_distributions[
                         i].state_type = 'ABSORBING'
-                    print('STATE ' + str(i) +
-                          ' has been set to absorbing.')
+                    print(('STATE ' + str(i) +
+                          ' has been set to absorbing.'))
                     return
             self._transition_probabilities = value
 
@@ -63,8 +63,8 @@ class TransitionProbabilities(object):
             if prob[line_index] == 1:
                 self._model.parameters.occupancy_distributions[line_index].\
                     state_type = 'ABSORBING'
-                print('STATE ' + str(line_index) +
-                      ' has been set to absorbing.')
+                print(('STATE ' + str(line_index) +
+                      ' has been set to absorbing.'))
                 return
             assert(pytest.approx(sum(prob)) == 1)
             self._transition_probabilities[line_index, :] = prob

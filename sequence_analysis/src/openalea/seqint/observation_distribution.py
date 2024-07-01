@@ -56,7 +56,7 @@ class ObservationDistribution(object):
         >>> outputs([0.2, 0.4, 0.6])
         """
         if all(isinstance(item, float) for item in value):
-            for i in xrange(0, len(self._outputs)):
+            for i in range(0, len(self._outputs)):
                 self._outputs[i] = value[i]
         else:
             raise AttributeError("Forbidden usage.")

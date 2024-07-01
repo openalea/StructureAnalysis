@@ -102,14 +102,14 @@ class TransitionGraphDisplay:
                 if 'INITIAL_PROBABILITIES' in l:
                     l = f.readline()
                     initialization_probabilities = np.array(
-                        map(float, l.split()))
+                        list(map(float, l.split())))
                     assert(len(initialization_probabilities) == k)
                 if 'TRANSITION_PROBABILITIES' in l:
                     transition_probabilities = np.zeros(
                         shape=(k, k))
-                    for i in xrange(0, k):
+                    for i in range(0, k):
                         l = f.readline()
-                        row = map(float, l.split())
+                        row = list(map(float, l.split()))
                         transition_probabilities[i, :] = row
                     break
                 l = f.readline()
@@ -121,10 +121,10 @@ class TransitionGraphDisplay:
 
         digraph = functools.partial(gv.Digraph, format='png')
         g = digraph()
-        nodes = [str(i) for i in xrange(0, k)]
+        nodes = [str(i) for i in range(0, k)]
         edges = []
-        for i in xrange(0, k):
-            for j in xrange(0, k):
+        for i in range(0, k):
+            for j in range(0, k):
                 if transition_probabilities[i, j] > max(0, self.probability_threshold):
                     # grey lvl in rgb(x, x, x)
                     edge_color = (1 - transition_probabilities[i, j]) * 255
@@ -135,7 +135,7 @@ class TransitionGraphDisplay:
                     edge_color = '#ffffff'
                     edges.append(((str(i), str(j)), {'color': edge_color}))
 
-        invisible_nodes = [str(i) for i in xrange(k, k*2)]
+        invisible_nodes = [str(i) for i in range(k, k*2)]
 
         g_invisible = digraph()
         g_invisible = self.add_nodes(g_invisible, invisible_nodes)
@@ -147,7 +147,7 @@ class TransitionGraphDisplay:
 
         g.subgraph(g_invisible)
 
-        for i in xrange(0, k):
+        for i in range(0, k):
             parent_id = i+k
             if initialization_probabilities[i] > self.probability_threshold:
                 # grey lvl in rgb(x, x, x)
