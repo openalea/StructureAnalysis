@@ -19,14 +19,14 @@ __version__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.stat_tool._stat_tool import _DiscreteMixtureData
-from openalea.stat_tool._stat_tool import _CompoundData
-from openalea.stat_tool._stat_tool import _ConvolutionData
-from openalea.stat_tool._stat_tool import _DiscreteDistributionData
+from openalea.stat_tool._stat_tool import (
+    _DiscreteMixtureData,
+    _CompoundData,
+    _ConvolutionData,
+    _DiscreteDistributionData
+)
 
-from openalea.sequence_analysis._sequence_analysis import _TimeEvents
-from openalea.sequence_analysis._sequence_analysis import _RenewalData
-from openalea.sequence_analysis._sequence_analysis import _Sequences
+from openalea.sequence_analysis._sequence_analysis import _TimeEvents, _RenewalData, _Sequences
 
 #import _sequence_analysis
 from openalea.stat_tool import error

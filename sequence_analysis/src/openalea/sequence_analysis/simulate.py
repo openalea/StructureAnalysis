@@ -18,29 +18,34 @@ __version__ = "$Id$"
 
 from openalea.stat_tool.simulate import Simulate as SimulateDistribution
 
-from openalea.stat_tool._stat_tool import _FrequencyDistribution
-from openalea.stat_tool._stat_tool import _DiscreteMixtureData
-from openalea.stat_tool._stat_tool import _ConvolutionData
-from openalea.stat_tool._stat_tool import _CompoundData
+from openalea.stat_tool._stat_tool import (
+    _FrequencyDistribution,
+    _DiscreteMixtureData,
+    _ConvolutionData,
+    _CompoundData
+)
 
 from openalea.sequence_analysis._sequence_analysis import srand
 from openalea.sequence_analysis._sequence_analysis import _Renewal
 # from openalea.sequence_analysis._sequence_analysis import _TopParameters
-from openalea.sequence_analysis._sequence_analysis import _TimeEvents
-from openalea.sequence_analysis._sequence_analysis import \
-    _VariableOrderMarkov,\
-    _HiddenVariableOrderMarkov,\
-    _SemiMarkov,\
-    _NonHomogeneousMarkov,\
+from openalea.sequence_analysis._sequence_analysis import (
+    _TimeEvents,
+    _VariableOrderMarkov,
+    _HiddenVariableOrderMarkov,
+    _SemiMarkov,
+    _NonHomogeneousMarkov,
     _HiddenSemiMarkov
-from openalea.sequence_analysis._sequence_analysis import \
-    _MarkovianSequences,\
-    _VariableOrderMarkovData,\
-    _SemiMarkovData,\
+)
+
+from openalea.sequence_analysis._sequence_analysis import (
+    _MarkovianSequences,
+    _VariableOrderMarkovData,
+    _SemiMarkovData,
     _NonHomogeneousMarkovData
+)
 
 from openalea.stat_tool import error
-from enums import stochastic_process_type
+from .enums import stochastic_process_type
 from openalea.stat_tool.enums import bool_type
 
 

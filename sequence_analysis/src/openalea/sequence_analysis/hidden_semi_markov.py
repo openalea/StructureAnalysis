@@ -20,11 +20,9 @@ __version__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.sequence_analysis._sequence_analysis import _HiddenSemiMarkov
 
 from openalea.stat_tool import error
-from openalea.sequence_analysis._sequence_analysis import DEFAULT_LENGTH
-from openalea.sequence_analysis._sequence_analysis import OCCUPANCY_THRESHOLD
+from openalea.sequence_analysis._sequence_analysis import _HiddenSemiMarkov, DEFAULT_LENGTH, OCCUPANCY_THRESHOLD
 
 __all__ = ['HiddenSemiMarkov',
            '_HiddenSemiMarkov']

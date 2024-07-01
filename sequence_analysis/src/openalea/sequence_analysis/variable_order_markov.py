@@ -20,9 +20,11 @@ __version__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.sequence_analysis._sequence_analysis import \
-    _VariableOrderMarkov, _VariableOrderMarkovData
-from openalea.sequence_analysis._sequence_analysis import DEFAULT_LENGTH
+from openalea.sequence_analysis._sequence_analysis import (
+    _VariableOrderMarkov, 
+    _VariableOrderMarkovData,
+    DEFAULT_LENGTH
+)
 
 from openalea.stat_tool import error
 

@@ -15,22 +15,26 @@
 __version__ = "$Id$"
 
 
-import openalea.stat_tool.interface as interface
-import openalea.stat_tool.error as error
+from openalea.stat_tool import interface
+from openalea.stat_tool import error
 from openalea.stat_tool._stat_tool import I_DEFAULT
-from openalea.stat_tool._stat_tool import _DiscreteParametricModel, _DiscreteMixture, \
+from openalea.stat_tool._stat_tool import (
+    _DiscreteParametricModel, _DiscreteMixture,
     _Convolution, _Compound
+)
 
 # from openalea.stat_tool.mixture import Mixture
     
-from openalea.sequence_analysis._sequence_analysis import _Correlation
-from openalea.sequence_analysis._sequence_analysis import _NonHomogeneousMarkovData
-from openalea.sequence_analysis._sequence_analysis import _HiddenVariableOrderMarkov
-from openalea.sequence_analysis._sequence_analysis import _VariableOrderMarkovData
-from openalea.sequence_analysis._sequence_analysis import _SemiMarkovData
-from openalea.sequence_analysis._sequence_analysis import _Sequences
-from openalea.sequence_analysis._sequence_analysis import _MarkovianSequences
-from openalea.sequence_analysis._sequence_analysis import _VariableOrderMarkov
+from openalea.sequence_analysis._sequence_analysis import (
+    _Correlation,
+    _NonHomogeneousMarkovData,
+    _HiddenVariableOrderMarkov,
+    _VariableOrderMarkovData,
+    _SemiMarkovData,
+    _Sequences,
+    _MarkovianSequences,
+    _VariableOrderMarkov
+)
 
 
 from openalea.sequence_analysis.enums import type_dict, norm_type

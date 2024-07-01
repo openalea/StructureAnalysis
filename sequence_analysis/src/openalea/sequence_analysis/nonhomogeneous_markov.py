@@ -20,10 +20,8 @@ __revision__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.sequence_analysis._sequence_analysis import _NonHomogeneousMarkov
-from openalea.sequence_analysis._sequence_analysis import _NonHomogeneousMarkovData
+from openalea.sequence_analysis._sequence_analysis import _NonHomogeneousMarkov, _NonHomogeneousMarkovData, DEFAULT_LENGTH
 from openalea.stat_tool import error
-from openalea.sequence_analysis._sequence_analysis import DEFAULT_LENGTH
 
 
 __all__ = ['NonhomogeneousMarkov',

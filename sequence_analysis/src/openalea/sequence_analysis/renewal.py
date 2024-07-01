@@ -21,16 +21,19 @@ __revision__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.stat_tool._stat_tool import \
+from openalea.stat_tool._stat_tool import (
      _DiscreteParametric
+)
 
-from openalea.sequence_analysis._sequence_analysis import \
+from openalea.sequence_analysis._sequence_analysis import (
     _Renewal, _RenewalData, _Sequences, _MarkovianSequences
+)
 from openalea.sequence_analysis._sequence_analysis import DEFAULT_TIME
 
 from openalea.stat_tool import error
-from openalea.stat_tool.enums import \
+from openalea.stat_tool.enums import (
     distribution_identifier_type, model_distribution_types
+)
 
 __all__ = ['Renewal',
            '_Renewal', '_RenewalData', 'RenewalData']

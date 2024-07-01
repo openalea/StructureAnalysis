@@ -151,6 +151,6 @@ class ImprovedDistanceMatrix(object):
         i = numpy.argsort(c)
         if verbose==True:
             for x in i:
-                print x+1, c[x]
+                print(x+1, c[x])
         return c
 

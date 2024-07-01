@@ -20,8 +20,7 @@
 __version__ = "$Id$"
 import os
 import openalea.stat_tool.interface as interface
-from openalea.sequence_analysis._sequence_analysis import _Tops
-from openalea.sequence_analysis._sequence_analysis import _Sequences
+from openalea.sequence_analysis._sequence_analysis import _Tops, _Sequences
 
 from openalea.sequence_analysis.enums import index_parameter_type_map
 
@@ -150,7 +149,7 @@ def Tops(*args, **kargs):
             if Identifiers:
                 return _Tops(args[0], Identifiers, index_parameter)
             else:
-                return _Tops(args[0], range(0, len(args[0])), index_parameter)
+                return _Tops(args[0], list(range(0, len(args[0]))), index_parameter)
         else:
             raise ValueError("wrong arguments ?")
     else:

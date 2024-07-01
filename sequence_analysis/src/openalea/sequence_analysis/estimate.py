@@ -18,38 +18,44 @@ __revision__ = "$Id$"
 from openalea.stat_tool import error
 
 # constants
-from openalea.stat_tool._stat_tool import  \
-    ONE_STEP_LATE, \
-    COMPUTED, \
-    COMPLETE_LIKELIHOOD,\
-    PARTIAL_LIKELIHOOD,\
-    I_DEFAULT, \
-    D_DEFAULT, \
+from openalea.stat_tool._stat_tool import  (
+    ONE_STEP_LATE, 
+    COMPUTED, 
+    COMPLETE_LIKELIHOOD,
+    PARTIAL_LIKELIHOOD,
+    I_DEFAULT,
+    D_DEFAULT, 
     ORDER
+)
 
 #maps
-from openalea.stat_tool.estimate import estimator_type
-from openalea.stat_tool.estimate import outside_type
-from openalea.stat_tool.estimate import smoothing_penalty_type
+from openalea.stat_tool.estimate import (
+    estimator_type,
+    outside_type,
+    smoothing_penalty_type,
+)
 
-from openalea.sequence_analysis.enums import estimator_semi_markov_type
-from openalea.sequence_analysis.enums import ident_map
-from openalea.sequence_analysis.enums import mean_computation_map
-#from openalea.sequence_analysis.enums import markovian_algorithms
-from openalea.sequence_analysis.enums import mean_computation_map
-from openalea.sequence_analysis.enums import sub_markovian_algorithms
-from openalea.sequence_analysis.enums import algorithm
-from openalea.sequence_analysis.enums import estimator
-from openalea.sequence_analysis.enums import likelihood_penalty_type
-from openalea.sequence_analysis.enums import stochastic_process_type
+from openalea.sequence_analysis.enums import (
+    estimator_semi_markov_type,
+    ident_map,
+    mean_computation_map,
+     markovian_algorithms,
+    mean_computation_map,
+    sub_markovian_algorithms,
+    algorithm,
+    estimator,
+    likelihood_penalty_type,
+    stochastic_process_type
+)
 
 # structure class
-from openalea.sequence_analysis._sequence_analysis import\
-    _HiddenSemiMarkov,\
-    _HiddenVariableOrderMarkov,\
-    _VariableOrderMarkov,\
-    _RenewalData,\
+from openalea.sequence_analysis._sequence_analysis import (
+    _HiddenSemiMarkov,
+    _HiddenVariableOrderMarkov,
+    _VariableOrderMarkov,
+    _RenewalData,
     _TimeEvents
+)
 # _Tops,\
 
 from openalea.stat_tool._stat_tool import _DiscreteMixture

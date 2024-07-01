@@ -20,14 +20,15 @@ __version__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.sequence_analysis._sequence_analysis import (_Sequences, 
+from openalea.sequence_analysis._sequence_analysis import (
+    _Sequences, 
     _MarkovianSequences, 
     _RenewalData,
     _MarkovianSequences,
     _VariableOrderMarkovData,
     _SemiMarkovData,
     _NonHomogeneousMarkovData,
-    )
+)
 
 
 #import _sequence_analysis
@@ -35,7 +36,7 @@ from openalea.stat_tool import error
 
 
 
-from enums import index_parameter_type_map, ms_vomd_smd_nhmd
+from .enums import index_parameter_type_map, ms_vomd_smd_nhmd
 from openalea.stat_tool.enums import bool_type
 
 __all__ = ['Sequences',
@@ -308,33 +309,33 @@ def Sequences(obj, **kargs):
         first_sequence = obj[0]
         if (type(first_sequence) in [int, float]):
             obj = [[[x] for x in obj]]
-            if Verbose:print 'this is a single univariate sequence'
+            if Verbose:print('this is a single univariate sequence')
         elif type(first_sequence)==list:
             #either a single multivariate sequence ot general case of several sequences multivariates
             if type(first_sequence[0]) == list:
-                if Verbose: print 'this is the general case, nothing to do'
+                if Verbose: print('this is the general case, nothing to do')
             elif type(first_sequence[0]) in [int, float]:
                 lengths = numpy.array([len(x) for x in obj])
                 if lengths.var()==0:
-                    if Verbose:print 'this is the ambiguous case'
+                    if Verbose:print('this is the ambiguous case')
 
                     if lengths[0]<5 and Univariate==False:
-                        if Verbose:print 'this is 1 single multivariate sequence'
+                        if Verbose:print('this is 1 single multivariate sequence')
                         obj = [obj]
                     else:
-                        if Verbose:print 'this is univariate sequences'
+                        if Verbose:print('this is univariate sequences')
                         res = []
                         for x in obj:
                             res.append([[y] for y in x])
                         obj = res
                 else:
-                    if Verbose:print 'this is univariate sequences'
+                    if Verbose:print('this is univariate sequences')
                     res = []
                     for x in obj:
                         res.append([[y] for y in x])
                     obj = res
             else:
-                print SyntaxError('wrong syntax for input object')
+                print(SyntaxError('wrong syntax for input object'))
 
 
     # 0 for int, 1 for float. By default all variables are int
@@ -463,6 +464,6 @@ def IndexParameterType(obj):
     from openalea.sequence_analysis.enums import index_parameter_type_map
 
     type = obj.index_parameter_type
-    for key, value in index_parameter_type_map.iteritems():
+    for key, value in index_parameter_type_map.items():
         if value==type:
             return key
