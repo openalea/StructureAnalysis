@@ -10,7 +10,7 @@ from os.path import join as pj
 def get_shared_data(file):
     import openalea.sequence_analysis
     shared_data_path = get_shared_data_path(openalea.sequence_analysis.__path__)
-    return pj(shared_data_path, file)
+    return str(pj(shared_data_path, file))
 
 
 

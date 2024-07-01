@@ -31,7 +31,7 @@ from ._sequence_analysis import (
     _Sequences,
     _SemiMarkov,
     _SemiMarkovData,
-    _TopParameters,
+   #_TopParameters,
     _VariableOrderMarkov,
     _VariableOrderMarkovData,
     _NonHomogeneousMarkov,
@@ -39,7 +39,7 @@ from ._sequence_analysis import (
     _Renewal,
     _HiddenVariableOrderMarkov,
     _HiddenSemiMarkov,
-    _Tops,
+    #_Tops,
     _RenewalData,
     _TimeEvents,
 )
@@ -589,7 +589,8 @@ def AddAbsorbingRun(obj, **kargs):
     """
     error.CheckType([obj], [[_MarkovianSequences, _VariableOrderMarkovData,
                             _SemiMarkovData, _NonHomogeneousMarkovData,
-                            _Tops]])
+                            #_Tops
+                            ]])
 
     SequenceLength = error.ParseKargs(kargs, "SequenceLength", I_DEFAULT)
     RunLength = error.ParseKargs(kargs, "RunLength", I_DEFAULT)
@@ -660,7 +661,8 @@ def Reverse(obj):
 
     error.CheckType([obj], [[_MarkovianSequences, _VariableOrderMarkovData,
                             _SemiMarkovData, _NonHomogeneousMarkovData,
-                            _Tops]])
+                            #_Tops
+                            ]])
 
     ret = obj.reverse()
 
@@ -1472,14 +1474,14 @@ def Extract(obj, *args, **kargs):
         _VariableOrderMarkovData, _SemiMarkovData, _NonHomogeneousMarkovData]
     """
 
-    if isinstance(obj, _Tops):
-        raise NotImplemented("Extract Tops case not yet implemented")
-    elif isinstance(obj, _TopParameters):
-        position = args[0]
-        error.CheckType(position, [int])
-        ret = obj.extract(position)
+    #if isinstance(obj, _Tops):
+    #    raise NotImplemented("Extract Tops case not yet implemented")
+    #if isinstance(obj, _TopParameters):
+    #    position = args[0]
+    #    error.CheckType(position, [int])
+    #    ret = obj.extract(position)
 
-    elif type(obj) in [_TimeEvents, _RenewalData]:
+    if type(obj) in [_TimeEvents, _RenewalData]:
         if len(args) >=1:
             key = args[0]
             if key == "NbEvent":
