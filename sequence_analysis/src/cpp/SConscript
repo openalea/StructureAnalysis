@@ -27,9 +27,9 @@ excludes = Split( """
 
 for f in excludes:
     for cpp in sources:
-	if f in cpp:
+        if f in cpp:
             sources.remove(cpp)
-	    break
+            break
 
 # Add defines to export symbols
 lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])

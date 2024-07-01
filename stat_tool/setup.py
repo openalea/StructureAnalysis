@@ -2,7 +2,7 @@
 """setup file for stat_tool package"""
 
 import os, sys
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 #from openalea.deploy.binary_deps import binary_deps
 from openalea.deploy.setup import *
 from os.path import join as pj
@@ -32,6 +32,10 @@ scons_parameters = ["build_prefix=" + build_prefix]
 install_requires = []
 setup_requires = ['openalea.deploy']
 
+namespace = 'openalea'
+packages = find_namespace_packages(where='src', include=['openalea.*'])
+package_dir = {'': 'src'}
+
 
 if __name__ == '__main__':
 
@@ -50,23 +54,18 @@ if __name__ == '__main__':
           # Scons parameters  v
           scons_parameters=scons_parameters,
 
-          namespace_packages=['openalea'], #, "structure_analysis"],
+          namespace_packages=[namespace], #, "structure_analysis"],
           #namespace_packages=["structure_analysis"],
           #create_namespaces=False,
 
           # Packages
-          packages=['openalea.stat_tool'],
+          packages=packages,
                     #'structure_analysis',
                     #'structure_analysis.stat_tool',
                     #'stat_tool'
                     #],
 
-          package_dir={ "openalea.stat_tool" : pj("src","openalea", "stat_tool"),
-                        #"stat_tool" : pj("src", "py", "stat_tool"),
-                        #"structure_analysis" : pj("src", "py", "structure_analysis"),
-                        #"structure_analysis.stat_tool" : pj("src", "py", "structure_analysis", "stat_tool"),
-                        '':'src'},
-
+          package_dir=package_dir,
           share_dirs = { 'share' : 'share' },
 
 

@@ -4,8 +4,8 @@ __revision__ = "$Id$"
 import os, sys
 from os.path import join as pj
 
-from setuptools import setup, find_packages
-from openalea.deploy.binary_deps import binary_deps
+from setuptools import setup, find_namespace_packages
+#from openalea.deploy.binary_deps import binary_deps
 
 
 # from openalea.deploy.metainfo import read_metainfo
@@ -34,11 +34,16 @@ scons_parameters=["build_prefix="+build_prefix]
 install_requires = []
 setup_requires = install_requires + ['openalea.deploy']
 
+namespace = 'openalea'
+packages = find_namespace_packages(where='src', include=['openalea.*'])
+package_dir = {'': 'src'}
+
+"""
 if sys.platform.startswith('win'):
     install_requires = [binary_deps('openalea.stattool')]
     install_requires += [binary_deps("boost")]
     setup_requires += [binary_deps("boost")]
-
+"""
 
 if __name__ == '__main__':
 
@@ -58,18 +63,12 @@ if __name__ == '__main__':
           scons_parameters=scons_parameters,
 
           namespace_packages=['openalea'],
-          create_namespaces=True,
+          #create_namespaces=True,
 
           # Packages
-          packages=['openalea',
-                    'openalea.sequence_analysis',
-                    'sequence_analysis_wralea.demo.change_point',
-                    'sequence_analysis_wralea.demo.stat_tool_tutorial',
-                    'sequence_analysis_wralea',
-                    ],
+          packages=packages,
 
-          package_dir={ "openalea.sequence_analysis" : pj("src","openalea","sequence_analysis"),
-                        "":"src"},
+          package_dir=package_dir,
           share_dirs = { 'share' : 'share' },
 
 
