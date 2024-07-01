@@ -742,9 +742,11 @@ class StatInterface(object):
 
             #data viewPoint
             elif ViewPoint == 'd':
-                from openalea.sequence_analysis._sequence_analysis import _SemiMarkovData, _MarkovianSequences, _Sequences, _NonHomogeneousMarkovData, _Tops
+                from openalea.sequence_analysis._sequence_analysis import _SemiMarkovData, _MarkovianSequences, _Sequences, _NonHomogeneousMarkovData#, _Tops
                 if type(self) in [_SemiMarkovData, _MarkovianSequences, _Sequences,
-                                  _NonHomogeneousMarkovData, _Tops]:
+                                  _NonHomogeneousMarkovData, 
+                                  #_Tops
+                                  ]:
                     #status = seq->plot_data_write(error , Plot_prefix , title);
                     plotable = self.get_plotable_data(*params)
             elif ViewPoint == 'v':

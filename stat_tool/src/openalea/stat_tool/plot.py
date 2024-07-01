@@ -28,7 +28,7 @@ DISABLE_PLOT = False
 # buildbot cannot close the windwos popped up by the method/function Plot/plot
 # So, we test if the command "python setup.py nosetests" has been used.
 # Still, using nosetests executable, windows should pop up.
-if("nosetests" in sys.argv):
+if ("nosetests" in sys.argv) or ("pytest" in sys.argv):
     DISABLE_PLOT = True
 
 
@@ -261,9 +261,9 @@ class mplotlib(plotter):
                 x = []
                 y = []
                 labels = []
-                for pt in singleplot:
-                    x.append(pt.x)
-                    y.append(pt.y)
+                for i in range(0,len(singleplot)):
+                    x.append(singleplot.get_label_x(i))
+                    y.append(singleplot.get_label_y(i))
 
                 # no data available. check if label is on.
                 if len(x) == 0:
@@ -394,7 +394,8 @@ def get_plotter():
             _plotter = mplotlib()
 
         except ImportError:
-            _plotter = gnuplot()
+            #_plotter = gnuplot()
+            pass
 
         set_plotter(_plotter)
         return _plotter
