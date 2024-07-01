@@ -9,10 +9,23 @@ __version__ = "$Id$"
 
 from openalea.stat_tool._stat_tool import *
 
-from openalea.stat_tool._stat_tool import (_FrequencyDistribution, _DiscreteMixtureData,
-    _CompoundData,_ConvolutionData, _DiscreteDistributionData, _DiscreteMixture,
-    _Compound, _Convolution, _DiscreteParametricModel, _Distribution,
-    _Vectors, _Cluster, _DistanceMatrix, _VectorDistance, _Regression)
+from openalea.stat_tool._stat_tool import (
+    _FrequencyDistribution, 
+    _DiscreteMixtureData,
+    _CompoundData,
+    _ConvolutionData, 
+    _DiscreteDistributionData, 
+    _DiscreteMixture,
+    _Compound, 
+    _Convolution, 
+    _DiscreteParametricModel, 
+    _Distribution,
+    _Vectors, 
+    _Cluster, 
+    _DistanceMatrix, 
+    _VectorDistance, 
+    _Regression
+    )
 
 # map to enumerate in boost python
 criterion_type = {

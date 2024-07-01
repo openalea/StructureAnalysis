@@ -16,18 +16,18 @@
 """
 __version__ = "$Id$"
 
-import error
-import interface
+from . import error
+from . import interface
 
 from openalea.stat_tool._stat_tool import _DistanceMatrix
 from openalea.stat_tool._stat_tool import _Cluster
 from openalea.stat_tool._stat_tool import _Dendrogram
 
-from enums import format_type
-from enums import criterion_type
-from enums import algorithm_type
-from enums import cluster_type
-from enums import round_type
+from .enums import format_type
+from .enums import criterion_type
+from .enums import algorithm_type
+from .enums import cluster_type
+from .enums import round_type
 mode_type = round_type
 
 __all__ = [

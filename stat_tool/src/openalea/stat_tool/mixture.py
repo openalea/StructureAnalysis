@@ -19,8 +19,8 @@
 __version__ = "$Id$"
 
 
-import interface
-import error
+from . import interface
+from . import error
 
 from openalea.stat_tool._stat_tool import _DiscreteMixture
 from openalea.stat_tool._stat_tool import _DiscreteMixtureData

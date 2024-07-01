@@ -14,22 +14,24 @@
 """
 __version__ = "$Id$"
 
-import interface
-import error
+from . import interface
+from . import error
 
 from openalea.stat_tool._stat_tool import *
 
-from openalea.stat_tool._stat_tool import _DiscreteParametricModel
-from openalea.stat_tool._stat_tool import _DiscreteDistributionData
-from openalea.stat_tool._stat_tool import _Distribution
-from openalea.stat_tool._stat_tool import I_DEFAULT
-from openalea.stat_tool._stat_tool import D_DEFAULT
-from openalea.stat_tool._stat_tool import D_INF
-from openalea.stat_tool._stat_tool import MAX_DIFF_BOUND
-from openalea.stat_tool._stat_tool import MAX_MEAN
-from openalea.stat_tool._stat_tool import VariableType
-from openalea.stat_tool._stat_tool import VariableTypeBis
-from openalea.stat_tool._stat_tool import RestorationAlgorithm
+from openalea.stat_tool._stat_tool import (
+    _DiscreteParametricModel,
+    _DiscreteDistributionData,
+    _Distribution,
+    I_DEFAULT,
+    D_DEFAULT,
+    D_INF,
+    MAX_DIFF_BOUND,
+    MAX_MEAN,
+    VariableType,
+    VariableTypeBis,
+    RestorationAlgorithm,
+)
 
 
 from enums import distribution_identifier_type

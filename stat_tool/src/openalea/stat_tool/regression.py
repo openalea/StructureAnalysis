@@ -14,8 +14,8 @@
 """
 __version__ = "$Id$"
 
-import error
-import interface
+from . import error
+from . import interface
 
 
 from openalea.stat_tool._stat_tool import _Regression
@@ -26,8 +26,8 @@ from openalea.stat_tool._stat_tool import _Convolution
 from openalea.stat_tool._stat_tool import _DiscreteMixture
 
 
-from enums import algo_map
-from enums import  bool_type
+from .enums import algo_map
+from .enums import  bool_type
 
 
 __all__ = ['_Regression',

@@ -15,17 +15,21 @@
 """
 __version__ = "$Id$"
 
-import interface
-import error
+from . import interface
+from . import error
 
-from openalea.stat_tool._stat_tool import _Vectors
-from openalea.stat_tool._stat_tool import _VectorDistance
-from openalea.stat_tool._stat_tool import I_DEFAULT
+from openalea.stat_tool._stat_tool import (
+    _Vectors,
+    _VectorDistance,
+    I_DEFAULT
+)
 # from openalea.stat_tool.enums import format_type
-from openalea.stat_tool.enums import variable_type
-from openalea.stat_tool.enums import variance_type
-from openalea.stat_tool.enums import distance_type
-from openalea.stat_tool.enums import OutputFormat
+from .enums import (
+    variable_type, 
+    variance_type, 
+    distance_type, 
+    OutputFormat
+    )
 
 
 __all__ = ['Vectors',

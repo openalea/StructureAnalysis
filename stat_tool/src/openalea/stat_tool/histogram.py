@@ -18,7 +18,7 @@ __version__ = "$Id$"
 #import os
 #sys.path.append(os.path.abspath("."))
 
-import interface
+from . import interface
 
 from openalea.stat_tool._stat_tool import _DiscreteDistributionData
 

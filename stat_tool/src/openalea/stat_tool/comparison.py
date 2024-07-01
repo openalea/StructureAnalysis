@@ -15,10 +15,10 @@
 """
 __version__ = "$Id$"
 
-import error
+from . import error
 
-from enums import variable_type
-from enums import format_type
+from .enums import variable_type
+from .enums import format_type
 
 
 from openalea.stat_tool._stat_tool import \

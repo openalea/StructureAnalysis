@@ -17,11 +17,12 @@
 """
 __version__ = "$Id$"
 
-import plot
 import os
 import glob
 import sys
-import error
+from . import plot
+from . import error
+
 # Output functions
 from openalea.stat_tool._stat_tool import FORWARD_DYNAMIC_PROGRAMMING, \
     FORWARD_BACKWARD_SAMPLING, GENERALIZED_VITERBI, \
@@ -430,7 +431,7 @@ class StatInterface(object):
             f = open(plot_file, "w")
             f.write(ctrp)
             f.close()
-            print plot_file, "\n"
+            print(plot_file, "\n")
 
         try:
             import Gnuplot
@@ -482,7 +483,7 @@ class StatInterface(object):
             self.plot_write(prefix, title)
 
         plot_file = prefix + suffix + ".print"
-        print "Graph printed into file:",  prefix + suffix + ".ps"
+        print("Graph printed into file:",  prefix + suffix + ".ps")
         f = open(plot_file, "r")
         f.readline()
         contents = f.read()
@@ -504,7 +505,7 @@ class StatInterface(object):
             f = open(plot_file, "w")
             f.write(ctrp)
             f.close()
-            print plot_file, "\n"
+            print(plot_file, "\n")
 
         try:
             import Gnuplot
@@ -631,7 +632,7 @@ class StatInterface(object):
                 Output = None
                 Output = error.ParseKargs(kargs, "Output", 'Segment', output_display)
             except:
-                print 'warning could not import output_display from sequence_analysis'
+                print('warning could not import output_display from sequence_analysis')
         else:
             try:
                 from openalea.sequence_analysis.enums import output_display
@@ -872,7 +873,7 @@ class StatInterface(object):
                 Output = None
                 Output = error.ParseKargs(kargs, "Output", 'Segment', output_display)
             except:
-                print 'warning could not import output_display from sequence_analysis'
+                print('warning could not import output_display from sequence_analysis')
         else:
             try:
                 from openalea.sequence_analysis.enums import output_display
@@ -960,7 +961,7 @@ class StatInterface(object):
                 # or Nonhomogenous_Markov_data
                 output = self.ascii_data_write(exhaustive, Format)
 
-            except Exception, e:
+            except Exception as e:
                 #for vectors only
                 #todo checkType
                 try:

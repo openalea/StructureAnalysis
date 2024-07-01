@@ -132,7 +132,7 @@ class gnuplot(plotter):
 
 
             g.plot(*plot_list)
-            raw_input("Press Enter to continue")
+            input("Press Enter to continue")
 
 
 class mplotlib(plotter):
@@ -276,7 +276,7 @@ class mplotlib(plotter):
                             pylab.hold(True)
                 #        break # nothing else to be done in principle
                     else:
-                        print "Warning. Empty data."
+                        print("Warning. Empty data.")
                         return
                 else:
                     pass
@@ -331,7 +331,7 @@ class mplotlib(plotter):
                                     new_legends.insert(index_begin_line_collection, current_legend)
                                     index_begin_line_collection += 1
                             pylab.legend(new_legends, **kwds)
-            except Exception, e:
+            except Exception as e:
                 import warnings
                 warnings.warn('legend failed:'+str(e))
 
