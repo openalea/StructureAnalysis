@@ -3,7 +3,7 @@
 from .config import OUTPUT_PATH
 from .transition_graph_display import TransitionGraphDisplay
 
-import Gnuplot
+# import Gnuplot
 import logging
 import matplotlib
 import numpy as np
@@ -47,58 +47,60 @@ class Htmlreport(object):
                                decimals_displayed=self._graph_decimals_displayed, display=False)
 
     def _generate_sojourn_distribution_plots(self):
-        for i in range(0, self._model.k):
-            try:
-                plot_file = os.path.join(".", self._model.model_id +
-                                         '-sojourn-distribution-state-' + str(i))
-                self._model.hsmm.extract(5, 0, i).plot_write(plot_file, "")
-                g = Gnuplot.Gnuplot()
-                g("set terminal png size 1024,768")
-                g("set output '" + plot_file + ".png'")
-                g("load '" + plot_file + ".plot'")
-                g.close()
-                for f in [plot_file + ".png", plot_file + ".plot", plot_file + ".print"]:
-                    try:
-                        shutil.move(f, self._output_path)
-                    except:
-                        os.remove(os.path.join(self._output_path, f))
-                        shutil.move(f, self._output_path)
-                for f in [plot_file + "0.dat", plot_file + "1.dat"]:
-                    try:
-                        shutil.move(f, self._output_path)
-                    except:
-                        os.remove(os.path.join(self._output_path, f))
-                        shutil.move(f, self._output_path)
-            except Exception as e:
-                logging.warning(e)
+        return None
+        #for i in range(0, self._model.k):
+            #try:
+                #plot_file = os.path.join(".", self._model.model_id +
+                                         #'-sojourn-distribution-state-' + str(i))
+                #self._model.hsmm.extract(5, 0, i).plot_write(plot_file, "")
+                #g = Gnuplot.Gnuplot()
+                #g("set terminal png size 1024,768")
+                #g("set output '" + plot_file + ".png'")
+                #g("load '" + plot_file + ".plot'")
+                #g.close()
+                #for f in [plot_file + ".png", plot_file + ".plot", plot_file + ".print"]:
+                    #try:
+                        #shutil.move(f, self._output_path)
+                    #except:
+                        #os.remove(os.path.join(self._output_path, f))
+                        #shutil.move(f, self._output_path)
+                #for f in [plot_file + "0.dat", plot_file + "1.dat"]:
+                    #try:
+                        #shutil.move(f, self._output_path)
+                    #except:
+                        #os.remove(os.path.join(self._output_path, f))
+                        #shutil.move(f, self._output_path)
+            #except Exception as e:
+                #logging.warning(e)
 
     def _generate_emission_distribution_plots(self):
-        for i in range(0, len(self._model.parameters.output_processes)):
-            for j in range(0, self._model.k):
-                    try:
-                        plot_file = os.path.join(".", self._model.model_id + '-output-process-' +
-                                                 str(i + 1) + '-state-' + str(j))
-                        self._model.hsmm.extract(1, i + 1, j).plot_write(
-                            plot_file, "")
-                        g = Gnuplot.Gnuplot()
-                        g("set terminal png size 1024,768")
-                        g("set output '" + plot_file + ".png'")
-                        g("load '" + plot_file + ".plot'")
-                        g.close()
-                        for f in [plot_file + ".png", plot_file + ".plot", plot_file + ".print"]:
-                            try:
-                                shutil.move(f, self._output_path)
-                            except:
-                                os.remove(os.path.join(self._output_path, f))
-                                shutil.move(f, self._output_path)
-                        for f in [plot_file + "0.dat", plot_file + "1.dat"]:
-                            try:
-                                shutil.move(f, self._output_path)
-                            except:
-                                os.remove(os.path.join(self._output_path, f))
-                                shutil.move(f, self._output_path)
-                    except Exception as e:
-                        logging.warning(e)
+        return None
+        #for i in range(0, len(self._model.parameters.output_processes)):
+            #for j in range(0, self._model.k):
+                    #try:
+                        #plot_file = os.path.join(".", self._model.model_id + '-output-process-' +
+                                                 #str(i + 1) + '-state-' + str(j))
+                        #self._model.hsmm.extract(1, i + 1, j).plot_write(
+                            #plot_file, "")
+                        #g = Gnuplot.Gnuplot()
+                        #g("set terminal png size 1024,768")
+                        #g("set output '" + plot_file + ".png'")
+                        #g("load '" + plot_file + ".plot'")
+                        #g.close()
+                        #for f in [plot_file + ".png", plot_file + ".plot", plot_file + ".print"]:
+                            #try:
+                                #shutil.move(f, self._output_path)
+                            #except:
+                                #os.remove(os.path.join(self._output_path, f))
+                                #shutil.move(f, self._output_path)
+                        #for f in [plot_file + "0.dat", plot_file + "1.dat"]:
+                            #try:
+                                #shutil.move(f, self._output_path)
+                            #except:
+                                #os.remove(os.path.join(self._output_path, f))
+                                #shutil.move(f, self._output_path)
+                    #except Exception as e:
+                        #logging.warning(e)
 
 
     def _prepare_html_code(self):
