@@ -41,5 +41,5 @@ cd ..
 ### After-install issues
 Observed only on OSX (so far), you may need to extend your `LD_LIBRARY_PATH` environment variable to include the path of your newly built libraries:
 ```
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/your/conda/env/:/path/to/StructureAnalysis/stat_tool/:/path/to/StructureAnalysis/sequence_analysis/
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/path/to/your/conda/env/lib:/path/to/StructureAnalysis/stat_tool/build-scons/lib/:/path/to/StructureAnalysis/sequence_analysis/build-scons/lib/
 ```
