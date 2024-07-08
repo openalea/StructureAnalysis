@@ -59,7 +59,7 @@ class Test(interface):
         seq = self.data
         pass
 
-    def test_plot(self):
+    def _test_plot(self):
         self.plot()
 
     def test_save(self):

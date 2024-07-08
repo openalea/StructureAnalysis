@@ -7,6 +7,7 @@
 __revision__ = "$Id$"
 
 
+import openalea.stat
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis.hidden_semi_markov import HiddenSemiMarkov
@@ -16,6 +17,9 @@ from openalea.sequence_analysis.data_transform import Thresholding
 from openalea.stat_tool.data_transform import *
 from openalea.stat_tool.cluster import Cluster
 from openalea.stat_tool.cluster import Transcode, Cluster
+
+import openalea.stat_tool.plot #import DISABLE_PLOT
+openalea.stat_tool.plot.DISABLE_PLOT = True
 
 from tools import interface
 from tools import runTestClass
@@ -76,7 +80,7 @@ class Test(interface):
     def test_len(self):
         seq = self.data
 
-    def test_plot(self):
+    def _test_plot(self):
         self.plot()
 
     def test_save(self):

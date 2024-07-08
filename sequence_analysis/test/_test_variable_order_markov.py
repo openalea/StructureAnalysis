@@ -16,6 +16,9 @@ from openalea.stat_tool.data_transform import *
 from openalea.stat_tool.cluster import Cluster
 from openalea.stat_tool.cluster import Transcode, Cluster
 
+import openalea.stat_tool.plot #import DISABLE_PLOT
+openalea.stat_tool.plot.DISABLE_PLOT = True
+
 from tools import interface
 from tools import runTestClass
 

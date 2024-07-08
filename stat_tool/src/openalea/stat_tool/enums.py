@@ -184,8 +184,8 @@ bool_type = {
              }
 
 
-algo_map = {"Averaging": 'a',
-            "LeastSquares": 's'
+algo_map = {"Averaging": moving_average_method.AVERAGING,
+            "LeastSquares": moving_average_method.LEAST_SQUARES,
             }
 
 

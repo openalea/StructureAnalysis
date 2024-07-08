@@ -63,11 +63,9 @@ NB_SEGMENTATION = NB_SEGMENTATION
 
 
 INTER_EVENT = RenewalType.INTER_EVENT
-WITHIN_OBSERVATION_PERIOD =  \
-    RenewalType.WITHIN_OBSERVATION_PERIOD
+WITHIN_OBSERVATION_PERIOD =  RenewalType.WITHIN_OBSERVATION_PERIOD
 LENGTH_BIAS =  RenewalType.LENGTH_BIAS
-BACKWARD_RECURRENCE_TIME = \
-    RenewalType.BACKWARD_RECURRENCE_TIME
+BACKWARD_RECURRENCE_TIME = RenewalType.BACKWARD_RECURRENCE_TIME
 FORWARD_RECURRENCE_TIME = RenewalType.FORWARD_RECURRENCE_TIME
 NB_EVENT = RenewalType.NB_EVENT
 MIXTURE = RenewalType.MIXTURE
@@ -173,11 +171,11 @@ stochastic_process_type = {
 
 markovian_algorithms = {
     'Forward':_stat_tool.RestorationAlgorithm.FORWARD,
-    'ForwardDynamicProgramming': \
+    'ForwardDynamicProgramming': 
         _stat_tool.RestorationAlgorithm.FORWARD_DYNAMIC_PROGRAMMING, # change point detection
-    'ForwardBackwardSampling': \
+    'ForwardBackwardSampling': 
         _stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,
-    'GeneralizedViterbi': \
+    'GeneralizedViterbi': 
         _stat_tool.RestorationAlgorithm.GENERALIZED_VITERBI,
     'NoComputation':_stat_tool.RestorationAlgorithm.NO_COMPUTATION,
     'Viterbi':_stat_tool.RestorationAlgorithm.VITERBI,
@@ -264,13 +262,14 @@ begin_aligned_map = {
                   }
 end_aligned_map = begin_aligned_map
 
-from openalea.sequence_analysis._sequence_analysis import \
-    _Sequences, _MarkovianSequences, _VariableOrderMarkovData, \
-    _SemiMarkovData, _NonHomogeneousMarkovData, _VariableOrderMarkov,\
-    _HiddenVariableOrderMarkov, _HiddenSemiMarkov, _SemiMarkov, \
-    _Renewal,_RenewalData,_TimeEvents, \
+from openalea.sequence_analysis._sequence_analysis import (
+    _Sequences, _MarkovianSequences, _VariableOrderMarkovData, 
+    _SemiMarkovData, _NonHomogeneousMarkovData, _VariableOrderMarkov,
+    _HiddenVariableOrderMarkov, _HiddenSemiMarkov, _SemiMarkov, 
+    _Renewal,_RenewalData,_TimeEvents, 
     _Correlation, _NonHomogeneousMarkovData
-    # Tops, _TopParameters, \
+    # Tops, _TopParameters, 
+)
     
     
 
@@ -280,23 +279,26 @@ sequence_alignment_first_arg = [_Sequences,
                                 _SemiMarkovData,
                                 _NonHomogeneousMarkovData]
 
-markov_model_comparison_first_arg = \
-    [_VariableOrderMarkov,
-     _HiddenVariableOrderMarkov,
-     _HiddenSemiMarkov,
-     _SemiMarkov]
+markov_model_comparison_first_arg = [
+    _VariableOrderMarkov,
+    _HiddenVariableOrderMarkov,
+    _HiddenSemiMarkov,
+    _SemiMarkov
+    ]
 
-markov_model_for_sequences_first_arg = \
-    [_MarkovianSequences,
-     _VariableOrderMarkovData,
-     _SemiMarkovData,
-     _NonHomogeneousMarkovData]
+markov_model_for_sequences_first_arg = [
+    _MarkovianSequences,
+    _VariableOrderMarkovData,
+    _SemiMarkovData,
+    _NonHomogeneousMarkovData
+    ]
 
-markov_model_for_sequences_second_arg = \
-    [_VariableOrderMarkov,
-     _SemiMarkov,
-     _HiddenVariableOrderMarkov,
-     _HiddenSemiMarkov]
+markov_model_for_sequences_second_arg = [
+    _VariableOrderMarkov,
+    _SemiMarkov,
+    _HiddenVariableOrderMarkov,
+    _HiddenSemiMarkov
+    ]
 
 ms_vomd_smd_list = [_MarkovianSequences,
                     _VariableOrderMarkovData,
@@ -311,7 +313,7 @@ output_sequence = {
                    }
 
 indel_cost_map = {"Adaptative": IndelCost.ADAPTATIVE,
-                     "Fixed": IndelCost.FIXED}
+                  "Fixed": IndelCost.FIXED}
 
 
 all_sequences_types = [ _VariableOrderMarkov,

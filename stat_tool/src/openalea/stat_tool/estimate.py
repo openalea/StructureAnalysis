@@ -33,7 +33,7 @@ _FrequencyDistribution = cst._FrequencyDistribution
 # from enums import outside_type
 # from enums import compound_type
 # from enums import estimator_type
-# from enums import distribution_identifier_type as dist_type
+from .enums import distribution_identifier_type as dist_type
 
 # from openalea.stat_tool._stat_tool import _DiscreteParametricModel
 # from openalea.stat_tool._stat_tool import _DiscreteParametric
