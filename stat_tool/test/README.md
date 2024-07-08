@@ -1,3 +1,7 @@
+# Test Status 
+
+This is the status of the tests (to be updated)
+
 test_cluster_and_distance_matrix.py     DONE
 test_cluster.py                         DONE
 test_comparison.py                      DONE
