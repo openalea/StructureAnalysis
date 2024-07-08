@@ -89,7 +89,7 @@ class interface():
 
     def print_data(self):
         """test that print command exists"""
-        print self.data
+        print(self.data)
 
     def display(self):
         """check that .display/Display is callable"""
