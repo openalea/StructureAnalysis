@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Samuel Dufour-Kowalski, Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: plotable.h 16076 2014-03-17 14:47:49Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -48,8 +48,6 @@
 
 using std::string;
 
-
-
 namespace stat_tool {
 
   enum process_distribution {
@@ -71,29 +69,29 @@ namespace stat_tool {
 
   typedef std::pair<float, float> PlotPoint;
   typedef std::pair<float, float> Range;
-  typedef std::pair<PlotPoint, string> Label;
+  typedef std::pair<PlotPoint, std::string> Label;
 
 
   // Class SinglePlot: list of (X, Y) pair with properties
 
-  class SinglePlot
+  class STAT_TOOL_API SinglePlot
   {
-    typedef std::list<PlotPoint> Points;
+    typedef std::vector<PlotPoint> Points;
     typedef std::vector<Label> Labels;
 
   public:
 
     Points data;
     Labels data_and_text;
-    string legend;
-    string style;
+    std::string legend;
+    std::string style;
 
     // Combination with
     // impulse, linepoints or line
     // linestyle : -- : -. -
     // marker : + , o . s v x > < ^
 
-    string color;
+    std::string color;
     // b  : blue,
     // g  : green,
     // r  : red,
@@ -114,32 +112,32 @@ namespace stat_tool {
     void add_point(const PlotPoint& p);
   
     // related to the label mode
-    void add_text(float x, float y, const string& p);   
+    void add_text(float x, float y, const std::string& p);   
     float get_x(int);
     float get_y(int);
     std::string get_label(int);
     int get_size() { return data_and_text.size(); }
  
     int size()
-    { return data.size(); };   
+    { return data_and_text.size(); };   
 
-    Points::const_iterator begin()
-    { return data.begin(); };
+    // Points::const_iterator begin()
+    // { return data_and_text.begin(); };
 
-    Points::const_iterator end()
-    { return data.end(); };
+    // Points::const_iterator end()
+    // { return data_and_text.end(); };
   };
 
 
   // Class MultiPlot: set of SinglePlot
 
-  class MultiPlot
+  class STAT_TOOL_API MultiPlot
   {
     std::vector<SinglePlot> plots;
     
   public:
 
-    string title;
+    std::string title;
 
     float xtics; 
     float ytics;
@@ -147,8 +145,8 @@ namespace stat_tool {
     Range xrange;
     Range yrange;
 
-    string xlabel;
-    string ylabel;
+    std::string xlabel;
+    std::string ylabel;
 
     bool grid;
 
@@ -185,8 +183,8 @@ namespace stat_tool {
 
   public:
 
-    string title;
-    string border;
+    std::string title;
+    std::string border;
     int nb_variable;
     std::vector<int> variable_nb_viewpoint;
     std::vector<int> variable;

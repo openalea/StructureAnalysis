@@ -32,6 +32,7 @@ void wrapper_9ba34b38b8a75c968e25c23f75118106()
     double  (::stat_tool::ContinuousParametricProcess::*method_pointer_cebc3dc50e265dddb861748541b68e5b)(class ::stat_tool::Distribution *, double ) const = &::stat_tool::ContinuousParametricProcess::variance_computation;
     void  (::stat_tool::ContinuousParametricProcess::*method_pointer_e4038a834f085556ba7622988e069150)(enum ::stat_tool::angle_unit ) = &::stat_tool::ContinuousParametricProcess::select_unit;
     void  (::stat_tool::ContinuousParametricProcess::*method_pointer_f1e34b3cae8354bf88b0b69db8db7c67)(enum ::stat_tool::continuous_parametric , double , double , double , double ) = &::stat_tool::ContinuousParametricProcess::init;
+    class ::std::basic_ostream< char, struct ::std::char_traits< char > > & (::stat_tool::ContinuousParametricProcess::*method_pointer_6b33212305505b149ccad021a22673f9)(class ::std::basic_ostream< char, struct ::std::char_traits< char > > &) = &::stat_tool::ContinuousParametricProcess::interval_computation;
     boost::python::class_< class ::stat_tool::ContinuousParametricProcess, autowig::Held< class ::stat_tool::ContinuousParametricProcess >::Type > class_9ba34b38b8a75c968e25c23f75118106("ContinuousParametricProcess", "Continuous parametric observation process\n\n", boost::python::no_init);
     class_9ba34b38b8a75c968e25c23f75118106.def(boost::python::init< int  >(""));
     class_9ba34b38b8a75c968e25c23f75118106.def(boost::python::init< class ::stat_tool::ContinuousParametricProcess const & >(""));
@@ -42,10 +43,12 @@ void wrapper_9ba34b38b8a75c968e25c23f75118106()
     class_9ba34b38b8a75c968e25c23f75118106.def("variance_computation", method_pointer_cebc3dc50e265dddb861748541b68e5b, "");
     class_9ba34b38b8a75c968e25c23f75118106.def("select_unit", method_pointer_e4038a834f085556ba7622988e069150, "");
     class_9ba34b38b8a75c968e25c23f75118106.def("init", method_pointer_f1e34b3cae8354bf88b0b69db8db7c67, "");
+    class_9ba34b38b8a75c968e25c23f75118106.def("interval_computation", method_pointer_6b33212305505b149ccad021a22673f9, boost::python::return_internal_reference<>(), "");
     class_9ba34b38b8a75c968e25c23f75118106.def_readwrite("nb_state", &::stat_tool::ContinuousParametricProcess::nb_state, "");
     class_9ba34b38b8a75c968e25c23f75118106.def_readwrite("ident", &::stat_tool::ContinuousParametricProcess::ident, "");
     class_9ba34b38b8a75c968e25c23f75118106.def_readwrite("tied_location", &::stat_tool::ContinuousParametricProcess::tied_location, "");
     class_9ba34b38b8a75c968e25c23f75118106.def_readwrite("tied_dispersion", &::stat_tool::ContinuousParametricProcess::tied_dispersion, "");
+    class_9ba34b38b8a75c968e25c23f75118106.def_readwrite("offset", &::stat_tool::ContinuousParametricProcess::offset, "");
     class_9ba34b38b8a75c968e25c23f75118106.def_readwrite("unit", &::stat_tool::ContinuousParametricProcess::unit, "");
 
 }

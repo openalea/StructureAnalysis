@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,7 +36,7 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
 #include "stat_tool/stat_label.h"
 
@@ -504,7 +504,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
  *         {observation period, number of events} using the EM algorithm.
  *
  *  \param[in] error                 reference on a StatError object,
- *  \param[in] display               flag for displaying estimation intermediate results,
+ *  \param[in] os                    stream for displaying estimation intermediate results,
  *  \param[in] type                  renewal process type (ORDINARY/EQUILIBRIUM),
  *  \param[in] iinter_event          reference on the initial inter-event distribution,
  *  \param[in] estimator             estimator type (maximum likelihood or penalized likelihood or
@@ -521,7 +521,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
  */
 /*--------------------------------------------------------------*/
 
-Renewal* TimeEvents::estimation(StatError &error , bool display , process_type type ,
+Renewal* TimeEvents::estimation(StatError &error , ostream *os , process_type type ,
                                 const DiscreteParametric &iinter_event , estimation_criterion estimator ,
                                 int nb_iter , censoring_estimator equilibrium_estimator ,
                                 duration_distribution_mean_estimator mean_estimator ,
@@ -678,15 +678,15 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
       previous_likelihood = likelihood;
       likelihood = renew->likelihood_computation(*this);
 
-      if ((display) && ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0))) {
-        cout << STAT_label[STATL_ITERATION] << " " << i << "   "
-             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-             << STAT_label[STATL_DEVIANCE] << ": " << 2 * (information - likelihood) << "   "
-             << STAT_label[STATL_SMOOTHNESS] << ": "  << pinter_ev->second_difference_norm_computation();
+      if ((os) && ((i < 10) || ((i < 100) && (i % 10 == 0)) || ((i < 1000) && (i % 100 == 0)) || (i % 1000 == 0))) {
+        *os << STAT_label[STATL_ITERATION] << " " << i << "   "
+            << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+            << STAT_label[STATL_DEVIANCE] << ": " << 2 * (information - likelihood) << "   "
+            << STAT_label[STATL_SMOOTHNESS] << ": "  << pinter_ev->second_difference_norm_computation();
         if (estimator == PENALIZED_LIKELIHOOD) {
-          cout << "   cumul: " << pinter_ev->cumul[pinter_ev->nb_value - 1];
+          *os << "   cumul: " << pinter_ev->cumul[pinter_ev->nb_value - 1];
         }
-        cout << endl;
+        *os << endl;
       }
     }
     while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (i < RENEWAL_NB_ITER) &&
@@ -694,15 +694,15 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
             ((nb_iter != I_DEFAULT) && (i < nb_iter))));
 
     if (likelihood != D_INF) {
-      if (display) {
-        cout << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
-             << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-             << STAT_label[STATL_DEVIANCE] << ": " << 2 * (information - likelihood) << "   "
-             << STAT_label[STATL_SMOOTHNESS] << ": " << pinter_ev->second_difference_norm_computation();
+      if (os) {
+        *os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+            << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+            << STAT_label[STATL_DEVIANCE] << ": " << 2 * (information - likelihood) << "   "
+            << STAT_label[STATL_SMOOTHNESS] << ": " << pinter_ev->second_difference_norm_computation();
         if (estimator == PENALIZED_LIKELIHOOD) {
-          cout << "   cumul: " << pinter_ev->cumul[pinter_ev->nb_value - 1];
+          *os << "   cumul: " << pinter_ev->cumul[pinter_ev->nb_value - 1];
         }
-        cout << endl;
+        *os << endl;
       }
 
       if (estimator == PARAMETRIC_REGULARIZATION) {
@@ -770,10 +770,10 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
 
         delete hreestim;
 
-        if ((display) && (likelihood != D_INF)) {
-          cout << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
-               << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
-               << STAT_label[STATL_SMOOTHNESS] << ": " << pinter_ev->second_difference_norm_computation() << endl;
+        if ((os) && (likelihood != D_INF)) {
+          *os << "\n" << i << " " << STAT_label[STATL_ITERATIONS] << "   "
+              << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   "
+              << STAT_label[STATL_SMOOTHNESS] << ": " << pinter_ev->second_difference_norm_computation() << endl;
         }
       }
     }
@@ -820,7 +820,7 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
  *         {observation period, number of events} using the EM algorithm.
  *
  *  \param[in] error                 reference on a StatError object,
- *  \param[in] display               flag for displaying estimation intermediate results,
+ *  \param[in] os                    stream for displaying estimation intermediate results,
  *  \param[in] type                  renewal process type (ORDINARY/EQUILIBRIUM),
  *  \param[in] estimator type        (maximum likelihood or penalized likelihood or
  *                                   estimation of a parametric distribution),
@@ -836,7 +836,7 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
  */
 /*--------------------------------------------------------------*/
 
-Renewal* TimeEvents::estimation(StatError &error , bool display , process_type type ,
+Renewal* TimeEvents::estimation(StatError &error , ostream *os , process_type type ,
                                 estimation_criterion estimator , int nb_iter ,
                                 censoring_estimator equilibrium_estimator ,
                                 duration_distribution_mean_estimator mean_estimator , double weight ,
@@ -863,7 +863,7 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
   iinter_event->ascii_print(cout);
 # endif
 
-  renew = estimation(error , display , type , *iinter_event , estimator , nb_iter ,
+  renew = estimation(error , os , type , *iinter_event , estimator , nb_iter ,
                      equilibrium_estimator , mean_estimator , weight ,
                      pen_type , outside);
   delete iinter_event;
@@ -878,7 +878,7 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
  *         time interval data using the EM algorithm.
  *
  *  \param[in] error          reference on a StatError object,
- *  \param[in] display        flag for displaying estimation intermediate results,
+ *  \param[in] os             stream for displaying estimation intermediate results,
  *  \param[in] iinter_event   reference on the initial inter-event distribution,
  *  \param[in] estimator      estimator type (maximum likelihood or penalized likelihood),
  *  \param[in] nb_iter        number of iterations,
@@ -892,7 +892,7 @@ Renewal* TimeEvents::estimation(StatError &error , bool display , process_type t
  */
 /*--------------------------------------------------------------*/
 
-Renewal* RenewalData::estimation(StatError &error , bool display ,
+Renewal* RenewalData::estimation(StatError &error , ostream *os ,
                                  const DiscreteParametric &iinter_event ,
                                  estimation_criterion estimator , int nb_iter ,
                                  duration_distribution_mean_estimator mean_estimator , double weight ,
@@ -975,7 +975,7 @@ Renewal* RenewalData::estimation(StatError &error , bool display ,
     no_event = NULL;
   }
 
-  inter_event = within->estimation(error , display , *within_backward , *within_forward , no_event ,
+  inter_event = within->estimation(error , os , *within_backward , *within_forward , no_event ,
                                    iinter_event , estimator , nb_iter , mean_estimator ,
                                    weight , pen_type , outside , htime->mean / mixture->mean);
 
@@ -1000,7 +1000,7 @@ Renewal* RenewalData::estimation(StatError &error , bool display ,
  *         time interval data using the EM algorithm.
  *
  *  \param[in] error          reference on a StatError object,
- *  \param[in] display        flag for displaying estimation intermediate results,
+ *  \param[in] os             stream for displaying estimation intermediate results,
  *  \param[in] estimator      estimator type (maximum likelihood or penalized likelihood),
  *  \param[in] nb_iter        number of iterations,
  *  \param[in] mean_estimator method of computation of the inter-event distribution mean,
@@ -1013,7 +1013,7 @@ Renewal* RenewalData::estimation(StatError &error , bool display ,
  */
 /*--------------------------------------------------------------*/
 
-Renewal* RenewalData::estimation(StatError &error , bool display , estimation_criterion estimator ,
+Renewal* RenewalData::estimation(StatError &error , ostream *os , estimation_criterion estimator ,
                                  int nb_iter , duration_distribution_mean_estimator mean_estimator ,
                                  double weight , penalty_type pen_type , side_effect outside) const
 
@@ -1038,7 +1038,7 @@ Renewal* RenewalData::estimation(StatError &error , bool display , estimation_cr
   iinter_event->ascii_print(cout);
 # endif
 
-  renew = estimation(error , display , *iinter_event , estimator , nb_iter ,
+  renew = estimation(error , os , *iinter_event , estimator , nb_iter ,
                      mean_estimator , weight , pen_type , outside);
   delete iinter_event;
 

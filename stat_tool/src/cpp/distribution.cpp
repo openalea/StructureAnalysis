@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,10 +36,11 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
 #include <sstream>
 #include <iomanip>
+#include <fstream>
 #include <cstring>
 
 #include "stat_tools.h"
@@ -2124,6 +2125,27 @@ ostream& Distribution::survival_ascii_write(ostream &os) const
   delete survival_rate;
 
   return os;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the survival rates from a discrete distribution and
+ *         writing of the result.
+ *
+ *  \return string.
+ */
+/*--------------------------------------------------------------*/
+
+string Distribution::survival_ascii_write() const
+
+{
+  ostringstream oss;
+
+
+  survival_ascii_write(oss);
+
+  return oss.str();
 }
 
 

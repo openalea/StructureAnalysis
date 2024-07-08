@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,6 +36,7 @@
 
 
 
+#include <fstream>
 #include <string>
 
 #include <boost/algorithm/string/trim.hpp>
@@ -760,8 +761,8 @@ DiscreteParametricModel* Renewal::extract(StatError &error , renewal_distributio
  */
 /*--------------------------------------------------------------*/
 
-Renewal* Renewal::building(StatError &error , const DiscreteParametric &inter_event ,
-                           process_type type , int time)
+Renewal* Renewal::build(StatError &error , const DiscreteParametric &inter_event ,
+                        process_type type , int time)
 
 {
   bool status = true;

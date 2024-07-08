@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -39,7 +39,27 @@
 #ifndef STAT_LABEL_H
 #define STAT_LABEL_H
 
-
+#if defined WIN32 || defined _WIN32 || defined __CYGWIN__
+  #ifdef LIBSTAT_TOOL
+    #ifdef __GNUC__
+      #define EXTERN extern __attribute__ ((dllexport))
+    #else
+      #define EXTERN extern __declspec(dllexport)
+    #endif
+  #else
+    #ifdef __GNUC__
+      #define EXTERN extern __attribute__ ((dllimport))
+    #else
+      #define EXTERN extern __declspec(dllimport)
+    #endif
+  #endif
+#else
+  #if __GNUC__ >= 4
+    #define EXTERN extern __attribute__ ((visibility ("default")))
+  #else
+    #define EXTERN extern 
+  #endif
+#endif
 
 namespace stat_tool {
 
@@ -116,17 +136,17 @@ namespace stat_tool {
   };
 
 
-  extern const char *STAT_word[];
-  extern const char *STAT_discrete_distribution_word[];
-  extern const char *STAT_discrete_distribution_letter[];
-  extern const char *STAT_continuous_distribution_word[];
-  extern const char *STAT_continuous_distribution_letter[];
-  extern const char *STAT_variable_type_word[];
-  extern const char *STAT_variable_type_letter[];
-  extern const char *STAT_distance_word[];
-  extern const char *STAT_criterion_word[];
-  extern const char *STAT_function_word[];
-  extern const char *STAT_variable_word[];
+  EXTERN const char *STAT_word[];
+  EXTERN const char *STAT_discrete_distribution_word[];
+  EXTERN const char *STAT_discrete_distribution_letter[];
+  EXTERN const char *STAT_continuous_distribution_word[];
+  EXTERN const char *STAT_continuous_distribution_letter[];
+  EXTERN const char *STAT_variable_type_word[];
+  EXTERN const char *STAT_variable_type_letter[];
+  EXTERN const char *STAT_distance_word[];
+  EXTERN const char *STAT_criterion_word[];
+  EXTERN const char *STAT_function_word[];
+  EXTERN const char *STAT_variable_word[];
 
 
 
@@ -355,7 +375,7 @@ namespace stat_tool {
   };
 
 
-  extern const char *STAT_label[];
+  EXTERN const char *STAT_label[];
 
 
 
@@ -420,7 +440,7 @@ namespace stat_tool {
   };
 
 
-  extern const char *STAT_parsing[];
+  EXTERN const char *STAT_parsing[];
 
 
 
@@ -545,7 +565,7 @@ namespace stat_tool {
   };
 
 
-  extern const char *STAT_error[];
+  EXTERN const char *STAT_error[];
 
 
 };  // namespace stat_tool

@@ -64,8 +64,7 @@
 #define HEADER_OS(TYPE) \
     StatError error; \
     TYPE* ret;\
-    bool os = true; \
-    //std::stringstream os;\
+    std::stringstream os;\
 
 
 

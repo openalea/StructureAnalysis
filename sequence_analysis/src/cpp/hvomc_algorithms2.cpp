@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,11 +36,12 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
-#include <string>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
 
 #include "stat_tool/stat_label.h"
 
@@ -4302,6 +4303,7 @@ bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , ostream &
  *         displaying the results.
  *
  *  \param[in] error             reference on a StatError object,
+ *  \param[in] os                stream for displaying the state and entropy profiles and the N most probable state sequences,
  *  \param[in] iseq              reference on a MarkovianSequences object,
  *  \param[in] identifier        sequence identifier,
  *  \param[in] state_sequence    method for computing the state sequences (GENERALIZED_VITERBI/FORWARD_BACKWARD_SAMPLING),
@@ -4311,14 +4313,13 @@ bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , ostream &
  */
 /*--------------------------------------------------------------*/
 
-bool HiddenVariableOrderMarkov::state_profile_ascii_write(StatError &error ,
-                                                          const MarkovianSequences &iseq ,
-                                                          int identifier ,
+bool HiddenVariableOrderMarkov::state_profile_ascii_write(StatError &error , ostream &os ,
+                                                          const MarkovianSequences &iseq , int identifier ,
                                                           latent_structure_algorithm state_sequence ,
                                                           int nb_state_sequence) const
 
 {
-  return state_profile_write(error , cout , iseq , identifier , ASCII ,
+  return state_profile_write(error , os , iseq , identifier , ASCII ,
                              state_sequence , nb_state_sequence);
 }
 
@@ -4378,6 +4379,7 @@ bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , const str
  *         displaying the results.
  *
  *  \param[in] error             reference on a StatError object,
+ *  \param[in] os                stream for displaying the state and entropy profiles and the N most probable state sequences,
  *  \param[in] identifier        sequence identifier,
  *  \param[in] state_sequence    method for computing the state sequences (GENERALIZED_VITERBI/FORWARD_BACKWARD_SAMPLING),
  *  \param[in] nb_state_sequence number of state sequences.
@@ -4386,7 +4388,7 @@ bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , const str
  */
 /*--------------------------------------------------------------*/
 
-bool HiddenVariableOrderMarkov::state_profile_ascii_write(StatError &error , int identifier ,
+bool HiddenVariableOrderMarkov::state_profile_ascii_write(StatError &error , ostream &os , int identifier ,
                                                           latent_structure_algorithm state_sequence ,
                                                           int nb_state_sequence) const
 
@@ -4401,7 +4403,7 @@ bool HiddenVariableOrderMarkov::state_profile_ascii_write(StatError &error , int
     error.update(STAT_error[STATR_NO_DATA]);
   }
   else {
-    status = state_profile_write(error , cout , *markov_data , identifier , ASCII ,
+    status = state_profile_write(error , os , *markov_data , identifier , ASCII ,
                                  state_sequence , nb_state_sequence);
   }
 
@@ -5329,7 +5331,7 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::state_sequence_computation(S
  *  \brief Comparison of hidden variable-order Markov chains for a sample of sequences.
  *
  *  \param[in] error     reference on a StatError object,
- *  \param[in] display   flag for displaying the results of model comparison, 
+ *  \param[in] os        stream for displaying the results of model comparison, 
  *  \param[in] nb_model  number of hidden variable-order Markov chains,
  *  \param[in] ihmarkov  pointer on the HiddenVariableOrderMarkov objects,
  *  \param[in] algorithm type of algorithm (FORWARD/VITERBI),
@@ -5339,7 +5341,7 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::state_sequence_computation(S
  */
 /*--------------------------------------------------------------*/
 
-bool MarkovianSequences::comparison(StatError &error , bool display , int nb_model ,
+bool MarkovianSequences::comparison(StatError &error , ostream *os , int nb_model ,
                                     const HiddenVariableOrderMarkov **ihmarkov ,
                                     latent_structure_algorithm algorithm , const string path) const
 
@@ -5459,8 +5461,8 @@ bool MarkovianSequences::comparison(StatError &error , bool display , int nb_mod
       }
     }
 
-    if (display) {
-      likelihood_write(cout , nb_model , likelihood , SEQ_label[SEQL_HIDDEN_MARKOV_CHAIN] ,
+    if (os) {
+      likelihood_write(*os , nb_model , likelihood , SEQ_label[SEQL_HIDDEN_MARKOV_CHAIN] ,
                        true , algorithm);
     }
     if (!path.empty()) {
@@ -5641,7 +5643,7 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::simulation(StatError &error 
  *  \brief Computation of Kullback-Leibler divergences between hidden variable-order Markov chains.
  *
  *  \param[in] error               reference on a StatError object,
- *  \param[in] display             flag for displaying the matrix of pairwise distances between models,
+ *  \param[in] os                  stream for displaying the matrix of pairwise distances between models,
  *  \param[in] nb_model            number of hidden variable-order Markov chains,
  *  \param[in] ihmarkov            pointer on the HiddenVariableOrderMarkov objects,
  *  \param[in] length_distribution sequence length frequency distribution,
@@ -5651,7 +5653,7 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::simulation(StatError &error 
  */
 /*--------------------------------------------------------------*/
 
-DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &error , bool display , int nb_model ,
+DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &error , ostream *os , int nb_model ,
                                                                   const HiddenVariableOrderMarkov **ihmarkov ,
                                                                   FrequencyDistribution **length_distribution ,
                                                                   const string path) const
@@ -5767,8 +5769,8 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
 
       if (!out_file) {
         error.update(STAT_error[STATR_FILE_NAME]);
-        if (display) {
-          cout << error;
+        if (os) {
+          *os << error;
         }
       }
     }
@@ -5797,8 +5799,8 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
       for (j = 0;j < seq->nb_sequence;j++) {
         likelihood[j][i] = hmarkov[i]->likelihood_computation(*seq , NULL , j);
 
-        if ((display) && (likelihood[j][i] == D_INF)) {
-          cout << "\nERROR - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << endl;
+        if ((os) && (likelihood[j][i] == D_INF)) {
+          *os << "\nERROR - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << endl;
         }
       }
 
@@ -5825,10 +5827,10 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
 //            }
           }
 
-          if ((display) && (nb_failure > 0)) {
-            cout << "\nWARNING - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << ", "
-                 << SEQ_error[SEQR_TARGET_MODEL] << ": " << j + 1 << " - "
-                 << SEQ_error[SEQR_DIVERGENCE_NB_FAILURE] << ": " << nb_failure << endl;
+          if ((os) && (nb_failure > 0)) {
+            *os << "\nWARNING - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << ", "
+                << SEQ_error[SEQR_TARGET_MODEL] << ": " << j + 1 << " - "
+                << SEQ_error[SEQR_DIVERGENCE_NB_FAILURE] << ": " << nb_failure << endl;
           }
 
 //          if (divergence != -D_INF) {
@@ -5837,9 +5839,9 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
         }
       }
 
-      if (display) {
-        cout << SEQ_label[SEQL_HIDDEN_MARKOV_CHAIN] << " " << i + 1 << ": " << seq->nb_sequence << " "
-             << SEQ_label[SEQL_SIMULATED] << " " << SEQ_label[seq->nb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << endl;
+      if (os) {
+        *os << SEQ_label[SEQL_HIDDEN_MARKOV_CHAIN] << " " << i + 1 << ": " << seq->nb_sequence << " "
+            << SEQ_label[SEQL_SIMULATED] << " " << SEQ_label[seq->nb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << endl;
         seq->likelihood_write(cout , nb_model , likelihood , SEQ_label[SEQL_HIDDEN_MARKOV_CHAIN]);
       }
       if (out_file) {
@@ -5874,7 +5876,7 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
  *  \brief Computation of Kullback-Leibler divergences between hidden variable-order Markov chains.
  *
  *  \param[in] error       reference on a StatError object,
- *  \param[in] display     flag for displaying the matrix of pairwise distances between models,
+ *  \param[in] os          stream for displaying the matrix of pairwise distances between models,
  *  \param[in] nb_model    number of hidden variable-order Markov chains,
  *  \param[in] hmarkov     pointer on the HiddenVariableOrderMarkov objects,
  *  \param[in] nb_sequence number of generated sequences,
@@ -5885,7 +5887,7 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
  */
 /*--------------------------------------------------------------*/
 
-DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &error , bool display ,
+DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &error , ostream *os ,
                                                                   int nb_model , const HiddenVariableOrderMarkov **hmarkov ,
                                                                   int nb_sequence , int length , const string path) const
 
@@ -5928,7 +5930,7 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
       length_distribution[i] = new FrequencyDistribution(*length_distribution[0]);
     }
 
-    dist_matrix = divergence_computation(error , display , nb_model , hmarkov , length_distribution , path);
+    dist_matrix = divergence_computation(error , os , nb_model , hmarkov , length_distribution , path);
 
     for (i = 0;i < nb_model;i++) {
       delete length_distribution[i];
@@ -5945,7 +5947,7 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
  *  \brief Computation of Kullback-Leibler divergences between hidden variable-order Markov chains.
  *
  *  \param[in] error       reference on a StatError object,
- *  \param[in] display     flag for displaying the matrix of pairwise distances between models,
+ *  \param[in] os          stream for displaying the matrix of pairwise distances between models,
  *  \param[in] nb_model    number of hidden variable-order Markov chains,
  *  \param[in] hmarkov     pointer on the HiddenVariableOrderMarkov objects,
  *  \param[in] nb_sequence number of generated sequences,
@@ -5956,7 +5958,7 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
  */
 /*--------------------------------------------------------------*/
 
-DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &error , bool display ,
+DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &error , ostream *os ,
                                                                   int nb_model , const HiddenVariableOrderMarkov **hmarkov ,
                                                                   int nb_sequence , const MarkovianSequences **seq ,
                                                                   const string path) const
@@ -5980,7 +5982,7 @@ DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &err
       length_distribution[i] = seq[i]->length_distribution->frequency_scale(nb_sequence);
     }
 
-    dist_matrix = divergence_computation(error , display , nb_model , hmarkov , length_distribution , path);
+    dist_matrix = divergence_computation(error , os , nb_model , hmarkov , length_distribution , path);
 
     for (i = 0;i < nb_model;i++) {
       delete length_distribution[i];

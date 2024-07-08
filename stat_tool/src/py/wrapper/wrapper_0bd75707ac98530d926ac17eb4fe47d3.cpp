@@ -26,6 +26,7 @@ void wrapper_0bd75707ac98530d926ac17eb4fe47d3()
     boost::python::scope().attr("stat_tool") = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::scope scope_0cdd446515295e8e8373e99f328c3748 = module_0cdd446515295e8e8373e99f328c3748;
     class ::stat_tool::DiscreteDistributionData * (::stat_tool::MixtureData::*method_pointer_22b0a6e9b8985815a70d8c14b0968354)(class ::stat_tool::StatError &, int , int ) const = &::stat_tool::MixtureData::extract;
+    class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > >  (::stat_tool::MixtureData::*method_pointer_9b1cb4d742805bfcb50ab9953cec9468)(bool ) const = &::stat_tool::MixtureData::ascii_data_write;
     void  (::stat_tool::MixtureData::*method_pointer_65b10f92a726577cbf6564411c83c993)(enum ::stat_tool::variable_nature ) = &::stat_tool::MixtureData::state_variable_init;
     double  (::stat_tool::MixtureData::*method_pointer_33ca36d613b75e3ebc8bbd312abb4ab5)() const = &::stat_tool::MixtureData::classification_information_computation;
     double  (::stat_tool::MixtureData::*method_pointer_500bb41fb5f55d4e8a20e25372760385)() const = &::stat_tool::MixtureData::information_computation;
@@ -47,6 +48,7 @@ void wrapper_0bd75707ac98530d926ac17eb4fe47d3()
     class_0bd75707ac98530d926ac17eb4fe47d3.def(boost::python::init< class ::stat_tool::Vectors const &, enum ::stat_tool::vector_transformation  >(""));
     class_0bd75707ac98530d926ac17eb4fe47d3.def(boost::python::init< class ::stat_tool::MixtureData const &, bool , enum ::stat_tool::vector_transformation  >(""));
     class_0bd75707ac98530d926ac17eb4fe47d3.def("extract", method_pointer_22b0a6e9b8985815a70d8c14b0968354, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
+    class_0bd75707ac98530d926ac17eb4fe47d3.def("ascii_data_write", method_pointer_9b1cb4d742805bfcb50ab9953cec9468, "");
     class_0bd75707ac98530d926ac17eb4fe47d3.def("state_variable_init", method_pointer_65b10f92a726577cbf6564411c83c993, "");
     class_0bd75707ac98530d926ac17eb4fe47d3.def("classification_information_computation", method_pointer_33ca36d613b75e3ebc8bbd312abb4ab5, "");
     class_0bd75707ac98530d926ac17eb4fe47d3.def("information_computation", method_pointer_500bb41fb5f55d4e8a20e25372760385, "");
@@ -66,7 +68,6 @@ void wrapper_0bd75707ac98530d926ac17eb4fe47d3()
     if(autowig::Held< class ::stat_tool::MixtureData >::is_class)
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::MixtureData >::Type, autowig::Held< class ::stat_tool::Vectors >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::MixtureData >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::MixtureData, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::MixtureData >::Type, class ::stat_tool::MixtureData > > >();
     }
 
 }

@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -76,7 +76,7 @@ namespace stat_tool {
 
   /// \brief Compound distribution
 
-  class Compound : public StatInterface , public Distribution {
+  class STAT_TOOL_API Compound : public StatInterface , public Distribution {
 
     friend class FrequencyDistribution;
     friend class CompoundData;
@@ -144,7 +144,7 @@ namespace stat_tool {
 
   /// \brief Data structure corresponding to a compound distribution
 
-  class CompoundData : public StatInterface , public FrequencyDistribution {
+  class STAT_TOOL_API CompoundData : public StatInterface , public FrequencyDistribution {
     friend class FrequencyDistribution;
     friend class Compound;
 

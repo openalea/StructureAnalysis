@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  * 
@@ -36,12 +36,12 @@
 
 
 
-#include <string>
-#include <vector>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
 #include <cstring>
-#include <string.h>
+#include <string>
+#include <vector>
 
 #include "distance_matrix.h"
 #include "stat_label.h"
@@ -1206,7 +1206,7 @@ DistanceMatrix* DistanceMatrix::select_individual(StatError &error , int inb_pat
 /*--------------------------------------------------------------*/
 
 DistanceMatrix* DistanceMatrix::select_individual(StatError &error , int inb_pattern ,
-                                                  vector<int> iidentifier , bool keep) const
+                                                  vector<int> &iidentifier , bool keep) const
 
 {
   return select_individual(error , inb_pattern , iidentifier.data() , keep);

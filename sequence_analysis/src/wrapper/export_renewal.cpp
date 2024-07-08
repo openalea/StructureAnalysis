@@ -67,7 +67,7 @@ public:
     StatError error;
     Renewal *renewal = NULL;
 
-    renewal = Renewal::building(error, inter_event, type, time);
+    renewal = Renewal::build(error, inter_event, type, time);
 
     return boost::shared_ptr<Renewal>(renewal);
   }
@@ -246,7 +246,7 @@ public:
       penalty_type pen_type, side_effect outside)
   {
     HEADER_OS(Renewal);
-    ret = input.estimation(error, os, estimator, nb_iter, mean_estimator,
+    ret = input.estimation(error, &os, estimator, nb_iter, mean_estimator,
         weight, pen_type, outside);
 
     FOOTER_OS;
@@ -261,7 +261,7 @@ public:
   {
     HEADER_OS(Renewal);
 
-    ret = input.estimation(error, os, input_dist, estimator, nb_iter,
+    ret = input.estimation(error, &os, input_dist, estimator, nb_iter,
         mean_estimator, weight, pen_type, outside);
 
     FOOTER_OS;

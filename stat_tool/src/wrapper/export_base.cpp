@@ -31,6 +31,7 @@
 #include "stat_tool/distribution.h"
 #include "stat_tool/distance_matrix.h"
 #include "stat_tool/regression.h"
+#include "stat_tool/vectors.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -323,7 +324,7 @@ void class_constant()
   
   // Vectors
   
-  enum_<stat_tool::wrap_util::UniqueInt<4, 18> >("OutputFormat")
+  enum_<stat_tool::wrap_util::UniqueInt<4, 19> >("OutputFormat")
   .value("ASCII", ASCII)
   .value("SPREADSHEET", SPREADSHEET)
   .value("GNUPLOT", GNUPLOT)
@@ -331,6 +332,13 @@ void class_constant()
   .export_values()
   ;
   
+  enum_<stat_tool::wrap_util::UniqueInt<2, 18> >("moving_average_method")
+  .value("AVERAGING", AVERAGING)
+  .value("LEAST_SQUARES", LEAST_SQUARES)
+  .export_values()
+  ;
+  
+
   /*const int NB_STATE = 100;
   const int ORDER = 8;
   const double THRESHOLDING_FACTOR = 0.8;

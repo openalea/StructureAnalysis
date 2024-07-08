@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: discrete_mixture.h 18442 2015-07-29 09:35:54Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -75,7 +75,7 @@ namespace stat_tool {
 
   /// \brief Mixture of discrete distributions
 
-  class DiscreteMixture : public StatInterface , public Distribution {
+  class STAT_TOOL_API DiscreteMixture : public StatInterface , public Distribution {
 
     friend class FrequencyDistribution;
     friend class DiscreteMixtureData;
@@ -116,7 +116,7 @@ namespace stat_tool {
     DiscreteMixture(int inb_component , double *pweight , const DiscreteParametric **pcomponent);
     DiscreteMixture(const DiscreteMixture &mixt , bool *component_flag , int inb_value);
     DiscreteMixture(int inb_component , const DiscreteParametric **pcomponent);
-    DiscreteMixture(int inb_component , vector<double> iweight , const std::vector<DiscreteParametric> icomponent);
+    DiscreteMixture(int inb_component , const std::vector<double> &iweight , const std::vector<DiscreteParametric> &icomponent);
     DiscreteMixture(const DiscreteMixture &mixt , bool data_flag = true)
     :Distribution(mixt) { copy(mixt , data_flag); }
     ~DiscreteMixture();
@@ -125,10 +125,10 @@ namespace stat_tool {
     DiscreteParametricModel* extract(StatError &error , int index) const;
     DiscreteMixtureData* extract_data(StatError &error) const;
 
-    static DiscreteMixture* building(StatError &error , int nb_component , double *weight ,
-                                     const DiscreteParametric **component);
-    static DiscreteMixture* building(StatError &error , int nb_component , std::vector<double> weight ,
-                                     const std::vector<DiscreteParametric> component);
+    static DiscreteMixture* build(StatError &error , int nb_component , double *weight ,
+                                  const DiscreteParametric **component);
+    static DiscreteMixture* build(StatError &error , const std::vector<double> &weight ,
+                                  const std::vector<DiscreteParametric> &component);
     static DiscreteMixture* ascii_read(StatError &error , const std::string path ,
                                        double cumul_threshold = CUMUL_THRESHOLD);
 
@@ -156,7 +156,7 @@ namespace stat_tool {
 
   /// \brief Data structure corresponding to a mixture of discrete distributions
 
-  class DiscreteMixtureData : public StatInterface , public FrequencyDistribution {
+  class STAT_TOOL_API DiscreteMixtureData : public StatInterface , public FrequencyDistribution {
 
     friend class FrequencyDistribution;
     friend class DiscreteMixture;

@@ -20,6 +20,10 @@
  *
  *-----------------------------------------------------------------------------*/
 
+#include "wrapper_util.h"
+#include "export_base.h"
+
+#include "stat_tool/plotable.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -28,7 +32,8 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include "export_plotable.h"
-#include "stat_tool/plotable.h"
+
+#include "boost_python_aliases.h"
 
 using namespace std;
 using namespace boost::python;
@@ -63,7 +68,8 @@ void class_plotable()
     .def("get_label_text", &SinglePlot::get_label, "returns label text(i)")
 
 
-    .def("__iter__", range(&SinglePlot::begin, &SinglePlot::end))
+    // CPL : this is commented in the C++ plotable class (begin and end)
+    //.def("__iter__", range(&SinglePlot::begin, &SinglePlot::end))
     .def("__len__", &SinglePlot::size)
     ;
 

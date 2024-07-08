@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,9 +36,10 @@
 
 
 
-#include <string>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
 #include <cstring>
 
 #include "distance_matrix.h"
@@ -2449,7 +2450,7 @@ void Clusters::algorithmic_step_2()
  *  \brief Partitioning clustering algorithm.
  *
  *  \param[in] error          reference on a StatError object,
- *  \param[in] display        flag for displaying the partitioning results,
+ *  \param[in] os             stream for displaying the partitioning results,
  *  \param[in] nb_cluster     number of clusters,
  *  \param[in] initialization initial prototypes,
  *  \param[in] algorithm      algorithm type.
@@ -2458,7 +2459,7 @@ void Clusters::algorithmic_step_2()
  */
 /*--------------------------------------------------------------*/
 
-Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_cluster ,
+Clusters* DistanceMatrix::partitioning(StatError &error , ostream *os , int nb_cluster ,
                                        int *prototype , int initialization , int algorithm) const
 
 {
@@ -2591,8 +2592,8 @@ Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_
 
     clusters->cluster_distance_computation_1();
 
-    if (display) {
-      clusters->global_distance_ascii_print(cout);
+    if (os) {
+      clusters->global_distance_ascii_print(*os);
     }
 
     delete dist_matrix;
@@ -2607,7 +2608,7 @@ Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_
  *  \brief Partitioning clustering algorithm.
  *
  *  \param[in] error              reference on a StatError object,
- *  \param[in] display            flag for displaying the partitioning results,
+ *  \param[in] os                 stream for displaying the partitioning results,
  *  \param[in] nb_cluster         number of clusters,
  *  \param[in] cluster_nb_pattern cluster sizes.
  *  \param[in] cluster_pattern    cluster compositions.
@@ -2616,7 +2617,7 @@ Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_
  */
 /*--------------------------------------------------------------*/
 
-Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_cluster ,
+Clusters* DistanceMatrix::partitioning(StatError &error , ostream *os , int nb_cluster ,
                                        int *cluster_nb_pattern , int **cluster_pattern) const
 
 {
@@ -2717,8 +2718,8 @@ Clusters* DistanceMatrix::partitioning(StatError &error , bool display , int nb_
     clusters->pattern_distance_computation();
     clusters->cluster_distance_computation_1();
 
-    if (display) {
-      clusters->global_distance_ascii_print(cout);
+    if (os) {
+      clusters->global_distance_ascii_print(*os);
     }
 
     delete dist_matrix;

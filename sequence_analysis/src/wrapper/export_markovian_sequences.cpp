@@ -207,7 +207,7 @@ public:
       int variable , bool add_flag )
   {
     HEADER_OS(MarkovianSequences);
-    ret = input.consecutive_values(error, os, variable, add_flag);
+    ret = input.consecutive_values(error, &os, variable, add_flag);
     FOOTER_OS;
   }
 
@@ -231,11 +231,10 @@ public:
 		  const char *path = 0)
   {
     StatError error;
-    // std::stringstream os;
-    bool os = true; // display
+    ostringstream os;
     bool ret = true;
 
-    ret = input.transition_count(error, os,
+    ret = input.transition_count(error, &os,
 			max_order, begin, estimator);
     FOOTER_OS;
   }
@@ -245,17 +244,17 @@ public:
 		  int begin_state, int end_state, int min_frequency)
   {
     StatError error;
-    //std::stringstream os;
-    bool os = true; //display
+    ostringstream os;
     bool ret = true;
 
-    ret = input.word_count(error, os ,variable, word_length,
+    ret = input.word_count(error, &os ,variable, word_length,
         begin_state, end_state,  min_frequency);
 
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
+
     //todo if this what we want to return ?
-    return string();
+    return os.str();
   }
 
 
@@ -270,7 +269,7 @@ public:
     transition_estimator estimator = transition_estimator(iestimator);
 
     HEADER_OS(VariableOrderMarkov);
-    ret = input.variable_order_markov_estimation(error, os, itype,
+    ret = input.variable_order_markov_estimation(error, &os, itype,
         min_order, max_order, algorithm, threshold, estimator,
         global_initial_transition, global_sample, counting_flag);
     FOOTER_OS;
@@ -316,7 +315,7 @@ public:
       }
 */
     CREATE_ARRAY(input_symbol, int, symbol);
-    ret = input.lumpability_estimation(error, os, symbol.get(), criterion,
+    ret = input.lumpability_estimation(error, &os, symbol.get(), criterion,
         order, counting_flag);
     FOOTER_OS;
 
@@ -328,7 +327,7 @@ public:
       bool common_dispersion, bool counting_flag, bool state_sequence, int nb_iter)
   {
     HEADER_OS(HiddenVariableOrderMarkov);
-    ret = input.hidden_variable_order_markov_estimation(error, os, hvom,
+    ret = input.hidden_variable_order_markov_estimation(error, &os, hvom,
         global_initial_transition, common_dispersion, counting_flag,
         state_sequence, nb_iter);
     FOOTER_OS;
@@ -343,7 +342,7 @@ public:
       double parameter, bool counting_flag, bool state_sequence, int nb_iter)
   {
     HEADER_OS(HiddenVariableOrderMarkov);
-    ret = input.hidden_variable_order_markov_stochastic_estimation(error, os,
+    ret = input.hidden_variable_order_markov_stochastic_estimation(error, &os,
         hvom, global_initial_transition, common_dispersion, min_nb_state_sequence,
         max_nb_state_sequence, parameter, counting_flag, state_sequence,
         nb_iter);
@@ -356,11 +355,10 @@ public:
   {
     StatError error;
     bool ret = false;
-    //std::stringstream os;
-    bool os = true; // display
+    ostringstream os;
 
     CREATE_ARRAY(input_markov, const VariableOrderMarkov*, data);
-    ret = input.comparison(error, os, data_size, data.get(), filename);
+    ret = input.comparison(error, &os, data_size, data.get(), filename);
     FOOTER_OS;
   }
 
@@ -369,12 +367,11 @@ public:
       boost::python::list &input_markov, char *filename)
   {
     StatError error;
-    //std::stringstream os;
-    bool os = true; // display
+    ostringstream os;
     bool ret = false;
 
     CREATE_ARRAY(input_markov, const SemiMarkov*, data);
-    ret = input.comparison(error, os, data_size, data.get(), filename);
+    ret = input.comparison(error, &os, data_size, data.get(), filename);
     FOOTER_OS;
   }
 
@@ -383,12 +380,11 @@ public:
       boost::python::list &input_markov, latent_structure_algorithm algorithm, const char *filename)
   {
     StatError error;
-    //std::stringstream os;
-    bool os = true; // display
+    ostringstream os;
     bool ret = false;
 
     CREATE_ARRAY(input_markov, const HiddenVariableOrderMarkov*, data);
-    ret = input.comparison(error, os, data_size, data.get(), algorithm,
+    ret = input.comparison(error, &os, data_size, data.get(), algorithm,
         filename);
     FOOTER_OS;
   }
@@ -399,12 +395,11 @@ public:
       const char *filename)
   {
     StatError error;
-    //std::stringstream os;
-    bool os = true; // display
+    ostringstream os;
     bool ret = false;
 
     CREATE_ARRAY(input_markov, const HiddenSemiMarkov*, markov);
-    ret = input.comparison(error, os, markov_size, markov.get(), algorithm,
+    ret = input.comparison(error, &os, markov_size, markov.get(), algorithm,
         filename);
 
     FOOTER_OS;
@@ -424,7 +419,7 @@ public:
       duration_distribution_mean_estimator mean_estimator)
   {
     HEADER_OS(HiddenSemiMarkov);
-    ret = input.hidden_semi_markov_estimation(error, os, ihsmarkov, poisson_geometric, common_dispersion,
+    ret = input.hidden_semi_markov_estimation(error, &os, ihsmarkov, poisson_geometric, common_dispersion,
         estimator, counting_flag, state_sequence, nb_iter, mean_estimator);
     FOOTER_OS;
   }
@@ -436,7 +431,7 @@ public:
       bool state_sequence, int nb_iter, duration_distribution_mean_estimator mean_estimator)
   {
     HEADER_OS(HiddenSemiMarkov);
-    ret = input.hidden_semi_markov_estimation(error, os, itype, nb_state, left_right,
+    ret = input.hidden_semi_markov_estimation(error, &os, itype, nb_state, left_right,
         occupancy_mean, poisson_geometric, common_dispersion, estimator, counting_flag,
         state_sequence, nb_iter, mean_estimator);
     FOOTER_OS;
@@ -451,7 +446,7 @@ public:
   {
     HEADER_OS(HiddenSemiMarkov);
 
-    ret = input.hidden_semi_markov_stochastic_estimation(error, os, ihsmarkov,
+    ret = input.hidden_semi_markov_stochastic_estimation(error, &os, ihsmarkov,
         poisson_geometric, common_dispersion, min_nb_state_sequence, max_nb_state_sequence,
         parameter, estimator, counting_flag, state_sequence, nb_iter);
 
@@ -466,7 +461,7 @@ public:
       bool counting_flag, bool state_sequence, int nb_iter)
   {
     HEADER_OS(HiddenSemiMarkov);
-    ret = input.hidden_semi_markov_stochastic_estimation(error, os, itype, nb_state,
+    ret = input.hidden_semi_markov_stochastic_estimation(error, &os, itype, nb_state,
         left_right, occupancy_mean, poisson_geometric, common_dispersion, min_nb_state_sequence,
         max_nb_state_sequence, parameter, estimator, counting_flag, state_sequence,
         nb_iter);
@@ -480,7 +475,7 @@ public:
       duration_distribution_mean_estimator mean_estimator)
   {
     HEADER_OS(SemiMarkov);
-    ret = input.semi_markov_estimation(error, os, itype, estimator,
+    ret = input.semi_markov_estimation(error, &os, itype, estimator,
         counting_flag, nb_iter, mean_estimator);
     FOOTER_OS;
   }
@@ -514,8 +509,7 @@ public:
   {
     StatError error;
     bool ret;
-    // std::stringstream os;
-    bool os = true; // display
+    ostringstream os;
     CREATE_ARRAY(input_values, int, data);
     ret = input.lumpability_test(error, os, data.get(), order);
     FOOTER_OS;

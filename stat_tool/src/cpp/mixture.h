@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: mixture.h 14946 2013-09-30 12:29:22Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -74,7 +74,7 @@ namespace stat_tool {
 
   /// \brief Multivariate mixture of distributions
 
-  class Mixture : public StatInterface {
+  class STAT_TOOL_API Mixture : public StatInterface {
 
     friend class Vectors;
     friend class MixtureData;
@@ -169,7 +169,7 @@ namespace stat_tool {
 
   /// \brief Data structure corresponding to a multivariate mixture of distributions
 
-  class MixtureData : public Vectors {
+  class STAT_TOOL_API MixtureData : public Vectors {
 
     friend class Vectors;
     friend class Mixture;
@@ -209,6 +209,7 @@ namespace stat_tool {
     DiscreteDistributionData* extract(StatError &error , int variable , int index) const;
 
     std::ostream& ascii_data_write(std::ostream &os , bool exhaustive = false) const;
+    std::string ascii_data_write(bool exhaustive = false) const;
     bool ascii_data_write(StatError &error , const std::string path , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;

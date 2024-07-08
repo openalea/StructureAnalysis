@@ -28,7 +28,7 @@ void wrapper_7fd12c45b7445cbda440f447ba16a244()
     class ::stat_tool::DiscreteParametricModel * (::stat_tool::Mixture::*method_pointer_c8e5ae61c41751f6b367998e3a1c9f5b)(class ::stat_tool::StatError &, int , int ) const = &::stat_tool::Mixture::extract;
     class ::stat_tool::MixtureData * (::stat_tool::Mixture::*method_pointer_ef68cb2853d15909b42f4b8a9f14ec5a)(class ::stat_tool::StatError &) const = &::stat_tool::Mixture::extract_data;
     class ::stat_tool::Mixture * (::stat_tool::Mixture::*method_pointer_496e0d85f6695277bc677b0002f4ded1)(double ) const = &::stat_tool::Mixture::thresholding;
-    class ::stat_tool::Mixture * (*method_pointer_a101a079c5d855c8a770f713cad98d9d)(class ::stat_tool::StatError &, class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > > const, double ) = ::stat_tool::Mixture::ascii_read;
+    class ::stat_tool::Mixture * (*method_pointer_bfda23f7a14a5062b8040d1e9e4b8128)(class ::stat_tool::StatError &, class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > > const, double ) = ::stat_tool::Mixture::ascii_read;
     double  (::stat_tool::Mixture::*method_pointer_a9a77ac4837d5614af40e9748c503f80)(class ::stat_tool::MixtureData const &) const = &::stat_tool::Mixture::classification_likelihood_computation;
     double  (::stat_tool::Mixture::*method_pointer_73eb4eb85305564ea2fc9b91dc32941b)(class ::stat_tool::Vectors const &, int ) const = &::stat_tool::Mixture::likelihood_computation;
     class ::stat_tool::MixtureData * (::stat_tool::Mixture::*method_pointer_cac2788f9500518aa5edca6b080bd7f5)(class ::stat_tool::StatError &, int ) const = &::stat_tool::Mixture::simulation;
@@ -41,12 +41,13 @@ void wrapper_7fd12c45b7445cbda440f447ba16a244()
     class ::stat_tool::ContinuousParametricProcess * (::stat_tool::Mixture::*method_pointer_4b463eddb9cc5b5fb92002c7d34bffc5)(int ) const = &::stat_tool::Mixture::get_continuous_parametric_process;
     boost::python::class_< class ::stat_tool::Mixture, autowig::Held< class ::stat_tool::Mixture >::Type, boost::python::bases< class ::stat_tool::StatInterface > > class_7fd12c45b7445cbda440f447ba16a244("Mixture", "Multivariate mixture of distributions\n\n", boost::python::no_init);
     class_7fd12c45b7445cbda440f447ba16a244.def(boost::python::init<  >(""));
+    class_7fd12c45b7445cbda440f447ba16a244.def(boost::python::init< int , double , double , double , bool  >(""));
     class_7fd12c45b7445cbda440f447ba16a244.def(boost::python::init< int , int , double , double , bool , enum ::stat_tool::tying_rule  >(""));
     class_7fd12c45b7445cbda440f447ba16a244.def(boost::python::init< class ::stat_tool::Mixture const &, bool  >(""));
     class_7fd12c45b7445cbda440f447ba16a244.def("extract", method_pointer_c8e5ae61c41751f6b367998e3a1c9f5b, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_7fd12c45b7445cbda440f447ba16a244.def("extract_data", method_pointer_ef68cb2853d15909b42f4b8a9f14ec5a, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_7fd12c45b7445cbda440f447ba16a244.def("thresholding", method_pointer_496e0d85f6695277bc677b0002f4ded1, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
-    class_7fd12c45b7445cbda440f447ba16a244.def("ascii_read", method_pointer_a101a079c5d855c8a770f713cad98d9d, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
+    class_7fd12c45b7445cbda440f447ba16a244.def("ascii_read", method_pointer_bfda23f7a14a5062b8040d1e9e4b8128, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_7fd12c45b7445cbda440f447ba16a244.def("classification_likelihood_computation", method_pointer_a9a77ac4837d5614af40e9748c503f80, "");
     class_7fd12c45b7445cbda440f447ba16a244.def("likelihood_computation", method_pointer_73eb4eb85305564ea2fc9b91dc32941b, "");
     class_7fd12c45b7445cbda440f447ba16a244.def("simulation", method_pointer_cac2788f9500518aa5edca6b080bd7f5, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
@@ -62,7 +63,6 @@ void wrapper_7fd12c45b7445cbda440f447ba16a244()
     if(autowig::Held< class ::stat_tool::Mixture >::is_class)
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::Mixture >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::Mixture >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::Mixture, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::Mixture >::Type, class ::stat_tool::Mixture > > >();
     }
 
 }

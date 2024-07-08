@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -567,6 +567,102 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
       j++;
       break;
     }
+    }
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    min_value_computation(i);
+    max_value_computation(i);
+
+    switch (type[i]) {
+    case INT_VALUE :
+      build_marginal_frequency_distribution(i);
+      break;
+    case REAL_VALUE :
+      build_marginal_histogram(i);
+      break;
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the Sequences class.
+ *
+ *  \param[in] inb_sequence       number of sequences,
+ *  \param[in] iidentifier        sequence identifiers,
+ *  \param[in] ilength            sequence lengths,
+ *  \param[in] ivertex_identifier vertex identifiers of the associated MTG,
+ *  \param[in] iindex_param_type  index parameter type (TIME/POSITION),
+ *  \param[in] iindex_parameter   index parameters,
+ *  \param[in] inb_variable       number of variables,
+ *  \param[in] itype              variable type,
+ *  \param[in] iint_sequence      integer-valued sequences,
+ *  \param[in] ireal_sequence     real-valued sequences.
+ */
+/*--------------------------------------------------------------*/
+
+Sequences::Sequences(int inb_sequence , const vector<int> &iidentifier , int *ilength ,
+                     const vector<vector<int> > &ivertex_identifier , index_parameter_type iindex_param_type ,
+                     const vector<vector<int> > &iindex_parameter , int nb_int_variable , int nb_real_variable ,
+                     const vector<vector<vector<int> > > &iint_sequence , const vector<vector<vector<double> > > &ireal_sequence)
+
+{
+  int i , j , k , m;
+  variable_nature *itype;
+
+
+  itype = new variable_nature[nb_int_variable + nb_real_variable];
+
+  i= 0;
+  for (j = 0;j < nb_int_variable;j++) {
+    itype[i++] = INT_VALUE;
+  }
+  for (j = 0;j < nb_real_variable;j++) {
+    itype[i++] = REAL_VALUE;
+  }
+
+  init(inb_sequence , NULL , ilength , NULL , iindex_param_type ,
+       nb_int_variable +  nb_real_variable , itype , false , false);
+  delete [] itype;
+
+  if (!iidentifier.empty()) {
+    for (i = 0;i < nb_sequence;i++) {
+      identifier[i] = iidentifier[i];
+    }
+  }
+
+  if (!ivertex_identifier.empty()) {
+    vertex_identifier = new int*[nb_sequence];
+    for (i = 0;i < nb_sequence;i++) {
+      vertex_identifier[i] = new int[length[i]];
+      for (j = 0;j < length[i];j++) {
+        vertex_identifier[i][j] = ivertex_identifier[i][j];
+      }
+    }
+  }
+
+  if (!iindex_parameter.empty()) {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+        index_parameter[i][j] = iindex_parameter[i][j];
+      }
+    }
+
+    build_index_parameter_frequency_distribution();
+    index_interval_computation();
+  }
+
+  for (i = 0;i < nb_sequence;i++) {
+    for (j = 0;j < length[i];j++) {
+      k = 0;
+      for (m = 0;m < nb_int_variable;m++) {
+        int_sequence[i][k++][j] = iint_sequence[i][m][j];
+      }
+      for (m = 0;m < nb_real_variable;m++) {
+        real_sequence[i][k++][j] = ireal_sequence[i][m][j];
+      }
     }
   }
 

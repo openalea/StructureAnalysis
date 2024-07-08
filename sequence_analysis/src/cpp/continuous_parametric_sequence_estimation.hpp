@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: continuous_distribution_sequence_estimation.hpp 12646 2012-08-03 08:12:47Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -40,7 +40,7 @@
 #define CONTINUOUS_PARAMETRIC_SEQUENCE_ESTIMATION_HPP
 
 
-#include <math.h>
+#include <cmath>
 
 #include <boost/math/special_functions/digamma.hpp>
 

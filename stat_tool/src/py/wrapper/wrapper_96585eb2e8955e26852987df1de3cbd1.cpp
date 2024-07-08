@@ -26,7 +26,7 @@ void wrapper_96585eb2e8955e26852987df1de3cbd1()
     boost::python::scope().attr("stat_tool") = module_0cdd446515295e8e8373e99f328c3748;
     boost::python::scope scope_0cdd446515295e8e8373e99f328c3748 = module_0cdd446515295e8e8373e99f328c3748;
     class ::stat_tool::DiscreteDistributionData * (::stat_tool::DiscreteParametricModel::*method_pointer_32615e4dbd38500b914c96f21f414665)(class ::stat_tool::StatError &) const = &::stat_tool::DiscreteParametricModel::extract_data;
-    class ::stat_tool::DiscreteParametricModel * (*method_pointer_12372c13069356af84ca772749d3e22f)(class ::stat_tool::StatError &, class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > > const, double ) = ::stat_tool::DiscreteParametricModel::ascii_read;
+    class ::stat_tool::DiscreteParametricModel * (*method_pointer_6b4a5891c54d5b0cb3a860a4b25d4a1a)(class ::stat_tool::StatError &, class ::std::basic_string< char, struct ::std::char_traits< char >, class ::std::allocator< char > > const, double ) = ::stat_tool::DiscreteParametricModel::ascii_read;
     class ::stat_tool::DiscreteDistributionData * (::stat_tool::DiscreteParametricModel::*method_pointer_10571acabe925b6aaff7cc61716a1496)(class ::stat_tool::StatError &, int ) const = &::stat_tool::DiscreteParametricModel::simulation;
     class ::stat_tool::DiscreteDistributionData * (::stat_tool::DiscreteParametricModel::*method_pointer_4c807bb6b90358228851305f7e6bc996)() const = &::stat_tool::DiscreteParametricModel::get_frequency_distribution;
     boost::python::class_< class ::stat_tool::DiscreteParametricModel, autowig::Held< class ::stat_tool::DiscreteParametricModel >::Type, boost::python::bases< class ::stat_tool::StatInterface, class ::stat_tool::DiscreteParametric > > class_96585eb2e8955e26852987df1de3cbd1("DiscreteParametricModel", "Discrete parametric distribution\n\n", boost::python::no_init);
@@ -39,7 +39,7 @@ void wrapper_96585eb2e8955e26852987df1de3cbd1()
     class_96585eb2e8955e26852987df1de3cbd1.def(boost::python::init< class ::stat_tool::DiscreteParametric const &, class ::stat_tool::FrequencyDistribution const * >(""));
     class_96585eb2e8955e26852987df1de3cbd1.def(boost::python::init< class ::stat_tool::DiscreteParametricModel const &, bool  >(""));
     class_96585eb2e8955e26852987df1de3cbd1.def("extract_data", method_pointer_32615e4dbd38500b914c96f21f414665, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
-    class_96585eb2e8955e26852987df1de3cbd1.def("ascii_read", method_pointer_12372c13069356af84ca772749d3e22f, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
+    class_96585eb2e8955e26852987df1de3cbd1.def("ascii_read", method_pointer_6b4a5891c54d5b0cb3a860a4b25d4a1a, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_96585eb2e8955e26852987df1de3cbd1.def("simulation", method_pointer_10571acabe925b6aaff7cc61716a1496, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_96585eb2e8955e26852987df1de3cbd1.def("get_frequency_distribution", method_pointer_4c807bb6b90358228851305f7e6bc996, boost::python::return_value_policy< boost::python::reference_existing_object >(), "");
     class_96585eb2e8955e26852987df1de3cbd1.staticmethod("ascii_read");
@@ -48,7 +48,6 @@ void wrapper_96585eb2e8955e26852987df1de3cbd1()
     {
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::DiscreteParametricModel >::Type, autowig::Held< class ::stat_tool::StatInterface >::Type >();
         boost::python::implicitly_convertible< autowig::Held< class ::stat_tool::DiscreteParametricModel >::Type, autowig::Held< class ::stat_tool::DiscreteParametric >::Type >();
-        //boost::python::objects::class_value_wrapper< autowig::Held< class ::stat_tool::DiscreteParametricModel >::Type, boost::python::objects::make_ptr_instance< class ::stat_tool::DiscreteParametricModel, boost::python::objects::pointer_holder< autowig::Held< class ::stat_tool::DiscreteParametricModel >::Type, class ::stat_tool::DiscreteParametricModel > > >();
     }
 
 }

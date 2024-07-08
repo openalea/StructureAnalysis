@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2015 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Samuel Dufour-Kowalski, Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: plotable.cpp 16835 2014-06-12 06:30:51Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,8 +36,9 @@
 
 
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 
+#include "stat_tools.h"
 #include "plotable.h"
 
 using namespace std;
@@ -50,7 +51,8 @@ namespace stat_tool {
 
 void SinglePlot::add_point(float x, float y)
 {
-  data.push_back(std::pair<float, float>(x,y));
+  // data.push_back(std::pair<float, float>(x,y));
+    add_text(x, y, "");
 }
 
 void SinglePlot::add_point(const PlotPoint& p)

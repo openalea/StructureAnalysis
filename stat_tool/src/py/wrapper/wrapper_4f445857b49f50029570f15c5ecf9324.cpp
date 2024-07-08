@@ -5,7 +5,7 @@
 namespace autowig
 {
 
-    void method_decorator_7365756e35f3565592c28fbb79abbc51(class ::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution > & instance, int  param_in_0, class ::stat_tool::MultiPlot & param_out)     { instance.operator[](param_in_0) = param_out; }
+    void method_decorator_7365756e35f3565592c28fbb79abbc51(class ::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution > & instance, int  param_in_0, const class ::stat_tool::MultiPlot & param_out) { instance.operator[](param_in_0) = param_out; }
 }
 
 #if defined(_MSC_VER)
@@ -29,16 +29,8 @@ void wrapper_4f445857b49f50029570f15c5ecf9324()
     class ::stat_tool::MultiPlot & (::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution >::*method_pointer_7365756e35f3565592c28fbb79abbc51)(int ) = &::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution >::operator[];
     int  (::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution >::*method_pointer_ab6753b51ae25240aa7951c0d1db07d8)() = &::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution >::size;
     boost::python::class_< class ::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution >, autowig::Held< class ::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution > >::Type > class_4f445857b49f50029570f15c5ecf9324("_TemplateMultiPlotSet_4f445857b49f50029570f15c5ecf9324", "", boost::python::no_init);
-    class_4f445857b49f50029570f15c5ecf9324.def(boost::python::init< int  >(""));
-    class_4f445857b49f50029570f15c5ecf9324.def(boost::python::init< int , int  >(""));
     class_4f445857b49f50029570f15c5ecf9324.def("__getitem__", method_pointer_7365756e35f3565592c28fbb79abbc51, boost::python::return_internal_reference<>(), "");
     class_4f445857b49f50029570f15c5ecf9324.def("__getitem__", autowig::method_decorator_7365756e35f3565592c28fbb79abbc51);
     class_4f445857b49f50029570f15c5ecf9324.def("__len__", method_pointer_ab6753b51ae25240aa7951c0d1db07d8, "");
-    class_4f445857b49f50029570f15c5ecf9324.def_readwrite("title", &::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution >::title, "");
-    class_4f445857b49f50029570f15c5ecf9324.def_readwrite("border", &::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution >::border, "");
-    class_4f445857b49f50029570f15c5ecf9324.def_readwrite("nb_variable", &::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution >::nb_variable, "");
-    class_4f445857b49f50029570f15c5ecf9324.def_readwrite("variable_nb_viewpoint", &::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution >::variable_nb_viewpoint, "");
-    class_4f445857b49f50029570f15c5ecf9324.def_readwrite("variable", &::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution >::variable, "");
-    class_4f445857b49f50029570f15c5ecf9324.def_readwrite("viewpoint", &::stat_tool::TemplateMultiPlotSet< enum ::stat_tool::process_distribution >::viewpoint, "");
 
 }

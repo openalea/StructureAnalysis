@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,8 +36,9 @@
 
 
 
-#include <string>
 #include <iomanip>
+#include <fstream>
+#include <string>
 
 #include "distance_matrix.h"
 #include "stat_label.h"
@@ -1476,7 +1477,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
  *  \brief Hierarchical clustering algorithms.
  *
  *  \param[in] error     reference on a StatError object,
- *  \param[in] display   flag for displaying the hierarchical clustering results,
+ *  \param[in] os        stream for displaying the hierarchical clustering results,
  *  \param[in] strategy  algorithm type (AGGLOMERATIVE/DIVISIVE/ORDERING),
  *  \param[in] criterion cluster merging criterion (agglomerative algorithm),
  *  \param[in] path      file path,
@@ -1486,7 +1487,7 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
  */
 /*--------------------------------------------------------------*/
 
-bool DistanceMatrix::hierarchical_clustering(StatError &error , bool display ,
+bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream *os ,
                                              hierarchical_strategy strategy , linkage criterion ,
                                              const string path , output_format format) const
 
@@ -1512,8 +1513,8 @@ bool DistanceMatrix::hierarchical_clustering(StatError &error , bool display ,
 
     // writing of results
 
-    if (display) {
-      dendrogram->ascii_write(cout);
+    if (os) {
+      dendrogram->ascii_write(*os);
     }
 
     if (!path.empty()) {

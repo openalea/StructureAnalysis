@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -37,9 +37,10 @@
 
 
 #include <sstream>
+#include <iomanip>
+#include <fstream>
 #include <string>
 #include <vector>
-#include <iomanip>
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -125,8 +126,8 @@ DiscreteMixture::DiscreteMixture(int inb_component , double *iweight ,
  */
 /*--------------------------------------------------------------*/
 
-DiscreteMixture::DiscreteMixture(int inb_component , vector<double> iweight ,
-                                 const vector<DiscreteParametric> icomponent)
+DiscreteMixture::DiscreteMixture(int inb_component , const vector<double> &iweight ,
+                                 const vector<DiscreteParametric> &icomponent)
 
 {
   int i;
@@ -398,8 +399,8 @@ DiscreteMixtureData* DiscreteMixture::extract_data(StatError &error) const
  */
 /*--------------------------------------------------------------*/
 
-DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component , double *weight ,
-                                           const DiscreteParametric **component)
+DiscreteMixture* DiscreteMixture::build(StatError &error , int nb_component , double *weight ,
+                                        const DiscreteParametric **component)
 
 {
   bool status;
@@ -443,7 +444,6 @@ DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component ,
  *  \brief Construction of a DiscreteMixture object on the basis of weights and components.
  *
  *  \param[in] error        reference on a StatError object,
- *  \param[in] nb_component number of components,
  *  \param[in] weight       component weights,
  *  \param[in] component    pointer on the components.
  *
@@ -451,12 +451,13 @@ DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component ,
  */
 /*--------------------------------------------------------------*/
 
-DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component , vector<double> weight ,
-                                           const vector<DiscreteParametric> component)
+DiscreteMixture* DiscreteMixture::build(StatError &error , const vector<double> &weight ,
+                                        const vector<DiscreteParametric> &component)
 
 {
   bool status;
   int i;
+  int nb_component;
   double cumul;
   DiscreteMixture *mixt;
 
@@ -464,7 +465,8 @@ DiscreteMixture* DiscreteMixture::building(StatError &error , int nb_component ,
   mixt = NULL;
   error.init();
 
-  if ((nb_component < 2) || (nb_component > DISCRETE_MIXTURE_NB_COMPONENT)) {
+  nb_component = weight.size();
+  if ((nb_component != component.size()) || (nb_component < 2) || (nb_component > DISCRETE_MIXTURE_NB_COMPONENT)) {
     error.update(STAT_parsing[STATP_NB_DISTRIBUTION]);
   }
 
@@ -1415,6 +1417,10 @@ bool DiscreteMixture::plot_write(const char *prefix , const char *title ,
 
       ofstream out_file((file_name[0].str()).c_str());
 
+//      if (i == 0) {
+//        out_file << "set terminal x11" << endl;
+//      }
+
       if (i == 1) {
         out_file << "set terminal postscript" << endl;
         file_name[1] << label(prefix) << ".ps";
@@ -1464,6 +1470,7 @@ bool DiscreteMixture::plot_write(const char *prefix , const char *title ,
       if (mixt_histo) {
         if (i == 0) {
           out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+//          out_file << "\npause mouse keypress \"Click any mouse button to continue\"" << endl;
         }
         out_file << endl;
 
@@ -1490,6 +1497,7 @@ bool DiscreteMixture::plot_write(const char *prefix , const char *title ,
           if (mixt_histo->component[k]->nb_element > 0) {
             if (i == 0) {
               out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+//              out_file << "\npause mouse keypress \"Click any mouse button to continue\"" << endl;
             }
             out_file << endl;
 
@@ -1757,7 +1765,7 @@ MultiPlotSet* DiscreteMixture::get_plotable(const DiscreteMixtureData *mixt_hist
         plot[i][1].style = "linespoints";
 
         component[j]->plotable_mass_write(plot[i][1] , mixt_histo->component[j]->nb_element);
-  
+
         i++;
       }
     }
@@ -1892,7 +1900,7 @@ DiscreteMixtureData::DiscreteMixtureData(const FrequencyDistribution &histo , co
   int i;
 
 
-  mixture = new DiscreteMixture(*pmixture , false); 
+  mixture = new DiscreteMixture(*pmixture , false);
   nb_component = pmixture->nb_component;
 
   weight = new FrequencyDistribution(nb_component);

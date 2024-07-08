@@ -1,0 +1,47 @@
+__all__ = []
+
+
+# Import Boost.Python module
+from . import __stat_tool
+
+# Resolve scopes
+__stat_tool.std.IosBase.seekdir = __stat_tool.std._ios_base.seekdir
+__stat_tool.std.IosBase.event = __stat_tool.std._ios_base.event
+__stat_tool.std.IosBase.Init = __stat_tool.std._ios_base.Init
+__stat_tool.std._BasicOstream_e1391944268253558f04b6f996bb5a8b.Sentry = __stat_tool.std.__basic_ostream_e1391944268253558f04b6f996bb5a8b.Sentry
+__stat_tool.std.Locale.Id = __stat_tool.std._locale.Id
+__stat_tool.std.Locale.Facet = __stat_tool.std._locale.Facet
+__stat_tool.std.IosBase.Failure = __stat_tool.std._ios_base.Failure
+
+# Group template specializations
+__stat_tool.std._CharTraits = (__stat_tool.std._CharTraits_277a0516fe4451448165550d8b9d6b2b)
+__stat_tool.std._BasicIos = (__stat_tool.std._BasicIos_f8b8546034205658b6e3e16175284f26)
+__stat_tool.stat_tool._TemplateMultiPlotSet = (__stat_tool.stat_tool._TemplateMultiPlotSet_4f445857b49f50029570f15c5ecf9324)
+__stat_tool.std._BasicStreambuf = (__stat_tool.std._BasicStreambuf_112dc12b863f53fea4df7b3ba388fd84)
+__stat_tool.std._AllocatorTraits = (__stat_tool.std._AllocatorTraits_ac4a9bb85fb454648221fcf5f2ef0203)
+__stat_tool.std._MoveIterator = (__stat_tool.std._MoveIterator_0e8aa013dbd85cbb828bb636ba93091e, __stat_tool.std._MoveIterator_1c84c65db02e5441bd8e625042563a4d, __stat_tool.std._MoveIterator_4bc3e7e222065c4eb16729fc2579f504, __stat_tool.std._MoveIterator_72b4985b076f54f0a30d51f8f5f500be, __stat_tool.std._MoveIterator_745e5d0d0b025a76b955a27c7f788b56, __stat_tool.std._MoveIterator_846e84372f4157b69a2438c203b1a0f2, __stat_tool.std._MoveIterator_b9d165f4ea225ad89892de22b6fa65fa, __stat_tool.std._MoveIterator_fc03972c49eb57c1bd4661e654ec8c1a)
+__stat_tool.std._BasicString = (__stat_tool.std._BasicString_448c20257e485acda59dc59305fceb58)
+__stat_tool.std._Vector = (__stat_tool.std._Vector_107131f9768c56e794a9b0de728d1738, __stat_tool.std._Vector_52efeeab642a50c286578b88496f1362, __stat_tool.std._Vector_6b9ae5eac40858c9a0f5e6e21c15d1d3, __stat_tool.std._Vector_ae4841ee8bd85189b310d929a67d17d6, __stat_tool.std._Vector_c5260d1a7cbb5ef3bc32b582df09a801, __stat_tool.std._Vector_d3fbcd4a393754ca8d7be71823564225, __stat_tool.std._Vector_db7f50b235e15b1aa024911715fa604a, __stat_tool.std._Vector_f0840635c9e2594cb061b2ce1bc3514a)
+__stat_tool.std._Pair = (__stat_tool.std._Pair_15bfc45e4cb45511b08b9e71d0c7f189, __stat_tool.std._Pair_ad547ba62d555da5925f982f13f6787b)
+__stat_tool.std._BasicOstream = (__stat_tool.std._BasicOstream_e1391944268253558f04b6f996bb5a8b)
+__stat_tool.stat_tool._ChainReestimation = (__stat_tool.stat_tool._ChainReestimation_4a0641faa57256529b8c34bd13a4c984)
+__stat_tool.stat_tool._Reestimation = (__stat_tool.stat_tool._Reestimation_4a7eb3f23eb959139a416b2a8b293302, __stat_tool.stat_tool._Reestimation_710d7ee5573c5d7f8f9127a08b4f3dfd)
+
+# Define aliases
+__stat_tool.stat_tool.Range = __stat_tool.std._Pair_ad547ba62d555da5925f982f13f6787b
+__stat_tool.stat_tool.Label = __stat_tool.std._Pair_15bfc45e4cb45511b08b9e71d0c7f189
+__stat_tool.stat_tool.MultiPlotSet = __stat_tool.stat_tool._TemplateMultiPlotSet_4f445857b49f50029570f15c5ecf9324
+__stat_tool.stat_tool.PlotPoint = __stat_tool.std._Pair_ad547ba62d555da5925f982f13f6787b
+__stat_tool.std._BasicStreambuf_112dc12b863f53fea4df7b3ba388fd84.TraitsType = __stat_tool.std._CharTraits_277a0516fe4451448165550d8b9d6b2b
+__stat_tool.std._Vector_52efeeab642a50c286578b88496f1362.ValueType = __stat_tool.std._Vector_6b9ae5eac40858c9a0f5e6e21c15d1d3
+__stat_tool.std.IosBase.SeekDir = __stat_tool.std.IosBase.seekdir
+__stat_tool.std._Vector_ae4841ee8bd85189b310d929a67d17d6.ValueType = __stat_tool.std._Vector_107131f9768c56e794a9b0de728d1738
+__stat_tool.std._Vector_c5260d1a7cbb5ef3bc32b582df09a801.ValueType = __stat_tool.stat_tool.DiscreteParametric
+__stat_tool.std._Vector_d3fbcd4a393754ca8d7be71823564225.ValueType = __stat_tool.stat_tool.discrete_parametric
+__stat_tool.std._Vector_db7f50b235e15b1aa024911715fa604a.ValueType = __stat_tool.stat_tool.Vectors
+__stat_tool.std._Vector_f0840635c9e2594cb061b2ce1bc3514a.ValueType = __stat_tool.stat_tool.FrequencyDistribution
+__stat_tool.std._BasicString_448c20257e485acda59dc59305fceb58.Self = __stat_tool.std._BasicString_448c20257e485acda59dc59305fceb58
+__stat_tool.std._BasicString_448c20257e485acda59dc59305fceb58.TraitsType = __stat_tool.std._CharTraits_277a0516fe4451448165550d8b9d6b2b
+__stat_tool.std._BasicString_448c20257e485acda59dc59305fceb58.AllocTraits = __stat_tool.std._AllocatorTraits_ac4a9bb85fb454648221fcf5f2ef0203
+__stat_tool.std._BasicIos_f8b8546034205658b6e3e16175284f26.TraitsType = __stat_tool.std._CharTraits_277a0516fe4451448165550d8b9d6b2b
+__stat_tool.std._BasicOstream_e1391944268253558f04b6f996bb5a8b.TraitsType = __stat_tool.std._CharTraits_277a0516fe4451448165550d8b9d6b2b

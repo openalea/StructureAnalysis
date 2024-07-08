@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2018 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,9 +36,9 @@
 
 
 
-#include <string.h>
-#include <string>
 #include <sstream>
+#include <cstring>
+#include <string>
 
 #include "stat_tools.h"
 #include "stat_label.h"
@@ -100,6 +100,14 @@ StatError::~StatError()
   }
 }
 
+std::string StatError::ascii_write(error_type type) const
+{
+  ostringstream oss;
+      
+  ascii_write(oss , type);
+
+  return oss.str();
+}
 
 /*--------------------------------------------------------------*/
 /**
@@ -237,7 +245,7 @@ string StatInterface::ascii_write(bool exhaustive) const
 
 {
   ostringstream oss;
-      
+
 
   ascii_write(oss , exhaustive);
 

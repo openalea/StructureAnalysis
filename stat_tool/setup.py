@@ -1,21 +1,26 @@
 # -*- coding: utf-8 -*-
-__revision__ = "$Id$"
-
 """setup file for stat_tool package"""
 
-__revision__ = "$Id$"
-
 import os, sys
-from setuptools import setup, find_packages
-from openalea.deploy.binary_deps import binary_deps
+from setuptools import setup, find_namespace_packages
+#from openalea.deploy.binary_deps import binary_deps
 from openalea.deploy.setup import *
 from os.path import join as pj
 
-from openalea.deploy.metainfo import read_metainfo
-metadata = read_metainfo('metainfo.ini', verbose=True)
-for key,value in metadata.iteritems():
-    exec("%s = '%s'" % (key, value))
+# from openalea.deploy.metainfo import read_metainfo
+# metadata = read_metainfo('metainfo.ini', verbose=True)
+# for key,value in metadata.iteritems():
+#     exec("%s = '%s'" % (key, value))
 
+# Meta-information
+name='OpenAlea.StatTool'
+version='2.0.0'
+description='Basic Statistical tools'
+long_description='Basic Statistical tools used by different Structure Analysis libraries.'
+authors='Y. Guedon, JB. Durand, P. Fernique, C. Pradal, T. Cokelaer, S. Dufour'
+authors_email='christophe.pradal@cirad.fr'
+url='https://github.com/openalea/StructureAnalysis/'
+license='CeCILL-C'
 
 build_prefix = "build-scons"
 
@@ -24,11 +29,12 @@ scons_parameters = ["build_prefix=" + build_prefix]
 
 
 # platform dependencies
-install_requires = [binary_deps('vplants.tool')]
-if sys.platform.startswith('win'):
-    install_requires += [binary_deps("boost")]
 install_requires = []
-setup_requires = install_requires + ['openalea.deploy']
+setup_requires = ['openalea.deploy']
+
+namespace = 'openalea'
+packages = find_namespace_packages(where='src', include=['openalea.*'])
+package_dir = {'': 'src'}
 
 
 if __name__ == '__main__':
@@ -48,17 +54,18 @@ if __name__ == '__main__':
           # Scons parameters  v
           scons_parameters=scons_parameters,
 
-          namespace_packages=['openalea'],
-          create_namespaces=True,
+          namespace_packages=[namespace], #, "structure_analysis"],
+          #namespace_packages=["structure_analysis"],
+          #create_namespaces=False,
 
           # Packages
-          packages=['openalea', 
-                    'openalea.stat_tool',
-                    'structure_analysis',
-                    'structure_analysis.stat_tool' 
-                    ],
+          packages=packages,
+                    #'structure_analysis',
+                    #'structure_analysis.stat_tool',
+                    #'stat_tool'
+                    #],
 
-          package_dir={ "openalea.stat_tool" : pj("src","stat_tool"), "structure_analysis" : pj("src", "py", "structure_analysis"), "structure_analysis.stat_tool" : pj("src", "py", "structure_analysis", "stat_tool"), '':'src'},
+          package_dir=package_dir,
           share_dirs = { 'share' : 'share' },
 
 
@@ -76,7 +83,7 @@ if __name__ == '__main__':
           # Dependencies
           setup_requires = setup_requires,
           install_requires = install_requires,
-          dependency_links = ['http://openalea.gforge.inria.fr/pi'],
+          #dependency_links = ['http://openalea.gforge.inria.fr/pi'],
 
 
        )

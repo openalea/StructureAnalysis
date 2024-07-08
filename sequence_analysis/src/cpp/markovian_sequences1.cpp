@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,10 +36,9 @@
 
 
 
-// #include <string>
-#include <vector>
 #include <sstream>
 #include <iomanip>
+#include <vector>
 
 #include <boost/math/distributions/normal.hpp>
 
@@ -1163,7 +1162,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
 /*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
-                                              const vector<MarkovianSequences> iseq) const
+                                              const vector<MarkovianSequences> &iseq) const
 
 {
   int i;
@@ -1422,7 +1421,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
 /*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariable ,
-                                                  vector<int> category , bool add_variable) const
+                                                  vector<int> &category , bool add_variable) const
 
 {
   return transcode(error , ivariable , category.data() , add_variable);
@@ -1470,7 +1469,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error ,
  *  \brief Removing of the non-represented values of an integer-valued variable.
  *
  *  \param[in] error        reference on a StatError object,
- *  \param[in] display      flag for displaying the non-represented values,
+ *  \param[in] os           stream for displaying the non-represented values,
  *  \param[in] ivariable    variable index,
  *  \param[in] add_variable flag for adding a variable.
  *
@@ -1478,7 +1477,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error ,
  */
 /*--------------------------------------------------------------*/
 
-MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , bool display ,
+MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , ostream *os ,
                                                            int ivariable , bool add_variable) const
 
 {
@@ -1525,14 +1524,14 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , bo
   }
 
   if (status) {
-    if (display) {
-      cout << "\n" << SEQ_label[SEQL_MISSING_VALUE] << ":";
+    if (os) {
+      *os << "\n" << SEQ_label[SEQL_MISSING_VALUE] << ":";
       for (i = 0;i < marginal_distribution[ivariable]->nb_value;i++) {
         if (marginal_distribution[ivariable]->frequency[i] == 0) {
-          cout << " " << i;
+          *os << " " << i;
         }
       }
-      cout << endl;
+      *os << endl;
     }
 
     category = new int[marginal_distribution[ivariable]->nb_value - marginal_distribution[ivariable]->offset];
@@ -1736,7 +1735,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
 /*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable , int nb_class ,
-                                                vector<int> ilimit , bool add_variable) const
+                                                vector<int> &ilimit , bool add_variable) const
 
 {
   return cluster(error , ivariable , nb_class , ilimit.data() , add_variable);
@@ -1851,7 +1850,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
 /*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable ,
-                                                int nb_class , vector<double> ilimit) const
+                                                int nb_class , vector<double> &ilimit) const
 
 {
   return cluster(error , variable , nb_class , ilimit.data());
@@ -2035,7 +2034,7 @@ MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int i
 /*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int inb_variable ,
-                                                        vector<int> ivariable , bool keep) const
+                                                        vector<int> &ivariable , bool keep) const
 
 {
   return select_variable(error , inb_variable , ivariable.data() , keep);
@@ -2354,7 +2353,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
 /*--------------------------------------------------------------*/
 
 MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb_sample ,
-                                                       const vector<MarkovianSequences> iseq , int ref_sample) const
+                                                       const vector<MarkovianSequences> &iseq , int ref_sample) const
 
 {
   int i;
@@ -5075,7 +5074,7 @@ void MarkovianSequences::build_characteristic(int variable , bool sojourn_time_f
  *  \brief Count of words of fixed length.
  *
  *  \param[in] error         reference on a StatError object,
- *  \param[in] display       flag for displaying word counts,
+ *  \param[in] os            stream for displaying word counts,
  *  \param[in] variable      variable index,
  *  \param[in] word_length   word length,
  *  \param[in] begin_state   begin state,
@@ -5086,7 +5085,7 @@ void MarkovianSequences::build_characteristic(int variable , bool sojourn_time_f
  */
 /*--------------------------------------------------------------*/
 
-bool MarkovianSequences::word_count(StatError &error , bool display , int variable ,
+bool MarkovianSequences::word_count(StatError &error , ostream *os , int variable ,
                                     int word_length , int begin_state , int end_state ,
                                     int min_frequency) const
 
@@ -5257,24 +5256,24 @@ bool MarkovianSequences::word_count(StatError &error , bool display , int variab
 
     // display of word counts
 
-    if (display) {
-      format_flags = cout.setf(ios::right , ios::adjustfield);
+    if (os) {
+      format_flags = os->setf(ios::right , ios::adjustfield);
 
       for (j = 0;j < i;j++) {
         for (k = 0;k < word_length;k++) {
-          cout << word[index[j]][k] << " ";
+          *os << word[index[j]][k] << " ";
         }
-        cout << "   " << setw(width) << frequency[index[j]]
-             << "   " << probability[index[j]];
+        *os << "   " << setw(width) << frequency[index[j]]
+            << "   " << probability[index[j]];
 
         if (j == 0) {
-          cout << "   (" << nb_word << " " << SEQ_label[SEQL_WORDS] << ", "
-               << total_frequency << ")";
+          *os << "   (" << nb_word << " " << SEQ_label[SEQL_WORDS] << ", "
+              << total_frequency << ")";
         }
-        cout << endl;
+        *os << endl;
       }
 
-      cout.setf(format_flags , ios::adjustfield);
+      os->setf(format_flags , ios::adjustfield);
     }
 
     delete [] power;

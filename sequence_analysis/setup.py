@@ -4,14 +4,24 @@ __revision__ = "$Id$"
 import os, sys
 from os.path import join as pj
 
-from setuptools import setup, find_packages
-from openalea.deploy.binary_deps import binary_deps
+from setuptools import setup, find_namespace_packages
+#from openalea.deploy.binary_deps import binary_deps
 
 
-from openalea.deploy.metainfo import read_metainfo
-metadata = read_metainfo('metainfo.ini', verbose=True)
-for key,value in metadata.iteritems():
-    exec("%s = '%s'" % (key, value))
+# from openalea.deploy.metainfo import read_metainfo
+# metadata = read_metainfo('metainfo.ini', verbose=True)
+# for key,value in metadata.iteritems():
+#     exec("%s = '%s'" % (key, value))
+
+# Meta-information
+name='OpenAlea.SequenceAnalysis'
+version='2.0.0'
+description='sequence analysis library'
+long_description='Python version of sequence analysis (AML stat).'
+authors='Y. Guedon, JB. Durand, P. Fernique, C. Pradal, T. Cokelaer'
+authors_email='christophe.pradal@cirad.fr'
+url='https://github.com/openalea/StructureAnalysis/'
+license='CeCILL-C'
 
 
 build_prefix = "build-scons"
@@ -24,11 +34,16 @@ scons_parameters=["build_prefix="+build_prefix]
 install_requires = []
 setup_requires = install_requires + ['openalea.deploy']
 
+namespace = 'openalea'
+packages = find_namespace_packages(where='src', include=['openalea.*'])
+package_dir = {'': 'src'}
+
+"""
 if sys.platform.startswith('win'):
-    install_requires = [binary_deps('vplants.stat_tool')]
+    install_requires = [binary_deps('openalea.stattool')]
     install_requires += [binary_deps("boost")]
     setup_requires += [binary_deps("boost")]
-
+"""
 
 if __name__ == '__main__':
 
@@ -48,17 +63,12 @@ if __name__ == '__main__':
           scons_parameters=scons_parameters,
 
           namespace_packages=['openalea'],
-          create_namespaces=True,
+          #create_namespaces=True,
 
           # Packages
-          packages=['openalea', 
-                    'openalea.sequence_analysis',
-                    'sequence_analysis_wralea.demo.change_point', 
-                    'sequence_analysis_wralea.demo.stat_tool_tutorial', 
-                    'sequence_analysis_wralea',
-                    ],
+          packages=packages,
 
-          package_dir={ "openalea.sequence_analysis" : pj("src","sequence_analysis"),  '':'src'},
+          package_dir=package_dir,
           share_dirs = { 'share' : 'share' },
 
 
@@ -72,16 +82,16 @@ if __name__ == '__main__':
           inc_dirs = { 'include' : pj(build_prefix, 'include') },
 
           entry_points = {
-            "wralea": ["vplants.stats = sequence_analysis_wralea",
-                       "vplants.demo = sequence_analysis_wralea.demo.change_point",
+            "wralea": ["openalea.stats = sequence_analysis_wralea",
+                       "openalea.demo = sequence_analysis_wralea.demo.change_point",
             ]
             },
 
           # Dependencies
           setup_requires = setup_requires,
           install_requires = install_requires,
-          dependency_links = ['http://openalea.gforge.inria.fr/pi'],
+          #dependency_links = ['http://openalea.gforge.inria.fr/pi'],
 
-          pylint_packages = ['src/openalea/sequence_analysis']
+          #pylint_packages = ['src/openalea/sequence_analysis']
           )
 

@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       V-Plants: Exploring and Modeling Plant Architecture
+ *       StructureAnalysis: Identifying patterns in plant architecture and development
  *
- *       Copyright 1995-2017 CIRAD/INRA/Inria Virtual Plants
+ *       Copyright 1995-2019 CIRAD AGAP
  *
  *       File author(s): Yann Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: sequences3.cpp 11060 2011-09-02 16:28:11Z guedon $
  *
- *       Forum for V-Plants developers:
+ *       Forum for StructureAnalysis developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -36,11 +36,13 @@
 
 
 
-#include <math.h>
+#include <cmath>
 
-#include <string>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+#include <string>
+#include <vector>
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -60,6 +62,150 @@ using namespace stat_tool;
 
 namespace sequence_analysis {
 
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a Sequences objects from arrays of index_parameters,
+ *         discrete values, real values, MTG vertex and sequence identifiers.
+ *
+ *  \param[in] error              reference on a StatError object,
+ *  \param[in] iindex_param_type  index parameter type (TIME/POSITION),
+ *  \param[in] iindex_parameter   index parameters,
+ *  \param[in] iint_vector        integer-valued sequences,
+ *  \param[in] ireal_vector       real-valued sequences,
+ *  \param[in] iidentifier        sequence identifiers,
+ *  \param[in] ivertex_identifier vertex identifiers of the associated MTG.
+ */
+/*--------------------------------------------------------------*/
+
+Sequences* Sequences::build(StatError &error , index_parameter_type iindex_param_type ,
+                            const vector<vector<int> > &iindex_parameter ,
+                            const vector<vector<vector<int> > > &iint_sequence ,
+                            const vector<vector<vector<double> > > &ireal_sequence ,
+                            const vector<int> &iidentifier , const vector<vector<int> > &ivertex_identifier)
+
+{
+  bool status = true;
+  int i , j;
+  int inb_sequence , nb_int_variable , nb_real_variable , *ilength;
+  Sequences *seq;
+
+
+  seq = NULL;
+  inb_sequence = I_DEFAULT;
+  error.init();
+
+  if (!iint_sequence.empty()) { 
+    inb_sequence = iint_sequence.size();
+  }
+  else if (!ireal_sequence.empty()) {
+    inb_sequence = ireal_sequence.size();
+  }
+  else {
+    status = false;
+    error.update(STAT_error[STATR_EMPTY_SAMPLE]);
+  }
+
+  if ((!iint_sequence.empty()) && (!ireal_sequence.empty()) && (iint_sequence.size() != ireal_sequence.size())) {
+    status = false;
+    error.update(SEQ_error[SEQR_NB_SEQUENCE]);
+  }
+  if ((!iindex_parameter.empty()) && (iindex_parameter.size() != inb_sequence)) {
+    status = false;
+    error.update(SEQ_error[SEQR_NB_SEQUENCE]);
+  }
+  if ((!iidentifier.empty()) && (iidentifier.size() != inb_sequence)) {
+    status = false;
+    error.update(SEQ_error[SEQR_NB_SEQUENCE]);
+  }
+  if ((!ivertex_identifier.empty()) && (ivertex_identifier.size() != inb_sequence)) {
+    status = false;
+    error.update(SEQ_error[SEQR_NB_SEQUENCE]);
+  }
+
+  if (status) {
+    ilength = new int [inb_sequence];
+
+    for (i = 0;i < inb_sequence;i++) {
+      if (!iint_sequence.empty()) {
+        ilength[i] = iint_sequence[i].size();
+      }
+      else if (!ireal_sequence.empty()) {
+        ilength[i] = ireal_sequence[i].size();
+      }
+      if ((!iint_sequence.empty()) && (!ireal_sequence.empty()) && (iint_sequence[i].size() != ireal_sequence[i].size())) {
+        status = false;
+        error.update(SEQ_error[SEQR_SEQUENCE_LENGTH] , i);
+      }
+
+      if (!iindex_parameter.empty()) {
+        switch (iindex_param_type) {
+
+        case TIME : {
+          if (iindex_parameter[i].size() != ilength[i]) {
+            status = false;
+            error.update(SEQ_error[SEQR_SEQUENCE_LENGTH] , i);
+          }
+          break;
+        }
+
+        case POSITION : {
+          if (iindex_parameter[i].size() != ilength[i] + 1) {
+            status = false;
+            error.update(SEQ_error[SEQR_SEQUENCE_LENGTH] , i);
+          }
+          break;
+        }
+        }
+      }
+
+      if ((!ivertex_identifier.empty()) && (ivertex_identifier[i].size() != ilength[i])) {
+        status = false;
+        error.update(SEQ_error[SEQR_SEQUENCE_LENGTH] , i);
+      }
+    }
+    
+    if (!iint_sequence.empty()) {
+      nb_int_variable = iint_sequence[0][0].size();
+      for (i = 0;i < inb_sequence;i++) {
+        for (j = 0;j < iint_sequence[i].size();j++) {
+          if (iint_sequence[i][j].size() != nb_int_variable) {
+            status = false;
+            error.update(STAT_error[STATR_NB_VARIABLE] , i , j);
+          }
+        }
+      }
+    }
+    else {
+      nb_int_variable = 0;
+    }
+
+    if (!ireal_sequence.empty()) {
+      nb_real_variable = ireal_sequence[0][0].size();
+      for (i = 0;i < inb_sequence;i++) {
+        for (j = 0;j < ireal_sequence[i].size();j++) {
+          if (ireal_sequence[i][j].size() != nb_real_variable) {
+            status = false;
+            error.update(STAT_error[STATR_NB_VARIABLE] , i , j);
+          }
+        }
+      }
+    }
+    else {
+      nb_real_variable = 0;
+    }
+
+    if (status) {
+      seq = new Sequences(inb_sequence , iidentifier , ilength , ivertex_identifier , iindex_param_type ,
+                          iindex_parameter , nb_int_variable , nb_real_variable , iint_sequence , ireal_sequence);
+    }
+
+    delete [] ilength;
+  }
+
+  return seq;
+}
 
 
 /*--------------------------------------------------------------*/
@@ -1694,6 +1840,29 @@ ostream& Sequences::ascii_data_write(ostream &os , output_sequence_format format
   ascii_print(os , format , false);
 
   return os;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Writing of a Sequences object.
+ *
+ *  \param[in] format     format (LINE/COLUMN/VECTOR/POSTERIOR_PROBABILITY),
+ *  \param[in] exhaustive flag detail level,
+ *
+ *  \return    string.
+ */
+/*--------------------------------------------------------------*/
+
+string Sequences::ascii_data_write(output_sequence_format format , bool exhaustive) const
+
+{
+  ostringstream oss;
+
+
+  ascii_data_write(oss , format , exhaustive);
+
+  return oss.str();
 }
 
 
@@ -3839,7 +4008,7 @@ double* Sequences::mean_direction_computation(int variable , angle_unit unit) co
  *  \brief Computation of the root mean square error or the mean absolute error for a variable.
  *
  *  \param[in] error       reference on a StatError object,
- *  \param[in] display     flag for displaying the result,
+ *  \param[in] os          stream for displaying the result,
  *  \param[in] variable    variable index,
  *  \param[in] iidentifier sequence identifier,
  *  \param[in] robust      flag computation of mean absolute error.
@@ -3848,7 +4017,7 @@ double* Sequences::mean_direction_computation(int variable , angle_unit unit) co
  */
 /*--------------------------------------------------------------*/
 
-bool Sequences::mean_error_computation(StatError &error , bool display , int variable ,
+bool Sequences::mean_error_computation(StatError &error , ostream *os , int variable ,
                                        int iidentifier , bool robust) const
 
 {
@@ -3978,17 +4147,17 @@ bool Sequences::mean_error_computation(StatError &error , bool display , int var
       }
     }
 
-    if (display) {
-      cout << "\n";
+    if (os) {
+      *os << "\n";
       if (((type[0] != STATE) && (nb_variable > 2)) || ((type[0] == STATE) && (nb_variable > 3))) {
-        cout << STAT_label[STATL_VARIABLE] << " " << variable + 1 << "   ";
+        *os << STAT_label[STATL_VARIABLE] << " " << variable + 1 << "   ";
       }
 
       if (robust) {
-        cout << SEQ_label[SEQL_MEAN_ABSOLUTE_ERROR] << ": " << mean_error << endl;
+        *os << SEQ_label[SEQL_MEAN_ABSOLUTE_ERROR] << ": " << mean_error << endl;
       }
       else {
-        cout << SEQ_label[SEQL_ROOT_MEAN_SQUARE_ERROR] << ": " << mean_error << endl;
+        *os << SEQ_label[SEQL_ROOT_MEAN_SQUARE_ERROR] << ": " << mean_error << endl;
       }
     }
   }

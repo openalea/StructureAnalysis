@@ -3,23 +3,15 @@ import os, sys
 
 
 #a silly comment to trigger a compilation
-try:
-    from openalea.misc.multisetup import Multisetup
-except ImportError:
-    print 'Install OpenAlea.Misc first'
-    try:
-        sys.path.insert(0, os.path.join('..','openalea','misc', 'src', 'openalea', 'misc'))
-        from multisetup import Multisetup
-    except ImportError,e:
-        print e
+from openalea.deploy.multisetup import Multisetup
 
 
-dirs = ['tool',
+dirs = [#'tool',
         'stat_tool',
         'sequence_analysis',
-        'tree',
-        'tree_statistic',
-        'tree_reduction',
+        #'tree',
+        #'tree_statistic',
+        #'tree_reduction',
         # 'tree_matching',
         # 'self_similarity',
 ]

@@ -16,9 +16,13 @@ EchoOn()
 
 dist0 = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.3)
 dist0 = Distribution("Model/Distribution/distribution1.dist")
+# Display(dist0)
+# Display(dist0, Detail->2)
+# Plot(dist0)
 
 dist1 = Distribution("B", 0, 10, 0.3)
 dist1 = Distribution("NB", 0, 3.5, 0.3)
+# Plot(dist0, dist1)
 
 # computation of survivior function and hasard rate
 
@@ -28,7 +32,8 @@ dist1 = Distribution("NB", 0, 3.5, 0.3)
 # simulation/estimation
 
 histo1 = Simulate(dist1, 200)
-
+# Display(histo1, Detail->2)
+# Plot(histo1)
 # Display(histo1, ViewPoint->"Survival")
 # Plot(histo1, ViewPoint->"Survival")
 
@@ -37,6 +42,8 @@ histo1 = Simulate(dist1, 200)
 # MinInfBound->0 (default) / 1
 
 dist2 = Estimate(histo1, "NB", MinInfBound->0, InfBoundStatus->"Fixed")
+# Display(dist2, Detail->2)
+# Plot(dist2)
 
 fagus = FrequencyDistribution("Sample/FrequencyDistribution/fagus1.his")
 
@@ -47,12 +54,15 @@ histo3 = Cluster(fagus, "Information", 0.8)
 histo4 = Cluster(fagus, "Limit", [2, 4, 6, 8, 10])
 histo5 = Transcode(fagus, [1, 2, 2, 3, 3, 4, 4, 5])
 # Display(histo5, Detail->2)
+# Plot(fagus, histo2, histo3, histo4, histo5)
 
 histo7 = Shift(fagus, -2)
 
 histo8 = ValueSelect(fagus, 2, 8)
 
 dist3 = Estimate(fagus, "B")
+# Display(dist3, Detail->2)
+# Plot(dist3)
 
 # comparison of frequency distributions
 
@@ -62,7 +72,7 @@ meri3 = FrequencyDistribution("Sample/FrequencyDistribution/meri3.his")
 meri4 = FrequencyDistribution("Sample/FrequencyDistribution/meri4.his")
 meri5 = FrequencyDistribution("Sample/FrequencyDistribution/meri5.his")
 
-# Compare(meri1, meri2, meri3, meri4, meri5, "N", FileName->"ASCII/meri.cmp")
+# Compare(meri1, meri2, meri3, meri4, meri5, "Nu", FileName->"ASCII/meri.cmp")
 Compare(meri1, meri2, meri3, meri4, meri5, "O")
 
 ComparisonTest("F", meri1, meri2)
@@ -82,10 +92,14 @@ dist5 = Fit(meri5, Distribution("B", 0, 10, 0.437879))
 #
 #########################################################################
 
-mixt1 = Mixture("Model/Distribution/mixture1.mixt")
-mixt1 = Mixture(0.6, Distribution("B", 2, 18, 0.5), 0.4, Distribution("NB", 10, 10, 0.5))
+mixt1 = DiscreteMixture("Model/Distribution/mixture1.mixt")
+mixt1 = DiscreteMixture(0.6, Distribution("B", 2, 18, 0.5), 0.4, Distribution("NB", 10, 10, 0.5))
+# Display(mixt1)
+# Plot(mixt1)
 
 mixt_histo1 = Simulate(mixt1, 200)
+# Display(mixt_histo1)
+# Plot(mixt_histo1)
 
 # extraction of frequency distributions corresponding to a given mixture component
 # (i.e. elementary distributions which are combined by mixture)
@@ -94,29 +108,35 @@ histo10 = ExtractFrequencyDistribution(mixt_histo1, "Component", 1)
 histo11 = ExtractFrequencyDistribution(mixt_histo1, "Component", 2)
 histo12 = Merge(histo10, histo11)
 histo13 = ExtractFrequencyDistribution(mixt_histo1, "Weight")
+# Plot(histo10, histo11, histo12)
 
 # estimation
 
-mixt2 = Estimate(mixt_histo1, "MIXTURE", "B", "NB", MinInfBound->0, InfBoundStatus->"Fixed", DistInfBoundStatus->"Fixed")
-
+mixt2 = Estimate(mixt_histo1, "DISCRETE_MIXTURE", "B", "NB", MinInfBound->0, InfBoundStatus->"Fixed", DistInfBoundStatus->"Fixed")
+# Display(mixt2, Detail->2)
+# Plot(mixt2)
 mixt_histo2 = ExtractData(mixt2)
 
 histo14 = ExtractFrequencyDistribution(ExtractData(mixt2), "Component", 1)
 histo15 = ToFrequencyDistribution(ExtractDistribution(mixt2, "Component", 1))
 
+# estimation with a known component
+
+mixt3 = Estimate(meri1, "DISCRETE_MIXTURE", Distribution("B", 6, 7, 0.5), "B")
+# Display(mixt3, Detail->2)
+# Plot(mixt3)
+
 # estimation and selection of the number of components
-
-mixt3 = Estimate(meri1, "MIXTURE", Distribution("B", 6, 7, 0.5), "B")
-
-# NbComponent->"Fixed" (default) / "Estimated"
-# Penalty->"AIC"/ "AICc" / "BIC" / "BICc" (default), option valide si NbComponent->"Estimated"
+# NbComponent->"Fixed" (default) / "Estimated"
+# Criterion->"AIC"/ "AICc" / "BIC" / "BICc" (default), valid option if NbComponent->"Estimated"
  
 meri = Merge(meri1, meri2, meri3, meri4, meri5)
 
-mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",  NbComponent->"Estimated", Penalty->"BIC")
-# Display(mixt2, Detail->2)
-dist_mixt = ExtractDistribution(mixt2, "Mixture")
-# Plot(dist_mixt)
+mixt4 = Estimate(meri, "DISCRETE_MIXTURE", "B", "B", "B", "B",  NbComponent->"Estimated", Criterion->"BIC")
+# Display(mixt4, Detail->2)
+# Plot(mixt4)
+mixt_histo4 = ExtractDistribution(mixt4, "Mixture")
+# Plot(mixt_histo4)
 
 
 #########################################################################
@@ -127,19 +147,30 @@ dist_mixt = ExtractDistribution(mixt2, "Mixture")
 
 convol1 = Convolution(Distribution("B", 0, 10, 0.5), Distribution("NB", 0, 10, 0.5))
 convol1 = Convolution("Model/Distribution/convolution1.conv")
+# Display(convol1)
+# Plot(convol1)
 
 convol_histo1 = Simulate(convol1, 200)
+# Display(convol_histo1)
+# Plot(convol_histo1)
 
 histo20 = ExtractFrequencyDistribution(convol_histo1, "Elementary", 1)
 
-convol2 = Estimate(convol_histo1, "CONVOLUTION", ExtractDistribution(convol1, "Elementary", 1), MinInfBound->0)
+# estimation with a known distribution
 
-histo21 = ExtractFrequencyDistribution(ExtractData(convol2), "Elementary", 1)
-histo22 = ToFrequencyDistribution(ExtractDistribution(convol2, "Elementary", 1))
+convol20 = Estimate(convol_histo1, "CONVOLUTION", ExtractDistribution(convol1, "Elementary", 1), MinInfBound->0)
+convol21 = Estimate(convol_histo1, "CONVOLUTION", ExtractDistribution(convol1, "Elementary", 1), Estimator->"PenalizedLikelihood", Weight->0.5)
+convol22 = Estimate(convol_histo1, "CONVOLUTION", ExtractDistribution(convol1, "Elementary", 1), Estimator->"Parametric")
+# Display(convol22)
+# Plot(convol22)
+
+histo21 = ExtractFrequencyDistribution(ExtractData(convol22), "Elementary", 1)
+histo22 = ToFrequencyDistribution(ExtractDistribution(convol22, "Elementary", 1))
 # Plot(histo21, histo22)
 
 histo_b2 = FrequencyDistribution("Sample/FrequencyDistribution/nothofagus_antarctica_bud_2.his")
 histo_s2 = FrequencyDistribution("Sample/FrequencyDistribution/nothofagus_antarctica_shoot_2.his")
+# Plot(histo_b2, histo_s2)
 
 # Estimator->"Likelihood" (default) / "PenalizedLikelihood" / "Parametric"
 # Si Estimator->"PenalizedLikelihood", options supplementaires possibles
@@ -151,7 +182,6 @@ histo_s2 = FrequencyDistribution("Sample/FrequencyDistribution/nothofagus_antarc
 convol30 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", Estimate(histo_b2, "CATEGORICAL"), NbIteration->500)
 convol31 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", Estimate(histo_b2, "CATEGORICAL"), NbIteration->100, Estimator->"PenalizedLikelihood", Weight->0.5)
 convol32 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", Estimate(histo_b2, "CATEGORICAL"), Estimator->"Parametric")
-
 # Plot(convol30, convol31, convol32)
 
 # Display(convol31)
@@ -167,6 +197,8 @@ convol32 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", Estimate(histo_b2, "CATEG
 #########################################################################
 
 cdist1 = Compound("Model/Distribution/compound1.cd")
+# Display(cdist1)
+# Plot(cdist1)
 
 chisto1 = Simulate(cdist1, 200)
 
@@ -180,7 +212,7 @@ histo32 = ToFrequencyDistribution(ExtractDistribution(cdist2, "Sum"))
 # Plot(histo31, histo32)
 
 peup1 = FrequencyDistribution("Sample/FrequencyDistribution/peup1.his")
-mixt4 = Estimate(peup1, "MIXTURE", "B", "NB")
+mixt4 = Estimate(peup1, "DISCRETE_MIXTURE", "B", "NB")
 histo33 = ToFrequencyDistributiony(ExtractDistribution(mixt4, "Component", 2))
 histo34 = Shift(histo33, -11)
 
@@ -253,12 +285,12 @@ vec13 = ValueSelect(vec10, 4, 3, 4)
 # Plot(ExtractFrequencyDistribution(vec11, 2), ExtractFrequencyDistribution(vec12, 2), ExtractFrequencyDistribution(vec13, 2))
 # Plot(ExtractFrequencyDistribution(vec11, 5), ExtractFrequencyDistribution(vec12, 5), ExtractFrequencyDistribution(vec13, 5))
 
-mixt20 = Estimate(ExtractFrequencyDistribution(vec10, 2), "MIXTURE", "NB", "NB", "NB", "NB", NbComponent->"Estimated")
+mixt20 = Estimate(ExtractFrequencyDistribution(vec10, 2), "DISCRETE_MIXTURE", "NB", "NB", "NB", "NB", NbComponent->"Estimated")
 # Display(mixt20)
 # Plot(mixt20)
 # Plot(ExtractDistribution(mixt20, "Mixture"))
 
-mixt21 = Estimate(ExtractFrequencyDistribution(vec10, 5), "MIXTURE", "NB", "NB", "NB", "NB", NbComponent->"Estimated")
+mixt21 = Estimate(ExtractFrequencyDistribution(vec10, 5), "DISCRETE_MIXTURE", "NB", "NB", "NB", "NB", NbComponent->"Estimated")
 
 vec9596 = ValueSelect(vec10, 1, 1995, 1996)
 # Plot(ExtractFrequencyDistribution(ValueSelect(vec9596, 4, 1), 6), ExtractFrequencyDistribution(ValueSelect(vec9596, 4, 2), 6), ExtractFrequencyDistribution(ValueSelect(vec9596, 4, 3, 4), 6))
@@ -332,8 +364,8 @@ matrix13 = Compare(vec16, VectorDistance("N", "O", "N", "N"))
 #########################################################################
 
 seq10 = Sequences("Sample/Sequences/arabidopsis_shoot_growth_Col_0_filtered_2.seq")
-SelectStep(seq10, 3, 5)
-SelectStep(seq10, 5, 0.05)
+SelectBinWidth(seq10, 3, 5)
+SelectBinWidth(seq10, 5, 0.05)
 
 vec10 = Vectors(RemoveIndexParameter(SelectVariable(seq10, [1, 3, 5])))
 mixt1 = Mixture("Model/Mixture/arabidopsis_shoot_growth_trivariate_4.mixt")
@@ -342,8 +374,8 @@ mixt14 = Estimate(vec10, "MIXTURE", mixt1)
 # Plot(mixt14, 1)
 
 vec11 = Simulate(mixt14, 1000)
-SelectStep(vec11, 3, 5)
-SelectStep(vec11, 4, 0.05)
+SelectBinWidth(vec11, 3, 5)
+SelectBinWidth(vec11, 4, 0.05)
 # Display(vec11)
 # Plot(vec11, 2)
 # Display(vec11, ViewPoint->"Data")

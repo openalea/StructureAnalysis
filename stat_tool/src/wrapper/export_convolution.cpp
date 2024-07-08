@@ -92,7 +92,7 @@ public:
           }
       }
 
-    conv = Convolution::building(error, nb_dist, dist.get());
+    conv = Convolution::build(error, nb_dist, dist.get());
 
     if (!conv)
       stat_tool::wrap_util::throw_error(error);

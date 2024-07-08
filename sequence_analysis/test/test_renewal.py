@@ -101,7 +101,7 @@ class Test(interface):
     def test_constructor_not_implemented2(self):
         try:
             Renewal(2, 1)
-            print 'here'
+            print('here')
 
             assert False
         except:
