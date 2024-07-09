@@ -3,15 +3,12 @@
 __version__ = "$Id$"
 
 
-from openalea.stat_tool import _stat_tool
 from openalea.stat_tool.distribution import Distribution, Uniform, Binomial
 from openalea.stat_tool.distribution import NegativeBinomial, Poisson
 from openalea.stat_tool.distribution import Multinomial
 from openalea.stat_tool.distribution import ToHistogram, ToDistribution
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool import Estimate
-
-
 
 from openalea.stat_tool._stat_tool import _DiscreteParametricModel
 

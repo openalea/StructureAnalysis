@@ -94,7 +94,7 @@ class Test(interface):
         eprime = Estimate(s, "CONVOLUTION", Binomial(0, 10, 0.5))
 
         # todo: find robust assert ?
-        print eprime.get_mean
+        print(eprime.get_mean)
 
     def test_truncate(self):
         s = self.data

@@ -8,20 +8,22 @@ __version__ = "$Id$"
 
 from openalea.stat_tool.vectors import Vectors
 from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.distribution import Distribution, Uniform, Binomial, \
+from openalea.stat_tool.distribution import (
+    Distribution, Uniform, Binomial, 
     NegativeBinomial
+    )
 from openalea.stat_tool.mixture import Mixture
 from openalea.stat_tool.convolution import Convolution
 from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.output import Plot
-from openalea.stat_tool.data_transform import Shift, Merge, Fit, ValueSelect, \
-    SelectVariable, SelectIndividual, MergeVariable, ExtractDistribution, \
+from openalea.stat_tool.data_transform import (
+    Shift, Merge, Fit, ValueSelect, 
+    SelectVariable, SelectIndividual, MergeVariable, ExtractDistribution, 
     ExtractHistogram, ExtractData, SelectStep
+    )
 
-from tools import runTestClass
-
-from openalea.stat_tool import get_shared_data
+from tools import runTestClass, robust_path as get_shared_data
 
 class data():
     """Create some common data sets for the classes

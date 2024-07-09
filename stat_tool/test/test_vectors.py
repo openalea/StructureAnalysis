@@ -9,9 +9,8 @@ from openalea.stat_tool.vectors import OutputFormat
 from openalea.stat_tool.enums import variance_type
 
 from tools import interface
-from tools import runTestClass
+from tools import runTestClass, robust_path as get_shared_data
 
-from openalea.stat_tool import get_shared_data
 
 class Test(interface):
     """a simple unittest class

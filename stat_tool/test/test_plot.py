@@ -4,6 +4,7 @@ __version__ = "$Id$"
 from openalea.stat_tool import _stat_tool
 from openalea.stat_tool.plot import get_plotter, gnuplot 
 from openalea.stat_tool.plot import DISABLE_PLOT
+DISABLE_PLOT = True
 
 from tools import runTestClass
 

@@ -5,12 +5,17 @@ author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 """
 __version__ = "$Id$"
 
+import os
+
 
 from openalea.stat_tool import Simulate
 from openalea.stat_tool.plot import DISABLE_PLOT
-import os
 from openalea.stat_tool.output import Display, Save
+DISABLE_PLOT=True
 
+from pathlib import Path
+from openalea.stat_tool import get_shared_data, get_shared_data_path
+import openalea.stat_tool as st
 
 def runTestClass(myclass):
     functions = [x for x in dir(myclass) if x.startswith('test')]
@@ -205,3 +210,15 @@ class interface():
     def test_extract_data(self):
         raise NotImplementedError()
 
+
+def robust_path(filename):
+    p = get_shared_data_path(st)
+    if p is not None:
+        # module in develop mode?
+        return get_shared_data(filename)
+    
+    p = Path(st.__path__[0])
+    if 'src' in str(p):
+        root_pkg = p/'../../..'
+        data = get_shared_data_path(root_pkg)
+        return os.path.join(data,filename)
