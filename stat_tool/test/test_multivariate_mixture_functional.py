@@ -23,7 +23,7 @@ def test1():
     d23 = Poisson(0, 0.2)
 
     m = _MultivariateMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
-    print m
+    print(m)
 
     #m2 = _MultivariateMixture("mixture_mv1.mixt")
     #print m2
