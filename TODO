@@ -1,6 +1,0 @@
-TODO list for `StructureAnalysis` to be updated / completed. We target a next official release of the package that must integrate with openalea CI/CD workflow and work on all plateforms.
-
-[ ] Repare `stat_tool` and `sequence_analysis` tests
-[ ] Add `stat_tool` and `sequence_analysus` documentation
-[ ] Specify and document classes design patterns (e.g. should all wrappers be adaptable to a potential `Rcpp` implementation)
-[ ] List prioritary functionalities to be implemented
