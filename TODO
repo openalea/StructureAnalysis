@@ -1,6 +1,20 @@
 TODO list for `StructureAnalysis` to be updated / completed. We target a next official release of the package that must integrate with openalea CI/CD workflow and work on all plateforms.
 
 [ ] Repare `stat_tool` and `sequence_analysis` tests
+    + update tests to be compliant with python 3
+    + let enumerated types be systematically transferred from python to wrappers to C++ by intermediate conversions to int
+    + think on a more automated manner to handle and wrap enumerated types, possibly by replacing them by classes with dictionary and inverse dictionary: {0: "VALUE0", 1: "VALUE1"} and {"VALUE0": 0, "VALUE1": 1}
+    + nosetests raised an error systematically in
+        File "StructureAnalysis/stat_tool/src/openalea/stat_tool/__init__.py", line 24, in get_shared_data
+            return pj(shared_data_path, file)
+        File "openalea/lib/python3.10/posixpath.py", line 76, in join
+            a = os.fspath(a)
+        TypeError: expected str, bytes or os.PathLike object, not NoneType
+
 [ ] Add `stat_tool` and `sequence_analysis` documentation
 [ ] Specify and document classes design patterns (e.g. should all wrappers be adaptable to a potential `Rcpp` implementation)
+    + Most models are composed by elementary distributions chained or aggregated in some manner. Data sets are associated with models estimated from these data through pointers. When displaying (text) or plotting (matplotlib) distributions, this allows the elementary distributions to be compared to histograms or curves.
+    + Currently, multiple dispatch is handled manually through tedious nested tests on types and parameter values. Consider using https://pypi.org/project/multipledispatch/ instead to clarify code and minimize effort. Currently, multiple dispatch is extended to global functions, for example if Class1.Estimate(int, str), Class1.Estimate(int, int), Class2.Estimate(int, str), Class2.Estimate(int, int) exist, method Estimate is overloaded both in each class and globally, through a global function Estimate(obj, *args, *kwargs) that calls obj.Estimate(*args, *kwargs). This principle should not be maintained.
+
 [ ] List prioritary functionalities to be implemented
+    + Several functionalities in stat_tool are possibly already implemented in scikitlearn (hierarchical clustering, ...). Currently the feasibility of wrapping them has been investigated but we could spend more time on hidden markov models (Semi, Variable-order), which are more specific to the module.
