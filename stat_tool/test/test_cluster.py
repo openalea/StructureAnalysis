@@ -4,6 +4,8 @@
 """
 __version__ = "$Id$"
 
+from pathlib import Path
+
 
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.vectors import Vectors, VectorDistance
@@ -20,10 +22,11 @@ class Test:
     """Test class to test cluster function and classes"""
 
     def __init__(self):
+        self.path = Path(__file__).parent
         self.data = self.build_data()
 
     def build_data(self):
-        data = Histogram("data/fagus1.his")
+        data = Histogram(str(Path.joinpath(self.path, "data", "fagus1.his")))
         return data
 
     def test_cluster_histo(self):

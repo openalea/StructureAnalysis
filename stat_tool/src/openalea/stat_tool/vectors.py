@@ -132,12 +132,12 @@ def Vectors(*args, **kargs):
     obj = args[0]
     ret = None
 
-    import openalea.core.path
+    from pathlib import Path
 
     if isinstance(obj, str):
         # constructor from a filename
         ret = _Vectors(args[0])
-    elif isinstance(obj, openalea.core.path.path):
+    elif isinstance(obj, Path):
         # constructor from a path
         ret = _Vectors(str(args[0]))
     elif isinstance(obj, list):
