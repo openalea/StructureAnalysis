@@ -1025,10 +1025,11 @@ public:
 
   static boost::shared_ptr<VectorDistance>
   build_from_types(boost::python::list& types, boost::python::list& weigths,
-      metric distance_type)
+      int distance_type)
   {
     VectorDistance* dist;
     int nb_variable;
+    metric dist_type = metric(distance_type);
 
     nb_variable = boost::python::len(types);
 
@@ -1036,17 +1037,21 @@ public:
         new double[nb_variable]);
 
     stat_tool::wrap_util::auto_ptr_array<variable_type> var_type(
-        new variable_type[nb_variable]);
+         new variable_type[nb_variable]);
+    stat_tool::wrap_util::auto_ptr_array<int> var_type_int(
+        new int[nb_variable]);
 
     // Extract each element of the vector
     for (int i = 0; i < nb_variable; i++)
       {
-        var_type[i] = boost::python::extract<stat_tool::variable_type>(types[i]);
+        // var_type[i] = boost::python::extract<stat_tool::variable_type>(int(types[i]));
+        var_type_int[i] = boost::python::extract<int>(types[i]);
+        var_type[i] = variable_type(var_type_int[i]);
         variable_weight[i] = boost::python::extract<double>(weigths[i]);
       }
 
     dist = new VectorDistance(nb_variable, var_type.get(),
-        variable_weight.get(), distance_type);
+        variable_weight.get(), dist_type);
 
     return boost::shared_ptr<VectorDistance>(dist);
   }

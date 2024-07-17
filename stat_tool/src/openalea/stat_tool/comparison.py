@@ -17,8 +17,10 @@ __version__ = "$Id$"
 
 from . import error
 
-from .enums import variable_type
-from .enums import format_type
+from .enums import (
+    variable_type,
+    output_format
+)
 
 
 from openalea.stat_tool._stat_tool import (
@@ -78,9 +80,10 @@ def compare_histo(histo, *args, **kargs):
         error.CheckType([h],
                         [[_DiscreteDistributionData, _DiscreteMixtureData,
                           _ConvolutionData, _CompoundData]])
-    filename = kargs.get("Filename", None)
-    format = error.ParseKargs(kargs, "Format", "ASCII",
-                                  possible=format_type)
+        filename = kargs.get("Filename", "")
+        format = error.ParseKargs(kargs, "Format",
+                                  default="ASCII",
+                                  possible=output_format)
 
     ret = histo.compare(histos, utype, filename, format)
 

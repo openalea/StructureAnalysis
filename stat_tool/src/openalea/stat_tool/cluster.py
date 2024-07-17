@@ -16,18 +16,25 @@
 """
 __version__ = "$Id$"
 
-from . import error
-from . import interface
+from . import (
+    error,
+    interface
+)
 
-from openalea.stat_tool._stat_tool import _DistanceMatrix
-from openalea.stat_tool._stat_tool import _Cluster
-from openalea.stat_tool._stat_tool import _Dendrogram
+from openalea.stat_tool._stat_tool import (
+    _DistanceMatrix,
+    _Cluster,
+    _Dendrogram
+)
 
-from .enums import format_type
-from .enums import criterion_type
-from .enums import algorithm_type
-from .enums import cluster_type
-from .enums import round_type
+from .enums import (
+    output_format,
+    criterion_type,
+    algorithm_type,
+    cluster_type,
+    round_type
+)
+
 mode_type = round_type
 
 __all__ = [
@@ -439,9 +446,10 @@ def Clustering(matrix, utype, *args, **kargs):
 
         # fixme: is it correct to set "" to the filename by defautl ?
         # if set to None, the prototype does not match
-        filename = kargs.get("Filename", None)
-        format = error.ParseKargs(kargs, "Format", "ASCII",
-                                  possible=format_type)
+        filename = kargs.get("Filename", "")
+        format = error.ParseKargs(kargs, "Format",
+                                  default="ASCII",
+                                  possible=output_format)
         #check options
         if Algorithm != algorithm_type["Agglomerative"] and \
             kargs.get("Criterion"):

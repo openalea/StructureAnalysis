@@ -15,8 +15,10 @@
 """
 __version__ = "$Id$"
 
-from . import interface
-from . import error
+from . import (
+    error,
+    interface
+)
 
 from openalea.stat_tool._stat_tool import (
     _Vectors,
@@ -265,7 +267,7 @@ def VectorDistance(*args, **kargs):
         # assign a uniform weights since none were provided
         weights = [1./len(types) for _elem in types]
 
-        return _VectorDistance(types, weights, distance)
+        return _VectorDistance(types, weights, int(distance))
     # same as above but with weights VectorDistance(0.5, "N", 0.5, "S")
     if isinstance(args[0], int) or isinstance(args[0], float):
         types = list(args[1:len(args):2])
