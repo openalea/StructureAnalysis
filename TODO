@@ -3,7 +3,8 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
 [ ] Repare `stat_tool` and `sequence_analysis` tests
     + update tests to be compliant with python 3
     + let enumerated types be systematically transferred from python to wrappers to C++ by intermediate conversions to int
-    + think on a more automated manner to handle and wrap enumerated types, possibly by replacing them by classes with dictionary and inverse dictionary: {0: "VALUE0", 1: "VALUE1"} and {"VALUE0": 0, "VALUE1": 1}
+    + think about a more automated manner to handle and wrap enumerated types, possibly by replacing them by classes with dictionary and inverse dictionary: {0: "VALUE0", 1: "VALUE1"} and {"VALUE0": 0, "VALUE1": 1}
+    + currently, distributions are picked withing a closed list and reimplemented from scratch. Consider finding existing C++ libraries with python interface (scipy, scikitlearn, boost?) and extend base classes to add estimation methods.
     + nosetests raised an error systematically in
         File "StructureAnalysis/stat_tool/src/openalea/stat_tool/__init__.py", line 24, in get_shared_data
             return pj(shared_data_path, file)
