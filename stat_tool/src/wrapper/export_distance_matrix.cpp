@@ -145,21 +145,24 @@ public:
   }
 
   static std::string
-  hierarchical_clustering(const DistanceMatrix& dm, hierarchical_strategy algorithm,
-      linkage criterion, const char* path, output_format& format)
+  hierarchical_clustering(const DistanceMatrix& dm, int ialgorithm,
+       int icriterion, const std::string path, int iformat)
   {
     StatError error;
     ostringstream os;
+    hierarchical_strategy algorithm = hierarchical_strategy(ialgorithm);
+    linkage criterion = linkage(icriterion);
+    output_format format = output_format(iformat);
 
     bool ret;
 
-    ret = dm.hierarchical_clustering(error, &os, algorithm, criterion, path,
-        format);
+    ret = dm.hierarchical_clustering(error, &os, algorithm, criterion,
+                                     path, format);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    return string();
+    return string(os.str());
 
   }
 

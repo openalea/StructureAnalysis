@@ -145,7 +145,7 @@ class Test(interface):
         for i in v:
             assert len(i) == 4
 
-        assert v[0] == range(4)
+        assert v[0] == list(range(4))
         assert v[1][1] == 5
 
     def test_variance_analysis(self):

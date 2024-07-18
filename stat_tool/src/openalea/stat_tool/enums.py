@@ -144,11 +144,17 @@ algorithm_type = {
      }
 
 # used by Clustering
-format_type = {
-    "ASCII" :'a',
-    "SpreadSheet": 's',
-    "" : 'n'
+output_format = {
+    "ASCII":        OutputFormat.ASCII,
+    "SPREADSHEET":  OutputFormat.SPREADSHEET,
+    "GNUPLOT":      OutputFormat.GNUPLOT,
+    "PLOT":         OutputFormat.PLOT,
     }
+# format_type = {
+#     "ASCII" :'a',
+#     "SpreadSheet": 's',
+#     "" : 'n'
+#     }
 
 cluster_type = {
      "Step":        "cluster_step",

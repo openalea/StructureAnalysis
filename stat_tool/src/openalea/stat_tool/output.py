@@ -20,17 +20,24 @@ __version__ = "$Id$"
 import os
 import glob
 import sys
-from . import plot
-from . import error
+from . import (
+    plot,
+    error,
+)
 
 # Output functions
-from openalea.stat_tool._stat_tool import FORWARD_DYNAMIC_PROGRAMMING, \
-    FORWARD_BACKWARD_SAMPLING, GENERALIZED_VITERBI, \
-    FORWARD_BACKWARD_SAMPLING
+from openalea.stat_tool._stat_tool import (
+    FORWARD_DYNAMIC_PROGRAMMING,
+    FORWARD_BACKWARD_SAMPLING, GENERALIZED_VITERBI,
+    FORWARD_BACKWARD_SAMPLING,
+)
 
 try:
-    from openalea.sequence_analysis.enums import NB_STATE_SEQUENCE, \
-        NB_SEGMENTATION
+    from openalea.sequence_analysis.enums import (
+        NB_STATE_SEQUENCE,
+        NB_SEGMENTATION,
+)
+
 except:
     NB_SEGMENTATION = 10
     NB_STATE_SEQUENCE = 10
