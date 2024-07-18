@@ -7,9 +7,8 @@ from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.distribution import Distribution
 
 from tools import interface
-from tools import runTestClass
+from tools import runTestClass, robust_path as get_shared_data
 
-from openalea.stat_tool import get_shared_data
 
 class Test(interface):
     """a simple unittest class
@@ -122,7 +121,7 @@ def test_extract_vec():
     vs = stat_tool.Vectors("data/cvectors.vec")
     h = vs.extract(4)
     assert h
-    print h
+    print(h)
 
 
 if __name__ == "__main__":

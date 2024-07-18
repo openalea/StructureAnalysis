@@ -18,10 +18,8 @@ from openalea.stat_tool.enums import distribution_identifier_type
 
 from openalea.stat_tool.estimate import Estimate, likelihood_penalty_type
 
-from tools import runTestClass
+from tools import runTestClass, robust_path as get_shared_data
 
-
-from openalea.stat_tool import get_shared_data
 
 class Test():
 

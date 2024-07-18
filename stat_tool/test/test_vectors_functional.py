@@ -18,12 +18,18 @@
 """
 __version__ = "$Id$"
 
-from openalea.stat_tool.vectors import Vectors, \
-    VarianceAnalysis, ContingencyTable
+from openalea.stat_tool.vectors import (
+    Vectors, 
+    VarianceAnalysis, 
+    ContingencyTable
+)
 from openalea.stat_tool.data_transform import ValueSelect
 from openalea.stat_tool.regression import Regression
-from openalea.stat_tool.data_transform import ExtractHistogram, \
-     SelectVariable, ExtractDistribution
+from openalea.stat_tool.data_transform import (
+    ExtractHistogram, 
+    SelectVariable, 
+    ExtractDistribution
+)
 from openalea.stat_tool.comparison import Compare
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.output import Display, Plot
@@ -72,22 +78,22 @@ def test():
     Plot(ExtractHistogram(vec11, 5), ExtractHistogram(vec12, 5),
         ExtractHistogram(vec13, 5))
     
-    mixt20 = Estimate(ExtractHistogram(vec10, 2), \
-                      "MIXTURE", "NB", "NB", "NB", "NB", \
+    mixt20 = Estimate(ExtractHistogram(vec10, 2), 
+                      "MIXTURE", "NB", "NB", "NB", "NB", 
                       NbComponent="Estimated")
     Display(mixt20)
     
     Plot(mixt20)
     Plot(ExtractDistribution(mixt20, "Mixture"))
     
-    _mixt21 = Estimate(ExtractHistogram(vec10, 5), \
-                       "MIXTURE", "NB", "NB", "NB", "NB", \
+    _mixt21 = Estimate(ExtractHistogram(vec10, 5), 
+                       "MIXTURE", "NB", "NB", "NB", "NB", 
                        NbComponent="Estimated")
     
     vec9596 = ValueSelect(vec10, 1, 1995, 1996)
     
-    Plot(ExtractHistogram(ValueSelect(vec9596, 4, 1), 6), \
-         ExtractHistogram(ValueSelect(vec9596, 4, 2), 6), \
+    Plot(ExtractHistogram(ValueSelect(vec9596, 4, 1), 6), 
+         ExtractHistogram(ValueSelect(vec9596, 4, 2), 6), 
          ExtractHistogram(ValueSelect(vec9596, 4, 3, 4), 6))
     
     # linear regression

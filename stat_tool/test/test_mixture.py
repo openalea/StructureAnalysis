@@ -9,9 +9,7 @@ from openalea.stat_tool.distribution import Binomial
 from openalea.stat_tool.estimate import Estimate
 
 from tools import interface
-from tools import runTestClass
-
-from openalea.stat_tool import get_shared_data
+from tools import runTestClass, robust_path as get_shared_data
 
 class Test(interface):
     """a simple unittest class"""
