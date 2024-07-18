@@ -23,7 +23,7 @@ def test1():
     d23 = Poisson(0, 0.2)
 
     m = _MultivariateMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
-    print m
+    print(m)
 
     #m2 = _MultivariateMixture("mixture_mv1.mixt")
     #print m2
@@ -34,13 +34,13 @@ def test1():
     #m = _MultivariateMixture("mixture_mv_nonparam.mixt")
    # print m
 
-    print "Simulation de melanges multivaries : "
+    print("Simulation de melanges multivaries : ")
     v = m.simulate(5000)
-    print v
+    print(v)
 
     Plot(m, variable=1, Title="Simulated mixture")
 
-    print "Estimation de melanges multivaries ", \
+    print("Estimation de melanges multivaries ")
     #    "d'apres un modele initial : "
     m_estim_model = v.mixture_estimation(m, 100,  [True, True])
 
@@ -48,8 +48,8 @@ def test1():
     extracted_mixture.old_plot(variable=1, Title="Marginal distribution")
     Plot(m_estim_model, variable = 1, Title="Estimated mixture")
 
-    print "Estimation de melanges multivaries ", \
-        "d'apres un nombre de composantes : "
+    print("Estimation de melanges multivaries ", 
+        "d'apres un nombre de composantes : ")
         
     m_estim_nbcomp = v.mixture_estimation(2, 100, [True, True])
     

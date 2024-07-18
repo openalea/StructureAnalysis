@@ -5,14 +5,15 @@ of stat_tool_test.aml
 """
 __version__ = "$Id$"
 
+import os
 
 from openalea.stat_tool import Compound, Histogram, Distribution
 
-from openalea.stat_tool import Simulate, ExtractHistogram, ToHistogram
-from openalea.stat_tool import Estimate, ExtractData, ExtractDistribution
-from openalea.stat_tool import Plot, Shift
-from openalea.stat_tool import shared_data_path
-import os
+from openalea.stat_tool import (
+    Simulate, ExtractHistogram, ToHistogram,
+    Estimate, ExtractData, ExtractDistribution,
+    Plot, Shift
+)
 
 # read data file
 def test():

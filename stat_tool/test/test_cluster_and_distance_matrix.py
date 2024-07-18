@@ -20,7 +20,8 @@ from openalea.stat_tool import SelectIndividual
 from openalea.stat_tool import ExtractHistogram
 from openalea.stat_tool import Display
 
-from openalea.stat_tool import get_shared_data
+#from openalea.stat_tool import get_shared_data
+from tools import robust_path as get_shared_data
 
 def test():
     vec10 = Vectors(get_shared_data('chene_sessile.vec'))

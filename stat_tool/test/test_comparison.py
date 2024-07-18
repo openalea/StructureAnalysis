@@ -17,9 +17,10 @@ from openalea.stat_tool.vectors import Vectors, VectorDistance
 from openalea.stat_tool.data_transform import SelectVariable
 from openalea.stat_tool.comparison import Compare, ComparisonTest
 
-from tools import runTestClass
+from tools import runTestClass, robust_path as get_shared_data
 
-from openalea.stat_tool import get_shared_data
+#from openalea.stat_tool import get_shared_data
+
 class TestHisto():
     """a simple unittest class"""
 

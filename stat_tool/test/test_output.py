@@ -11,9 +11,8 @@ from openalea.stat_tool.data_transform import Shift
 from openalea.stat_tool.output import Plot, Display
 from openalea.stat_tool.plot import DISABLE_PLOT
 
-from tools import runTestClass
+from tools import runTestClass, robust_path as get_shared_data
 
-from openalea.stat_tool import get_shared_data
 
 class Test:
     """a simple unittest class"""

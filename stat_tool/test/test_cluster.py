@@ -11,11 +11,14 @@ from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.vectors import Vectors, VectorDistance
 from openalea.stat_tool.comparison import Compare
 from openalea.stat_tool.data_transform import SelectVariable
-from openalea.stat_tool.cluster import Transcode, Clustering, \
-    ToDistanceMatrix, Cluster
+from openalea.stat_tool.cluster import (Transcode, Clustering, 
+    ToDistanceMatrix, Cluster)
 
-from tools import runTestClass
-from openalea.stat_tool import get_shared_data
+from tools import runTestClass, robust_path
+import openalea.stat_tool as st
+#from openalea.stat_tool import get_shared_data, get_shared_data_path
+
+get_shared_data = robust_path
 
 
 class Test:
