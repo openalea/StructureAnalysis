@@ -1,6 +1,7 @@
 TODO list for `StructureAnalysis` to be updated / completed. We target a next official release of the package that must integrate with openalea CI/CD workflow and work on all plateforms.
 
 [ ] Repare `stat_tool` and `sequence_analysis` tests
+    + create a new branch for each new development (do not systematically use new_python_api)
     + update tests to be compliant with python 3
     + let enumerated types be systematically transferred from python to wrappers to C++ by intermediate conversions to int
     + think about a more automated manner to handle and wrap enumerated types, possibly by replacing them by classes with dictionary and inverse dictionary: {0: "VALUE0", 1: "VALUE1"} and {"VALUE0": 0, "VALUE1": 1}
@@ -14,6 +15,7 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
     + python
 
 [ ] Add `stat_tool` and `sequence_analysis` documentation
+[ ] Fix auto-build: missing .conda file?
 [ ] Specify and document classes design patterns (e.g. should all wrappers be adaptable to a potential `Rcpp` implementation)
     + Most models are composed by elementary distributions chained or aggregated in some manner. Data sets are associated with models estimated from these data through pointers. When displaying (text) or plotting (matplotlib) distributions, this allows the elementary distributions to be compared to histograms or curves.
     + Currently, multiple dispatch is handled manually through tedious nested tests on types and parameter values. Consider using https://pypi.org/project/multipledispatch/ instead to clarify code and minimize effort. Currently, multiple dispatch is extended to global functions, for example if Class1.Estimate(int, str), Class1.Estimate(int, int), Class2.Estimate(int, str), Class2.Estimate(int, int) exist, method Estimate is overloaded both in each class and globally, through a global function Estimate(obj, *args, *kwargs) that calls obj.Estimate(*args, *kwargs). This principle should not be maintained.
