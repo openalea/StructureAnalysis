@@ -65,6 +65,13 @@ distribution_identifier_type = {
     "MULTINOMIAL": DistributionIdentifierType.MULTINOMIAL,
     }
 
+# TODO: For the sake of consistency, should be in stat_tool.h and exported as enum?
+format_type = { \
+    "ASCII" :'a',
+    "SpreadSheet": 's',
+    "" : 'n'
+    }
+
 variable_type = {
     "O" : VariableType.ORDINAL,
     "ORDINAL" : VariableType.ORDINAL,
@@ -150,11 +157,6 @@ output_format = {
     "GNUPLOT":      OutputFormat.GNUPLOT,
     "PLOT":         OutputFormat.PLOT,
     }
-# format_type = {
-#     "ASCII" :'a',
-#     "SpreadSheet": 's',
-#     "" : 'n'
-#     }
 
 cluster_type = {
      "Step":        "cluster_step",
