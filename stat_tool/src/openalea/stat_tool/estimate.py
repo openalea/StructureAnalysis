@@ -244,6 +244,7 @@ class EstimateFunctions:
             Penalty can only be used with NbComponent set to 'Estimated'""")
 
         if not NbComponent: # "FIXED"
+            # TODO: debug from here (imixt: are components BINOMIAL distributions, what is the mass function, etc.)
             imixt = _DiscreteMixture(pcomponent)
             ret = histo.discrete_mixture_estimation1(imixt, estimate, MinInfBound,
                                             InfBoundStatus, DistInfBoundStatus)

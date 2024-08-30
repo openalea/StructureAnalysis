@@ -201,6 +201,8 @@ void DiscreteMixture::computation(int min_nb_value , double cumul_threshold , bo
  */
 /*--------------------------------------------------------------*/
 
+// TODO: initialize mass, even in the case of CATEGORICAL?
+
 void DiscreteMixture::init(const FrequencyDistribution &histo , bool *estimate ,
                            int min_inf_bound , bool component_flag)
 
@@ -581,7 +583,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
           mixt->variance_correction(mixt_histo , estimate , min_inf_bound);
 
           // M-step: weight reestimation
-
+          // TODO: obviously mixt_histo->weight->frequency[k] == 0, where is it supposed to be updated?
           for (k = 0;k < nb_component;k++) {
             mixt->weight->mass[k] = (double)mixt_histo->weight->frequency[k] /
                                     (double)mixt_histo->weight->nb_element;
