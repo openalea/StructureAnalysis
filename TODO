@@ -6,14 +6,14 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
     + let enumerated types be systematically transferred from python to wrappers to C++ by intermediate conversions to int
     + think about a more automated manner to handle and wrap enumerated types, possibly by replacing them by classes with dictionary and inverse dictionary: {0: "VALUE0", 1: "VALUE1"} and {"VALUE0": 0, "VALUE1": 1}
     + currently, distributions are picked withing a closed list and reimplemented from scratch. Consider finding existing C++ libraries with python interface (scipy, scikitlearn, boost?) and extend base classes to add estimation methods.
-    + nosetests raised an error in test_mixture_functional.py
+    + nosetests raised an error in test_mixture_functional.py (should be solved by robust_path?)
         File "StructureAnalysis/stat_tool/src/openalea/stat_tool/__init__.py", line 24, in get_shared_data
             return pj(shared_data_path, file)
         File "openalea/lib/python3.10/posixpath.py", line 76, in join
             a = os.fspath(a)
         TypeError: expected str, bytes or os.PathLike object, not NoneType
     + python
-
+    + Update C++ version
 [ ] Add `stat_tool` and `sequence_analysis` documentation
 [ ] Fix auto-build: missing .conda file?
 [ ] Specify and document classes design patterns (e.g. should all wrappers be adaptable to a potential `Rcpp` implementation)
