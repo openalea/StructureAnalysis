@@ -29,7 +29,6 @@ class Test(interface):
         assert mixt.nb_component == 3
         return mixt
 
-    #TODO: test constructor like Mixture(d1, d2, d3) or _DiscreteMixture(d1, d2, d3)
     def test_constructor_from_file(self):
         self.constructor_from_file()
 

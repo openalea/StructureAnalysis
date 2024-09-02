@@ -285,7 +285,17 @@ public:
     return histo;
   }
 
-  WRAP_METHOD3(FrequencyDistribution, parametric_estimation, DiscreteParametricModel, discrete_parametric, int, bool);
+  static DiscreteParametric* parametric_estimation(const DiscreteDistributionData& histo, int ident, int min_inf_bound, bool flag)
+  {
+    discrete_parametric iident = discrete_parametric(ident);
+    DiscreteParametric *dist = NULL;
+
+    dist = histo.parametric_estimation(iident, min_inf_bound, flag);
+
+    return dist;
+  }
+
+  // WRAP_METHOD3(FrequencyDistribution, parametric_estimation, DiscreteParametricModel, discrete_parametric, int, bool);
   WRAP_METHOD3(FrequencyDistribution, value_select, DiscreteDistributionData, int, int, bool);
   WRAP_METHOD1(FrequencyDistribution, shift, DiscreteDistributionData, int);
   WRAP_METHOD1(FrequencyDistribution, fit, DiscreteParametricModel, DiscreteParametric);

@@ -444,6 +444,7 @@ void class_discrete_parametric_model()
   //.def(init< int, boost::python::optional <discrete_parametric, int, int, double, double > >())
   .def(init <const Distribution& >())
   .def(init <const DiscreteParametric& >())
+  .def(init <const DiscreteParametric&, const FrequencyDistribution* >())
   .def(init <const DiscreteParametricModel& , boost::python::optional< bool> >())
 
   .def("__init__", make_constructor(DiscreteParametricModelWrap::parametric_model_from_file))

@@ -135,15 +135,22 @@ class TestDistribution():
     def test_uniform(self):
 
         d = Distribution("UNIFORM", 0, 10)
-        assert list(d.simulate(1000))
-        assert d.get_sup_bound == 10
-        assert d.get_inf_bound == 0
-        assert d.get_probability == -1
-        assert d.get_parameter == -1
-        assert d.get_ident() == 4
+        s = d.simulate(1000)
+        assert list(s)
+        import numpy as np
+        assert(np.sum(s) == 1000)
+        assert(d.get_sup_bound == 10)
+        assert(d.get_inf_bound == 0)
+        assert(d.get_probability == -1)
+        assert(d.get_parameter == -1)
+        from openalea.stat_tool.enums import distribution_identifier_type as dist_type
+
+        assert(dist_type['UNIFORM'] == d.get_ident())
 
         d = Uniform(0, 10)
-        assert list(d.simulate(1000))
+        s = d.simulate(1000)
+        assert list(s)
+        assert(np.sum(s) == 1000)
 
         m = d.simulate(1000).extract_model()
         assert isinstance(m, _DiscreteParametricModel)

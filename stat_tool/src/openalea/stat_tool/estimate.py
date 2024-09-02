@@ -107,7 +107,8 @@ class EstimateFunctions:
             raise KeyError("Valid type are %s" % (str(list(dist_type.keys()))))
 
 
-        return histo.parametric_estimation(ident_id, MinInfBound, flag)
+        e = histo.parametric_estimation(int(ident_id), MinInfBound, flag)
+        return(_DiscreteParametricModel(e, histo))
 
 
 
@@ -224,7 +225,9 @@ class EstimateFunctions:
                 pcomponent.append(_DiscreteParametric(0, dist_type[dist]))
                 ident.append(dist_type[dist])
                 estimate.append(True)
-            elif isinstance(dist, _DiscreteParametricModel):
+            elif (isinstance(dist, _DiscreteParametric) or \
+                isinstance(dist, _DiscreteParametricModel)):
+                # TODO: check wether ident is properly transferred to _DiscreteParametric(dist)
                 pcomponent.append(_DiscreteParametric(dist))
                 ident.append(None)
                 estimate.append(False)
