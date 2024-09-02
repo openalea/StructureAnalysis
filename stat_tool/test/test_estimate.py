@@ -27,30 +27,74 @@ class Test():
         pass
 
     def test_nonparametric(self):
-        h = Histogram(get_shared_data("meri1.his"))
+        h = histogram(get_shared_data("meri1.his"))
         e =  h.estimate_nonparametric()
         assert e
-        # assert abs(e.likelihood() - VAL) < epsilon
+         assert abs(e.likelihood() - val) < epsilon
 
     def test_nb(self):
-        """NegativeBinomial"""
-        h = Histogram(get_shared_data("peup2.his"))
-        assert h.estimate_parametric('NB')
+        """negativebinomial"""
+        h = histogram(get_shared_data("peup2.his"))
+        assert h.estimate_parametric('nb')
 
     def test_binomial(self):
-        """BINOMIAL Distribution"""
-        h = Histogram(get_shared_data("meri5.his"))
-        assert h.estimate_parametric('B')
+        """binomial distribution"""
+        h = histogram(get_shared_data("meri5.his"))
+        assert h.estimate_parametric('b')
 
     def test_poisson(self):
-        """Poisson distribution
-        >>> p = distribution.Poisson(0, 10)
+        """poisson distribution
+        >>> p = distribution.poisson(0, 10)
         >>> h = p.simulate(1000)
         """
-        p = distribution.Poisson(0, 10)
+        p = distribution.poisson(0, 10)
         h = p.simulate(1000)
 
-        assert h.estimate_parametric('P')
+        assert h.estimate_parametric('p')
+
+    def test_binomial_estimation(self):
+        """estimate binomial distribution"""
+        from openalea.stat_tool.enums import distribution_identifier_type as dist_type
+        p = distribution.binomial(2, 12, 0.7)
+        h = p.simulate(1000)
+        d1 = h.estimate_parametric('b')
+        d2 = h.default_parametric_estimation(dist_type['b'])
+        assert d1
+        assert d2
+        return(d1, d2)
+
+    def test_uniform_estimation(self):
+        """Estimate Uniform distribution"""
+        from openalea.stat_tool.enums import distribution_identifier_type as dist_type
+        p = distribution.Uniform(2, 12)
+        h = p.simulate(1000)
+        d1 = h.estimate_parametric('U')
+        d2 = h.default_parametric_estimation(dist_type['U'])
+        assert d1
+        assert d2
+        return(d1, d2)
+
+    def test_Poisson_estimation(self):
+        """Estimate Binomial distribution"""
+        from openalea.stat_tool.enums import distribution_identifier_type as dist_type
+        p = distribution.Poisson(0, 10)
+        h = p.simulate(1000)
+        d1 = h.estimate_parametric('P')
+        d2 = h.default_parametric_estimation(dist_type['P'])
+        assert d1
+        assert d2
+        return(d1, d2)
+
+    def test_negative_binomial_estimation(self):
+        """Estimate Negative Binomial distribution"""
+        from openalea.stat_tool.enums import distribution_identifier_type as dist_type
+        p = distribution.NegativeBinomial(2, 4.5, 0.6)
+        h = p.simulate(1000)
+        d1 = h.estimate_parametric('NB')
+        d2 = h.default_parametric_estimation(dist_type['NB'])
+        assert d1
+        assert d2
+        return(d1, d2)
 
     def test_mixture_1(self):
         distributions = ["B", "NB", "NB", "NB"]

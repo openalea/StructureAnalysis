@@ -197,7 +197,7 @@ def NegativeBinomial(inf_bound, param=D_DEFAULT,
     :Parameters:
       * inf_bound (int) : lower bound to the range of possible values
         (shift parameter)
-      * param (int, float) : parameter of the Poisson distribution
+      * param (int, float) : parameter of the Negative Binomial distribution
       * proba (int, float) : probability of 'success'
 
     .. plot::

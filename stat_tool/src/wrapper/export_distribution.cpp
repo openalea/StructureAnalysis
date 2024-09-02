@@ -255,7 +255,7 @@ void class_discrete_parametric()
 
   // DiscreteParametric base class
   class_< DiscreteParametric, bases< Distribution > >
-    ("_DiscreteParametric", init< boost::python::optional< int, discrete_parametric, int, int, double, double > >())
+    ("_DiscreteParametric", init< int, discrete_parametric, boost::python::optional< int, int, double, double > >())
     .def(init<discrete_parametric, int, int, double, double, boost::python::optional< double > >())
     .def(init<int, int>())
     .def(init<const Distribution&, boost::python::optional<int> >())

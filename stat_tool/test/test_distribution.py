@@ -110,7 +110,6 @@ class Test(interface):
         s = self.data
         _res = s.truncate(4)
 
-
 class TestDistribution():
     """Test the distribution (Uniform, Binomial, ...)
 

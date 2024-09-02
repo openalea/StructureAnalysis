@@ -1154,6 +1154,50 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Estimation of the parameters of a uniform distribution on the basis of
+ *         a frequency distribution (estimation is biased)
+ *
+ *  \param[in] dist               pointer on a DiscreteParametric object,
+ *  \param[in] min_inf_bound      minimum lower bound of the support,
+ *  \param[in] min_inf_bound_flag flag on the distribution shift.
+ *
+ *  \return                       maximized log-likelihood.
+ */
+/*--------------------------------------------------------------*/
+
+template <typename Type>
+double Reestimation<Type>::uniform_estimation(DiscreteParametric *dist , int min_inf_bound ,
+                                              bool min_inf_bound_flag) const
+
+{
+  int i , j;
+  int inf_bound , sup_bound;
+  double likelihood = D_INF;
+
+
+    if (!min_inf_bound_flag) {
+      inf_bound = min_inf_bound;
+    }
+    else {
+      inf_bound = offset;
+    }
+    sup_bound = nb_value-1;
+    dist->inf_bound = inf_bound;
+    dist->sup_bound = sup_bound;
+    dist->uniform_computation();
+    likelihood = dist->likelihood_computation(*this);
+    if (likelihood != D_INF) {
+      dist->init(inf_bound , sup_bound , D_DEFAULT, D_DEFAULT);
+    }
+
+
+  return likelihood;
+}
+
+
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Estimation of the parameters of a shifted Poisson distribution on the basis of
  *         a frequency distribution.
  *
@@ -1441,6 +1485,9 @@ double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int 
 
 
   switch (dist->ident) {
+  case UNIFORM :
+    likelihood = uniform_estimation(dist , min_inf_bound , min_inf_bound_flag);
+    break;
   case BINOMIAL :
     likelihood = binomial_estimation(dist , min_inf_bound , min_inf_bound_flag);
     break;

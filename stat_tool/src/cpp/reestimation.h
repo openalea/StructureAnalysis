@@ -139,6 +139,7 @@ namespace stat_tool {
     void penalized_likelihood_estimation(Distribution *dist , double weight , penalty_type pen_type ,
                                          double *penalty , side_effect outside) const;
 
+    double uniform_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag) const;
     double binomial_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag) const;
     double poisson_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
                               double cumul_threshold) const;

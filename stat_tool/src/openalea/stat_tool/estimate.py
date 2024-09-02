@@ -17,6 +17,7 @@
 
 from . import error, interface
 from .enums import *
+from .distribution import *
 
 import openalea.stat_tool._stat_tool as cst
 
@@ -27,6 +28,7 @@ _Convolution = cst._Convolution
 _Distribution = cst._Distribution
 _DiscreteMixture = cst._DiscreteMixture
 _FrequencyDistribution = cst._FrequencyDistribution
+_DiscreteDistributionData = cst._DiscreteDistributionData
 
 # from enums import likelihood_penalty_type
 # from enums import smoothing_penalty_type
@@ -44,6 +46,46 @@ from .enums import distribution_identifier_type as dist_type
 # from openalea.stat_tool._stat_tool import _FrequencyDistribution
 # from openalea.stat_tool._stat_tool import LikelihoodPenaltyType
 
+from openalea.stat_tool._stat_tool import I_DEFAULT, D_DEFAULT
+
+
+def default_parametric_estimation(histo, iident_id):
+    """Dummy estimation of parametric distribution, using maximal bounds
+    as compliant with histo and moment estimators"""
+    if isinstance(histo, _FrequencyDistribution):
+        if iident_id == dist_type["B"]:
+            # BINOMIAL
+            inf_bound = histo.offset
+            sup_bound = histo.nb_value
+            mean = histo.mean
+            e = Binomial(inf_bound, sup_bound, max(1e-10, mean/sup_bound))
+        elif iident_id == dist_type["U"]:
+            # UNIFORM
+            inf_bound = histo.offset
+            sup_bound = histo.nb_value-1
+            print(inf_bound, sup_bound)
+            e = Uniform(inf_bound, sup_bound)
+            print(e)
+        elif iident_id == dist_type["P"]:
+            # POISSON
+            inf_bound = histo.offset
+            sup_bound = histo.nb_value
+            mean = histo.mean
+            e = Poisson(inf_bound, max(1e-10, mean-inf_bound))
+        elif iident_id == dist_type["NB"]:
+            inf_bound = histo.offset
+            sup_bound = histo.nb_value
+            mean = histo.mean
+            var = histo.var
+            if (mean - inf_bound) > 0:
+                prob = min(1-1e-10, max(1e-10, var / (mean - inf_bound)))
+            param = prob * abs(mean - offset) / (1-prob)
+            e = NegativeBinomial(inf_bound, param, prob)
+        else:
+            raise ValueError("Wrong distribution label:" + str(iident_id))
+    else:
+        raise TypeError("Wrong argument type:" + str(type(histo)))
+    return(e)
 
 __all__ = ["Estimate", "EstimateFunctions"]
 
@@ -108,9 +150,14 @@ class EstimateFunctions:
 
 
         e = histo.parametric_estimation(int(ident_id), MinInfBound, flag)
-        return(_DiscreteParametricModel(e, histo))
-
-
+        if (e is not None):
+            return(_DiscreteParametricModel(e, histo))
+        else:
+            e = histo.default_parametric_estimation(int(ident_id))
+            if (e is not None):
+                raise FormatError("Estimation Error")
+            else:
+                return(_DiscreteParametricModel(e, histo))
 
 
     def estimate_DiscreteMixture(histo, *args, **kargs):
@@ -210,7 +257,7 @@ class EstimateFunctions:
         # Parse list of distribution that could be defined by a distribution,
         # compound, mixture, convolution or simplya string such as "B",
         # "Mixture", ...
-
+        # breakpoint()
         for dist in distributions:
 
             if isinstance(dist, str):
@@ -221,14 +268,18 @@ class EstimateFunctions:
                         must be in %s. You provided %s"""
                         % (dist_authorised, dist))
                 #todo: check that poisson is allowed
-
-                pcomponent.append(_DiscreteParametric(0, dist_type[dist]))
+                # TODO: check wether ident is properly transferred to _DiscreteParametric(dist)
+                print("Entering _DiscreteParametricModel(0, dist_type[dist])")
+                # d = _DiscreteParametricModel(dist_type[dist], I_DEFAULT, I_DEFAULT, D_DEFAULT, D_DEFAULT)
+                d = _DiscreteDistributionData(histo).estimate_parametric(dist)
+                print("Leaving _DiscreteParametricModel(0, dist_type[dist])")
+                assert(d.get_ident() == dist_type[dist])
+                pcomponent.append(d)
                 ident.append(dist_type[dist])
                 estimate.append(True)
             elif (isinstance(dist, _DiscreteParametric) or \
                 isinstance(dist, _DiscreteParametricModel)):
-                # TODO: check wether ident is properly transferred to _DiscreteParametric(dist)
-                pcomponent.append(_DiscreteParametric(dist))
+                pcomponent.append(_DiscreteParametricModel(dist))
                 ident.append(None)
                 estimate.append(False)
             elif type(dist) in [_DiscreteMixture, _Convolution, _Compound]:
@@ -403,6 +454,7 @@ class EstimateFunctions:
 
 # Extend _Histogram class
 _FrequencyDistribution = interface.extend_class( _FrequencyDistribution, EstimateFunctions)
+_FrequencyDistribution.default_parametric_estimation = lambda h, iident_id: default_parametric_estimation(h, iident_id)
 
 
 

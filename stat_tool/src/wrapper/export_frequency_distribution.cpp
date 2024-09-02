@@ -53,12 +53,6 @@ public:
 
   // __len__
   static int
-  histo_get_nb_value(FrequencyDistribution &h)
-  {
-    return h.nb_value;
-  }
-
-  static int
   histo_get_nb_element(FrequencyDistribution &h)
   {
     return h.nb_element;
@@ -407,6 +401,12 @@ void class_frequency_distribution()
   .def("__len__", FrequencyDistributionWrap::histo_get_nb_element)
   .def("__getitem__", FrequencyDistributionWrap::histo_get_item)
 
+  // Statistics
+  .add_property("offset", &FrequencyDistribution::offset, "Get offset (inf_bound)")
+  .add_property("variance", &FrequencyDistribution::variance, "Get variance")
+  .add_property("nb_value", &FrequencyDistribution::nb_value, "Get highest possible value (sup_bound)")
+  .add_property("mean", &FrequencyDistribution::mean, "mean")
+
   // Comparison
   .def("compare", FrequencyDistributionWrap::comparison,
       args("frequency distribution"),"Comparison of frequency distributions")
@@ -579,7 +579,7 @@ void class_distribution_data()
 
     .def("__init__", make_constructor(DistributionDataWrap::distribution_data_from_list ))
     .def("__init__", make_constructor(DistributionDataWrap::distribution_data_from_file))
-
+    .def(init <const FrequencyDistribution& >())
     .def(self_ns::str(self)) // __str__
 
     // Output
