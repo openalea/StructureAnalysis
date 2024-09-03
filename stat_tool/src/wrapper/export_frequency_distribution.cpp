@@ -103,12 +103,14 @@ public:
   }
 
   static std::string
-  comparison(const FrequencyDistribution &h, boost::python::tuple& histos, variable_type type,
-      const char* filename, output_format format)
+  comparison(const FrequencyDistribution &h, boost::python::tuple& histos, int itype,
+      const char* filename, int iformat)
   {
     ostringstream os;
     StatError error;
     int nb_histo = boost::python::len(histos);
+    variable_type type = variable_type(itype);
+    output_format format = output_format(iformat);
 
     // Test list length
     if (nb_histo == 0)
