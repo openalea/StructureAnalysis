@@ -18,6 +18,7 @@
 from . import error, interface
 from .enums import *
 from .distribution import *
+from .error import *
 
 import openalea.stat_tool._stat_tool as cst
 
@@ -154,7 +155,7 @@ class EstimateFunctions:
             return(_DiscreteParametricModel(e, histo))
         else:
             e = histo.default_parametric_estimation(int(ident_id))
-            if (e is not None):
+            if (e is None):
                 raise FormatError("Estimation Error")
             else:
                 return(_DiscreteParametricModel(e, histo))
@@ -269,10 +270,7 @@ class EstimateFunctions:
                         % (dist_authorised, dist))
                 #todo: check that poisson is allowed
                 # TODO: check wether ident is properly transferred to _DiscreteParametric(dist)
-                print("Entering _DiscreteParametricModel(0, dist_type[dist])")
-                # d = _DiscreteParametricModel(dist_type[dist], I_DEFAULT, I_DEFAULT, D_DEFAULT, D_DEFAULT)
                 d = _DiscreteDistributionData(histo).estimate_parametric(dist)
-                print("Leaving _DiscreteParametricModel(0, dist_type[dist])")
                 assert(d.get_ident() == dist_type[dist])
                 pcomponent.append(d)
                 ident.append(dist_type[dist])
