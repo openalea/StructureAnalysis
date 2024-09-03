@@ -162,11 +162,12 @@ public:
 
   static DiscreteMixture*
   discrete_mixture_estimation2(const FrequencyDistribution &h, boost::python::list& ident_list,
-      int min_inf_bound, bool flag, bool component_flag, model_selection_criterion criterion)
+      int min_inf_bound, bool flag, bool component_flag, int icriterion)
   {
     DiscreteMixture* ret;
     ostringstream os;
     StatError error;
+    model_selection_criterion criterion = model_selection_criterion(icriterion);
 
     int nb_component = boost::python::len(ident_list);
     discrete_parametric ident[DISCRETE_MIXTURE_NB_COMPONENT];
