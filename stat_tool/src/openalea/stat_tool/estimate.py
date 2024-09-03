@@ -359,12 +359,14 @@ class EstimateFunctions:
 
 	    #The second argument is either a string (e.g.,"Sum") or an unknown
         #distribution.
-        try:
-            if Type:
-                Type = compound_type[Type]
-        except KeyError:
-            raise AttributeError("Bad type. Possible types are %s"
-                                 % (str(list(compound_type.keys()))))
+        error.CheckValue([Type], [list(compound_type.keys())])
+        Type = compound_type[Type]        
+        # try:
+        #     if Type:
+        #         Type = compound_type[Type]
+        # except KeyError:
+        #     raise AttributeError("Bad type. Possible types are %s"
+        #                          % (str(list(compound_type.keys()))))
 
         #The second argument is either a string (e.g.,"Sum") or an unknown
         #distribution.

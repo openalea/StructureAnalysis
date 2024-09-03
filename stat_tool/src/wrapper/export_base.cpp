@@ -323,6 +323,13 @@ void class_constant()
   scope().attr("ORDER") = ORDER;
   
   // Vectors
+
+  enum_<stat_tool::wrap_util::UniqueInt<2, 18> >("moving_average_method")
+  .value("AVERAGING", AVERAGING)
+  .value("LEAST_SQUARES", LEAST_SQUARES)
+  .export_values()
+  ;
+
   
   enum_<stat_tool::wrap_util::UniqueInt<4, 19> >("OutputFormat")
   .value("ASCII", ASCII)
@@ -332,12 +339,12 @@ void class_constant()
   .export_values()
   ;
   
-  enum_<stat_tool::wrap_util::UniqueInt<2, 18> >("moving_average_method")
-  .value("AVERAGING", AVERAGING)
-  .value("LEAST_SQUARES", LEAST_SQUARES)
+  // compound
+  enum_<stat_tool::wrap_util::UniqueInt<2, 20> >("CompoundType")
+  .value("ELEMENTARY", ELEMENTARY)
+  .value("SUM", SUM)
   .export_values()
   ;
-  
 
   /*const int NB_STATE = 100;
   const int ORDER = 8;

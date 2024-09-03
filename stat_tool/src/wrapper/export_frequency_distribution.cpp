@@ -241,12 +241,17 @@ public:
 
   static Compound*
   compound_estimation2(const FrequencyDistribution &h, const DiscreteParametric &known_dist,
-      compound_distribution type, int min_inf_bound, estimation_criterion estimator, int nb_iter, double weight,
-      penalty_type pen_type, side_effect outside)
+      int itype, int min_inf_bound, int iestimator, int nb_iter, double weight,
+	  int ipen_type, int ioutside)
   {
     Compound* ret;
     ostringstream os;
     StatError error;
+    compound_distribution type = compound_distribution(itype);
+    estimation_criterion estimator = estimation_criterion(iestimator);
+    penalty_type pen_type = penalty_type(ipen_type);
+    side_effect outside = side_effect(ioutside);
+
 
     ret = h.compound_estimation(error, &os, known_dist, type, min_inf_bound,
         estimator, nb_iter, weight, pen_type, outside);

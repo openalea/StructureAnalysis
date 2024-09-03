@@ -165,8 +165,8 @@ cluster_type = {
      }
 
 compound_type = {
-    'Elementary': 'e',
-    'Sum': 's',
+    'Elementary': CompoundType.ELEMENTARY,
+    'Sum': CompoundType.SUM,
     }
 
 variance_type = {
