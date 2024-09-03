@@ -205,12 +205,14 @@ public:
 
   static Convolution*
   convolution_estimation2(const FrequencyDistribution &h, const DiscreteParametric &known_dist,
-      int min_inf_bound, estimation_criterion estimator, int nb_iter, double weight,
-      penalty_type pen_type, side_effect outside)
+      int min_inf_bound, int iestimator, int nb_iter, double weight, int ipen_type, int ioutside)
   {
     Convolution* ret;
     ostringstream os;
     StatError error;
+    estimation_criterion estimator = estimation_criterion(iestimator);
+	penalty_type pen_type = penalty_type(ipen_type);
+	side_effect outside = side_effect(ioutside);
 
     ret = h.convolution_estimation(error, &os, known_dist, min_inf_bound,
         estimator, nb_iter, weight, pen_type, outside);
