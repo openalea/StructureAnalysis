@@ -33,6 +33,7 @@ class Test:
         
     def test_plotable2(self):
 
+        #TODO: understand why the three points do not show up.
         p = _stat_tool.MultiPlotSet(1)
         p[0][0].add_point(_stat_tool.PlotPoint(1.0, 1.2))
         p[0][0].add_point(_stat_tool.PlotPoint(3.0, 5.2))

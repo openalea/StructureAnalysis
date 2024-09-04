@@ -49,6 +49,7 @@
 
 #include "mixture.h"
 #include "stat_label.h"
+#include "mixture.h"
 
 using namespace std;
 using namespace boost;

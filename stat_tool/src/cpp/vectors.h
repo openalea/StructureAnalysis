@@ -120,6 +120,7 @@ namespace stat_tool {
   class Mixture;
   class Regression;
   class VectorDistance;
+  class MultivariateMixture;
 
   /// \brief Vectors with integer- and real-valued variables
 
@@ -127,6 +128,7 @@ namespace stat_tool {
 
     friend class Regression;
     friend class Mixture;
+    friend class MultivariateMixture;
 
     friend std::ostream& operator<<(std::ostream &os , const Vectors &vec)
     { return vec.ascii_write(os); }
@@ -412,6 +414,14 @@ namespace stat_tool {
                                            int max_nb_assignment = MAX_NB_ASSIGNMENT ,
                                            double parameter = NB_ASSIGNMENT_PARAMETER ,
                                            bool assignment = true , int nb_iter = I_DEFAULT) const;
+
+    MultivariateMixture* mixture_estimation(StatError &error , std::ostream *os ,
+                                            const MultivariateMixture &imixture,
+                                            int nb_iter = I_DEFAULT ,
+                                            bool *force_param = NULL) const;
+    MultivariateMixture* mixture_estimation(StatError &error , std::ostream* os ,
+                                            int nb_component , int nb_iter = I_DEFAULT ,
+                                            bool *force_param = NULL) const;
 
     // class member access
 
