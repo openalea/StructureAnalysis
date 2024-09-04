@@ -14,11 +14,12 @@ from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool import  _stat_tool
-from openalea.stat_tool.enums import distribution_identifier_type
+from openalea.stat_tool.enums import distribution_identifier_type, compound_type
 
 from openalea.stat_tool.estimate import Estimate, likelihood_penalty_type
 
 from tools import runTestClass, robust_path as get_shared_data
+from openalea.stat_tool._stat_tool import CUMUL_THRESHOLD
 
 
 class Test():
@@ -27,38 +28,45 @@ class Test():
         pass
 
     def test_nonparametric(self):
-        h = histogram(get_shared_data("meri1.his"))
+        epsilon = 1. - CUMUL_THRESHOLD
+        h = Histogram(get_shared_data("meri1.his"))
         e =  h.estimate_nonparametric()
+        # find likelihood value
+        strh = str(h)
+        word = "information:"
+        i = strh.find(word)
+        j = strh.find("(",i)
+        val = float(strh[i+len(word):j])
         assert e
-         assert abs(e.likelihood() - val) < epsilon
+        assert abs(e.likelihood() - val) < epsilon
 
     def test_nb(self):
         """negativebinomial"""
-        h = histogram(get_shared_data("peup2.his"))
-        assert h.estimate_parametric('nb')
+        h = Histogram(get_shared_data("peup2.his"))
+        assert h.estimate_parametric('NB')
 
     def test_binomial(self):
         """binomial distribution"""
-        h = histogram(get_shared_data("meri5.his"))
-        assert h.estimate_parametric('b')
+        h = Histogram(get_shared_data("meri5.his"))
+        assert h.estimate_parametric('B')
 
     def test_poisson(self):
         """poisson distribution
         >>> p = distribution.poisson(0, 10)
         >>> h = p.simulate(1000)
         """
-        p = distribution.poisson(0, 10)
+        p = distribution.Poisson(0, 10)
         h = p.simulate(1000)
 
-        assert h.estimate_parametric('p')
+        assert h.estimate_parametric('P')
 
     def test_binomial_estimation(self):
         """estimate binomial distribution"""
         from openalea.stat_tool.enums import distribution_identifier_type as dist_type
-        p = distribution.binomial(2, 12, 0.7)
+        p = distribution.Binomial(2, 12, 0.7)
         h = p.simulate(1000)
-        d1 = h.estimate_parametric('b')
-        d2 = h.default_parametric_estimation(dist_type['b'])
+        d1 = h.estimate_parametric('B')
+        d2 = h.default_parametric_estimation(dist_type['B'])
         assert d1
         assert d2
         return(d1, d2)
@@ -99,7 +107,7 @@ class Test():
     def test_mixture_1(self):
         distributions = ["B", "NB", "NB", "NB"]
         h = Histogram(get_shared_data( "peup2.his"))
-        m1 =  h.estimate_mixture(distributions, NbComponent="Estimated")
+        m1 =  h.estimate_DiscreteMixture(distributions, NbComponent="Estimated")
         assert m1
 
         types = []
@@ -107,14 +115,14 @@ class Test():
             temp = distribution_identifier_type[d]
             types.append(temp)
 
-        c = h.mixture_estimation2(types, 0, True, True,
-                                likelihood_penalty_type['AIC'])
+        c = h.discrete_mixture_estimation2(types, 0, True, True,
+                                           likelihood_penalty_type['AIC'])
 
         assert str(c)==str(m1)
 
     def test_mixture_2(self):
         h = Histogram(get_shared_data( "peup2.his"))
-        m2 = h.estimate_mixture([Binomial(0, 10, 0.5), "NB"])
+        m2 = h.estimate_DiscreteMixture([Binomial(0, 10, 0.5), "NB"])
         assert m2
 
     def test_convolution(self):
@@ -158,7 +166,7 @@ class Test():
         cdist3 = chisto1.compound_estimation1(
                     ExtractDistribution(cdist1, "Elementary"),
                     ExtractDistribution(cdist1, "Sum"),
-                    's', _stat_tool.LIKELIHOOD, -1, -1.,
+                    compound_type['Sum'], _stat_tool.LIKELIHOOD, -1, -1.,
                     _stat_tool.SECOND_DIFFERENCE,
                     _stat_tool.ZERO)
         assert str(cdist2) == str(cdist3)

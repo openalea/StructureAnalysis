@@ -26,6 +26,7 @@
 #include "export_distribution.h"
 
 #include "stat_tool/distribution.h"
+#include "stat_tool/stat_label.h"
 
 #include <boost/python.hpp>
 // definition of boost::python::len
@@ -221,7 +222,6 @@ void class_distribution()
    double first_difference_norm_computation() const;
    double second_difference_norm_computation() const;
 
-   double likelihood_computation(const Reestimation<int> &histo) const   { return histo.likelihood_computation(*this); }
    double likelihood_computation(const Reestimation<double> &histo) const   { return histo.likelihood_computation(*this); }
    void chi2_fit(const FrequencyDistribution &histo , Test &test) const;
 
@@ -360,6 +360,7 @@ public:
                                          iparameter, iprobability);
 
   }
+
   
   // simulation method wrapping
   WRAP_METHOD1(DiscreteParametricModel, simulation, DiscreteDistributionData, int);
@@ -424,6 +425,28 @@ public:
   //file_ascii_write wrapping
   WRAP_METHOD_FILE_ASCII_WRITE(DiscreteParametricModel);
 
+  // likelihood computation with p->frequency_distribution
+  static double likelihood_computation(const DiscreteParametricModel& p)
+  {
+	  StatError error;
+	  FrequencyDistribution *data = NULL;
+
+	  data = p.extract_data(error);
+	  if (data == NULL) {
+		  error.update(STAT_error[STATR_NO_DATA]);
+		  stat_tool::wrap_util::throw_error(error);
+	  } else {
+	  	  return p.likelihood_computation(*data);
+	  }
+  }
+
+  // likelihood computation with given data
+  static double likelihood_computation_histo(const DiscreteParametricModel& p, const FrequencyDistribution &histo)
+  {
+  	  return p.likelihood_computation(histo);
+  }
+
+
 };
 
 
@@ -463,6 +486,10 @@ void class_discrete_parametric_model()
     .def("get_plotable", &StatInterface::get_plotable,
     		return_value_policy< manage_new_object >(),
     		"Return a plotable (no parameters)")
+	.def("likelihood", DiscreteParametricModelWrap::likelihood_computation,
+			"Return loglikelihood value")
+	.def("likelihood", DiscreteParametricModelWrap::likelihood_computation_histo,
+			"Return loglikelihood value")
 
 //     .def("plot_write", DiscreteParametricModelWrap::plot_write,
 // 	 args("prefix", "title", "dists"),

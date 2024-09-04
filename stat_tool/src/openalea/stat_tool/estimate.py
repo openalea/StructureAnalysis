@@ -77,10 +77,10 @@ def default_parametric_estimation(histo, iident_id):
             inf_bound = histo.offset
             sup_bound = histo.nb_value
             mean = histo.mean
-            var = histo.var
+            var = histo.variance
             if (mean - inf_bound) > 0:
                 prob = min(1-1e-10, max(1e-10, var / (mean - inf_bound)))
-            param = prob * abs(mean - offset) / (1-prob)
+            param = prob * abs(mean - inf_bound) / (1-prob)
             e = NegativeBinomial(inf_bound, param, prob)
         else:
             raise ValueError("Wrong distribution label:" + str(iident_id))
@@ -383,18 +383,17 @@ class EstimateFunctions:
                 raise TypeError("""
                     argument "known_distribution" must be of type
                      _DiscreteMixture, _COnvolution, _Compound or _DiscreteParametricModel""")
-            if Type == 's':
-
+            if Type == compound_type['Sum']  :
                 return histo.compound_estimation1(
                     unknown_distribution, known_distribution, Type,
                     Estimator, NbIteration, Weight, Penalty, Outside)
-            elif Type == 'e':
-
+                
+            elif Type == compound_TYPE['Elementary']:
                 return histo.compound_estimation1(
                            known_distribution, unknown_distribution, Type,
                            Estimator, NbIteration, Weight, Penalty, Outside)
             else:
-                raise KeyError("should not enter here.")
+                raise ValueError("Bad compound type: " + str(Type) + "; not in " + str(compound_type.values()))
         else:
             return histo.compound_estimation2(
                             known_distribution, Type, MinInfBound,  Estimator,
