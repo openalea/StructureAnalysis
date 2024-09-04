@@ -19,7 +19,7 @@ from openalea.stat_tool.data_transform import Merge, Shift, ExtractData
 from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool.cluster import Cluster
 
-from openalea.stat_tool import get_shared_data
+from tools import runTestClass, robust_path as get_shared_data
 
 
 def test():
@@ -59,11 +59,11 @@ def test():
     """
 
     plot.DISABLE_PLOT = DISABLE_PLOT
-    meri1 = Histogram(get_shared_data( "meri1.his"))
-    meri2 = Histogram(get_shared_data( "meri2.his"))
-    meri3 = Histogram(get_shared_data( "meri3.his"))
-    meri4 = Histogram(get_shared_data( "meri4.his"))
-    meri5 = Histogram(get_shared_data( "meri5.his"))
+    meri1 = Histogram(get_shared_data("meri1.his"))
+    meri2 = Histogram(get_shared_data("meri2.his"))
+    meri3 = Histogram(get_shared_data("meri3.his"))
+    meri4 = Histogram(get_shared_data("meri4.his"))
+    meri5 = Histogram(get_shared_data("meri5.his"))
     
 
     Plot(meri1, meri2, meri3, meri4, meri5)
