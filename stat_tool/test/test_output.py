@@ -31,7 +31,7 @@ class Test:
     def get_mixture_2(self):
         """create another mixture data"""
         h = Histogram(get_shared_data("meri2.his"))
-        m = h.estimate_mixture("B", "NB")
+        m = h.estimate_DiscreteMixture("B", "NB")
         return m
 
     def _test_old_plot(self):

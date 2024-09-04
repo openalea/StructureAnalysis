@@ -3,6 +3,7 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
 [ ] Repare `stat_tool` and `sequence_analysis` tests
     + create a new branch for each new development (do not systematically use new_python_api)
     + update tests to be compliant with python 3
+    + matplotlib output to Survival (remove gnuplot)
     + let enumerated types be systematically transferred from python to wrappers to C++ by intermediate conversions to int
     + check consistency of naming and methods vs. global functions (develop methods, reduce global functions). Maybe hide some low-level methods defined in low-level wrappers.
     + think about a more automated manner to handle and wrap enumerated types, possibly by replacing them by classes with dictionary and inverse dictionary: {0: "VALUE0", 1: "VALUE1"} and {"VALUE0": 0, "VALUE1": 1}

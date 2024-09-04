@@ -656,7 +656,7 @@ class StatInterface(object):
             or (ViewPoint == 'p'  and Output not in [output_display['State'], output_display['InState'], output_display['OutState']]):
             raise ValueError(" INCOMPATIBLE_OPTIONS between ViewPoint and Output")
 
-
+        plotable = None
         #calling the plot functions from here
         try:
             if ViewPoint=='s':

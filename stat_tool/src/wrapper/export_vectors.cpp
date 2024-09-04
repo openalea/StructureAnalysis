@@ -704,10 +704,12 @@ public:
 
   static Regression*
   moving_average_dist(const Vectors& v, int explanatory_var, int response_var,
-      const Distribution &dist, moving_average_method algo)
+      const Distribution &dist, int ialgo)
   {
     StatError error;
     Regression * ret = NULL;
+    moving_average_method algo = moving_average_method(ialgo);
+
     ret = v.moving_average(error, explanatory_var, response_var, dist, algo);
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -716,10 +718,11 @@ public:
 
   static Regression*
   moving_average_list(const Vectors& v, int explanatory_var, int response_var,
-      const boost::python::list& filter, moving_average_method algo)
+      const boost::python::list& filter, int ialgo)
   {
     StatError error;
     Regression * ret = NULL;
+    moving_average_method algo = moving_average_method(ialgo);
     double sum = 0;
     int nb_var = len(filter);
     stat_tool::wrap_util::auto_ptr_array<double> vars(
