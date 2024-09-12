@@ -141,7 +141,7 @@ DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , DiscretePar
  */
 /*--------------------------------------------------------------*/
 
-void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process)
+void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process, bool mass_copy)
 
 {
   int i;
@@ -151,8 +151,19 @@ void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process)
   nb_value = process.nb_value;
 
   observation = new DiscreteParametric*[nb_state];
-  for (i = 0;i < nb_state;i++) {
-    observation[i] = new DiscreteParametric(*(process.observation[i]) , DISTRIBUTION_COPY , nb_value);
+  if (mass_copy && process.observation != NULL){
+	  for (i = 0;i < nb_state;i++) {
+		  if (process.observation[i] != NULL)
+			  observation[i] = new DiscreteParametric(*(process.observation[i]) , DISTRIBUTION_COPY , process.observation[i]->alloc_nb_value);
+		  	  observation[i]->mass_copy(*(process.observation[i]));
+	  }
+  } else {
+	  if (process.observation != NULL) {
+		  for (i = 0;i < nb_state;i++) {
+			  if (process.observation[i] != NULL)
+				  observation[i] = new DiscreteParametric(*(process.observation[i]) , DISTRIBUTION_COPY , nb_value);
+		  }
+	  }
   }
 
   if ((process.weight) && (process.mixture)) {

@@ -160,7 +160,7 @@ MultivariateMixture::MultivariateMixture(const MultivariateMixture &mixt ,
   for (var = 0;var < nb_var;var++) {
     if (variable_flag[var]) {
       if (mixt.pcomponent[var] != NULL) {
-    pcomponent[var] = new DiscreteParametricProcess(*mixt.pcomponent[var]);
+    pcomponent[var] = new DiscreteParametricProcess(*mixt.pcomponent[var], true);
     npcomponent[var] = NULL;
       }
       else {
@@ -199,7 +199,7 @@ MultivariateMixture::MultivariateMixture(int inb_component , int inb_variable,
 
   for (var = 0;var < nb_var;var++) {
     if (ppcomponent[var] != NULL) {
-    pcomponent[var] = new DiscreteParametricProcess(*ppcomponent[var]);
+    pcomponent[var] = new DiscreteParametricProcess(*ppcomponent[var], true);
     npcomponent[var] = NULL;
     }
     else {
@@ -262,6 +262,7 @@ MultivariateMixture::MultivariateMixture(int inb_component, int inb_variable,
       for(i = 0; i < nb_component; i++) {
     delete pcomponent[var]->observation[i];
     param = (cumul_method(10, rand->cumul, 1.) + 1);
+    // TODO: change default parameter values
     pcomponent[var]->observation[i] =
       new DiscreteParametric(NEGATIVE_BINOMIAL, 0, I_DEFAULT , 1., 1. / (double)((param * *nb_value)+1.));
       }
@@ -304,7 +305,7 @@ void MultivariateMixture::copy(const MultivariateMixture &mixt , bool data_flag)
 
   for (var = 0;var < nb_var;var++) {
     if (mixt.pcomponent[var] != NULL) {
-    pcomponent[var] = new DiscreteParametricProcess(*mixt.pcomponent[var]);
+    pcomponent[var] = new DiscreteParametricProcess(*mixt.pcomponent[var], true);
     npcomponent[var] = NULL;
     }
     else {
@@ -312,6 +313,7 @@ void MultivariateMixture::copy(const MultivariateMixture &mixt , bool data_flag)
        npcomponent[var] = new CategoricalProcess(*mixt.npcomponent[var]);
     }
   }
+  // init();
 }
 
 

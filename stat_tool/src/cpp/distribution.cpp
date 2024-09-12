@@ -60,6 +60,8 @@ namespace stat_tool {
  *
  *  \param[in] dist      reference on a Distribution object,
  *  \param[in] inb_value number of values.
+ *  inb_value can be less than dist.nb_values. In this case,
+ *  the unnormalized truncated distribution is copied
  */
 /*--------------------------------------------------------------*/
 
@@ -74,11 +76,23 @@ void Distribution::mass_copy(const Distribution &dist , int inb_value)
   }
   else {
     nb_value = dist.nb_value;
+    alloc_nb_value = dist.alloc_nb_value;
   }
-  offset = MIN(dist.offset , nb_value - 1);
+  if ((inb_value == I_DEFAULT) && (dist.alloc_nb_value > dist.nb_value)) {
+	  offset = dist.offset;
+	  alloc_nb_value = dist.alloc_nb_value;
+	  if (mass != NULL) {
+		  delete [] mass;
+		  mass = new double[alloc_nb_value];
+		  for (i = 0;i < alloc_nb_value;i++)
+			mass[i] = dist.mass[i];
+	  }
+  } else {
+	  offset = MIN(dist.offset , nb_value - 1);
 
-  for (i = 0;i < nb_value;i++) {
-    mass[i] = dist.mass[i];
+	  for (i = 0;i < nb_value;i++) {
+		mass[i] = dist.mass[i];
+	  }
   }
 }
 
@@ -325,10 +339,11 @@ void Distribution::copy(const Distribution &dist , int ialloc_nb_value)
     mass[i] = dist.mass[i];
     cumul[i] = dist.cumul[i];
   }
-  for (i = nb_value;i < alloc_nb_value;i++) {
+  // for 0 < i < offset, mass[i] may be 0 or unspecified.
+  /* for (i = nb_value;i < alloc_nb_value;i++) {
     mass[i] = 0.;
     cumul[i] = 0.;
-  }
+  }*/
 }
 
 

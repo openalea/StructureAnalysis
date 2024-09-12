@@ -279,13 +279,13 @@ namespace stat_tool {
                                        ///< deduced from the restoration
     Distribution *restoration_mixture;  ///< mixture of observation distributions
 
-    void copy(const DiscreteParametricProcess &process);
+    void copy(const DiscreteParametricProcess &process, bool mass_copy=false);
     void remove();
 
     DiscreteParametricProcess(int inb_state = 0 , int inb_value = 0);
     DiscreteParametricProcess(int inb_state , DiscreteParametric **pobservation);
-    DiscreteParametricProcess(const DiscreteParametricProcess &process)
-    { copy(process); }
+    DiscreteParametricProcess(const DiscreteParametricProcess &process, bool mass_copy=false)
+    { copy(process, mass_copy); }
     ~DiscreteParametricProcess();
     DiscreteParametricProcess& operator=(const DiscreteParametricProcess &process);
 

@@ -24,7 +24,9 @@ from openalea.stat_tool._stat_tool import (
     _Cluster, 
     _DistanceMatrix, 
     _VectorDistance, 
-    _Regression
+    _Regression,
+    _MultivariateMixture,
+    _MultivariateMixtureData
     )
 
 # map to enumerate in boost python
@@ -224,7 +226,9 @@ all_stat_tool_types  = [_FrequencyDistribution,
                         _Vectors,
                         _Cluster,
                         _DistanceMatrix,
-                        _Regression
+                        _Regression,
+                        _MultivariateMixture,
+                        _MultivariateMixtureData
                         ]
 
 

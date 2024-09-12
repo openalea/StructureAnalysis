@@ -555,7 +555,7 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
         // computation of the probabilities for the successive values (forward recurrence)
 
         log_failure = log(failure);
-
+        //TODO: check whether term should be reset to log(term)
         while ((cumul[i] < cumul_threshold) && (i < inb_value - 1)) {
           i++;
           set++;
@@ -568,7 +568,37 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
     }
     break;
   }
-  }
+
+  case GEOMETRIC : {
+
+	  // geometric distribution
+
+	  for (i = 0;i < inf_bound;i++) {
+		mass[i] = 0.;
+		cumul[i] = 0.;
+	  }
+
+	  // computation of the lower bound probability
+
+	  term = log(success);
+	  mass[i] = exp(term);
+	  cumul[i] = mass[i];
+
+	  // computation in log
+
+	  // computation of the probabilities for the successive values (forward recurrence)
+
+	  log_failure = log(failure);
+
+	  while ((cumul[i] < cumul_threshold) && (i < alloc_nb_value - 1)) {
+		  i++;
+		  term += log_failure;
+		  mass[i] = exp(term);
+		  cumul[i] = cumul[i - 1]  + mass[i];
+	  }
+	  break;
+  	}
+  } // end switch mode
 
   offset = MIN(inf_bound , i);
   nb_value = i + 1;
@@ -1005,7 +1035,11 @@ void DiscreteParametric::computation(int min_nb_value , double cumul_threshold)
       poisson_computation(min_nb_value , cumul_threshold , STANDARD);
       break;
     case NEGATIVE_BINOMIAL :
-      negative_binomial_computation(min_nb_value , cumul_threshold , STANDARD);
+      if (parameter=1)
+		  // geometric distribution
+		  negative_binomial_computation(min_nb_value , cumul_threshold , GEOMETRIC);
+      else
+    	  negative_binomial_computation(min_nb_value , cumul_threshold , STANDARD);
       break;
     case POISSON_GEOMETRIC :
       poisson_geometric_computation(min_nb_value , cumul_threshold);

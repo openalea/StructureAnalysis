@@ -41,6 +41,12 @@ class Test(interface):
     def build_data_2(self):
         return Vectors(get_shared_data("chene_sessile.vec"))
 
+    def build_data_3(self):
+        data_file = "data/cluster_vectors.vec"
+        v1 = Vectors(data_file)
+        v2 = _Vectors(data_file)
+        assert(str(v1)==str(v2))
+    
     def test_identifiers(self):
         v = Vectors([[1, 2, 3], [4, 5, 6], [7, 8, 9]], Identifiers=[1, 2, 4])
         assert v.get_identifiers() == [1, 2, 4]

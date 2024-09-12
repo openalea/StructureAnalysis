@@ -52,7 +52,7 @@ namespace stat_tool {
  *  Constantes :
  */
 
-  const double MVMIXTURE_LIKELIHOOD_DIFF = 1.e-6;
+  const double MVMIXTURE_LIKELIHOOD_DIFF = 1.e-8; // stopping criterion for relative log-likelihood in EM
   const int MIXTURE_COEFF = 2;           // coefficient: rounding for estimators
 
 

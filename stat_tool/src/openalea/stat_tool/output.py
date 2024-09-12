@@ -1052,7 +1052,11 @@ class StatInterface(object):
             from openalea.stat_tool.enums import all_stat_tool_types
             try:
                 from openalea.sequence_analysis.enums import all_sequences_types
-            except:
+            except ImportError:
+                if type(self) in all_stat_tool_types:
+                    output = self.ascii_write(exhaustive)
+                else:
+                    raise TypeError("wrong input type.")
                 pass
             if type(self) in all_stat_tool_types:
                 output = self.ascii_write(exhaustive)

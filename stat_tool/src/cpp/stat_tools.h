@@ -128,7 +128,8 @@ namespace stat_tool {
 
   enum distribution_computation {
     STANDARD ,
-    RENEWAL
+    RENEWAL ,
+	GEOMETRIC
   };
 
   enum continuous_parametric {
@@ -426,6 +427,12 @@ namespace stat_tool {
   class DiscreteParametricModel;
 
   /// \brief Discrete distribution
+  /*
+   * Probabilities are represented as an array *mass, with size nb_allocated_value
+   * mass[i] is only meaningful for offset <= i < nb_value.
+   * For i < offset, mass[i] may be either 0 or unspecified.
+   * */
+
 
   class STAT_TOOL_API Distribution {
 
