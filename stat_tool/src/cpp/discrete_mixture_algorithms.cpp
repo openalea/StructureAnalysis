@@ -256,8 +256,8 @@ void DiscreteMixture::init(const FrequencyDistribution &histo , bool *estimate ,
       }
 
       case NEGATIVE_BINOMIAL : {
-        component[i]->parameter = NEGATIVE_BINOMIAL_PARAMETER;
-        component[i]->probability = component[i]->parameter / (shift_mean + component[i]->parameter);
+    	  component[i]->parameter = 1.;
+    	  component[i]->probability = 1. / ((histo.nb_value)+1+shift_mean);
         break;
       }
       }
@@ -617,9 +617,11 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
           previous_likelihood = likelihood;
           likelihood = mixt->Distribution::likelihood_computation(*this);
 
-          if (!mixt->component_order_test()) {
+          // Commenting: having increasing means does not seem
+          // to be required in mixtures
+          /* if (!mixt->component_order_test()) {
             likelihood = D_INF;
-          }
+          }*/
         }
         while (((likelihood - previous_likelihood) / -likelihood > DISCRETE_MIXTURE_LIKELIHOOD_DIFF) &&
                (j < DISCRETE_MIXTURE_NB_ITER) && (likelihood != D_INF));

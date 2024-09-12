@@ -3,6 +3,7 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
 [ ] Repare `stat_tool` and `sequence_analysis` tests
     + create a new branch for each new development (do not systematically use new_python_api)
     + update tests to be compliant with python 3
+    + Fix stat_tool_examples.py, test_distribution_functional.py, test_estimate.py, test_multivariate_mixture_functional.py, test_vector_distance.py
     + matplotlib output to Survival (remove gnuplot)
     + Translate C++ comments
     + let enumerated types be systematically transferred from python to wrappers to C++ by intermediate conversions to int

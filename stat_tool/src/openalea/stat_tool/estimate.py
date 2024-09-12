@@ -230,7 +230,7 @@ class EstimateFunctions:
         else:
             distributions = list(args)
 
-        InfBoundStatus = kargs.get("InfBoundStatus","Free")
+        InfBoundStatus = kargs.get("InfBoundStatus","Fixed")
         DistInfBoundStatus = kargs.get("DistInfBoundStatus", "Free")
         NbComponent = kargs.get("NbComponent", "Fixed")
 
