@@ -440,4 +440,16 @@ void class_forward()
 */
 }
 
+#define WRAP BaseWrap
+class WRAP
+{
+
+public:
+
+
+  void set_seed(int seed)
+  {
+     stat_tool::set_seed(seed);
+  }
+};
 

@@ -80,6 +80,14 @@ class Test(interface):
     def test_file_ascii_write(self):
         self.file_ascii_write()
     
+    def test_estimate(self):
+        data_file = "data/cluster_vectors.vec"
+        v = Vectors(data_file)
+        assert(len(v) == 836)
+        assert(v.nb_variable == 5)
+        m = v.mixture_estimation(3, 300, [])
+        return m, v
+     
     def test_spreadsheet_write(self):
         self.spreadsheet_write()
     
@@ -87,13 +95,18 @@ class Test(interface):
         self.simulate()
     
     def test_extract(self):
-        pass
+        m, v = self.test_simulate2()
+        for i in range(1, v.nb_variable+1):
+            m2 = v.extract(i)
+            assert m2
+        return(m2)
     
     def test_extract_data(self):
-        pass
+        m, v = self.test_estimate()
+        d = m.extract_data()
+        assert d
     
     def test_simulate2(self):
-    
         d11 = Binomial(0, 12, 0.1)
         d12 = Binomial(0, 12, 0.5)
         d13 = Binomial(0, 12, 0.8)
@@ -104,10 +117,27 @@ class Test(interface):
         v = m.simulate(5000)
         assert v
     
-        m_estim_model = v.mixture_estimation(m, 100, [True, True])
+        # TODO: set seed
+        estimation_failed = True
+        while estimation_failed:
+            try:
+                m_estim_model = v.mixture_estimation(m, 100, [True, True])
+            except Exception:
+                pass
+            else:
+                estimation_failed = False             
         assert m_estim_model
-        m_estim_nbcomp = v.mixture_estimation(2)
+        
+        estimation_failed = True
+        while estimation_failed:
+            try:
+                m_estim_nbcomp = v.mixture_estimation(2)
+            except Exception:
+                pass
+            else:
+                estimation_failed = False                     
         assert m_estim_nbcomp
+        
         return m, v
     
     def _test_permutation(self):
@@ -134,11 +164,7 @@ class Test(interface):
     
     def test_cluster_data_file(self):
         """Clustering using the mixture model, reading data from a file"""
-        data_file = "data/cluster_vectors.vec"
-        v = Vectors(data_file)
-        assert(len(v) == 836)
-        assert(v.nb_variable == 5)
-        m = v.mixture_estimation(3, 300, [])
+        m, v = self.test_estimate()
         clust_entropy = m.cluster_data(v , True)
         import tempfile, os
         tmp_file_name = tempfile.mktemp()

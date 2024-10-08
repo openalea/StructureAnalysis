@@ -538,6 +538,22 @@ ostream& Distribution::ascii_characteristic_print(ostream &os , bool shape , boo
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Set seed of random generator
+ *
+ *  \param[in] seed
+ *
+ *  \
+ */
+/*--------------------------------------------------------------*/
+
+void set_seed(int seed)
+
+{
+  srand(seed);
+}
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Computation of the column width for an integer value.
  *
  *  \param[in] value value.

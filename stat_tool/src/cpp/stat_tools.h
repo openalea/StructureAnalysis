@@ -1029,6 +1029,8 @@ namespace stat_tool {
   };
 
 
+  STAT_TOOL_API void set_seed(int seed);
+
   STAT_TOOL_API int column_width(int);
   STAT_TOOL_API int column_width(int min_value , int max_value);
   STAT_TOOL_API int column_width(double min_value , double max_value);

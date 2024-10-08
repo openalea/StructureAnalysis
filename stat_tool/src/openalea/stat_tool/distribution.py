@@ -31,6 +31,7 @@ from openalea.stat_tool._stat_tool import (
     VariableType,
     VariableTypeBis,
     RestorationAlgorithm,
+    # TODO: set_seed
 )
 
 

@@ -1669,10 +1669,10 @@ bool MultivariateMixture::spreadsheet_write(StatError &error , std::string path)
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un melange et de la structure de donnees associee.
+ *  Gnuplot output of MultivariateMixture and associated data, if any.
  *
- *  arguments : prefixe des fichiers, titre des figures,
- *              pointeur sur un objet MultivariateMixtureData.
+ *  Parameters: prefix for files, figure titles,
+ *              pointer on MultivariateMixtureData object
  *
  *--------------------------------------------------------------*/
 
@@ -1752,157 +1752,58 @@ bool MultivariateMixture::plot_write(StatError &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un melange et de la structure de donnees associee.
+ *  Matplotlib output of MultivariateMixture and associated data, if any.
+ *  Plot marginal mixture distributions.
  *
- *  argument : pointeur sur un objet MultivariateMixtureData.
+ *  Parameter: pointer on MultivariateMixtureData object
  *
  *--------------------------------------------------------------*/
 
 MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *mixt_data) const
 
 {
-//   register int i , j;
-//   int xmax;
-//   double scale;
-//   std::ostringstream legend;
+  bool status = true;
+  int var = 0, cvariable = 0; // variable index that corresponds to var in mixture_data
+  DiscreteParametricModel *pparam = NULL;
+  FrequencyDistribution **observation = NULL;
+  StatError error;
+  MultiPlotSet *plotset=NULL;
+/*
+  // affiche la loi des poids
+  if (mixt_data != NULL) {
+	pparam = new DiscreteParametricModel(*weight, mixt_data->weight);
+	status= pparam->plot_write(error, prefix, title);
+	delete pparam;
+	pparam = NULL;
+  }
 
+  if (status) {
+	for (var = 1; var <= nb_var; var++) {
+	  if (mixt_data != NULL) {
+	switch (mixt_data->type[0])
+	  {
+	  case INT_VALUE :
+		cvariable = var - 1;
+		break;
+	  case STATE :
+		cvariable = var;
+		break;
+	  }
 
-//   // nombre de fenetres: nb_component + 2 si ajustement
-
-   MultiPlotSet *plotset = new MultiPlotSet(mixt_data ? nb_component + 2 : 1);
-//   MultiPlotSet &set = *plotset;
-
-//   set.title = "MultivariateMixture fit";
-//   set.border = "15 lw 0";
-
-//   // 1ere vue : melange ajuste
-
-//   if (nb_value - 1 < TIC_THRESHOLD) {
-//     set[0].xtics = 1;
-//   }
-
-//   xmax = nb_value - 1;
-//   if ((cumul[xmax] > 1. - DOUBLE_ERROR) &&
-//       (mass[xmax] > PLOT_MASS_THRESHOLD)) {
-//     xmax++;
-//   }
-//   set[0].xrange = Range(0 , xmax);
-
-//   // definition du nombre de SinglePlot
-
-//   i = 0;
-
-//   if (mixt_data) {
-//     set[0].yrange = Range(0 , ceil(MAX(mixt_data->max , max * mixt_data->nb_element)
-//                                    * YSCALE));
-
-//     set[0].resize(nb_component + 2);
-//     set[0][i].legend = STAT_label[STATL_FREQUENCY_DISTRIBUTION];
-//     set[0][i].style = "impulses";
-
-//     mixt_data->plotable_frequency_write(set[0][i++]);
-
-//     scale = mixt_data->nb_element;
-//   }
-
-//   else {
-//     set[0].yrange = Range(0. , MIN(max * YSCALE , 1.));
-
-//     set[0].resize(nb_component + 1);
-
-//     scale = 1;
-//   }
-
-//   set[0][i].legend = STAT_label[STATL_MIXTURE];
-//   set[0][i].style = "linespoints";
-
-//   plotable_mass_write(set[0][i++] , scale);
-
-//   for (j = 0;j < nb_component;j++) {
-//     legend.str("");
-//     legend << STAT_label[STATL_DISTRIBUTION] << " " << j + 1;
-//     set[0][i + j].legend = legend.str();
-
-//     set[0][i + j].style = "linespoints";
-
-//     if (mixt_data) {
-//       component[j]->plotable_mass_write(set[0][i + j] , weight->mass[j] * mixt_data->nb_element);
-//     }
-//     else {
-//       component[j]->plotable_mass_write(set[0][i + j] , weight->mass[j]);
-//     }
-//   }
-
-//   if (mixt_data) {
-
-//     // 2eme vue : poids
-
-//     if (weight->nb_value - 1 < TIC_THRESHOLD) {
-//       set[1].xtics = 1;
-//     }
-
-//     set[1].xrange = Range(0 , weight->nb_value - 1);
-//     set[1].yrange = Range(0 , ceil(MAX(mixt_data->weight->max ,
-//                                    weight->max * mixt_data->weight->nb_element)
-//                                    * YSCALE));
-
-//     set[1].resize(2);
-
-//     legend.str("");
-//     legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
-//     set[1][0].legend = legend.str();
-//     set[1][0].style = "impulses";
-
-//     legend.str("");
-//     legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION];
-//     set[1][1].legend = legend.str();
-//     set[1][1].style = "linespoints";
-
-//     mixt_data->weight->plotable_frequency_write(set[1][0]);
-//     weight->plotable_mass_write(set[1][1] , mixt_data->weight->nb_element);
-
-//     i = 2;
-//     for (j = 0;j < nb_component;j++) {
-//       if (mixt_data->component[j]->nb_element > 0) {
-
-//         // vues suivantes : composantes ajustees
-
-//         if (component[j]->nb_value - 1 < TIC_THRESHOLD) {
-//           set[i].xtics = 1;
-//         }
-
-//         xmax = component[j]->nb_value - 1;
-//         if ((component[j]->cumul[xmax] > 1. - DOUBLE_ERROR) &&
-//             (component[j]->mass[xmax] > PLOT_MASS_THRESHOLD)) {
-//           xmax++;
-//         }
-//         set[0].xrange = Range(0 , xmax);
-
-//         set[i].xrange = Range(0 , component[j]->nb_value - 1);
-//         set[i].yrange = Range(0 , ceil(MAX(mixt_data->component[j]->max ,
-//                                        component[j]->max * mixt_data->component[j]->nb_element)
-//                                        * YSCALE));
-
-//         set[i].resize(2);
-
-//         legend.str("");
-//         legend << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << j + 1;
-//         set[i][0].legend = legend.str();
-//         set[i][0].style = "impulses";
-
-//         legend.str("");
-//         legend << STAT_label[STATL_DISTRIBUTION] << " " << j + 1;
-//         set[i][1].legend = legend.str();
-//         set[i][1].style = "linespoints";
-
-//         mixt_data->component[j]->plotable_frequency_write(set[i][0]);
-//         component[j]->plotable_mass_write(set[i][1] , mixt_data->component[j]->nb_element);
-
-//         i++;
-//       }
-//     }
-//   }
-
+	if (mixt_data->component != NULL) {
+	  if (mixt_data->component[cvariable] != NULL) {
+		observation = mixt_data->component[cvariable];
+	  }
+	  else
+		observation = NULL;
+	}
+	  }
+	  if (npcomponent[var-1] != NULL)
+	npcomponent[var-1]->plot_print(prefix, title, var, observation);
+	  else
+	pcomponent[var-1]->plot_print(prefix, title, var, observation);
+	}
+  }*/
    return plotset;
 }
 
