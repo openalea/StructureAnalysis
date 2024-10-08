@@ -1303,7 +1303,9 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
   int i;
   int max_inf_bound , inf_bound;
   double diff , shift_mean , parameter , probability , likelihood , max_likelihood = D_INF;
-
+  double max_param; double min_param = DOUBLE_ERROR;
+  double dmin_param, dmax_param, left_l, right_l;
+  DiscreteParametric *dist_cp = NULL;
 
   // computation of the interval tested on the lower bound of the support
 
@@ -1321,6 +1323,7 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
     max_inf_bound = offset;
   }
 
+  // moment estimation: requires mean - max_inf_bound < variance
   if (mean - max_inf_bound < variance) {
 
     // estimation for each possible lower bound of the shape parameter and
@@ -1368,6 +1371,34 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
 //    cout << "\nnumber of cases : " << max_inf_bound - min_inf_bound + 1
 //         << " | number of computations : " << (max_inf_bound - i + 1) << endl;
 #   endif
+  } else {
+	// maximum likelihood estimation of continuous parameter by dichotomy
+		shift_mean = mean - min_inf_bound;
+		dist->probability = shift_mean / variance;
+		dist->inf_bound = min_inf_bound;
+		max_param = pow((mean - min_inf_bound),2) / variance;
+		dist_cp = new DiscreteParametric(*dist);
+		dist_cp->copy(*dist);
+		dist->parameter = max_param;
+		dist->computation();
+		dist_cp->parameter = min_param;
+		dist_cp->computation();
+		left_l = this->likelihood_computation(*dist_cp);
+		right_l = this->likelihood_computation(*dist);
+		for (i=0; i < BISECTION_NB_ITER; i++) {
+			 if (left_l < right_l) {
+				 dist_cp->parameter = (dist_cp->parameter + dist->parameter) / 2;
+				 dist_cp->computation();
+				 left_l = this->likelihood_computation(*dist_cp);
+			 } else {
+				 dist->parameter = (dist_cp->parameter + dist->parameter) / 2;
+				 dist->computation();
+				 right_l = this->likelihood_computation(*dist);
+			}
+		 }
+		dist->parameter = (dist_cp->parameter + dist->parameter) / 2;
+		max_likelihood = this->likelihood_computation(*dist);
+		delete dist_cp;
   }
 
   return max_likelihood;

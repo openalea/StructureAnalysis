@@ -86,8 +86,8 @@ def test():
     #model selection approach: estimation of both the mixture parameters and
     # the number of components
 
-    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",
-                     NbComponent="Estimated")
+#    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",
+#                     NbComponent="Estimated")
     mixt2 = Estimate(meri, "MIXTURE", "NB", "NB")
     Plot(mixt2)
     Plot(ExtractDistribution(mixt2, "Mixture"))

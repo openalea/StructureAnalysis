@@ -1035,7 +1035,7 @@ void DiscreteParametric::computation(int min_nb_value , double cumul_threshold)
       poisson_computation(min_nb_value , cumul_threshold , STANDARD);
       break;
     case NEGATIVE_BINOMIAL :
-      if (parameter=1)
+      if (parameter==1)
 		  // geometric distribution
 		  negative_binomial_computation(min_nb_value , cumul_threshold , GEOMETRIC);
       else
