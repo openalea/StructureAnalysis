@@ -697,11 +697,24 @@ public:
     return ret;
   }
 
+  static DiscreteMixture*
+  mixture_extract_distribution(const MultivariateMixture& mixt, int ivariable)
+  {
+    DiscreteMixture* ret = NULL;
+    StatError error;
+
+    ret = mixt.extract_distribution(error, ivariable);
+	if (ret == NULL)
+	  stat_tool::wrap_util::throw_error(error);
+    return ret;
+  }
     WRAP_METHOD0(MultivariateMixture, extract_data, MultivariateMixtureData);
     WRAP_METHOD_FILE_ASCII_WRITE( MultivariateMixture);
     WRAP_METHOD_PLOT_WRITE( MultivariateMixture);
     WRAP_METHOD_SPREADSHEET_WRITE( MultivariateMixture);
     WRAP_METHOD1(MultivariateMixture, simulation, MultivariateMixtureData, int);
+
+
 
 };
 
@@ -747,6 +760,8 @@ void class_multivariate_mixture()
         args("nb_element"), "simulate(self, nb_element) -> _MultivariateMixtureData. \n\n" "Simulate nb_element elements")
     DEF_RETURN_VALUE("extract_mixture", WRAP::extract_mixture,
         args("variable"), "extract_mixture(self, variable) -> _Distribution. \n\n" "Return the _MultivariateMixture distribution")
+	DEF_RETURN_VALUE("extract_distribution", WRAP::mixture_extract_distribution,
+	    args("variable"), "Extraction of marginal for a given variable")
 
     // no object returned, args required
     .def("_is_parametric", WRAP::_is_parametric,

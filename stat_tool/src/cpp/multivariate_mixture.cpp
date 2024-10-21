@@ -54,7 +54,7 @@
 #include "markovian.h"
 #include "vectors.h"
 #include "stat_label.h"
-#include "mixture.h"
+// #include "mixture.h"
 #include "multivariate_mixture.h"
 
 using namespace std;
@@ -485,12 +485,15 @@ Distribution* MultivariateMixture::extract_categorical_model(StatError &error ,
  *
  *--------------------------------------------------------------*/
 
-Distribution* MultivariateMixture::extract_distribution(StatError &error , int ivariable) const
+DiscreteMixture* MultivariateMixture::extract_distribution(StatError &error , int ivariable) const
 {
-  bool status = true;
-  register int i , j, variable = ivariable - 1;
+  bool status = true, discrete_mixture = false;
+  register int i , j, variable = ivariable - 1,  nb_value;
   double *pweight , *pmass;
-  Distribution *pDistribution = NULL;
+  const DiscreteParametric **marginal_pcomponent = NULL;
+  DiscreteMixture *pDistribution = NULL;
+  DiscreteMixtureData *data = NULL;
+  FrequencyDistribution *obs_marginal = NULL;
 
   if ((ivariable < 1) || (ivariable > nb_var)) {
     status = false;
@@ -498,68 +501,36 @@ Distribution* MultivariateMixture::extract_distribution(StatError &error , int i
   }
 
   if (status) {
-
-    pDistribution = new Distribution();
-    pDistribution->nb_value = 0;
+    marginal_pcomponent = new const DiscreteParametric*[nb_component];
+    pweight = weight->mass;
 
     if (pcomponent[variable] != NULL) { // parametric distribution
-      for (i = 0;i < nb_component;i++) {
-        if (pcomponent[variable]->observation[i]->nb_value > pDistribution->nb_value) {
-            pDistribution->nb_value = pcomponent[variable]->observation[i]->nb_value;
-            }
-        }
 
-      pDistribution->offset = pDistribution->nb_value; // majorant
-      for (i = 0;i < nb_component;i++) {
-        if (pcomponent[variable]->observation[i]->offset < pDistribution->offset) {
-            pDistribution->offset = pcomponent[variable]->observation[i]->offset;
-            }
-        }
-
-      pDistribution->mass = new double[pDistribution->nb_value];
-      pDistribution->cumul = new double[pDistribution->nb_value];
-      pmass = pDistribution->mass - 1;
-      for (i = 0;i < pDistribution->nb_value;i++) {
-        pweight = weight->mass;
-        *++pmass = 0.;
-        for (j = 0;j < nb_component;j++) {// non-parametric distribution
-            if (i < pcomponent[variable]->observation[j]->nb_value) {
-                *pmass += *pweight * pcomponent[variable]->observation[j]->mass[i];
-                }
-            pweight++;
-            }
-      }
+      for (i = 0;i < nb_component;i++)
+    	  marginal_pcomponent[i] = pcomponent[variable]->observation[i];
     }
     else { // npcomponent[variable] != NULL)
-        for (i = 0;i < nb_component;i++) {
-            if (npcomponent[variable]->observation[i]->nb_value > pDistribution->nb_value) {
-                pDistribution->nb_value = npcomponent[variable]->observation[i]->nb_value;
-                }
-            }
-
-        pDistribution->offset = pDistribution->nb_value; // majorant
-        for (i = 0;i < nb_component;i++) {
-            if (npcomponent[variable]->observation[i]->offset < pDistribution->offset) {
-                pDistribution->offset = npcomponent[variable]->observation[i]->offset;
-            }
-        }
-
-        pDistribution->mass = new double[pDistribution->nb_value];
-        pDistribution->cumul = new double[pDistribution->nb_value];
-
-        pmass = pDistribution->mass - 1;
-        for (i = 0;i < pDistribution->nb_value;i++) {
-            pweight = weight->mass;
-            *++pmass = 0.;
-            for (j = 0;j < nb_component;j++) {
-                if (i < npcomponent[variable]->observation[j]->nb_value) {
-                    *pmass += *pweight * npcomponent[variable]->observation[j]->mass[i];
-                }
-                pweight++;
-            }
-        }
+    	for (i = 0;i < nb_component;i++) {
+    		nb_value = npcomponent[variable]->observation[i]->nb_value;
+    		marginal_pcomponent[i] = new DiscreteParametric(nb_value, CATEGORICAL);
+    		for (j = 0; j < nb_value; j++)
+    			marginal_pcomponent[i]->mass[j] = npcomponent[variable]->observation[i]->mass[j];
+    	}
     }
+    pDistribution = new DiscreteMixture(nb_component, pweight, marginal_pcomponent);
+	if (mixture_data != NULL) {
+		obs_marginal = mixture_data->get_marginal_distribution(variable);
+		data = new DiscreteMixtureData(*obs_marginal, pDistribution);
 
+		pDistribution->mixture_data = data;
+    }
+    if (npcomponent[variable] != NULL)
+    	for (i = 0;i < nb_component;i++)
+    	    delete marginal_pcomponent[i];
+
+    delete [] marginal_pcomponent;
+
+    pDistribution->computation();
     pDistribution->cumul_computation();
 
     pDistribution->max_computation();
@@ -1758,54 +1729,200 @@ bool MultivariateMixture::plot_write(StatError &error , const char *prefix ,
  *  Parameter: pointer on MultivariateMixtureData object
  *
  *--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Plot of a Mixture object and the associated data structure.
+ *
+ *  \param[in] vec pointer on a MixtureData object.
+ *
+ *  \return        MultiPlotSet object.
+ */
+/*--------------------------------------------------------------*/
 
-MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *mixt_data) const
+//TODO: replace Mixture by MultivariateMixture, etc.
+MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *vec) const
 
 {
-  bool status = true;
-  int var = 0, cvariable = 0; // variable index that corresponds to var in mixture_data
-  DiscreteParametricModel *pparam = NULL;
-  FrequencyDistribution **observation = NULL;
-  StatError error;
-  MultiPlotSet *plotset=NULL;
-/*
-  // affiche la loi des poids
-  if (mixt_data != NULL) {
-	pparam = new DiscreteParametricModel(*weight, mixt_data->weight);
-	status= pparam->plot_write(error, prefix, title);
-	delete pparam;
-	pparam = NULL;
+  int i , j;
+  int nb_plot_set , index , variable;
+  FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
+  Histogram *marginal_histo = NULL , **observation_histo = NULL;
+  FrequencyDistribution **component = NULL;
+  MultiPlotSet *plot_set;
+  ostringstream title , legend;
+
+
+  // computation of the number of plots
+
+  nb_plot_set = 1;
+
+  for (i = 0;i < nb_var;i++) {
+    if (vec) {
+      switch (vec->type[0]) {
+      case STATE :
+        variable = i + 1;
+        break;
+      default :
+        variable = i;
+        break;
+      }
+    } // end if (vec)
+
+    if (vec->component) {
+      nb_plot_set += nb_component;
+    }
+    else {
+      nb_plot_set++;
+    }
+
+    if ((npcomponent[i]) && (vec->marginal_distribution[variable])) {
+      if ((npcomponent[i]->weight) &&
+          (npcomponent[i]->mixture)) {
+        nb_plot_set++;
+      }
+    }
+
+    if ((pcomponent[i]) && (vec->marginal_distribution[variable])) {
+      if ((pcomponent[i]->weight) &&
+          (pcomponent[i]->mixture)) {
+        nb_plot_set += 2;
+      }
+    }
   }
 
-  if (status) {
-	for (var = 1; var <= nb_var; var++) {
-	  if (mixt_data != NULL) {
-	switch (mixt_data->type[0])
-	  {
-	  case INT_VALUE :
-		cvariable = var - 1;
-		break;
-	  case STATE :
-		cvariable = var;
-		break;
-	  }
+  plot_set = new MultiPlotSet(nb_plot_set , nb_var + 1);
+  MultiPlotSet &plot = *plot_set;
 
-	if (mixt_data->component != NULL) {
-	  if (mixt_data->component[cvariable] != NULL) {
-		observation = mixt_data->component[cvariable];
-	  }
-	  else
-		observation = NULL;
-	}
-	  }
-	  if (npcomponent[var-1] != NULL)
-	npcomponent[var-1]->plot_print(prefix, title, var, observation);
-	  else
-	pcomponent[var-1]->plot_print(prefix, title, var, observation);
-	}
-  }*/
-   return plotset;
+  plot_set->border = "15 lw 0";
+
+  index = 0;
+  plot_set->variable_nb_viewpoint[0] = 0;
+
+  plot[0].xrange = Range(0 , weight->nb_value - 1);
+
+  if (vec) {
+
+    // weights
+
+    plot[0].yrange = Range(0 , ceil(MAX(vec->marginal_distribution[0]->max ,
+                                    weight->max * vec->marginal_distribution[0]->nb_element)
+                                    * YSCALE));
+
+    if (weight->nb_value - 1 < TIC_THRESHOLD) {
+      plot[0].xtics = 1;
+    }
+
+    plot[0].resize(2);
+
+    legend.str("");
+    legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+    plot[0][0].legend = legend.str();
+
+    plot[0][0].style = "impulses";
+
+    vec->marginal_distribution[0]->plotable_frequency_write(plot[0][0]);
+
+    legend.str("");
+    legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION];
+    plot[0][1].legend = legend.str();
+
+    plot[0][1].style = "linespoints";
+
+    weight->plotable_mass_write(plot[0][1] , vec->marginal_distribution[0]->nb_element);
+  }
+
+  else {
+    plot[0].yrange = Range(0 , weight->max * YSCALE);
+    legend.str("");
+    legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION];
+    plot[0][0].legend = legend.str();
+
+    plot[0][0].style = "linespoints";
+
+    weight->plotable_mass_write(plot[0][0] , vec->marginal_distribution[0]->nb_element);
+  } // end if (vec)
+
+  for (i = 0;i < nb_var;i++) {
+    if (vec) {
+      switch (vec->type[0]) {
+      case STATE :
+        variable = i + 1;
+        break;
+      default :
+        variable = i;
+        break;
+      }
+
+
+      marginal_dist = vec->marginal_distribution[variable];
+
+      if (vec->component) {
+    	  component = vec->component[variable];
+      }
+      marginal_histo = vec->marginal_histogram[variable];
+    }
+
+    if (npcomponent[i]) {
+      plot_set->variable_nb_viewpoint[i] = 0;
+      npcomponent[i]->plotable_write(*plot_set , index , i + 1 , observation_dist ,
+                                             marginal_dist , MIXTURE);
+    }
+    else
+      pcomponent[i]->plotable_write(*plot_set , index , i + 1 , observation_dist ,
+                                                     marginal_dist , MIXTURE);
+  }
+
+  return plot_set;
 }
+
+//
+//MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *mixt_data) const
+//
+//{
+//  bool status = true;
+//  int var = 0, cvariable = 0; // variable index that corresponds to var in mixture_data
+//  DiscreteParametricModel *pparam = NULL;
+//  FrequencyDistribution **observation = NULL;
+//  StatError error;
+//  MultiPlotSet *plotset=NULL;
+///*
+//  // affiche la loi des poids
+//  if (mixt_data != NULL) {
+//	pparam = new DiscreteParametricModel(*weight, mixt_data->weight);
+//	status= pparam->plot_write(error, prefix, title);
+//	delete pparam;
+//	pparam = NULL;
+//  }
+//
+//  if (status) {
+//	for (var = 1; var <= nb_var; var++) {
+//	  if (mixt_data != NULL) {
+//	switch (mixt_data->type[0])
+//	  {
+//	  case INT_VALUE :
+//		cvariable = var - 1;
+//		break;
+//	  case STATE :
+//		cvariable = var;
+//		break;
+//	  }
+//
+//	if (mixt_data->component != NULL) {
+//	  if (mixt_data->component[cvariable] != NULL) {
+//		observation = mixt_data->component[cvariable];
+//	  }
+//	  else
+//		observation = NULL;
+//	}
+//	  }
+//	  if (npcomponent[var-1] != NULL)
+//	npcomponent[var-1]->plot_print(prefix, title, var, observation);
+//	  else
+//	pcomponent[var-1]->plot_print(prefix, title, var, observation);
+//	}
+//  }*/
+//   return plotset;
+//}
 
 
 /*--------------------------------------------------------------*

@@ -51,6 +51,8 @@ namespace stat_tool {
  *
  *  Constants
  */
+/* class MixtureData;
+
 
 
   const int MIXTURE_NB_COMPONENT = NB_STATE;  // maximum number of components
@@ -62,15 +64,15 @@ namespace stat_tool {
 
   const int MIXTURE_NB_VECTOR = 50000;   // maximum sample size for simulation
 
-
+*/
 
 /****************************************************************
  *
  *  Class definition
  */
 
+/* class MixtureData;
 
-  class MixtureData;
 
   /// \brief Multivariate mixture of distributions
 
@@ -250,9 +252,9 @@ namespace stat_tool {
     double get_entropy(int index) const { return entropy[index]; }
   };
 
-
 };  // namespace stat_tool
 
 
+*/
 
 #endif

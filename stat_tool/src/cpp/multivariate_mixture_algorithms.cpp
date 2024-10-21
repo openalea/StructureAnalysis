@@ -60,6 +60,52 @@ using namespace std;
 namespace stat_tool {
 
 
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the concentration parameter of a von Mises distribution
+ *         on the basis of the mean direction (Mardia & Jupp, 2000; pp. 85-86).
+ *
+ *  \param[in] mean_direction mean direction.
+ *
+ *  \return                   concentration parameter.
+ */
+/*--------------------------------------------------------------*/
+
+double von_mises_concentration_computation(double mean_direction)
+
+{
+  int i;
+  double concentration , power[6];
+
+
+  if (mean_direction < 0.53) {
+    power[1] = mean_direction;
+    for (i = 2;i <= 5;i++) {
+      power[i] = power[i - 1] * mean_direction;
+    }
+
+    concentration = 2 * power[1] + power[3] + 5 * power[5] / 6;
+  }
+
+  else if (mean_direction < 0.85) {
+    concentration = -0.4 + 1.39 * mean_direction + 0.43 / (1. - mean_direction);
+  }
+
+  else {
+    power[1] = 1. - mean_direction;
+    for (i = 2;i <= 3;i++) {
+      power[i] = power[i - 1] * (1. - mean_direction);
+    }
+
+    concentration = 1. / (2 * power[1] - power[2] - power[3]);
+  }
+
+# ifdef DEBUG
+  cout << "mean direction: " << mean_direction << " | concentration : " << concentration << endl;
+# endif
+
+  return concentration;
+}
 
 /*--------------------------------------------------------------*
  *
@@ -1095,6 +1141,8 @@ MultivariateMixtureData* MultivariateMixture::cluster(StatError &error,  const V
     nb_real_variable++;
   }
 
+  // note that int and real values are allocated for each variable
+  // but only one of them is actually used
   itypes = new variable_nature[nb_res_variable];
   itypes[0] = STATE; // states
   for (var = 0; var < nb_variable; var++) {
@@ -1133,11 +1181,12 @@ MultivariateMixtureData* MultivariateMixture::cluster(StatError &error,  const V
 	else {
 	  if (add_state_entropy && (var == nb_res_variable-1)) {
 	    // compute entropy
-	    ireal_vector[n][nb_real_variable-1] = 0;
+	    ireal_vector[n][nb_res_variable-1] = 0;
 	    for (s = 0; s < nb_component; s++) {
-	      if (log(posterior_dist[n][s]) > D_INF) 
-		ireal_vector[n][nb_real_variable-1] -= 
-		  posterior_dist[n][s] * log(posterior_dist[n][s]); 
+	    	if (log(posterior_dist[n][s]) > D_INF)
+	    		ireal_vector[n][nb_res_variable-1] -=
+	    				posterior_dist[n][s] * log(posterior_dist[n][s]);
+	    	assert(!isnan(ireal_vector[n][nb_res_variable-1]));
 	      }
 	  }
 	  else

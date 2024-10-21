@@ -7,7 +7,7 @@
 __version__ = "$Id$"
 
 
-from openalea.stat_tool.plot import DISABLE_PLOT
+# from openalea.stat_tool.plot import DISABLE_PLOT
 
 from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
 from openalea.stat_tool.vectors import Vectors
@@ -67,8 +67,8 @@ class Test(interface):
         assert len(c) == 3
     
     def test_plot(self):
-        if DISABLE_PLOT == False:
-            self.data.plot(1)
+        # if DISABLE_PLOT == False:
+        self.data.plot(1)
          #   self.data.plot(2)
     
     def _test_save(self):
@@ -86,6 +86,12 @@ class Test(interface):
         assert(len(v) == 836)
         assert(v.nb_variable == 5)
         m = v.mixture_estimation(3, 300, [])
+        m.plot()
+        # Get marginals
+        for i in range(v.nb_variable):
+            marginal = m.extract_distribution(i+1)
+            assert(marginal.nb_component == 3)
+        marginal.plot()    
         return m, v
      
     def test_spreadsheet_write(self):

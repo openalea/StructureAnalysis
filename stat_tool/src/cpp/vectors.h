@@ -431,9 +431,9 @@ namespace stat_tool {
     variable_nature get_type(int variable) const { return type[variable]; }
     double get_min_value(int variable) const { return min_value[variable]; }
     double get_max_value(int variable) const { return max_value[variable]; }
-    FrequencyDistribution* get_marginal_distribution(int variable) const
+    FrequencyDistribution* get_marginal_distribution(int variable) const /// get marginal counts for a given variable (does not allocate a new object, returns internal pointer)
     { return marginal_distribution[variable]; }
-    Histogram* get_marginal_histogram(int variable) const
+    Histogram* get_marginal_histogram(int variable) const /// get marginal histogram for a given variable (does not allocate a new object, returns internal pointer)
     { return marginal_histogram[variable]; }
     double get_mean(int variable) const { return mean[variable]; }
     double get_covariance(int variable1, int variable2) const

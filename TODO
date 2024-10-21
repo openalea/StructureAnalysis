@@ -6,6 +6,7 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
     + Switch to pytest instead of nosetests.
     + Fix stat_tool_examples.py, test_distribution_functional.py, test_estimate.py, test_multivariate_mixture_functional.py, test_multivariate_mixture_functional.py, test_vector_distance.py test_compound_functional.py
     + export set_seed in stat_tool.h
+    + merge implementations of Mixture and MultivariateMixture (same semantics)
     + matplotlib output to Survival (remove gnuplot)
     + Translate C++ comments
     + let enumerated types be systematically transferred from python to wrappers to C++ by intermediate conversions to int

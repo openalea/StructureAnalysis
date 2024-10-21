@@ -79,6 +79,8 @@ namespace stat_tool {
 
     friend class FrequencyDistribution;
     friend class DiscreteMixtureData;
+    // friend class MultivariateMixtureData;
+    friend class MultivariateMixture;
 
     friend std::ostream& operator<<(std::ostream &os , const DiscreteMixture &mixt)
     { return mixt.ascii_write(os , mixt.mixture_data , false , false); }
@@ -160,6 +162,8 @@ namespace stat_tool {
 
     friend class FrequencyDistribution;
     friend class DiscreteMixture;
+    // friend class MultivariateMixtureData;
+    // friend class MultivariateMixture;
 
     friend std::ostream& operator<<(std::ostream &os , const DiscreteMixtureData &mixt_histo)
     { return mixt_histo.ascii_write(os , false); }

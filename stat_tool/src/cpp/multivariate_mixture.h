@@ -65,7 +65,7 @@ namespace stat_tool {
   class MultivariateMixtureData;
 
 
-  // melange de lois multivariees a variables independantes
+  // \brief Multivariate mixture of distributions
 
   class MultivariateMixture : public StatInterface {
 
@@ -147,7 +147,7 @@ namespace stat_tool {
     Distribution* extract_categorical_model(StatError &error , int ivariable,
                           int index) const;
     /** extract marginal mixture distribution */
-    Distribution* extract_distribution(StatError &error , int ivariable) const;
+    DiscreteMixture* extract_distribution(StatError &error , int ivariable) const;
     MultivariateMixtureData* extract_data(StatError &error) const;
 
     /** Permutation of the states of \e self */

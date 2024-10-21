@@ -26,6 +26,7 @@
 #include "export_base.h"
 
 #include "stat_tool/regression.h"
+#include "stat_tool/discrete_mixture.h"
 #include "stat_tool/multivariate_mixture.h"
 
 

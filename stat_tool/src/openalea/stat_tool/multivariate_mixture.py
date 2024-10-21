@@ -57,9 +57,9 @@ def _MultivariateMixture_old_print(self, variable, Title=""):
         file_id += "0"
     interface.StatInterface.plot_print(self, Title=Title, Suffix=file_id)
 
-def _MultivariateMixture_get_plotable(self):
-    """Return a plotable object (not yet implemented)"""
-    return None
+#def _MultivariateMixture_get_plotable(self):
+#    """Return a plotable object"""
+#    return None
 
 
 def _MultivariateMixture_criteria(self):
@@ -126,7 +126,7 @@ def _MultivariateMixture_state_permutation(self, perm):
 
 _MultivariateMixture.old_plot = _MultivariateMixture_old_plot
 _MultivariateMixture.plot_print = _MultivariateMixture_old_print
-_MultivariateMixture.get_plotable = _MultivariateMixture_get_plotable
+#_MultivariateMixture.get_plotable = _MultivariateMixture_get_plotable
 _MultivariateMixture._criteria = _MultivariateMixture_criteria
 _MultivariateMixture.save = _MultivariateMixture_save
 _MultivariateMixture.state_permutation = _MultivariateMixture_state_permutation
