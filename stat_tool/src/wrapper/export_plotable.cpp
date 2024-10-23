@@ -40,6 +40,44 @@ using namespace boost::python;
 using namespace stat_tool;
 
 
+#define WRAP PlotableWrap
+class WRAP
+{
+
+public:
+
+  static void set_xrange(MultiPlot& plot, const boost::python::tuple& xrange)
+  {
+	 std::pair<int, int> range;
+
+     boost::python::extract<int> get_param1(xrange[0]);
+     if (get_param1.check())
+    	 range.first = get_param1();
+
+	 boost::python::extract<int> get_param2(xrange[1]);
+	 if (get_param2.check())
+		 range.second = get_param2();
+
+	 plot.xrange = range;
+  }
+
+  static void set_yrange(MultiPlot& plot, const boost::python::tuple& yrange)
+  {
+	 std::pair<int, int> range;
+
+     boost::python::extract<int> get_param1(yrange[0]);
+     if (get_param1.check())
+    	 range.first = get_param1();
+
+	 boost::python::extract<int> get_param2(yrange[1]);
+	 if (get_param2.check())
+		 range.second = get_param2();
+
+	 plot.yrange = range;
+  }
+};
+
+
 void class_plotable()
 {
   class_ < PlotPoint >("PlotPoint", init<float, float>())
@@ -86,6 +124,9 @@ void class_plotable()
     .def_readwrite("xrange", &MultiPlot::xrange)
     .def_readwrite("yrange", &MultiPlot::yrange)
 
+    .def("set_xrange", WRAP::set_xrange)
+    .def("set_yrange", WRAP::set_yrange)
+
     .def_readwrite("grid", &MultiPlot::grid)
     .def_readwrite("group", &MultiPlot::group)
 
@@ -116,5 +157,6 @@ class_<std::vector<int> > ("std_vector_int")
 ;
 }
 
+#undef WRAP
 
 

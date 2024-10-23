@@ -49,6 +49,14 @@ namespace stat_tool {
 
 //////////////////////// SinglePlot /////////////////////////////////////////////
 
+SinglePlot::SinglePlot(const SinglePlot& plot)
+{
+    data = plot.data;
+    data_and_text = plot.data_and_text;
+    legend = plot.legend;
+    style = plot.style;
+}
+
 void SinglePlot::add_point(float x, float y)
 {
   // data.push_back(std::pair<float, float>(x,y));
@@ -110,7 +118,29 @@ std::string SinglePlot::get_label(int i)
   return pt.second;
 }
 
+//////////////////////// MultiPlot /////////////////////////////////////////////
+MultiPlot::MultiPlot(const MultiPlot& multiplot)
+{
+	plots = multiplot.plots;
+    title = multiplot.title;
 
+    xtics = multiplot.xtics;
+    ytics = multiplot.ytics;
+
+    xrange = multiplot.xrange;
+    yrange = multiplot.yrange;
+
+    xlabel = multiplot.xlabel;
+    ylabel = multiplot.ylabel;
+
+    grid = multiplot.grid;
+
+    group = multiplot.group;
+}
+
+MultiPlot::MultiPlot(const MultiPlot *multiplot)
+:MultiPlot(*multiplot)
+{}
 //////////////////////// MultiPlotSet /////////////////////////////////////////////
 
 /*

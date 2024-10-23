@@ -1738,8 +1738,7 @@ bool MultivariateMixture::plot_write(StatError &error , const char *prefix ,
  *  \return        MultiPlotSet object.
  */
 /*--------------------------------------------------------------*/
-
-//TODO: replace Mixture by MultivariateMixture, etc.
+//TODO: split MultiPlotSet into an array of of MultiPlotSets?
 MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *vec) const
 
 {
@@ -1748,8 +1747,10 @@ MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *v
   FrequencyDistribution *marginal_dist = NULL , **observation_dist = NULL;
   Histogram *marginal_histo = NULL , **observation_histo = NULL;
   FrequencyDistribution **component = NULL;
-  MultiPlotSet *plot_set;
+  MultiPlotSet *plot_set, *marginal_plot_set;
+  DiscreteMixture *marginal_mixture = NULL;
   ostringstream title , legend;
+  StatError error;
 
 
   // computation of the number of plots
@@ -1789,6 +1790,7 @@ MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *v
       }
     }
   }
+  nb_plot_set += nb_component+2;
 
   plot_set = new MultiPlotSet(nb_plot_set , nb_var + 1);
   MultiPlotSet &plot = *plot_set;
@@ -1798,49 +1800,54 @@ MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *v
   index = 0;
   plot_set->variable_nb_viewpoint[0] = 0;
 
-  plot[0].xrange = Range(0 , weight->nb_value - 1);
+  plot[index].xrange = Range(0 , weight->nb_value - 1);
 
+  title.str("");
+  title << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION];
   if (vec) {
 
+	 title << " and " << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     // weights
 
-    plot[0].yrange = Range(0 , ceil(MAX(vec->marginal_distribution[0]->max ,
+    plot[index].yrange = Range(0 , ceil(MAX(vec->marginal_distribution[0]->max ,
                                     weight->max * vec->marginal_distribution[0]->nb_element)
                                     * YSCALE));
 
     if (weight->nb_value - 1 < TIC_THRESHOLD) {
-      plot[0].xtics = 1;
+      plot[index].xtics = 1;
     }
 
-    plot[0].resize(2);
+    plot[index].resize(2);
 
     legend.str("");
     legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
-    plot[0][0].legend = legend.str();
+    plot[index][0].legend = legend.str();
 
-    plot[0][0].style = "impulses";
+    plot[index][0].style = "impulses";
 
     vec->marginal_distribution[0]->plotable_frequency_write(plot[0][0]);
 
     legend.str("");
     legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION];
-    plot[0][1].legend = legend.str();
+    plot[index][1].legend = legend.str();
 
-    plot[0][1].style = "linespoints";
+    plot[index][1].style = "linespoints";
 
-    weight->plotable_mass_write(plot[0][1] , vec->marginal_distribution[0]->nb_element);
+    weight->plotable_mass_write(plot[index][1] , vec->marginal_distribution[0]->nb_element);
   }
 
   else {
-    plot[0].yrange = Range(0 , weight->max * YSCALE);
+    plot[index].yrange = Range(0 , weight->max * YSCALE);
     legend.str("");
     legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION];
-    plot[0][0].legend = legend.str();
+    plot[index][0].legend = legend.str();
 
-    plot[0][0].style = "linespoints";
+    plot[index][0].style = "linespoints";
 
-    weight->plotable_mass_write(plot[0][0] , vec->marginal_distribution[0]->nb_element);
+    weight->plotable_mass_write(plot[index][0] , vec->marginal_distribution[0]->nb_element);
   } // end if (vec)
+  plot[index].title = title.str();
+  index++;
 
   for (i = 0;i < nb_var;i++) {
     if (vec) {
@@ -1860,6 +1867,8 @@ MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *v
     	  component = vec->component[variable];
       }
       marginal_histo = vec->marginal_histogram[variable];
+      if ((vec != NULL) && (vec->marginal_distribution != NULL))
+    	  observation_dist = vec->marginal_distribution;
     }
 
     if (npcomponent[i]) {
@@ -1870,7 +1879,18 @@ MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *v
     else
       pcomponent[i]->plotable_write(*plot_set , index , i + 1 , observation_dist ,
                                                      marginal_dist , MIXTURE);
+    marginal_mixture = extract_distribution(error, i+1);
+    marginal_plot_set = marginal_mixture->get_plotable();
+    // TODO: investigate seg fault, may be create copy operator or plotable_write method.
+	plot[index].resize(marginal_plot_set[0].size());
+    for (j=0; j < marginal_plot_set[0].size(); j++)   {
+    	plot[index][j] = (*marginal_plot_set)[0][j];
+    }
+    delete marginal_mixture;
+    delete marginal_plot_set;
+    index++;
   }
+
 
   return plot_set;
 }

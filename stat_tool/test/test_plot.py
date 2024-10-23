@@ -35,6 +35,16 @@ class Test:
 
         #TODO: understand why the three points do not show up.
         p = _stat_tool.MultiPlotSet(1)
+        
+        p[0].resize(1)
+        p[0].set_xrange((-10 , 10))
+        p[0].set_yrange((-5 , 8))
+        p[0].xlabel = "x"
+        p[0].ylabel = "y"
+        # equivalent to p[0].xrange = _stat_tool.PlotPoint((0 , 3.5)
+        p[0].xtics = 1
+        p[0].ytics = 1
+                        
         p[0][0].add_point(_stat_tool.PlotPoint(1.0, 1.2))
         p[0][0].add_point(_stat_tool.PlotPoint(3.0, 5.2))
         p[0][0].add_point(_stat_tool.PlotPoint(2.0, 2.3))
@@ -43,6 +53,7 @@ class Test:
         p[0][0].legend = "legend"
         p[0][0].color = 'r'
         p[0][0].style = '+'
+    
 
         from openalea.stat_tool.output import plot
 

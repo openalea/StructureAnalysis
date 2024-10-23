@@ -86,6 +86,15 @@ class Test(interface):
         assert(len(v) == 836)
         assert(v.nb_variable == 5)
         m = v.mixture_estimation(3, 300, [])
+        self._m = m 
+        self._v = v            
+        return m, v
+
+    def test_mixture_plots(self):
+        if hasattr(self, '_m') and hasattr(self, '_m'):
+            m, v = self._m, self._v 
+        else: 
+            m, v = self.test_estimate()
         m.plot()
         # Get marginals
         for i in range(v.nb_variable):
