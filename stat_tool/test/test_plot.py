@@ -53,6 +53,8 @@ class Test:
         p[0][0].legend = "legend"
         p[0][0].color = 'r'
         p[0][0].style = '+'
+        # p[0][0].style = "linespoints";
+        # p[0][0].label = True
     
 
         from openalea.stat_tool.output import plot

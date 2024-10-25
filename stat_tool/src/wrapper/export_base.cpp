@@ -439,17 +439,22 @@ void class_forward()
     void computation(const DiscreteParametric &dist);
 */
 }
-
-#define WRAP BaseWrap
+#define WRAP SetSeed
 class WRAP
 {
 
 public:
-
-
-  void set_seed(int seed)
-  {
-     stat_tool::set_seed(seed);
-  }
+	static void set_seed(int seed) { stat_tool::set_seed(seed); }
 };
+
+void class_set_seed()
+{
+  class_<SetSeed>
+    ("_SetSeed", "SetSeed")
+    .def("set_seed", WRAP::set_seed, "Set seed")
+	;
+
+};
+
+#undef WRAP
 
