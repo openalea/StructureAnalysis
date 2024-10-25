@@ -34,6 +34,8 @@ from openalea.stat_tool._stat_tool import (
     _SetSeed
 )
 
+_SetSeedInstance = _SetSeed()
+set_seed = _SetSeedInstance.set_seed
 
 from .enums import distribution_identifier_type
 
@@ -46,7 +48,8 @@ __all__ = ["_Distribution",
            "NegativeBinomial",
            "Multinomial",
            "ToHistogram",
-           "ToDistribution"]
+           "ToDistribution",
+           "set_seed"]
 
 def Distribution(utype, *args):
     """

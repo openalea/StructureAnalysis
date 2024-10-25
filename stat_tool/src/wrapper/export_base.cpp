@@ -444,7 +444,7 @@ class WRAP
 {
 
 public:
-	static void set_seed(int seed) { stat_tool::set_seed(seed); }
+	static void set_seed(const SetSeed&, int seed) { stat_tool::set_seed(seed); }
 };
 
 void class_set_seed()

@@ -7,6 +7,7 @@ from openalea.stat_tool.distribution import Distribution, Uniform, Binomial
 from openalea.stat_tool.distribution import NegativeBinomial, Poisson
 from openalea.stat_tool.distribution import Multinomial
 from openalea.stat_tool.distribution import ToHistogram, ToDistribution
+from openalea.stat_tool.distribution import set_seed
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool import Estimate
 
@@ -234,7 +235,19 @@ class TestDistribution():
         assert 0.6666 < dist.get_variance < 0.6667
 
 
+    def test_set_seed(self):
+        """"Setting simulation seed"""
 
+        d = Distribution("POISSON", 0, 2.5)
+        set_seed(0)
+         # Simulate and get histograms        
+        s1 = str(list(d.simulate(200)))
+        s2 = str(list(d.simulate(200)))
+        assert s1 != s2
+        set_seed(0)
+        s3 = str(list(d.simulate(200)))
+        assert s1 == s3
+        return s1, s2, s3
 
 
 
