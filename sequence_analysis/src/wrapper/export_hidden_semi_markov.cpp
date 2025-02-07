@@ -189,6 +189,45 @@ public:
 
 
 
+	static double likelihood_computation(const HiddenSemiMarkov &hsm,
+                                             const MarkovianSequences &seq,
+                                             boost::python::list &post_prob,
+                                             int index) {
+        int post_prob_len = boost::python::len(post_prob), i, nb_seq;
+        double *posterior_probability = NULL;
+        double likelihood = D_INF;
+
+        nb_seq = seq.get_nb_sequence();
+        if (post_prob_len > 0) {
+          for (i = 0; i < post_prob_len; i++) {
+              post_prob.pop();
+          }
+        }
+        for (i = 0; i < nb_seq; i++) {
+            post_prob.append(D_INF);
+        }
+
+        likelihood = hsm.likelihood_computation(seq, posterior_probability, index);
+        if (likelihood > D_INF) {
+            posterior_probability = new double[nb_seq];
+            if (index != I_DEFAULT) {
+                // compute probability of just one sequence
+                post_prob[index] = posterior_probability[index];
+            } else {
+                for (i = 0; i < nb_seq; i++) {
+                    post_prob[i] = posterior_probability[i];
+                }
+          }
+          delete [] posterior_probability;
+          posterior_probability = NULL;
+        }
+		return likelihood;
+	}
+
+	static double get_likelihood(const HiddenSemiMarkov &hsm) {
+	    return hsm.get_semi_markov_data()->get_likelihood();
+	}
+
 
 };
 
@@ -205,6 +244,8 @@ void class_hidden_semi_markov() {
 
     .def(self_ns::str(self)) //__str__
     .def("file_ascii_write", WRAP::file_ascii_write, "Save vector summary into a file")
+
+    .def("likelihood_computation", WRAP::likelihood_computation, args("sequences","posterior_probabilities", "index"), "Compute likelihood for given sequences")
 
     DEF_RETURN_VALUE("state_sequence_computation", WRAP::state_sequence_computation, args(""),"")
     DEF_RETURN_VALUE("thresholding", WRAP::thresholding, args("index"), "todo")

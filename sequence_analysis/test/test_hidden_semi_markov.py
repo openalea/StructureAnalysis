@@ -7,7 +7,7 @@
 __revision__ = "$Id$"
 
 
-import openalea.stat
+#import openalea.stat
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis.hidden_semi_markov import HiddenSemiMarkov
