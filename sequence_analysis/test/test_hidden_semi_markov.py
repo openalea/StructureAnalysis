@@ -22,10 +22,10 @@ import openalea.stat_tool.plot #import DISABLE_PLOT
 openalea.stat_tool.plot.DISABLE_PLOT = True
 
 from tools import interface
-from tools import runTestClass
+from tools import runTestClass, robust_path as get_shared_data
 
-from openalea.sequence_analysis import get_shared_data
 import os
+
 
 def HiddenSemiMarkovData():
      hsm = HiddenSemiMarkov(str(get_shared_data( "wij1.hsc")))
@@ -43,9 +43,6 @@ class Test(interface):
                            HiddenSemiMarkov)
 
     def build_data(self):
-        """todo: check identifier output. should be a list """
-        # build a list of 2 sequences with a variable that should be identical
-        # to sequences1.seq
         hsm = HiddenSemiMarkov(str(get_shared_data('test_hidden_semi_markov.dat')))
         return hsm
 
