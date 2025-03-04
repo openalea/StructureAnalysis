@@ -6,17 +6,18 @@ __version__ = "$Id$"
 from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
 from openalea.stat_tool.distribution import Binomial, Poisson
 
-from openalea.stat_tool.output import Plot
+from openalea.stat_tool.output import plot, Plot
 
+from openalea.stat_tool.plot import get_plotter, mplotlib 
 
 def test1():
 
 
-    #ORIGINAL AML stops HERE 
+    plotter = mplotlib()
      
     d11 = Binomial(0, 12, 0.1)
-    d12 = Binomial(2, 13, 0.6)
-    d13 = Binomial(3, 15, 0.9)
+    d12 = Binomial(0, 12, 0.6)
+    d13 = Binomial(0, 12, 0.9)
     
     d21 = Poisson(0, 25.0)
     d22 = Poisson(0, 5.0)
@@ -24,6 +25,8 @@ def test1():
 
     m = _MultivariateMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
     print(m)
+
+    Plot(m, variable=0, Title="Simulated mixture: ")
 
     #m2 = _MultivariateMixture("mixture_mv1.mixt")
     #print m2
@@ -35,10 +38,11 @@ def test1():
    # print m
 
     print("Simulation de melanges multivaries : ")
-    v = m.simulate(5000)
+    v = m.simulate(500000)
     print(v)
 
-    Plot(m, variable=1, Title="Simulated mixture")
+    # TODO: matplotlib output for ._MultivariateMixtureData
+    Plot(v, variable=1, Title="Simulated mixture: ")
 
     print("Estimation de melanges multivaries ")
     #    "d'apres un modele initial : "
@@ -46,7 +50,9 @@ def test1():
 
     extracted_mixture = m_estim_model.extract_mixture(1)
     extracted_mixture.old_plot(variable=1, Title="Marginal distribution")
+    # TODO: check why clustering is so bad (or histograms are so far from distributions)
     Plot(m_estim_model, variable = 1, Title="Estimated mixture")
+    print(m_estim_model.display(True))
 
     print("Estimation de melanges multivaries ", 
         "d'apres un nombre de composantes : ")

@@ -1769,7 +1769,7 @@ MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *v
       }
     } // end if (vec)
 
-    if (vec->component) {
+    if ((vec) && (vec->component)) {
       nb_plot_set += nb_component;
     }
     else {
@@ -1783,7 +1783,7 @@ MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *v
       }
     }
 
-    if ((pcomponent[i]) && (vec->marginal_distribution[variable])) {
+    if ((pcomponent[i]) && (vec) && (vec->marginal_distribution[variable])) {
       if ((pcomponent[i]->weight) &&
           (pcomponent[i]->mixture)) {
         nb_plot_set += 2;
@@ -1844,7 +1844,9 @@ MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *v
 
     plot[index][0].style = "linespoints";
 
-    weight->plotable_mass_write(plot[index][0] , vec->marginal_distribution[0]->nb_element);
+    weight->plotable_mass_write(plot[index][0] , 1);
+    // weight->plotable_mass_write(plot[index][0] , vec->marginal_distribution[0]->nb_element);
+
   } // end if (vec)
   plot[index].title = title.str();
   index++;

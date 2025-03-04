@@ -277,7 +277,13 @@ class mplotlib(plotter):
                 #        break # nothing else to be done in principle
                     else:
                         print("Warning. Empty data.")
-                        return
+                        for i in range(0, singleplot.get_label_size()):
+                            x = singleplot.get_label_x(i)
+                            y = singleplot.get_label_y(i)
+                            labels = singleplot.get_label_text(i)
+                            matplotlib.pyplot.text(x, y, labels)
+                            pylab.hold(True)
+                        # return
                 else:
                     pass
                     # continue to the normal plots

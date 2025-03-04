@@ -4,7 +4,7 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
     + create a new branch for each new development (do not systematically use new_python_api)
     + update tests to be compliant with python 3
     + Switch to pytest instead of nosetests.
-    + Fix stat_tool_examples.py, test_distribution_functional.py, test_estimate.py, test_multivariate_mixture_functional.py, test_multivariate_mixture_functional.py, test_vector_distance.py test_compound_functional.py
+    + Fix stat_tool_examples.py, test_estimate.py, test_multivariate_mixture_functional.py, test_vector_distance.py
     + export set_seed in stat_tool.h
     + merge implementations of Mixture and MultivariateMixture (same semantics)
     + matplotlib output to Survival (remove gnuplot)
@@ -13,6 +13,7 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
     + check consistency of naming and methods vs. global functions (develop methods, reduce global functions). Maybe hide some low-level methods defined in low-level wrappers.
     + think about a more automated manner to handle and wrap enumerated types, possibly by replacing them by classes with dictionary and inverse dictionary: {0: "VALUE0", 1: "VALUE1"} and {"VALUE0": 0, "VALUE1": 1}
     + currently, distributions are picked withing a closed list and reimplemented from scratch. Consider finding existing C++ libraries with python interface (scipy, scikitlearn, boost?) and extend base classes to add estimation methods.
+    + Reread the scikitlearn manual and get inspired by their API.
     + nosetests raised an error in test_mixture_functional.py (should be solved by robust_path?)
         File "StructureAnalysis/stat_tool/src/openalea/stat_tool/__init__.py", line 24, in get_shared_data
             return pj(shared_data_path, file)

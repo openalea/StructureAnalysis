@@ -7,6 +7,8 @@ __version__ = "$Id$"
 
 import os
 
+import numpy as np
+
 from openalea.stat_tool import Compound, Histogram, Distribution
 
 from openalea.stat_tool import (
@@ -41,8 +43,10 @@ def test():
     peup1 = Histogram("data/peup1.his")
     mixt4 = Estimate(peup1, "MIXTURE", "B", "NB")
     histo33 = ToHistogram(ExtractDistribution(mixt4, "Component", 2))
+    histo33array = np.array(histo33)
+    bad_shift_val = int(np.min(np.where(histo33array > 0))) + 1
     try:
-        histo34 = Shift(histo33, -11)
+        histo34 = Shift(histo33, -bad_shift_val)
     except Exception:
         pass
     else:
