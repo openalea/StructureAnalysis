@@ -145,13 +145,13 @@ namespace stat_tool {
                               double cumul_threshold) const;
     double negative_binomial_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
                                         double cumul_threshold) const;
-    double poisson_geometric_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
+    double geometric_poisson_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
                                         double cumul_threshold) const;
 
     double parametric_estimation(DiscreteParametric *pdist , int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
-                                 double cumul_threshold = CUMUL_THRESHOLD , bool poisson_geometric = false) const;
+                                 double cumul_threshold = CUMUL_THRESHOLD , bool geometric_poisson = false) const;
     double type_parametric_estimation(DiscreteParametric *pdist , int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
-                                      double cumul_threshold = CUMUL_THRESHOLD , bool poisson_geometric = false) const;
+                                      double cumul_threshold = CUMUL_THRESHOLD , bool geometric_poisson = false) const;
 
     DiscreteParametric* type_parametric_estimation(int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
                                                    double cumul_threshold = CUMUL_THRESHOLD) const;

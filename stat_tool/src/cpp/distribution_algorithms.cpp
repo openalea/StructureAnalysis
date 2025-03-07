@@ -629,7 +629,7 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
  */
 /*--------------------------------------------------------------*/
 
-void DiscreteParametric::poisson_geometric_computation(int inb_value , double cumul_threshold)
+void DiscreteParametric::geometric_poisson_computation(int inb_value , double cumul_threshold)
 
 {
   int i , j , k;
@@ -998,7 +998,7 @@ int DiscreteParametric::nb_value_computation(discrete_parametric ident , int inf
   }
 
   else {
-    if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
+    if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == GEOMETRIC_POISSON)) {
       DiscreteParametric *dist;
 
       dist = new DiscreteParametric(ident , inf_bound , sup_bound , parameter ,
@@ -1041,8 +1041,8 @@ void DiscreteParametric::computation(int min_nb_value , double cumul_threshold)
       else
     	  negative_binomial_computation(min_nb_value , cumul_threshold , STANDARD);
       break;
-    case POISSON_GEOMETRIC :
-      poisson_geometric_computation(min_nb_value , cumul_threshold);
+    case GEOMETRIC_POISSON :
+      geometric_poisson_computation(min_nb_value , cumul_threshold);
       break;
     case UNIFORM :
       uniform_computation();

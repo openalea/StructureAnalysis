@@ -250,19 +250,20 @@ void class_constant()
   .export_values()
   ;
 
-  enum_<stat_tool::wrap_util::UniqueInt<3, 11> >("EstimatorHSMType")
+  enum_<stat_tool::wrap_util::UniqueInt<3, 11> >("CensoringEstimator")
   .value("PARTIAL_LIKELIHOOD", PARTIAL_LIKELIHOOD)
   .value("COMPLETE_LIKELIHOOD", COMPLETE_LIKELIHOOD)
   .value("KAPLAN_MEIER", KAPLAN_MEIER)
   .export_values()
   ;
 
-  enum_<stat_tool::wrap_util::UniqueInt<3, 12> >("ClusterType")
+  enum_<stat_tool::wrap_util::UniqueInt<3, 12> >("DurationDistributionMeanEstimator")
   .value("COMPUTED", COMPUTED)
   .value("ESTIMATED", ESTIMATED)
   .value("ONE_STEP_LATE", ONE_STEP_LATE)
   .export_values()
   ;
+
 
   enum_<stat_tool::wrap_util::UniqueInt<6, 13> >("LikelihoodPenaltyType")
   .value("AIC", AIC)
@@ -345,6 +346,15 @@ void class_constant()
   .value("SUM", SUM)
   .export_values()
   ;
+
+  enum_<stat_tool::wrap_util::UniqueInt<3, 21> >("ProcessType")
+  .value("ORDINARY", ORDINARY)
+  .value("EQUILIBRIUM", EQUILIBRIUM)
+  .value("DEFAULT_TYPE", DEFAULT_TYPE)
+  .export_values()
+  ;
+
+
 
   /*const int NB_STATE = 100;
   const int ORDER = 8;

@@ -118,7 +118,7 @@ const char *STAT_discrete_distribution_word[] = {
   "BINOMIAL" ,
   "POISSON" ,
   "NEGATIVE_BINOMIAL" ,
-  "POISSON_GEOMETRIC" ,
+  "GEOMETRIC_POISSON" ,
   "UNIFORM" ,
   "PRIOR_SEGMENT_LENGTH"
 };

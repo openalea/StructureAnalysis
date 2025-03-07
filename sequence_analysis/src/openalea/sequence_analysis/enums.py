@@ -163,10 +163,10 @@ index_parameter_type_map = {
         }
 
 
-stochastic_process_type = {
-    'Ordinary': _stat_tool.ProcessType.ORDINARY,
-    'Equilibrium' : _stat_tool.ProcessType.EQUILIBRIUM,
-    'DefaultType' : _stat_tool.ProcessType.DEFAULT_TYPE
+process_type = {
+    'ORDINARY': _stat_tool.ProcessType.ORDINARY,
+    'EQUILIBRIUM' : _stat_tool.ProcessType.EQUILIBRIUM,
+    'DEFAULT_TYPE' : _stat_tool.ProcessType.DEFAULT_TYPE
     }
 
 markovian_algorithms = {
@@ -214,16 +214,16 @@ likelihood_penalty_type = {
     }
 
 
-mean_computation_map = {
-    "Computed" : _stat_tool.ClusterType.COMPUTED,
-    "Estimated" : _stat_tool.ClusterType.ESTIMATED,
-    "OneStepLate" : _stat_tool.ClusterType.ONE_STEP_LATE
+duration_distribution_mean_estimator = {
+    "COMPUTED": _stat_tool.DurationDistributionMeanEstimator.COMPUTED,
+    "ESTIMATED": _stat_tool.DurationDistributionMeanEstimator.ESTIMATED,
+    "ONE_STEP_LATE": _stat_tool.DurationDistributionMeanEstimator.ONE_STEP_LATE,
     }
 
 estimator_semi_markov_type = {
-    "CompleteLikelihood" : _stat_tool.EstimatorHSMType.COMPLETE_LIKELIHOOD,
-    "PartialLikelihood" :  _stat_tool.EstimatorHSMType.PARTIAL_LIKELIHOOD,
-    "KaplanMeier" : _stat_tool.EstimatorHSMType.KAPLAN_MEIER
+    "CompleteLikelihood" : _stat_tool.CensoringEstimator.COMPLETE_LIKELIHOOD,
+    "PartialLikelihood" :  _stat_tool.CensoringEstimator.PARTIAL_LIKELIHOOD,
+    "KaplanMeier" : _stat_tool.CensoringEstimator.KAPLAN_MEIER
     }
 
 

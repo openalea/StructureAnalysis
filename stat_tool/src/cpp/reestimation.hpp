@@ -1420,7 +1420,7 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
 /*--------------------------------------------------------------*/
 
 template <typename Type>
-double Reestimation<Type>::poisson_geometric_estimation(DiscreteParametric *dist , int min_inf_bound ,
+double Reestimation<Type>::geometric_poisson_estimation(DiscreteParametric *dist , int min_inf_bound ,
                                                         bool min_inf_bound_flag , double cumul_threshold) const
 
 {
@@ -1457,7 +1457,7 @@ double Reestimation<Type>::poisson_geometric_estimation(DiscreteParametric *dist
 //      cout << i << " : " dist->parameter << " | " << dist->probability << endl;
 #     endif
 
-      dist->poisson_geometric_computation(nb_value , cumul_threshold);
+      dist->geometric_poisson_computation(nb_value , cumul_threshold);
       likelihood = dist->likelihood_computation(*this);
 
       if (likelihood > max_likelihood) {
@@ -1500,7 +1500,7 @@ double Reestimation<Type>::poisson_geometric_estimation(DiscreteParametric *dist
  *  \param[in] min_inf_bound      minimum lower bound of the support,
  *  \param[in] min_inf_bound_flag flag on the distribution shift,
  *  \param[in] cumul_threshold    threshold on the cumulative distribution function,
- *  \param[in] poisson_geometric  flag on the estimation of a Poisson geometric distribution.
+ *  \param[in] geometric_poisson  flag on the estimation of a Poisson geometric distribution.
  *
  *  \return                       maximized log-likelihood.
  */
@@ -1509,7 +1509,7 @@ double Reestimation<Type>::poisson_geometric_estimation(DiscreteParametric *dist
 template <typename Type>
 double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int min_inf_bound ,
                                                  bool min_inf_bound_flag , double cumul_threshold ,
-                                                 bool poisson_geometric) const
+                                                 bool geometric_poisson) const
 
 {
   double likelihood;
@@ -1528,8 +1528,8 @@ double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int 
   case NEGATIVE_BINOMIAL :
     likelihood = negative_binomial_estimation(dist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
     break;
-  case POISSON_GEOMETRIC :
-    likelihood = poisson_geometric_estimation(dist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
+  case GEOMETRIC_POISSON :
+    likelihood = geometric_poisson_estimation(dist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
     break;
   }
 
@@ -1547,7 +1547,7 @@ double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int 
  *  \param[in] min_inf_bound      minimum lower bound of the support,
  *  \param[in] min_inf_bound_flag flag on the distribution shift,
  *  \param[in] cumul_threshold    threshold on the cumulative distribution function,
- *  \param[in] poisson_geometric  flag on the estimation of a Poisson geometric distribution.
+ *  \param[in] geometric_poisson  flag on the estimation of a Poisson geometric distribution.
  *
  *  \return                       maximized log-likelihood.
  */
@@ -1556,7 +1556,7 @@ double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int 
 template <typename Type>
 double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist , int min_inf_bound ,
                                                       bool min_inf_bound_flag , double cumul_threshold ,
-                                                      bool poisson_geometric) const
+                                                      bool geometric_poisson) const
 
 {
   double likelihood , max_likelihood;
@@ -1583,7 +1583,7 @@ double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist ,
     dist->copy(*bdist);
   }
 
-  if ((min_inf_bound == 0) || (!poisson_geometric)) {  // for comparing negative binomial and poisson geometric distributions
+  if ((min_inf_bound == 0) || (!geometric_poisson)) {  // for comparing negative binomial and poisson geometric distributions
   likelihood = negative_binomial_estimation(bdist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
   if (likelihood > max_likelihood) {
     bdist->ident = NEGATIVE_BINOMIAL;
@@ -1593,10 +1593,10 @@ double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist ,
   }
   }
 
-  if ((min_inf_bound > 0) && (poisson_geometric)) {
-    likelihood = poisson_geometric_estimation(bdist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
+  if ((min_inf_bound > 0) && (geometric_poisson)) {
+    likelihood = geometric_poisson_estimation(bdist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
     if (likelihood > max_likelihood) {
-      bdist->ident = POISSON_GEOMETRIC;
+      bdist->ident = GEOMETRIC_POISSON;
       max_likelihood = likelihood;
       dist->equal_size_copy(*bdist);
       dist->copy(*bdist);

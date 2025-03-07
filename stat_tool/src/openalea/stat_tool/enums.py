@@ -178,6 +178,18 @@ variance_type = {
     "ORDINAL":  ORDINAL,
     }
 
+duration_distribution_mean_estimator = {
+    "COMPUTED": DurationDistributionMeanEstimator.COMPUTED,
+    "ESTIMATED": DurationDistributionMeanEstimator.ESTIMATED,
+    "ONE_STEP_LATE": DurationDistributionMeanEstimator.ONE_STEP_LATE,
+    }
+
+censoring_estimator = {
+    "PARTIAL_LIKELIHOOD": CensoringEstimator.PARTIAL_LIKELIHOOD,
+    "COMPLETE_LIKELIHOOD": CensoringEstimator.COMPLETE_LIKELIHOOD,
+    "KAPLAN_MEIER": CensoringEstimator.KAPLAN_MEIER,
+  }
+  
 keep_type = {
              "keep": "Keep",
              "Keep": "Keep",

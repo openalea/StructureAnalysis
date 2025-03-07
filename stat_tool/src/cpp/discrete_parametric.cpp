@@ -159,7 +159,7 @@ DiscreteParametric::DiscreteParametric(discrete_parametric iident , int iinf_bou
     nb_value = sup_bound + 1;
   }
 
-  else if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
+  else if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == GEOMETRIC_POISSON)) {
     nb_value = (int)round(inf_bound + (parametric_mean_computation() - inf_bound +
                                        sqrt(parametric_variance_computation())) * 20.);
     if (nb_value == inf_bound) {
@@ -497,7 +497,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_SUP_BOUND] , line , i + 1);
             }
 
-            if (((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) &&
+            if (((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == GEOMETRIC_POISSON)) &&
                 (*token != STAT_word[STATW_PARAMETER])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_PARAMETER] , line , i + 1);
@@ -514,7 +514,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
           // or sequence length (prior segment length)
 
           case 2 : {
-            if (((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) &&
+            if (((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == GEOMETRIC_POISSON)) &&
                 (*token != STAT_word[STATW_PROBABILITY])) {
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_PROBABILITY] , line , i + 1);
@@ -598,7 +598,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
               }
             }
 
-            if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
+            if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == GEOMETRIC_POISSON)) {
 /*              try {
                 parameter = stod(*token);   in C++ 11
               }
@@ -632,7 +632,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
           // or sequence length (prior segment length)
 
           case 2 : {
-            if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
+            if ((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == GEOMETRIC_POISSON)) {
 /*              try {
                 probability = stod(*token);   in C++ 11
               }
@@ -661,7 +661,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
                   break;
                 }
 
-                case POISSON_GEOMETRIC : {
+                case GEOMETRIC_POISSON : {
                   if ((probability <= 0.) || (probability >= 1.)) {
                     lstatus = false;
                   }
@@ -704,7 +704,7 @@ DiscreteParametric* DiscreteParametric::parsing(StatError &error , ifstream &in_
     }
 
     if (i > 0) {
-      if ((((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC) || (ident == PRIOR_SEGMENT_LENGTH)) && (i != 10)) ||
+      if ((((ident == BINOMIAL) || (ident == NEGATIVE_BINOMIAL) || (ident == GEOMETRIC_POISSON) || (ident == PRIOR_SEGMENT_LENGTH)) && (i != 10)) ||
           (((ident == POISSON) || (ident == UNIFORM)) && (i != 7))) {
         status = false;
         error.update(STAT_parsing[STATP_FORMAT] , line);
@@ -999,7 +999,7 @@ int DiscreteParametric::nb_parameter_computation()
   case NEGATIVE_BINOMIAL :
     bnb_parameter = 3;
     break;
-  case POISSON_GEOMETRIC :
+  case GEOMETRIC_POISSON :
     bnb_parameter = 3;
     break;
   case UNIFORM :
@@ -1054,7 +1054,7 @@ double DiscreteParametric::parametric_mean_computation() const
   case NEGATIVE_BINOMIAL :
     parametric_mean = inf_bound + parameter * (1. - probability) / probability;
     break;
-  case POISSON_GEOMETRIC :
+  case GEOMETRIC_POISSON :
     parametric_mean = (inf_bound + parameter) / probability;
     break;
   case UNIFORM :
@@ -1096,7 +1096,7 @@ double DiscreteParametric::parametric_variance_computation() const
   case NEGATIVE_BINOMIAL :
     parametric_variance = parameter * (1. - probability) / (probability * probability);
     break;
-  case POISSON_GEOMETRIC :
+  case GEOMETRIC_POISSON :
     parametric_variance = ((inf_bound + parameter) * (1. - probability) + parameter) /
                           (probability * probability);
     break;
@@ -1162,7 +1162,7 @@ double DiscreteParametric::parametric_skewness_computation() const
     break;
   }
 
-  case POISSON_GEOMETRIC : {
+  case GEOMETRIC_POISSON : {
     parametric_skewness = (parameter * (1. + 3 * (1. - probability)) +
                            (inf_bound + parameter) * (2. - probability) * (1. - probability)) /
                           pow((inf_bound + parameter) * (1. - probability) + parameter , 1.5);

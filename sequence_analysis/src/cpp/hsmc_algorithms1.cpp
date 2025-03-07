@@ -407,7 +407,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
  *  \param[in] error             reference on a StatError object,
  *  \param[in] os                stream for displaying estimation intermediate results,
  *  \param[in] ihsmarkov         initial hidden semi-Markov chain,
- *  \param[in] poisson_geometric flag on the estimation of Poisson geometric state occupancy distributions,
+ *  \param[in] geometric_poisson flag on the estimation of Poisson geometric state occupancy distributions,
  *  \param[in] common_dispersion flag common dispersion parameter (continuous observation processes),
  *  \param[in] estimator         estimator type for the reestimation of the state occupancy distributions
  *                               (complete or partial likelihood),
@@ -423,7 +423,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
 
 HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &error , ostream *os ,
                                                                     const HiddenSemiMarkov &ihsmarkov ,
-                                                                    bool poisson_geometric , bool common_dispersion ,
+                                                                    bool geometric_poisson , bool common_dispersion ,
                                                                     censoring_estimator estimator , bool counting_flag ,
                                                                     bool state_sequence , int nb_iter ,
                                                                     duration_distribution_mean_estimator mean_estimator) const
@@ -1513,11 +1513,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                                          MAX(sqrt(occupancy_reestim[i]->variance) , 1.) * OCCUPANCY_COEFF) , MIN_NB_ELEMENT));
             if (iter <= EXPLORATION_NB_ITER) {
               occupancy_likelihood = hoccupancy->Reestimation<int>::parametric_estimation(occupancy , 1 , true ,
-                                                                                          OCCUPANCY_THRESHOLD , poisson_geometric);
+                                                                                          OCCUPANCY_THRESHOLD , geometric_poisson);
             }
             else {
               occupancy_likelihood = hoccupancy->Reestimation<int>::type_parametric_estimation(occupancy , 1 , true ,
-                                                                                               OCCUPANCY_THRESHOLD , poisson_geometric);
+                                                                                               OCCUPANCY_THRESHOLD , geometric_poisson);
             }
 
             if (occupancy_likelihood == D_INF) {
@@ -2133,7 +2133,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
  *  \param[in] nb_state          number of states,
  *  \param[in] left_right        flag on the Markov chain structure,
  *  \param[in] occupancy_mean    mean state occupancy,
- *  \param[in] poisson_geometric flag on the estimation of Poisson geometric state occupancy distributions,
+ *  \param[in] geometric_poisson flag on the estimation of Poisson geometric state occupancy distributions,
  *  \param[in] common_dispersion flag common dispersion parameter (continuous observation processes),
  *  \param[in] estimator         estimator type for the reestimation of the state occupancy distributions
  *                               (complete or partial likelihood),
@@ -2150,7 +2150,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &error , ostream *os ,
                                                                     process_type itype , int nb_state ,
                                                                     bool left_right , double occupancy_mean ,
-                                                                    bool poisson_geometric , bool common_dispersion ,
+                                                                    bool geometric_poisson , bool common_dispersion ,
                                                                     censoring_estimator estimator , bool counting_flag ,
                                                                     bool state_sequence , int nb_iter ,
                                                                     duration_distribution_mean_estimator mean_estimator) const
@@ -2260,7 +2260,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       }
     }
 
-    hsmarkov = hidden_semi_markov_estimation(error , os , *ihsmarkov , poisson_geometric ,
+    hsmarkov = hidden_semi_markov_estimation(error , os , *ihsmarkov , geometric_poisson ,
                                              common_dispersion , estimator , counting_flag ,
                                              state_sequence , nb_iter , mean_estimator);
     delete ihsmarkov;
@@ -2277,7 +2277,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
  *  \param[in] error                  reference on a StatError object,
  *  \param[in] os                     stream for displaying estimation intermediate results,
  *  \param[in] ihsmarkov              initial hidden semi-Markov chain,
- *  \param[in] poisson_geometric      flag on the estimation of Poisson geometric state occupancy distributions,
+ *  \param[in] geometric_poisson      flag on the estimation of Poisson geometric state occupancy distributions,
  *  \param[in] common_dispersion      flag common dispersion parameter (continuous observation processes),
  *  \param[in] min_nb_state_sequence  minimum number of generated sequences,
  *  \param[in] max_nb_state_sequence  maximum number of generated sequences,
@@ -2294,7 +2294,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
 HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(StatError &error , ostream *os ,
                                                                                const HiddenSemiMarkov &ihsmarkov ,
-                                                                               bool poisson_geometric , bool common_dispersion ,
+                                                                               bool geometric_poisson , bool common_dispersion ,
                                                                                int min_nb_state_sequence ,
                                                                                int max_nb_state_sequence , double parameter ,
                                                                                censoring_estimator estimator ,
@@ -3236,11 +3236,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
             if (iter <= EXPLORATION_NB_ITER) {
               occupancy_likelihood = complete_run[i]->parametric_estimation(occupancy , 1 , true ,
-                                                                            OCCUPANCY_THRESHOLD , poisson_geometric);
+                                                                            OCCUPANCY_THRESHOLD , geometric_poisson);
             }
             else {
               occupancy_likelihood = complete_run[i]->type_parametric_estimation(occupancy , 1 , true ,
-                                                                                 OCCUPANCY_THRESHOLD , poisson_geometric);
+                                                                                 OCCUPANCY_THRESHOLD , geometric_poisson);
             }
 
 #           ifdef DEBUG
@@ -3852,7 +3852,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
  *  \param[in] nb_state              number of states,
  *  \param[in] left_right            flag on the Markov chain structure,
  *  \param[in] occupancy_mean        mean state occupancy,
- *  \param[in] poisson_geometric     flag on the estimation of Poisson geometric state occupancy distributions,
+ *  \param[in] geometric_poisson     flag on the estimation of Poisson geometric state occupancy distributions,
  *  \param[in] common_dispersion     flag common dispersion parameter (continuous observation processes),
  *  \param[in] min_nb_state_sequence minimum number of generated sequences,
  *  \param[in] max_nb_state_sequence maximum number of generated sequences,
@@ -3870,7 +3870,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(StatError &error , ostream *os ,
                                                                                process_type itype , int nb_state ,
                                                                                bool left_right , double occupancy_mean ,
-                                                                               bool poisson_geometric , bool common_dispersion ,
+                                                                               bool geometric_poisson , bool common_dispersion ,
                                                                                int min_nb_state_sequence ,
                                                                                int max_nb_state_sequence , double parameter ,
                                                                                censoring_estimator estimator ,
@@ -3982,7 +3982,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       }
     }
 
-    hsmarkov = hidden_semi_markov_stochastic_estimation(error , os , *ihsmarkov , poisson_geometric ,
+    hsmarkov = hidden_semi_markov_stochastic_estimation(error , os , *ihsmarkov , geometric_poisson ,
                                                         common_dispersion , min_nb_state_sequence ,
                                                         max_nb_state_sequence , parameter , estimator ,
                                                         counting_flag , state_sequence , nb_iter);

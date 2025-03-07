@@ -414,25 +414,29 @@ public:
 
   static HiddenSemiMarkov*
   hidden_semi_markov_estimation(const MarkovianSequences &input,
-      const HiddenSemiMarkov &ihsmarkov, bool poisson_geometric, bool common_dispersion,
+      const HiddenSemiMarkov &ihsmarkov, bool geometric_poisson, bool common_dispersion,
       censoring_estimator estimator, bool counting_flag, bool state_sequence, int nb_iter,
       duration_distribution_mean_estimator mean_estimator)
   {
     HEADER_OS(HiddenSemiMarkov);
-    ret = input.hidden_semi_markov_estimation(error, &os, ihsmarkov, poisson_geometric, common_dispersion,
+    ret = input.hidden_semi_markov_estimation(error, &os, ihsmarkov, geometric_poisson, common_dispersion,
         estimator, counting_flag, state_sequence, nb_iter, mean_estimator);
     FOOTER_OS;
   }
 
   static HiddenSemiMarkov*
   hidden_semi_markov_estimation_model(const MarkovianSequences &input,
-      process_type itype, int nb_state, bool left_right, double occupancy_mean,
-      bool poisson_geometric, bool common_dispersion, censoring_estimator estimator, bool counting_flag,
-      bool state_sequence, int nb_iter, duration_distribution_mean_estimator mean_estimator)
+      int intitype, int nb_state, bool left_right, double occupancy_mean,
+      bool geometric_poisson, bool common_dispersion, int iestimator, bool counting_flag,
+      bool state_sequence, int nb_iter, int imean_estimator)
   {
     HEADER_OS(HiddenSemiMarkov);
+	process_type itype = process_type(intitype);
+	censoring_estimator estimator = censoring_estimator(iestimator);
+	duration_distribution_mean_estimator mean_estimator
+		= duration_distribution_mean_estimator(imean_estimator);
     ret = input.hidden_semi_markov_estimation(error, &os, itype, nb_state, left_right,
-        occupancy_mean, poisson_geometric, common_dispersion, estimator, counting_flag,
+        occupancy_mean, geometric_poisson, common_dispersion, estimator, counting_flag,
         state_sequence, nb_iter, mean_estimator);
     FOOTER_OS;
   }
@@ -440,14 +444,14 @@ public:
 
   static HiddenSemiMarkov*
   hidden_semi_markov_stochastic_estimation(const MarkovianSequences &input,
-      const HiddenSemiMarkov &ihsmarkov, bool poisson_geometric, bool common_dispersion,
+      const HiddenSemiMarkov &ihsmarkov, bool geometric_poisson, bool common_dispersion,
       int min_nb_state_sequence, int max_nb_state_sequence, double parameter,
       censoring_estimator estimator, bool counting_flag, bool state_sequence, int nb_iter)
   {
     HEADER_OS(HiddenSemiMarkov);
 
     ret = input.hidden_semi_markov_stochastic_estimation(error, &os, ihsmarkov,
-        poisson_geometric, common_dispersion, min_nb_state_sequence, max_nb_state_sequence,
+        geometric_poisson, common_dispersion, min_nb_state_sequence, max_nb_state_sequence,
         parameter, estimator, counting_flag, state_sequence, nb_iter);
 
     FOOTER_OS;
@@ -456,13 +460,13 @@ public:
   static HiddenSemiMarkov*
   hidden_semi_markov_stochastic_estimation_model(
       const MarkovianSequences &input, process_type itype, int nb_state, bool left_right,
-      double occupancy_mean, bool poisson_geometric, bool common_dispersion, int min_nb_state_sequence,
+      double occupancy_mean, bool geometric_poisson, bool common_dispersion, int min_nb_state_sequence,
       int max_nb_state_sequence, double parameter, censoring_estimator estimator,
       bool counting_flag, bool state_sequence, int nb_iter)
   {
     HEADER_OS(HiddenSemiMarkov);
     ret = input.hidden_semi_markov_stochastic_estimation(error, &os, itype, nb_state,
-        left_right, occupancy_mean, poisson_geometric, common_dispersion, min_nb_state_sequence,
+        left_right, occupancy_mean, geometric_poisson, common_dispersion, min_nb_state_sequence,
         max_nb_state_sequence, parameter, estimator, counting_flag, state_sequence,
         nb_iter);
     FOOTER_OS;
@@ -470,11 +474,14 @@ public:
   }
 
   static SemiMarkov*
-  semi_markov_estimation(const MarkovianSequences &input, process_type itype,
-      censoring_estimator estimator, bool counting_flag, int nb_iter,
-      duration_distribution_mean_estimator mean_estimator)
+  semi_markov_estimation(const MarkovianSequences &input, int intitype,
+      int iestimator, bool counting_flag, int nb_iter, int imean_estimator)
   {
-    HEADER_OS(SemiMarkov);
+	HEADER_OS(SemiMarkov);
+	process_type itype = process_type(intitype);
+	censoring_estimator estimator = censoring_estimator(iestimator);
+	duration_distribution_mean_estimator mean_estimator
+		= duration_distribution_mean_estimator(imean_estimator);
     ret = input.semi_markov_estimation(error, &os, itype, estimator,
         counting_flag, nb_iter, mean_estimator);
     FOOTER_OS;

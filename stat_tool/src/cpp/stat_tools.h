@@ -115,7 +115,7 @@ namespace stat_tool {
     BINOMIAL ,
     POISSON ,
     NEGATIVE_BINOMIAL ,
-    POISSON_GEOMETRIC ,
+    GEOMETRIC_POISSON ,
     UNIFORM ,
     PRIOR_SEGMENT_LENGTH ,
     MULTINOMIAL                          // addition by Florence Chaubert
@@ -644,7 +644,7 @@ namespace stat_tool {
                              distribution_computation mode);
     void negative_binomial_computation(int inb_value , double cumul_threshold ,
                                        distribution_computation mode);
-    void poisson_geometric_computation(int inb_value , double cumul_threshold);
+    void geometric_poisson_computation(int inb_value , double cumul_threshold);
     void uniform_computation();
     void prior_segment_length_computation();
 

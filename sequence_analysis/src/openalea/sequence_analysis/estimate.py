@@ -19,33 +19,36 @@ from openalea.stat_tool import error
 
 # constants
 from openalea.stat_tool._stat_tool import  (
-    ONE_STEP_LATE, 
-    COMPUTED, 
-    COMPLETE_LIKELIHOOD,
-    PARTIAL_LIKELIHOOD,
+#    ONE_STEP_LATE, 
+#    COMPUTED, 
+#    COMPLETE_LIKELIHOOD,
+#    PARTIAL_LIKELIHOOD,
     I_DEFAULT,
     D_DEFAULT, 
     ORDER
 )
 
+from openalea.stat_tool.enums import (
+    estimator_type,
+    censoring_estimator
+)
+
 #maps
 from openalea.stat_tool.estimate import (
-    estimator_type,
+#    estimator_type,
     outside_type,
-    smoothing_penalty_type,
+    smoothing_penalty_type,    
 )
 
 from openalea.sequence_analysis.enums import (
     estimator_semi_markov_type,
+    process_type, 
     ident_map,
-    mean_computation_map,
-     markovian_algorithms,
-    mean_computation_map,
+    markovian_algorithms,
     sub_markovian_algorithms,
     algorithm,
     estimator,
-    likelihood_penalty_type,
-    stochastic_process_type
+    likelihood_penalty_type
 )
 
 # structure class
@@ -148,10 +151,10 @@ def _estimate_renewal_count_data(obj, itype, **kargs):
     Type = 'v'
     error.CheckType([obj, itype], [[_TimeEvents, _RenewalData], str])
     if isinstance(itype, str):
-        if itype == "Ordinary":
-            Type = 'o'
-        elif itype == "Equilibrium":
-            Type = 'e'
+        if itype.upper() == "ORDINARY":
+            Type = process_type["ORDINARY"]
+        elif itype.upper() == "EQUILIBRIUM":
+            Type = process_type["EQUILIBRIUM"]
         else:
             raise AttributeError("type must be Ordinary or Equilibrium")
     else:
@@ -349,6 +352,7 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
     NbIteration = kargs.get("NbIteration", I_DEFAULT)
     Counting = kargs.get("Counting", True)
     StateSequence = kargs.get("StateSequence", True)
+    GeometricPoisson = kargs.get("GeometricPoisson", False)
     Parameter = kargs.get("Parameter", NB_STATE_SEQUENCE_PARAMETER)
     MinNbSequence = kargs.get("MinNbStateSequence", MIN_NB_STATE_SEQUENCE)
     MaxNbSequence = kargs.get("MaxNbStateSequence", MAX_NB_STATE_SEQUENCE)
@@ -377,7 +381,7 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
     if Algorithm != sub_markovian_algorithms["EM"]:
         if Estimator == KAPLAN_MEIER:
             raise ValueError(
-                "Estimator= KaplanMeier and Algorithm = MCEM not possible")
+                "Estimator = KaplanMeier and Algorithm = MCEM not possible")
 
 
     error.CheckType([args[0]], [[str, _HiddenSemiMarkov]])
@@ -412,14 +416,14 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
 
         if Algorithm == NO_COMPUTATION:
             hsmarkov = obj.hidden_semi_markov_estimation_model( Type, NbState,
-                         LeftRight, InitialOccupancyMean, CommonDispersion, Estimator,
+                         LeftRight, InitialOccupancyMean, GeometricPoisson, CommonDispersion, Estimator,
                          Counting, StateSequence, NbIteration, MeanComputation)
             return hsmarkov
 
         elif Algorithm == FORWARD_BACKWARD_SAMPLING:
             hsmarkov = obj.hidden_semi_markov_stochastic_estimation_model(
-                Type, NbState, LeftRight, InitialOccupancyMean, CommonDispersion,
-                MinNbSequence, MaxNbSequence, Parameter, Estimator, Counting,
+                Type, NbState, LeftRight, InitialOccupancyMean, GeometricPoisson, 
+                CommonDispersion, MinNbSequence, MaxNbSequence, Parameter, Estimator, Counting,
                 StateSequence, NbIteration)
             return hsmarkov
 
@@ -435,13 +439,13 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
         hsmarkov = args[0]
         if Algorithm == NO_COMPUTATION:
             output = obj.hidden_semi_markov_estimation(hsmarkov,
-                                CommonDispersion, Estimator, Counting,
+                                GeometricPoisson, CommonDispersion, Estimator, Counting,
                                 StateSequence, NbIteration, MeanComputation)
             return output
         elif Algorithm == FORWARD_BACKWARD_SAMPLING:
             return obj.hidden_semi_markov_stochastic_estimation(hsmarkov,
-                            CommonDispersion, MinNbSequence, MaxNbSequence,
-                            Parameter, Estimator, Counting,
+                            GeometricPoisson, CommonDispersion, MinNbSequence, 
+                            MaxNbSequence, Parameter, Estimator, Counting,
                             StateSequence, NbIteration)
 
 
