@@ -6,6 +6,7 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
     + Switch to pytest instead of nosetests.
     + Fix stat_tool_examples.py, test_estimate.py, test_multivariate_mixture_functional.py, test_vector_distance.py, test_hidden_semi_markov_functional.py
     + export set_seed in stat_tool.h
+    + either make HEADER_OS statements work in sequence_analysis wrappers or remove them.
     + merge implementations of Mixture and MultivariateMixture (same semantics)
     + matplotlib output to Survival (remove gnuplot)
     + Translate C++ comments

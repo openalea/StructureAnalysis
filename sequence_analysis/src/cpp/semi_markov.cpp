@@ -2476,10 +2476,11 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
     }
 
     if (categorical_process[i]) {
+      //TODO: recount size in plot_set, not sufficient in that case.
       plot_set->variable_nb_viewpoint[i] = 0;
-      categorical_process[i]->plotable_write(*plot_set , index , i + 1 , observation_dist ,
+      /* categorical_process[i]->plotable_write(*plot_set , index , i + 1 , observation_dist ,
                                              marginal_dist , characteristics ,
-                                             length_distribution);
+                                             length_distribution);*/
     }
     else if (discrete_parametric_process[i]) {
       discrete_parametric_process[i]->plotable_write(*plot_set , index , i + 1 , observation_dist ,

@@ -48,6 +48,7 @@ from openalea.sequence_analysis.enums import (
     sub_markovian_algorithms,
     algorithm,
     estimator,
+    duration_distribution_mean_estimator,
     likelihood_penalty_type
 )
 
@@ -361,8 +362,8 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
     Estimator = error.ParseKargs(kargs, "Estimator", 'CompleteLikelihood',
                                 estimator_semi_markov_type)
     InitialOccupancyMean = kargs.get("InitialOccupancyMean", D_DEFAULT)
-    MeanComputation = error.ParseKargs(kargs, "OccupancyMean", 'Computed',
-                                      mean_computation_map)
+    MeanComputation = error.ParseKargs(kargs, "OccupancyMean", 'COMPUTED',
+                                      duration_distribution_mean_estimator)
 
     error.CheckType([CommonDispersion, Counting, NbIteration,
                      MinNbSequence, MaxNbSequence, Parameter, StateSequence,
@@ -391,10 +392,10 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
         error.CheckType([args[1]], [int])
         NbState = args[1]
 
-        if args[0] == "Ordinary":
+        if args[0].upper() == "ORDINARY":
             error.CheckArgumentsLength(args, 3, 3)
             error.CheckType([args[2]], [str])
-            Type = 'o'
+            Type = process_type["ORDINARY"]
             if args[2] not in ["LeftRight", "Irreducible"]:
                 raise ValueError(
                         "third argument must be LeftRight or Irreducible.")
@@ -402,14 +403,14 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
                 LeftRight = True
             else:
                 LeftRight = False
-        elif args[0] == "Equilibrium":
+        elif args[0].uppper() == "EQUILIBRIUM":
             error.CheckArgumentsLength(args, 2, 2)
-            Type = 'e'
+            Type = process_type["EQUILIBRIUM"]
             LeftRight = False
         else:
             raise AttributeError("type must be Ordinary or Equilibrium")
 
-        if ((Type != 'e') or (Estimator == PARTIAL_LIKELIHOOD) or \
+        if ((Type != process_type["EQUILIBRIUM"]) or (Estimator == PARTIAL_LIKELIHOOD) or \
             (Algorithm != NO_COMPUTATION)) and \
             kargs.get(InitialOccupancyMean):
             raise ValueError("Incompatible user arguments")

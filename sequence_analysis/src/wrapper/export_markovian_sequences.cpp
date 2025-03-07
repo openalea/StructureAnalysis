@@ -430,15 +430,21 @@ public:
       bool geometric_poisson, bool common_dispersion, int iestimator, bool counting_flag,
       bool state_sequence, int nb_iter, int imean_estimator)
   {
-    HEADER_OS(HiddenSemiMarkov);
+    // HEADER_OS(HiddenSemiMarkov);
+    StatError error;
+    HiddenSemiMarkov *ret = NULL;
+
 	process_type itype = process_type(intitype);
 	censoring_estimator estimator = censoring_estimator(iestimator);
 	duration_distribution_mean_estimator mean_estimator
 		= duration_distribution_mean_estimator(imean_estimator);
-    ret = input.hidden_semi_markov_estimation(error, &os, itype, nb_state, left_right,
+    ret = input.hidden_semi_markov_estimation(error, &cout, itype, nb_state, left_right,
         occupancy_mean, geometric_poisson, common_dispersion, estimator, counting_flag,
         state_sequence, nb_iter, mean_estimator);
-    FOOTER_OS;
+    if (ret == NULL)
+    	sequence_analysis::wrap_util::throw_error(error);
+    // FOOTER_OS;
+    return(ret);
   }
 
 
