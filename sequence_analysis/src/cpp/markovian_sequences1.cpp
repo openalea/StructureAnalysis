@@ -504,7 +504,8 @@ void MarkovianSequences::remove()
     for (i = 1;i < nb_variable;i++) {
       if (observation_distribution[i]) {
         for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
-          delete observation_distribution[i][j];
+        	if (observation_distribution[i][j] != NULL)
+        		delete observation_distribution[i][j];
         }
         delete [] observation_distribution[i];
       }
@@ -512,11 +513,12 @@ void MarkovianSequences::remove()
     delete [] observation_distribution;
   }
 
-  if (observation_histogram) {
+  if (observation_histogram != NULL) {
     for (i = 1;i < nb_variable;i++) {
-      if (observation_histogram[i]) {
+      if (observation_histogram[i] != NULL) {
         for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
-          delete observation_histogram[i][j];
+        	if (observation_histogram[i][j] != NULL)
+        	  delete observation_histogram[i][j];
         }
         delete [] observation_histogram[i];
       }

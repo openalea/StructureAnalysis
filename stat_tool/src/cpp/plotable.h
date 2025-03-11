@@ -106,7 +106,10 @@ namespace stat_tool {
     
   public:
 
-    SinglePlot() {};
+    SinglePlot() {
+    	legend = "";
+    	style = "";
+    };
     SinglePlot(const SinglePlot& plot);
 
     void add_point(float x, float y);

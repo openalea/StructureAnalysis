@@ -452,30 +452,43 @@ public:
   hidden_semi_markov_stochastic_estimation(const MarkovianSequences &input,
       const HiddenSemiMarkov &ihsmarkov, bool geometric_poisson, bool common_dispersion,
       int min_nb_state_sequence, int max_nb_state_sequence, double parameter,
-      censoring_estimator estimator, bool counting_flag, bool state_sequence, int nb_iter)
+      int iestimator, bool counting_flag, bool state_sequence, int nb_iter)
   {
-    HEADER_OS(HiddenSemiMarkov);
+    HiddenSemiMarkov *ret = NULL;
+	censoring_estimator estimator = censoring_estimator(iestimator);
+	StatError error;
 
-    ret = input.hidden_semi_markov_stochastic_estimation(error, &os, ihsmarkov,
+    ret = input.hidden_semi_markov_stochastic_estimation(error, &cout, ihsmarkov,
         geometric_poisson, common_dispersion, min_nb_state_sequence, max_nb_state_sequence,
         parameter, estimator, counting_flag, state_sequence, nb_iter);
 
-    FOOTER_OS;
+    if (ret == NULL)
+        sequence_analysis::wrap_util::throw_error(error);
+
+    return(ret);
   }
 
   static HiddenSemiMarkov*
   hidden_semi_markov_stochastic_estimation_model(
-      const MarkovianSequences &input, process_type itype, int nb_state, bool left_right,
+      const MarkovianSequences &input, int intitype, int nb_state, bool left_right,
       double occupancy_mean, bool geometric_poisson, bool common_dispersion, int min_nb_state_sequence,
-      int max_nb_state_sequence, double parameter, censoring_estimator estimator,
+      int max_nb_state_sequence, double parameter, int iestimator,
       bool counting_flag, bool state_sequence, int nb_iter)
   {
-    HEADER_OS(HiddenSemiMarkov);
-    ret = input.hidden_semi_markov_stochastic_estimation(error, &os, itype, nb_state,
+	StatError error;
+	HiddenSemiMarkov *ret = NULL;
+	censoring_estimator estimator = censoring_estimator(iestimator);
+	process_type itype = process_type(intitype);
+
+    ret = input.hidden_semi_markov_stochastic_estimation(error, &cout, itype, nb_state,
         left_right, occupancy_mean, geometric_poisson, common_dispersion, min_nb_state_sequence,
         max_nb_state_sequence, parameter, estimator, counting_flag, state_sequence,
         nb_iter);
-    FOOTER_OS;
+
+    if (ret == NULL)
+    	sequence_analysis::wrap_util::throw_error(error);
+
+    return(ret);
 
   }
 

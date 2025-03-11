@@ -1917,9 +1917,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         hsmarkov->viterbi(*seq);
         hsmarkov->remove_cumul();
 
-        seq->min_value_computation(0);
-        seq->max_value_computation(0);
+        seq->min_value[0] = 0; // seq->min_value_computation(0);
+        seq->max_value[0] = hsmarkov->nb_state-1; // seq->max_value_computation(0);
         seq->build_marginal_frequency_distribution(0);
+        // variable 0 corresponds to hidden state.
+        // The states for which characteristics are computed are those which are present
         seq->build_characteristic(0 , true , (hsmarkov->type == EQUILIBRIUM ? true : false));
 
         seq->build_transition_count(hsmarkov);
@@ -1930,8 +1932,12 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
         for (i = 0;i < hsmarkov->nb_state;i++) {
           if (hsmarkov->sojourn_type[i] == SEMI_MARKOVIAN) {
-            hsmarkov->state_process->sojourn_time[i]->computation((seq->characteristics[0] ? seq->characteristics[0]->sojourn_time[i]->nb_value : 1) ,
-                                                                  OCCUPANCY_THRESHOLD);
+
+        	if (seq->characteristics[0] != NULL && seq->characteristics[0]->sojourn_time[i] != NULL)
+				hsmarkov->state_process->sojourn_time[i]->computation(seq->characteristics[0]->sojourn_time[i]->nb_value ,
+																	  OCCUPANCY_THRESHOLD);
+        	else
+        		hsmarkov->state_process->sojourn_time[i]->computation(1 , OCCUPANCY_THRESHOLD);
             if (hsmarkov->stype[i] == RECURRENT) {
               if (hsmarkov->type == ORDINARY) {
                 hsmarkov->forward[i]->copy(*(hsmarkov->state_process->sojourn_time[i]));

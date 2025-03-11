@@ -65,6 +65,8 @@ def test():
     Plot(meri1, meri2, meri3, meri4, meri5)
     Compare(meri1, meri2, meri3, meri4, meri5, "N")
 
+    Dist = meri1.estimate_parametric("B")
+    Plot(Dist)
 
     ComparisonTest("F", meri1, meri2)
     ComparisonTest("T", meri1, meri2)

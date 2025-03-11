@@ -6,13 +6,17 @@ pj = os.path.join
 ALEASolution = config.ALEASolution
 
 options = Variables(['../options.py', 'options.py'], ARGUMENTS)
-options.Add(BoolVariable('with_efence', 'build tests with efence library', 0))
+options.Add(BoolVariable('with_efence', 'build tests with efence library', 1))
 options.Add(BoolVariable('DEBUG', 'my debug', 0))
 
 tools = ['boost_python', 'openalea.stattool']
 
 env = ALEASolution(options, tools)
 env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++0x'])
+
+if env['with_efence']:
+    env.AppendUnique(LIBS=['efence'])
+
 
 # Build stage
 prefix = env['build_prefix']
