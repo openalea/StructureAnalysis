@@ -8,6 +8,8 @@ ALEASolution = config.ALEASolution
 options = Variables(['../options.py', 'options.py'], ARGUMENTS)
 options.Add(BoolVariable('with_efence', 'build tests with efence library', 1))
 options.Add(BoolVariable('DEBUG', 'my debug', 0))
+# TODO: read from options.py
+options.Add(BoolVariable('with_test', 'Add c++ tests', 1))
 
 tools = ['boost_python', 'openalea.stattool']
 
@@ -21,8 +23,11 @@ if env['with_efence']:
 # Build stage
 prefix = env['build_prefix']
 SConscript(pj(prefix,"src/cpp/SConscript"),
-           exports='env')
+        exports='env')
 SConscript(pj(prefix,"src/wrapper/SConscript"),
-           exports='env')
+        exports='env')
+
+SConscript(pj(prefix,"test/cpp/SConscript"), exports="env")
 
 Default("build")
+

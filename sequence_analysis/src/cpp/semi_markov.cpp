@@ -200,15 +200,22 @@ void SemiMarkovChain::remove()
   int i;
 
 
-  delete [] sojourn_type;
+  if (sojourn_type != NULL)
+	  delete [] sojourn_type;
 
-  delete state_process;
+  sojourn_type = NULL;
 
-  if (forward) {
+  if (state_process != NULL)
+	  delete state_process;
+  state_process = NULL;
+
+  if (forward != NULL) {
     for (i = 0;i < nb_state;i++) {
       delete forward[i];
+      forward[i] = NULL;
     }
     delete [] forward;
+    forward = NULL;
   }
 }
 
@@ -504,27 +511,43 @@ void SemiMarkov::remove()
   int i;
 
 
-  delete semi_markov_data;
+  if (semi_markov_data != NULL){
+	  delete semi_markov_data;
+	  semi_markov_data = NULL;
+  }
 
-  if (categorical_process) {
+
+  if (categorical_process != NULL) {
     for (i = 0;i < nb_output_process;i++) {
-      delete categorical_process[i];
+    	if (categorical_process[i] != NULL) {
+    		delete categorical_process[i];
+    		categorical_process[i] = NULL;
+    	}
     }
     delete [] categorical_process;
+    categorical_process = NULL;
   }
 
-  if (discrete_parametric_process) {
+  if (discrete_parametric_process != NULL) {
     for (i = 0;i < nb_output_process;i++) {
-      delete discrete_parametric_process[i];
+    	if (discrete_parametric_process[i] != NULL) {
+    		delete discrete_parametric_process[i];
+    		discrete_parametric_process[i] = NULL;
+    	}
     }
     delete [] discrete_parametric_process;
+    discrete_parametric_process = NULL;
   }
 
-  if (continuous_parametric_process) {
+  if (continuous_parametric_process != NULL) {
     for (i = 0;i < nb_output_process;i++) {
-      delete continuous_parametric_process[i];
+    	if (continuous_parametric_process[i] != NULL) {
+    		delete continuous_parametric_process[i];
+    		continuous_parametric_process[i] = NULL;
+    	}
     }
     delete [] continuous_parametric_process;
+    continuous_parametric_process = NULL;
   }
 }
 

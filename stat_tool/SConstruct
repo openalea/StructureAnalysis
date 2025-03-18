@@ -10,7 +10,7 @@ pj = os.path.join
 ALEASolution = config.ALEASolution
 
 options = Variables(['../options.py', 'options.py'], ARGUMENTS)
-options.Add(BoolVariable('with_efence', 'build tests with efence library', 0))
+options.Add(BoolVariable('with_efence', 'build tests with efence library', 1))
 options.Add(BoolVariable('DEBUG', 'my debug', 0))
 
 tools = ['boost_python']

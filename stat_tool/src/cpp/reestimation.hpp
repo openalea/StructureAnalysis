@@ -1300,12 +1300,13 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
                                                         bool min_inf_bound_flag , double cumul_threshold) const
 
 {
-  int i;
-  int max_inf_bound , inf_bound;
+  int i, j;
+  int max_inf_bound , inf_bound, swap;
   double diff , shift_mean , parameter , probability , likelihood , max_likelihood = D_INF;
   double max_param; double min_param = DOUBLE_ERROR;
   double dmin_param, dmax_param, left_l, right_l;
-  DiscreteParametric *dist_cp = NULL;
+  DiscreteParametric *dist_cpl = NULL, *dist_cpr = NULL;
+  bool moment_estimation_failure = false;
 
   // computation of the interval tested on the lower bound of the support
 
@@ -1321,6 +1322,11 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
 
     min_inf_bound = MAX(min_inf_bound , (int)diff + 1);
     max_inf_bound = offset;
+    if (min_inf_bound > max_inf_bound) {
+    	swap = min_inf_bound;
+    	min_inf_bound = max_inf_bound;
+    	max_inf_bound = swap;
+    }
   }
 
   // moment estimation: requires mean - max_inf_bound < variance
@@ -1365,40 +1371,55 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
 
     if (max_likelihood != D_INF) {
       dist->init(inf_bound , I_DEFAULT , parameter , probability);
+    } else {
+    	moment_estimation_failure = true;
     }
 
 #   ifdef DEBUG
 //    cout << "\nnumber of cases : " << max_inf_bound - min_inf_bound + 1
 //         << " | number of computations : " << (max_inf_bound - i + 1) << endl;
 #   endif
-  } else {
-	// maximum likelihood estimation of continuous parameter by dichotomy
-		shift_mean = mean - min_inf_bound;
-		dist->probability = shift_mean / variance;
-		dist->inf_bound = min_inf_bound;
-		max_param = pow((mean - min_inf_bound),2) / variance;
-		dist_cp = new DiscreteParametric(*dist);
-		dist_cp->copy(*dist);
-		dist->parameter = max_param;
-		dist->computation();
-		dist_cp->parameter = min_param;
-		dist_cp->computation();
-		left_l = this->likelihood_computation(*dist_cp);
-		right_l = this->likelihood_computation(*dist);
-		for (i=0; i < BISECTION_NB_ITER; i++) {
-			 if (left_l < right_l) {
-				 dist_cp->parameter = (dist_cp->parameter + dist->parameter) / 2;
-				 dist_cp->computation();
-				 left_l = this->likelihood_computation(*dist_cp);
-			 } else {
-				 dist->parameter = (dist_cp->parameter + dist->parameter) / 2;
-				 dist->computation();
-				 right_l = this->likelihood_computation(*dist);
+  }
+  if ((mean - max_inf_bound >= variance) || (moment_estimation_failure)) {
+	  for (i = max_inf_bound;i >= min_inf_bound;i--) {
+		// maximum likelihood estimation of continuous parameter by dichotomy
+		// probability is still the moment estimator
+		dist_cpl = new DiscreteParametric(*dist);
+		dist_cpr = new DiscreteParametric(*dist);
+		dist_cpl->inf_bound = i;
+		dist_cpr->inf_bound = i;
+		shift_mean = mean - i;
+		dist_cpr->probability = min(shift_mean / variance, 1-1e-10	); // dist_cpr->probability = min(shift_mean / variance, 1-std::numeric_limits<double>::min());
+		if (dist_cpr->probability > 0) {
+			max_param = pow((mean - min_inf_bound),2) / variance;
+			dist_cpl->copy(*dist_cpr);
+			dist_cpr->parameter = max_param;
+			dist_cpr->computation();
+			dist_cpl->parameter = min_param;
+			dist_cpl->computation();
+			left_l = this->likelihood_computation(*dist_cpl);
+			right_l = this->likelihood_computation(*dist_cpr);
+			for (j=0; j < BISECTION_NB_ITER; j++) {
+				 if (left_l < right_l) {
+					 dist_cpl->parameter = (dist_cpl->parameter + dist->parameter) / 2;
+					 dist_cpl->computation();
+					 left_l = this->likelihood_computation(*dist_cpl);
+				 } else {
+					 dist_cpr->parameter = (dist_cpl->parameter + dist_cpr->parameter) / 2;
+					 dist_cpr->computation();
+					 right_l = this->likelihood_computation(*dist_cpr);
+				}
+			 }
+			dist_cpr->parameter = (dist_cpl->parameter + dist_cpr->parameter) / 2;
+			likelihood = this->likelihood_computation(*dist_cpr);
+			if (likelihood > max_likelihood) {
+				dist->copy(*dist_cpr);
+				max_likelihood = likelihood;
 			}
-		 }
-		dist->parameter = (dist_cp->parameter + dist->parameter) / 2;
-		max_likelihood = this->likelihood_computation(*dist);
-		delete dist_cp;
+			delete dist_cpl;
+			delete dist_cpr;
+		} // else likelihood = D_INF;
+	}
   }
 
   return max_likelihood;

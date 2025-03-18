@@ -1,0 +1,82 @@
+# -*-python-*-
+
+import os
+
+# Import global objects
+
+Import("env")
+
+env_test = env.Clone()
+
+pj = os.path.join
+
+
+my_debug = True
+if env_test['debug']:
+   env_test.Append(CPPDEFINES= ['DEBUG'])
+
+if my_debug:
+    env_test.AppendUnique(LIBS=['efence'])
+    CPPFLAGS=["-g"]
+    env_test.AppendUnique(CPPFLAGS=CPPFLAGS)
+    if '-DNDEBUG' in env._dict['CCFLAGS']:
+        env_test._dict['CCFLAGS'] = []
+    if '-DNDEBUG' in env._dict['CXXFLAGS']:
+        env_test._dict['CXXFLAGS'] = []
+
+# env_test.AppendUnique(LIBS=['tool', 'stat_tool', 'sequence_analysis'])
+#if os.name != 'nt':
+#    env_test.AppendUnique(LIBS= ['efence'])
+
+# env_test.AppendUnique(LIBS= ['leaktrace'])
+
+includes= env_test.ALEAGlob('*.h')
+includes += env_test.ALEAGlob('*.hpp')
+sources = env_test.ALEAGlob('*.cpp')
+inc = env_test.ALEAIncludes( "tool", includes)
+inc = env_test.ALEAIncludes( "stat_tool", includes)
+inc = env_test.ALEAIncludes( "sequence_analysis", includes)
+inc = env_test.ALEAIncludes( "leaktrace", includes)
+env_test.AppendUnique(LIBS=['vpstat_tool'])
+env_test.AppendUnique(LIBS=['vpsequence'])
+
+#Sources
+
+# test_int_fl_containers.cpp
+tests = Split("""
+test_hidden_semi_markov_chain.cpp
+""")
+
+def prog(p):
+  return env_test.Program(p)
+
+# def check(p):
+#    os.popen(p+" > output_current_test.txt")
+#    res=commands.getoutput("diff output_current_test.txt Outputs/output_"+p+".txt")
+#    if res!='':
+#       print "actual and theoretical outputs differ for ", p, ": \n", res, "\n"
+#    else:
+#       print "actual and theoretical outputs match for ", p, "\n"
+
+
+# Bug: AttributeError : 'map' object has no attribute 'get_csig'
+# test_prog=map(prog, tests)
+test_prog=env_test.Program("test_hidden_semi_markov_chain.cpp")
+
+'''
+def rmTests(target, source, env):
+  import os
+  print [ os.remove(str(s)) for s in source]
+  return 1
+
+r= env.AddPostAction(test_prog, rmTests)
+Alias('clean_test', r)
+'''
+
+# print test_prog
+
+# map(check, test_prog)
+
+Alias('test_sequence_analysis', test_prog)
+Alias('test', 'test_sequence_analysis')
+

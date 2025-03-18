@@ -654,6 +654,7 @@ void CategoricalSequenceProcess::remove()
   if (first_occurrence) {
     for (i = 0;i < nb_value;i++) {
       delete first_occurrence[i];
+      first_occurrence[i] = NULL;
     }
     delete [] first_occurrence;
 
@@ -669,6 +670,7 @@ void CategoricalSequenceProcess::remove()
   if (recurrence_time) {
     for (i = 0;i < nb_value;i++) {
       delete recurrence_time[i];
+      recurrence_time[i] = NULL;
     }
     delete [] recurrence_time;
 
@@ -684,6 +686,7 @@ void CategoricalSequenceProcess::remove()
   if (sojourn_time) {
     for (i = 0;i < nb_value;i++) {
       delete sojourn_time[i];
+      sojourn_time[i] = NULL;
     }
     delete [] sojourn_time;
 
@@ -693,6 +696,7 @@ void CategoricalSequenceProcess::remove()
   if (nb_run) {
     for (i = 0;i < nb_value;i++) {
       delete nb_run[i];
+      nb_run[i] = NULL;
     }
     delete [] nb_run;
 
@@ -702,6 +706,7 @@ void CategoricalSequenceProcess::remove()
   if (nb_occurrence) {
     for (i = 0;i < nb_value;i++) {
       delete nb_occurrence[i];
+      nb_occurrence[i] = NULL;
     }
     delete [] nb_occurrence;
 
@@ -924,6 +929,7 @@ CategoricalSequenceProcess* CategoricalSequenceProcess::occupancy_parsing(StatEr
     delete dist[i];
   }
   delete [] dist;
+  dist = NULL;
 
   return process;
 }

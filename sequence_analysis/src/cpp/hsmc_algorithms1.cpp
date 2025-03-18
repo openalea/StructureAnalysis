@@ -446,7 +446,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
   Reestimation<double> **occupancy_reestim , **length_bias_reestim , **censored_occupancy_reestim ,
                        ***observation_reestim;
   FrequencyDistribution *hoccupancy , *hobservation;
-  HiddenSemiMarkov *hsmarkov;
+  HiddenSemiMarkov *hsmarkov, *hsmarkov_best = NULL;
   SemiMarkovData *seq;
 
 # ifdef DEBUG
@@ -1070,6 +1070,12 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
         if (likelihood == D_INF) {
           break;
+        }
+        if (likelihood > previous_likelihood) {
+      	  // save result
+      	  if (hsmarkov_best != NULL)
+      		  delete hsmarkov_best;
+      	  hsmarkov_best = new HiddenSemiMarkov(*hsmarkov);
         }
 
 #       ifdef DEBUG
@@ -1727,6 +1733,16 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
              (((likelihood - previous_likelihood) / -likelihood > SEMI_MARKOV_LIKELIHOOD_DIFF) ||
               (min_likelihood == D_INF) || (nb_likelihood_decrease == 1))) ||
             ((nb_iter != I_DEFAULT) && (iter < nb_iter))));
+
+    if ((likelihood == D_INF) && (hsmarkov_best != NULL)) {
+    	*os << "\n Convergence failed, returning saved model with highest likelihood" << endl;
+    	delete hsmarkov;
+    	hsmarkov = NULL;
+    	hsmarkov = new HiddenSemiMarkov(*hsmarkov_best);
+    	likelihood = hsmarkov->likelihood_computation(*this);
+    	delete hsmarkov_best;
+    	hsmarkov_best = NULL;
+    }
 
     if (likelihood != D_INF) {
       if (os) {
@@ -2671,7 +2687,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
         }
       }
 
-      for (i = 0;i < nb_sequence;i++) {
+      for (i = 0;i < nb_sequence;i++) { // sequence i
 
         // forward recurrence
 
@@ -2686,15 +2702,15 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
           }
         }
 
-        for (j = 0;j < length[i];j++) {
+        for (j = 0;j < length[i];j++) { // position j at sequence i
           norm[j] = 0.;
 
-          for (k = 0;k < hsmarkov->nb_state;k++) {
+          for (k = 0;k < hsmarkov->nb_state;k++) { // state k at position j and sequence i
 
             // computation of the observation probabilities
 
             observation[j][k] = 1.;
-            for (m = 0;m < hsmarkov->nb_output_process;m++) {
+            for (m = 0;m < hsmarkov->nb_output_process;m++) { // variable m
               if (hsmarkov->categorical_process[m]) {
                 observation[j][k] *= hsmarkov->categorical_process[m]->observation[k]->mass[*pioutput[m]];
               }

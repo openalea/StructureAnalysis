@@ -15,7 +15,8 @@ from openalea.stat_tool.cluster import Transcode, Cluster
 import openalea.stat_tool.plot #import DISABLE_PLOT
 # openalea.stat_tool.plot.DISABLE_PLOT = True
 from openalea.stat_tool.plot import DISABLE_PLOT
-DISABLE_PLOT = False
+# DISABLE_PLOT = False
+DISABLE_PLOT = True
 
 from tools import interface
 from tools import runTestClass, robust_path as get_shared_data
@@ -80,17 +81,20 @@ def test2():
     seq_estim = seq.select_variable([2], True)
 
     # TODO: why are two states the same?
-    hsmc_est = Estimate(seq_estim, "HIDDEN_SEMI-MARKOV", "Ordinary", nb_states, "Irreducible", Nbiteration=300)   
-    print(hsmc_est.display())
+    # hsmc_est = Estimate(seq_estim, "HIDDEN_SEMI-MARKOV", "Ordinary", nb_states, "Irreducible", Nbiteration=300)   
+    # print(hsmc_est.display())
+    #
+    # # TODO: find adequate error message in 
+    # plotter = mplotlib()
+    # # hsmc_est.plot("Intensity", 1)
+    #
+    # hsmc_est.extract_histogram(1,1).plot()
+    # hsmc_est.extract(seq_map['Observation'],1,1).plot(Title="Observation distribution for state 1")
+    # hsmc_est.extract(seq_map['Sojourn'],0,0).plot(Title="Sojourn distribution for state 0")
 
-    # TODO: find adequate error message in 
-    plotter = mplotlib()
-    # hsmc_est.plot("Intensity", 1)
-    hsmc_est.extract_histogram(1,1).plot()
-    hsmc_est.extract(seq_map['Observation'],1,1).plot(Title="Observation distribution for state 1")
-    hsmc_est.extract(seq_map['Sojourn'],0,0).plot(Title="Sojourn distribution for state 0")
-
-
+    hsmc_est_file = Estimate(seq_estim, "HIDDEN_SEMI-MARKOV", hsm, Nbiteration=300)   
+    print(hsmc_est_file.display())
+    
 if __name__ == "__main__":
-    test1()
+    # test1()
     test2()

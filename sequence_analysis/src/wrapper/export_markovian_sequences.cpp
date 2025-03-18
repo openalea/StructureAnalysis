@@ -415,13 +415,22 @@ public:
   static HiddenSemiMarkov*
   hidden_semi_markov_estimation(const MarkovianSequences &input,
       const HiddenSemiMarkov &ihsmarkov, bool geometric_poisson, bool common_dispersion,
-      censoring_estimator estimator, bool counting_flag, bool state_sequence, int nb_iter,
-      duration_distribution_mean_estimator mean_estimator)
+      int iestimator, bool counting_flag, bool state_sequence, int nb_iter,
+      int imean_estimator)
   {
-    HEADER_OS(HiddenSemiMarkov);
-    ret = input.hidden_semi_markov_estimation(error, &os, ihsmarkov, geometric_poisson, common_dispersion,
+	HiddenSemiMarkov *ret = NULL;
+	censoring_estimator estimator = censoring_estimator(iestimator);
+	duration_distribution_mean_estimator mean_estimator = duration_distribution_mean_estimator(imean_estimator);
+	StatError error;
+
+	ret = input.hidden_semi_markov_estimation(error, &cout, ihsmarkov, geometric_poisson, common_dispersion,
         estimator, counting_flag, state_sequence, nb_iter, mean_estimator);
-    FOOTER_OS;
+
+    if (ret == NULL)
+    	sequence_analysis::wrap_util::throw_error(error);
+    // FOOTER_OS;
+    return(ret);
+
   }
 
   static HiddenSemiMarkov*
