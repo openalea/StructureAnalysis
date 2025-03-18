@@ -316,7 +316,6 @@ void Distribution::copy(const Distribution &dist , int ialloc_nb_value)
 {
   int i;
 
-
   nb_value = dist.nb_value;
   if (ialloc_nb_value == I_DEFAULT) {
     alloc_nb_value = nb_value;
@@ -332,13 +331,32 @@ void Distribution::copy(const Distribution &dist , int ialloc_nb_value)
   variance = dist.variance;
   nb_parameter = 0;
 
+  if (mass != NULL){
+	  delete [] mass;
+	  mass = NULL;
+  }
+  if (cumul != NULL) {
+	  delete [] cumul;
+	  cumul = NULL;
+  }
+
   mass = new double[alloc_nb_value];
   cumul = new double[alloc_nb_value];
 
-  for (i = 0;i < nb_value;i++) {
+  for (i = offset;i < alloc_nb_value;i++) {
     mass[i] = dist.mass[i];
     cumul[i] = dist.cumul[i];
   }
+
+  for (i = 0;i < offset;i++) {
+    mass[i] = dist.mass[i];
+    cumul[i] = dist.cumul[i];
+  }
+
+  /* for (i = 0;i < nb_value;i++) {
+    mass[i] = dist.mass[i];
+    cumul[i] = dist.cumul[i];
+  }*/
   // for 0 < i < offset, mass[i] may be 0 or unspecified.
   /* for (i = nb_value;i < alloc_nb_value;i++) {
     mass[i] = 0.;

@@ -114,9 +114,16 @@ void Reestimation<Type>::copy(const Reestimation<Type> &histo)
   mean = histo.mean;
   variance = histo.variance;
 
+  if (frequency != NULL) {
+	  delete [] frequency;
+	  frequency = NULL;
+  }
   frequency = new Type[nb_value];
 
-  for (i = 0;i < nb_value;i++) {
+  for (i = 0;i < offset;i++) {
+    frequency[i] = 0.;
+  }
+  for (i = offset;i < nb_value;i++) {
     frequency[i] = histo.frequency[i];
   }
 }

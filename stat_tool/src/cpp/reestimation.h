@@ -83,6 +83,11 @@ namespace stat_tool {
   class ContinuousParametric;
 
   /// \brief Frequency distribution with integer or real (for EM algorithms) frequencies
+  /*
+   * Frequencies are represented as an array *frequency, with size alloc_nb_value
+   * frequency[i] is only meaningful for offset <= i < nb_value.
+   * For i < offset, frequency[i] may be either 0 or unspecified.
+   * */
 
   template <typename Type>
   class Reestimation {

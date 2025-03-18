@@ -75,53 +75,61 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
   int max_length = ilength.nb_value - 1;
 
 
-  if (length) {
+  if (length != NULL) {
     delete length;
+    length = NULL;
   }
   length = new Distribution(ilength);
 
-  if (index_value) {
+  if (index_value != NULL) {
     delete index_value;
+    index_value = NULL;
   }
   index_value = new Curves(nb_value , max_length , false , false , false);
 
-  if (!no_occurrence) {
-    no_occurrence = new double[nb_value];
+  if (no_occurrence != NULL) {
+	delete [] no_occurrence;
   }
+  no_occurrence = new double[nb_value];
 
   for (i = 0;i < nb_value;i++) {
     no_occurrence[i] = 0.;
   }
 
-  if (first_occurrence) {
+  if (first_occurrence != NULL) {
     for (i = 0;i < nb_value;i++) {
       delete first_occurrence[i];
+      first_occurrence[i] = NULL;
     }
+    delete first_occurrence;
+    first_occurrence = NULL;
   }
-  else {
-    first_occurrence = new Distribution*[nb_value];
-  }
+  first_occurrence = new Distribution*[nb_value];
 
   for (i = 0;i < nb_value;i++) {
     first_occurrence[i] = new Distribution(NB_VALUE);
   }
 
-  if (!absorption) {
-    absorption = new double[nb_value];
+  if (absorption != NULL) {
+	delete [] absorption;
+	absorption = NULL;
   }
+
+  absorption = new double[nb_value];
 
   for (i = 0;i < nb_value;i++) {
     absorption[i] = 0.;
   }
 
-  if (sojourn_time) {
+  if (sojourn_time != NULL) {
     for (i = 0;i < nb_value;i++) {
       delete sojourn_time[i];
+      sojourn_time[i] = NULL;
     }
+    sojourn_time = NULL;
   }
-  else {
-    sojourn_time = new DiscreteParametric*[nb_value];
-  }
+
+  sojourn_time = new DiscreteParametric*[nb_value];
 
   for (i = 0;i < nb_value;i++) {
     if (homogeneity[i]) {
@@ -134,22 +142,24 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
   }
 
   if (homogeneous) {
-    if (!leave) {
-      leave = new double[nb_value];
+    if (leave != NULL) {
+    	delete [] leave;
+    	leave = NULL;
     }
+    leave = new double[nb_value];
 
     for (i = 0;i < nb_value;i++) {
       leave[i] = 0.;
     }
 
-    if (recurrence_time) {
+    if (recurrence_time != NULL) {
       for (i = 0;i < nb_value;i++) {
         delete recurrence_time[i];
+        recurrence_time[i] = NULL;
       }
+      recurrence_time = NULL;
     }
-    else {
-      recurrence_time = new Distribution*[nb_value];
-    }
+    recurrence_time = new Distribution*[nb_value];
 
     for (i = 0;i < nb_value;i++) {
       recurrence_time[i] = new Distribution(NB_VALUE);
@@ -157,28 +167,28 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
   }
 
   if (counting_flag) {
-    if (nb_run) {
+    if (nb_run != NULL) {
       for (i = 0;i < nb_value;i++) {
         delete nb_run[i];
+        nb_run[i] = NULL;
       }
     }
-    else {
-      nb_run = new Distribution*[nb_value];
-    }
+    nb_run = new Distribution*[nb_value];
 
     for (i = 0;i < nb_value;i++) {
       nb_run[i] = new Distribution((max_length % 2 == 0 ?
                                     max_length / 2 : max_length / 2 + 1) + 1);
     }
 
-    if (nb_occurrence) {
+    if (nb_occurrence != NULL) {
       for (i = 0;i < nb_value;i++) {
         delete nb_occurrence[i];
+        nb_occurrence[i] = NULL;
       }
+      nb_occurrence = NULL;
     }
-    else {
-      nb_occurrence = new Distribution*[nb_value];
-    }
+
+    nb_occurrence = new Distribution*[nb_value];
 
     for (i = 0;i < nb_value;i++) {
       nb_occurrence[i] = new Distribution(max_length + 1);
@@ -206,75 +216,85 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
   int max_length = ilength.nb_value - 1;
 
 
-  if (length) {
+  if (length != NULL) {
     delete length;
+    length = NULL;
   }
   length = new Distribution(ilength);
 
-  if (index_value) {
+  if (index_value != NULL) {
     delete index_value;
+    index_value = NULL;
   }
   index_value = new Curves(nb_value , max_length , false , false , false);
 
-  if (!no_occurrence) {
-    no_occurrence = new double[nb_value];
+  if (no_occurrence != NULL) {
+	delete [] no_occurrence;
+	no_occurrence = NULL;
   }
+  no_occurrence = new double[nb_value];
 
   for (i = 0;i < nb_value;i++) {
     no_occurrence[i] = 0.;
   }
 
-  if (first_occurrence) {
+  if (first_occurrence != NULL) {
     for (i = 0;i < nb_value;i++) {
       delete first_occurrence[i];
+      first_occurrence[i] = NULL;
     }
+    delete first_occurrence;
+    first_occurrence = NULL;
   }
-  else {
-    first_occurrence = new Distribution*[nb_value];
-  }
+  first_occurrence = new Distribution*[nb_value];
 
   for (i = 0;i < nb_value;i++) {
     first_occurrence[i] = new Distribution(NB_VALUE);
   }
 
-  if (!leave) {
-    leave = new double[nb_value];
+  if (leave != NULL) {
+  	delete [] leave;
+  	leave = NULL;
   }
+
+  leave = new double[nb_value];
 
   for (i = 0;i < nb_value;i++) {
     leave[i] = 0.;
   }
 
-  if (recurrence_time) {
+  if (recurrence_time != NULL) {
     for (i = 0;i < nb_value;i++) {
       delete recurrence_time[i];
+      recurrence_time[i] = NULL;
     }
+    recurrence_time = NULL;
   }
-  else {
-    recurrence_time = new Distribution*[nb_value];
-  }
+  recurrence_time = new Distribution*[nb_value];
 
   for (i = 0;i < nb_value;i++) {
     recurrence_time[i] = new Distribution(NB_VALUE);
   }
 
   if (sojourn_time_flag) {
-    if (!absorption) {
-      absorption = new double[nb_value];
-    }
+	  if (absorption != NULL) {
+		delete [] absorption;
+		absorption = NULL;
+	  }
+	absorption = new double[nb_value];
 
     for (i = 0;i < nb_value;i++) {
       absorption[i] = 0.;
     }
 
-    if (sojourn_time) {
+    if (sojourn_time != NULL) {
       for (i = 0;i < nb_value;i++) {
         delete sojourn_time[i];
+        sojourn_time[i] = NULL;
       }
+      sojourn_time = NULL;
     }
-    else {
-      sojourn_time = new DiscreteParametric*[nb_value];
-    }
+    sojourn_time = new DiscreteParametric*[nb_value];
 
     for (i = 0;i < nb_value;i++) {
       sojourn_time[i] = new DiscreteParametric(NB_VALUE);
@@ -282,28 +302,28 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
   }
 
   if (counting_flag) {
-    if (nb_run) {
-      for (i = 0;i < nb_value;i++) {
-        delete nb_run[i];
-      }
-    }
-    else {
-      nb_run = new Distribution*[nb_value];
-    }
+	if (nb_run != NULL) {
+	  for (i = 0;i < nb_value;i++) {
+		delete nb_run[i];
+		nb_run[i] = NULL;
+	  }
+	}
+	nb_run = new Distribution*[nb_value];
 
     for (i = 0;i < nb_value;i++) {
       nb_run[i] = new Distribution((max_length % 2 == 0 ?
                                     max_length / 2 : max_length / 2 + 1) + 1);
     }
 
-    if (nb_occurrence) {
+    if (nb_occurrence != NULL) {
       for (i = 0;i < nb_value;i++) {
         delete nb_occurrence[i];
+        nb_occurrence[i] = NULL;
       }
+      nb_occurrence = NULL;
     }
-    else {
-      nb_occurrence = new Distribution*[nb_value];
-    }
+
+    nb_occurrence = new Distribution*[nb_value];
 
     for (i = 0;i < nb_value;i++) {
       nb_occurrence[i] = new Distribution(max_length + 1);
