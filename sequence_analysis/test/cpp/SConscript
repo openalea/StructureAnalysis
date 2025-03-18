@@ -26,7 +26,8 @@ if my_debug:
     if '-DNDEBUG' in env._dict['CXXFLAGS']:
         env_test._dict['CXXFLAGS'] = []
 
-env_test.AppendUnique(LIBS=['stat_tool', 'sequence_analysis'])
+# env_test.AppendUnique(LIBS=['stat_tool', 'sequence_analysis'])
+env_test.AppendUnique(LIBS=['vpstat_tool', 'vpsequence'])
 #if os.name != 'nt':
 #    env_test.AppendUnique(LIBS= ['efence'])
 
@@ -89,6 +90,6 @@ Alias('clean_test', r)
 
 # map(check, test_prog)
 
-#Alias('test_sequence_analysis', test_prog)
+Alias('test_sequence_analysis', test_prog)
 Alias('test', 'test_sequence_analysis')
 
