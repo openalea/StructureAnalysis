@@ -331,8 +331,11 @@ public:
     DiscreteParametricModel *model = NULL;
     model = DiscreteParametricModel::ascii_read(error, filename);
 
-    if(!model) stat_tool::wrap_util::throw_error(error);
-    return boost::shared_ptr<DiscreteParametricModel>(model);
+    if(model == NULL) {
+    	stat_tool::wrap_util::throw_error(error);
+    	return NULL;
+    } else
+    	return boost::shared_ptr<DiscreteParametricModel>(model);
   }
   
   static boost::shared_ptr<DiscreteParametricModel> parametric_model_from_ident(int iident = I_DEFAULT ,
@@ -348,7 +351,13 @@ public:
     model = new DiscreteParametricModel(ident, iinf_bound, isup_bound,
                                         iparameter, iprobability, cumul_threshold);
 
-    return boost::shared_ptr<DiscreteParametricModel>(model);
+    if(model == NULL) {
+    	// In principle the constructor above cannot fail, even if parameters are not admissible.
+    	// In this case, simulation / plot / etc. will fail.
+		// stat_tool::wrap_util::throw_error(error);
+		return NULL;
+	} else
+		return boost::shared_ptr<DiscreteParametricModel>(model);
   }
   
   static boost::shared_ptr<DiscreteParametricModel> parametric_model_from_ident2(int iident = I_DEFAULT ,

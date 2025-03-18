@@ -1,7 +1,11 @@
 /****************************************************************
  *
- *  Test multivariate mixture models
+ *  Test class Distribution
  */
+
+#include <fstream>
+#include <cstdio>
+#include <cstdlib>
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/vectors.h"
@@ -11,12 +15,15 @@ using namespace stat_tool;
 
 int main(void) {
 
-  int iinf_bound = 5, isup_bound = I_DEFAULT, isimul = 100;
-  double iparameter = 5.6, iprobability = 0.3;
+  int iinf_bound = 1, isup_bound = I_DEFAULT, isimul = 100;
+  double iparameter = 15, iprobability = 0.5;
   DiscreteParametric *d = NULL, *d_cp = NULL;
+  DiscreteParametricModel *dm = NULL, *dm_cp = NULL;
   int var, i, j, nb_variable, nb_component;
   std::vector<int> simulated(isimul);
   StatError error;
+  const std::string nbinom_file = "./nbinom.dis", wrong_file = "./wrong_name";
+  std::ofstream fout1(nbinom_file), fout2(wrong_file);
 /*  const char * mixpath= "./tmp.mix", * spmixpath= "./tmp_sp.mix";
   const char * gnupath = "./tmp_mix", * gnu_datapath = "./tmp_mix_data";
   const char * margpath= "./marg_mix", * gnu_tmppath = "./tmp_mix_d";
@@ -29,6 +36,7 @@ int main(void) {
 
 
   d = new DiscreteParametric(NEGATIVE_BINOMIAL, iinf_bound, isup_bound, iparameter, iprobability);
+  d->ascii_print(fout1); // will close automatically
   // d->init();
   // d->computation();
   d->ascii_print(cout);
@@ -49,8 +57,26 @@ int main(void) {
   delete d;
   d = NULL;
   d_cp->ascii_print(cout);
+
+  dm_cp = new DiscreteParametricModel();
+  dm = dm_cp->ascii_read(error , nbinom_file);
+  std::remove(nbinom_file.c_str());
+
+  cout << "DiscreteParametricModel (from file): " << endl;
+  dm->ascii_print(cout);
+
+  delete dm;
+  dm = NULL;
+
+  dm = dm_cp->ascii_read(error , wrong_file);
+  assert(dm == NULL);
+
   delete d_cp;
   d_cp = NULL;
+  delete d;
+  d = NULL;
+  delete dm_cp;
+  dm_cp = NULL;
 
   return 0;
 }
