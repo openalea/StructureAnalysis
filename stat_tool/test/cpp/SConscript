@@ -1,27 +1,59 @@
 # -*-python-*-
 
-import os, commands
+import os
 
 # Import global objects
 
 Import("env")
-
-env_test = env.Copy()
+Import("statlib")
+print(statlib)
+#env_test = env.Clone()
+env_test = env
 
 pj = os.path.join
 
+
+my_debug = True
 if env_test['debug']:
    env_test.Append(CPPDEFINES= ['DEBUG'])
-env_test.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
-if env_test['with_efence']:
-    env_test.AppendUnique(LIBS= ['efence'])
 
-tests= Split("""
-test_multivariate_mixture.cpp
+if my_debug:
+    env_test.AppendUnique(LIBS=['efence'])
+    CPPFLAGS=["-g"] # No. This is managed by sconsx. Use scons debug=1
+    env_test.AppendUnique(CPPFLAGS=CPPFLAGS)
+    if '-DNDEBUG' in env._dict['CCFLAGS']:
+        env_test._dict['CCFLAGS'] = []
+    if '-DNDEBUG' in env._dict['CXXFLAGS']:
+        env_test._dict['CXXFLAGS'] = []
+
+env_test.AppendUnique(LIBS=['vpstat_tool'])
+
+# env_test.AppendUnique(LIBPATH=['machin'])
+# ajouterait : -Lbuild-scons/test/cpp/machin
+
+includes= env_test.ALEAGlob('*.h')
+includes += env_test.ALEAGlob('*.hpp')
+sources = env_test.ALEAGlob('*.cpp')
+
+env_test.Append(CPPPATH='#/src/cpp/')
+# Perhaps here you mean to modify CPPPATH?
+
+#Sources
+
+# test_int_fl_containers.cpp
+# tests = Split("""
+# test_distribution.cpp
+# test_multivariate_mixture.cpp
+# """)
+
+tests = Split("""
+test_distribution.cpp
 """)
 
+# tests.append(statlib)
+
 def prog(p):
-  return env_test.Program(p)
+  return env_test.ALEAProgram(p)
 
 # def check(p):
 #    os.popen(p+" > output_current_test.txt")
@@ -32,17 +64,19 @@ def prog(p):
 #       print "actual and theoretical outputs match for ", p, "\n"
 
 
-test_prog=map(prog, tests)
+# Bug: AttributeError : 'map' object has no attribute 'get_csig'
+# test_prog=map(prog, tests)
+test_prog=env_test.ALEAProgram('test_stat_tool', tests)
 
-"""
+'''
 def rmTests(target, source, env):
   import os
   print [ os.remove(str(s)) for s in source]
   return 1
 
 r= env.AddPostAction(test_prog, rmTests)
-Alias('clean_test',r)
-"""
+Alias('clean_test', r)
+'''
 
 # print test_prog
 

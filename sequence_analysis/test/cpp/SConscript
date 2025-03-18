@@ -28,6 +28,9 @@ if my_debug:
 
 # env_test.AppendUnique(LIBS=['stat_tool', 'sequence_analysis'])
 env_test.AppendUnique(LIBS=['vpstat_tool', 'vpsequence'])
+# env_test.AppendUnique(LIBPATH=['machin'])
+# ajouterait : -Lbuild-scons/test/cpp/machin
+
 #if os.name != 'nt':
 #    env_test.AppendUnique(LIBS= ['efence'])
 
@@ -43,13 +46,6 @@ sources = env_test.ALEAGlob('*.cpp')
 
 env_test.Append(CPPPATH='#/src/cpp/')
 # Perhaps here you mean to modify CPPPATH?
-
-#inc = env_test.ALEAIncludes( "tool", includes)
-#inc = env_test.ALEAIncludes( "stat_tool", includes)
-#inc = env_test.ALEAIncludes( "sequence_analysis", includes)
-#inc = env_test.ALEAIncludes( "leaktrace", includes)
-#env_test.AppendUnique(LIBS=['vpstat_tool'])
-#env_test.AppendUnique(LIBS=['vpsequence'])
 
 #Sources
 
