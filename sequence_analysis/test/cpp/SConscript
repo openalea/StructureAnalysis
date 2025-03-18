@@ -5,8 +5,10 @@ import os
 # Import global objects
 
 Import("env")
+Import("seqlib")
 
-env_test = env.Clone()
+#env_test = env.Clone()
+env_test = env
 
 pj = os.path.join
 
@@ -17,28 +19,36 @@ if env_test['debug']:
 
 if my_debug:
     env_test.AppendUnique(LIBS=['efence'])
-    CPPFLAGS=["-g"]
+    CPPFLAGS=["-g"] # No. This is managed by sconsx. Use scons debug=1
     env_test.AppendUnique(CPPFLAGS=CPPFLAGS)
     if '-DNDEBUG' in env._dict['CCFLAGS']:
         env_test._dict['CCFLAGS'] = []
     if '-DNDEBUG' in env._dict['CXXFLAGS']:
         env_test._dict['CXXFLAGS'] = []
 
-# env_test.AppendUnique(LIBS=['tool', 'stat_tool', 'sequence_analysis'])
+env_test.AppendUnique(LIBS=['stat_tool', 'sequence_analysis'])
 #if os.name != 'nt':
 #    env_test.AppendUnique(LIBS= ['efence'])
 
 # env_test.AppendUnique(LIBS= ['leaktrace'])
+#env.AppendUnique(CPPDEFINES=['MESSAGE'])
+
+#LIBS = ['vpstat_tool', 'vpsequence']
+#env_test.AppendUnique(LIBS=LIBS)
 
 includes= env_test.ALEAGlob('*.h')
 includes += env_test.ALEAGlob('*.hpp')
 sources = env_test.ALEAGlob('*.cpp')
-inc = env_test.ALEAIncludes( "tool", includes)
-inc = env_test.ALEAIncludes( "stat_tool", includes)
-inc = env_test.ALEAIncludes( "sequence_analysis", includes)
-inc = env_test.ALEAIncludes( "leaktrace", includes)
-env_test.AppendUnique(LIBS=['vpstat_tool'])
-env_test.AppendUnique(LIBS=['vpsequence'])
+
+env_test.Append(CPPPATH='#/src/cpp/')
+# Perhaps here you mean to modify CPPPATH?
+
+#inc = env_test.ALEAIncludes( "tool", includes)
+#inc = env_test.ALEAIncludes( "stat_tool", includes)
+#inc = env_test.ALEAIncludes( "sequence_analysis", includes)
+#inc = env_test.ALEAIncludes( "leaktrace", includes)
+#env_test.AppendUnique(LIBS=['vpstat_tool'])
+#env_test.AppendUnique(LIBS=['vpsequence'])
 
 #Sources
 
@@ -47,8 +57,10 @@ tests = Split("""
 test_hidden_semi_markov_chain.cpp
 """)
 
+tests.append(seqlib)
+
 def prog(p):
-  return env_test.Program(p)
+  return env_test.ALEAProgram(p)
 
 # def check(p):
 #    os.popen(p+" > output_current_test.txt")
@@ -61,7 +73,7 @@ def prog(p):
 
 # Bug: AttributeError : 'map' object has no attribute 'get_csig'
 # test_prog=map(prog, tests)
-test_prog=env_test.Program("test_hidden_semi_markov_chain.cpp")
+test_prog=env_test.ALEAProgram('test_sequence_analysis', tests)
 
 '''
 def rmTests(target, source, env):
@@ -77,6 +89,6 @@ Alias('clean_test', r)
 
 # map(check, test_prog)
 
-Alias('test_sequence_analysis', test_prog)
+#Alias('test_sequence_analysis', test_prog)
 Alias('test', 'test_sequence_analysis')
 
