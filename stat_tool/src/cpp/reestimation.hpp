@@ -65,7 +65,6 @@ namespace stat_tool {
 
 template <typename Type>
 void Reestimation<Type>::init(int inb_value)
-
 {
   nb_element = 0;
   nb_value = inb_value;
@@ -101,7 +100,6 @@ void Reestimation<Type>::init(int inb_value)
 
 template <typename Type>
 void Reestimation<Type>::copy(const Reestimation<Type> &histo)
-
 {
   int i;
 
@@ -139,7 +137,9 @@ void Reestimation<Type>::copy(const Reestimation<Type> &histo)
 
 template <typename Type>
 Reestimation<Type>::Reestimation(const Reestimation<Type> &histo)
-
+: nb_value(histo.nb_value), alloc_nb_value(histo.nb_value),
+  offset(histo.offset), nb_element(histo.nb_element),
+  max(histo.max), mean(histo.mean), variance(histo.variance), frequency(NULL)
 {
   copy(histo);
 }
@@ -156,7 +156,8 @@ Reestimation<Type>::Reestimation(const Reestimation<Type> &histo)
 
 template <typename Type>
 Reestimation<Type>::Reestimation(int nb_histo , const Reestimation<Type> **histo)
-
+: nb_value(0), alloc_nb_value(0), offset(0), nb_element(0),
+  max(0), mean(D_INF), variance(D_INF), frequency(NULL)
 {
   int i , j;
 
@@ -201,7 +202,9 @@ template <typename Type>
 Reestimation<Type>::~Reestimation()
 
 {
-  delete [] frequency;
+  if (frequency != NULL)
+	  delete [] frequency;
+  frequency = NULL;
 }
 
 

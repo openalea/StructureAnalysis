@@ -178,6 +178,9 @@ void Distribution::init(int inb_value)
 /*--------------------------------------------------------------*/
 
 Distribution::Distribution(int inb_value)
+: nb_value(inb_value), alloc_nb_value(inb_value), offset(0),
+max(D_INF), complement(D_INF), mean(D_INF), variance(D_INF),
+nb_parameter(0), mass(NULL), cumul(NULL)
 
 {
   init(inb_value);
@@ -194,7 +197,9 @@ Distribution::Distribution(int inb_value)
 /*--------------------------------------------------------------*/
 
 Distribution::Distribution(int inb_value , double *imass)
-
+: nb_value(inb_value), alloc_nb_value(inb_value), offset(0),
+max(D_INF), complement(D_INF), mean(D_INF), variance(D_INF),
+nb_parameter(0), mass(NULL), cumul(NULL)
 {
   int i;
 
@@ -232,7 +237,9 @@ Distribution::Distribution(int inb_value , double *imass)
 /*--------------------------------------------------------------*/
 
 Distribution::Distribution(const Distribution &dist , double scaling_coeff)
-
+: nb_value(dist.nb_value), alloc_nb_value(dist.nb_value), offset(0),
+max(D_INF), complement(D_INF), mean(D_INF), variance(D_INF),
+nb_parameter(0), mass(NULL), cumul(NULL)
 {
   int i , j;
   int min , max;
@@ -287,6 +294,9 @@ Distribution::Distribution(const Distribution &dist , double scaling_coeff)
 /*--------------------------------------------------------------*/
 
 Distribution::Distribution(const FrequencyDistribution &histo)
+: nb_value(histo.nb_value), alloc_nb_value(histo.nb_value), offset(0),
+max(D_INF), complement(D_INF), mean(D_INF), variance(D_INF),
+nb_parameter(0), mass(NULL), cumul(NULL)
 
 {
   nb_value = histo.nb_value;
@@ -340,18 +350,17 @@ void Distribution::copy(const Distribution &dist , int ialloc_nb_value)
 	  cumul = NULL;
   }
 
-  mass = new double[alloc_nb_value];
-  cumul = new double[alloc_nb_value];
-
-  for (i = offset;i < alloc_nb_value;i++) {
-    mass[i] = dist.mass[i];
-    cumul[i] = dist.cumul[i];
+  if (dist.mass != NULL) {
+	  mass = new double[alloc_nb_value];
+	  for (i = 0;i < alloc_nb_value;i++)
+		mass[i] = dist.mass[i];
+  }
+  if (dist.cumul != NULL) {
+	  cumul = new double[alloc_nb_value];
+	  for (i = 0;i < alloc_nb_value;i++)
+		cumul[i] = dist.cumul[i];
   }
 
-  for (i = 0;i < offset;i++) {
-    mass[i] = dist.mass[i];
-    cumul[i] = dist.cumul[i];
-  }
 
   /* for (i = 0;i < nb_value;i++) {
     mass[i] = dist.mass[i];
@@ -419,7 +428,9 @@ void Distribution::normalization_copy(const Distribution &dist)
 
 Distribution::Distribution(const Distribution &dist , distribution_transformation transform ,
                            int ialloc_nb_value)
-
+: nb_value(dist.nb_value), alloc_nb_value(ialloc_nb_value), offset(0),
+max(D_INF), complement(D_INF), mean(D_INF), variance(D_INF),
+nb_parameter(0), mass(NULL), cumul(NULL)
 {
   switch (transform) {
   case DISTRIBUTION_COPY :
@@ -444,8 +455,14 @@ Distribution::Distribution(const Distribution &dist , distribution_transformatio
 Distribution::~Distribution()
 
 {
-  delete [] mass;
-  delete [] cumul;
+  if (mass != NULL)  {
+	  delete [] mass;
+	  mass = NULL;
+  }
+  if (cumul != NULL) {
+	  delete [] cumul;
+	  cumul = NULL;
+  }
 }
 
 
@@ -463,9 +480,14 @@ Distribution& Distribution::operator=(const Distribution &dist)
 
 {
   if (&dist != this) {
-    delete [] mass;
-    delete [] cumul;
-
+	  if (mass != NULL)  {
+		  delete [] mass;
+		  mass = NULL;
+	  }
+	  if (cumul != NULL) {
+		  delete [] cumul;
+		  cumul = NULL;
+	  }
     copy(dist);
   }
 

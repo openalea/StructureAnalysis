@@ -426,8 +426,9 @@ namespace stat_tool {
   class FrequencyDistribution;
   class DiscreteParametricModel;
 
-  /// \brief Discrete distribution
-  /*
+
+  /*! \brief Discrete distribution
+   *
    * Probabilities are represented as an array *mass, with size nb_allocated_value
    * mass[i] is only meaningful for offset <= i < nb_value.
    * For i < offset, mass[i] may be either 0 or unspecified.

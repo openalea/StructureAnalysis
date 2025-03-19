@@ -109,7 +109,8 @@ namespace stat_tool {
     void init(int inb_value);
     void copy(const Reestimation<Type> &histo);
 
-    Reestimation(int inb_value = 0) { init(inb_value); }
+    Reestimation(int inb_value = 0) : nb_value(0), alloc_nb_value(0), offset(0),
+    		nb_element(0), max(0), mean(-1), variance(-1), frequency(NULL) { init(inb_value); }
     Reestimation(const Reestimation<Type> &histo);
     Reestimation(int nb_histo , const Reestimation<Type> **histo);
     ~Reestimation();

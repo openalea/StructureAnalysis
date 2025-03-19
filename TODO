@@ -4,9 +4,8 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
     + create a new branch for each new development (do not systematically use new_python_api)
     + update tests to be compliant with python 3
     + Switch to pytest instead of nosetests.
-    + Test base classes in stat_tool with valgrind (read and copy Distribution, ParametricDistribution, FrequencyDistribution)
-    + Fix stat_tool_examples.py, test_estimate.py, test_multivariate_mixture_functional.py, test_vector_distance.py, test_hidden_semi_markov_functional.py
-    + export set_seed in stat_tool.h
+    + Fix stat_tool_examples.py, test_estimate.py (rewrite NB estimation), test_multivariate_mixture_functional.py, test_vector_distance.py, test_hidden_semi_markov_functional.py
+    + export set_seed in stat_tool.h, before: check C++ functioning
     + either make HEADER_OS statements work in sequence_analysis wrappers or remove them.
     + merge implementations of Mixture and MultivariateMixture (same semantics)
     + matplotlib output to Survival (remove gnuplot)

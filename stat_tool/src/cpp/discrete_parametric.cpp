@@ -1568,6 +1568,10 @@ DiscreteParametricModel* DiscreteParametricModel::ascii_read(StatError &error , 
     if (status) {
       dist = new DiscreteParametricModel(*pdist);
     }
+    if (dist->mass == NULL) {
+    	delete dist;
+    	dist = NULL;
+    }
 
     delete pdist;
   }
