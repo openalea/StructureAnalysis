@@ -12,6 +12,7 @@ from pathlib import Path
 from openalea.sequence_analysis import get_shared_data, get_shared_data_path
 import openalea.stat_tool as st
 import openalea.sequence_analysis as sa
+from openalea.stat_tool.distribution import set_seed
 
 # from openalea.stat_tool import *
 # from openalea.stat_tool.plot import DISABLE_PLOT
@@ -62,6 +63,7 @@ class interface():
         self.data = data
         self.filename = filename
         self.structure = Structure
+        set_seed(0)
 
     def build_data(self):
         raise NotImplementedError()

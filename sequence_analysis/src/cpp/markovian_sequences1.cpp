@@ -2586,7 +2586,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error , int
             normal dist(min_value[j] - 2 * standard_deviation[j] , standard_deviation[j]);
 
             for (k = length[i];k < seq->length[i];k++) {
-              limit = ((double)rand() / (RAND_MAX + 1.));
+              limit = double(rand_unif(mt));
               seq->real_sequence[i][j][k] = quantile(dist , limit);
             }
           }
@@ -2595,7 +2595,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error , int
             normal dist(max_value[j] + 2 * standard_deviation[j] , standard_deviation[j]);
 
             for (k = length[i];k < seq->length[i];k++) {
-              limit = ((double)rand() / (RAND_MAX + 1.));
+              limit = double(rand_unif(mt));
               seq->real_sequence[i][j][k] = quantile(dist , limit);
             }
           }
@@ -3739,8 +3739,11 @@ void MarkovianSequences::self_transition_computation(int state)
     sum += self_transition[state]->frequency[i] * self_transition[state]->point[0][i];
   }
 
-  cout << "\naverage self-transition probability : "
-       << sum / self_transition->nb_element_computation() << endl;
+  cout << "\naverage self-transition count: "
+       << sum << endl;
+
+  // cout << "\naverage self-transition probability : "
+  //     << sum / self_transition[state]->nb_element_computation() << endl;
 # endif
 
 }
@@ -4798,7 +4801,7 @@ void MarkovianSequences::censored_sojourn_time_frequency_distribution_computatio
     initial_run[i]->mean_computation();
     initial_run[i]->variance_computation();
 
-    os << initial_run[i];
+    cout << initial_run[i];
 #   endif
 
     final_run[i]->nb_value_computation();
@@ -4810,7 +4813,7 @@ void MarkovianSequences::censored_sojourn_time_frequency_distribution_computatio
     final_run[i]->mean_computation();
     final_run[i]->variance_computation();
 
-    os << final_run[i];
+    cout << final_run[i];
 #   endif
 
     single_run[i]->nb_value_computation();
@@ -4822,7 +4825,7 @@ void MarkovianSequences::censored_sojourn_time_frequency_distribution_computatio
     single_run[i]->mean_computation();
     single_run[i]->variance_computation();
 
-    os << single_run[i];
+    cout << single_run[i];
 #   endif
 
   }

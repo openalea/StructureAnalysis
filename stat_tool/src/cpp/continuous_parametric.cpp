@@ -3943,7 +3943,7 @@ double ContinuousParametric::simulation()
   double limit , value , step , current_cumul , previous_cumul;
 
 
-  limit = ((double)rand() / (RAND_MAX + 1.));
+  limit = double(rand_unif(mt));
 
   switch (ident) {
 

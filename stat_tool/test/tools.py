@@ -16,6 +16,8 @@ DISABLE_PLOT=True
 from pathlib import Path
 from openalea.stat_tool import get_shared_data, get_shared_data_path
 import openalea.stat_tool as st
+from openalea.stat_tool.distribution import set_seed
+
 
 def runTestClass(myclass):
     functions = [x for x in dir(myclass) if x.startswith('test')]
@@ -71,6 +73,7 @@ class interface():
         self.filename = filename
         self.structure = Structure
         self.N = 1000
+        set_seed(0)
 
     def build_data(self):
         raise NotImplementedError()

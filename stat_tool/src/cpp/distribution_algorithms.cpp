@@ -1702,7 +1702,7 @@ int cumul_method(int nb_value , const double *cumul , double scale)
   double limit;
 
 
-  limit = ((double)rand() / (RAND_MAX + 1.)) * scale;
+  limit = double(rand_unif(mt)) * scale;
 //  limit = ((double)random() / (double)0x7fffffff) * scale;
 
   if ((limit < cumul[nb_value / 2])) {
@@ -1768,11 +1768,9 @@ int DiscreteParametric::simulation() const
 
   else {
     do {
-      x = (double)rand() / (RAND_MAX + 1.);
-      y = (double)rand() / (RAND_MAX + 1.);
-//      x = (double)random() / (double)0x7fffffff;
-//      y = (double)random() / (double)0x7fffffff;
-      value = (int)(offset + range * x);
+      x = double(rand_unif(mt));
+      y = double(rand_unif(mt));
+      value = int(offset + range * x);
     }
     while (y * max > mass[value]);
   }

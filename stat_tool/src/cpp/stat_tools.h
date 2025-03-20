@@ -39,6 +39,8 @@
 #ifndef STAT_TOOLS_H
 #define STAT_TOOLS_H
 
+#include <random>
+
 #include "config.h"
 #include "reestimation.h"
 #include "plotable.h"
@@ -314,8 +316,9 @@ namespace stat_tool {
   const double YSCALE = 1.1;             // scale factor for y axis in plots
   const double PLOT_RANGE_RATIO = 4.;    // threshold for plotting from 0
 
-
-
+  // random generator
+  extern std::mt19937 mt;
+  extern std::uniform_real_distribution<double> rand_unif;
 /****************************************************************
  *
  *  Class definition
@@ -1030,7 +1033,7 @@ namespace stat_tool {
   };
 
 
-  STAT_TOOL_API void set_seed(int seed);
+  STAT_TOOL_API void set_seed(int seed, std::mt19937 &generator=mt);
 
   STAT_TOOL_API int column_width(int);
   STAT_TOOL_API int column_width(int min_value , int max_value);

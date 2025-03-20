@@ -39,6 +39,7 @@
 #include "stat_tool/stat_label.h"
 
 #include "semi_markov.h"
+#include "sequence_label.h"
 
 using namespace std;
 using namespace stat_tool;
@@ -318,7 +319,7 @@ double* SemiMarkovChain::memory_computation() const
 //      if ((i > 0) && (i % 100 == 0)) {
         cout << i << "  ";
         for (j = 0;j < nb_state;j++) {
-          cout << state[j] << " ";
+          cout << state_out[j] << " ";
         }
         cout << " | " << sum / nb_state << endl;
 //      }

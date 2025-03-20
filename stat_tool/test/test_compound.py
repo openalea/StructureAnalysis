@@ -9,6 +9,7 @@ from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.stat_tool.distribution import Binomial, NegativeBinomial
 from openalea.stat_tool.estimate import Estimate
+from openalea.stat_tool.distribution import set_seed
 
 from tools import interface
 from tools import runTestClass
@@ -25,6 +26,7 @@ class Test(interface):
             self.build_data(),
             "data/compound1.cd",
             Compound)
+        set_seed(0)
 
     def build_data(self):
         d1 = Binomial(2, 5, 0.5)

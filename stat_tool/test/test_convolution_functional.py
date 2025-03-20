@@ -7,9 +7,11 @@ from openalea.stat_tool import Convolution, Histogram, Distribution
 from openalea.stat_tool import Simulate, ExtractHistogram, ToHistogram
 from openalea.stat_tool import Estimate, ExtractData, ExtractDistribution
 from openalea.stat_tool import Plot, Shift, Display, Save
+from openalea.stat_tool.distribution import set_seed
 
 
 def test():
+    set_seed(0)
     convol2 = Convolution(Distribution("B", 0, 10, 0.5),
                           Distribution("NB", 0, 10, 0.5))
     Plot(convol2, Title='convol2')

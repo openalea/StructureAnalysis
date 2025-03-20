@@ -52,7 +52,8 @@ using namespace std;
 
 namespace stat_tool {
 
-
+std::mt19937 mt(0);
+std::uniform_real_distribution<double> rand_unif(0.0, 1.0);
 
 /*--------------------------------------------------------------*/
 /**
@@ -586,10 +587,10 @@ ostream& Distribution::ascii_characteristic_print(ostream &os , bool shape , boo
  */
 /*--------------------------------------------------------------*/
 
-void set_seed(int seed)
+void set_seed(int seed, std::mt19937 &generator)
 
 {
-  srand(seed);
+	generator.seed(seed);
 }
 
 /*--------------------------------------------------------------*/

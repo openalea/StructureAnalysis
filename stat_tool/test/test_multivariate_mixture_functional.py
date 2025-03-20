@@ -5,6 +5,7 @@ __version__ = "$Id$"
 
 from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
 from openalea.stat_tool.distribution import Binomial, Poisson
+from openalea.stat_tool.distribution import set_seed
 
 from openalea.stat_tool.output import plot, Plot
 
@@ -12,7 +13,7 @@ from openalea.stat_tool.plot import get_plotter, mplotlib
 
 def test1():
 
-
+    
     plotter = mplotlib()
      
     d11 = Binomial(0, 12, 0.1)

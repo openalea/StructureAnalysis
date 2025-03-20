@@ -29,8 +29,11 @@ plot.DISABLE_PLOT = DISABLE_PLOT
 
 from openalea.stat_tool.plot import get_plotter, mplotlib 
 
+from openalea.stat_tool.distribution import set_seed
+
 def test1():
     
+    set_seed(0)
     from openalea.sequence_analysis import Estimate
     
     # TODO: find model with more separated states
@@ -62,6 +65,7 @@ def test2():
 
     from openalea.sequence_analysis import Estimate
     from openalea.sequence_analysis import seq_map
+    set_seed(0)
     
     # TODO: find model with more separated states
     hsm = HiddenSemiMarkov(str(get_shared_data('test_hidden_semi_markov_param.dat')))
@@ -79,6 +83,7 @@ def test2():
 
     nb_states = 3
     seq_estim = seq.select_variable([2], True)
+    print(seq_estim.display())
 
     # TODO: why are two states the same?
     # hsmc_est = Estimate(seq_estim, "HIDDEN_SEMI-MARKOV", "Ordinary", nb_states, "Irreducible", Nbiteration=300)   

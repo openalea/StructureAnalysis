@@ -79,7 +79,9 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
          **transition_entropy , **occupancy_entropy;
 # endif
 
-
+# ifdef DEBUG
+  double *backward0 = new double[nb_state];
+# endif
   // initializations
 
   seq.entropy = new double[seq.nb_sequence];
@@ -887,7 +889,7 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
             }
 
 #           ifdef DEBUG
-            cout << j << " " << backward[0][j] << " " << backward0[j] << endl;
+            cout << j << " " << backward0[j] << " " << backward0[j] << endl;
 #           endif
           }
 
@@ -1090,6 +1092,10 @@ void HiddenSemiMarkov::forward_backward(SemiMarkovData &seq) const
     delete [] predicted_entropy[i];
   }
   delete [] predicted_entropy;
+
+# ifdef DEBUG
+  delete [] backward0;
+# endif
 
 # ifdef MESSAGE
   for (i = 0;i < seq.max_length;i++) {

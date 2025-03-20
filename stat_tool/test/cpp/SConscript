@@ -43,11 +43,12 @@ env_test.Append(CPPPATH='#/src/cpp/')
 # test_int_fl_containers.cpp
 # tests = Split("""
 # test_distribution.cpp
+# test_seed.cpp
 # test_multivariate_mixture.cpp
 # """)
 
 tests = Split("""
-test_distribution.cpp
+test_seed.cpp
 """)
 
 # tests.append(statlib)

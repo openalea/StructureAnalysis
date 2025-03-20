@@ -31,7 +31,7 @@ int main(void)
    MarkovianSequences *seq_estim= NULL;
    StatError error;
    std::vector< int > select;
-   const char * hsmcrefpath= "../../../share/data/test_hidden_semi_markov_param.dat";
+   const char * hsmcrefpath= "../../share/data/test_hidden_semi_markov_param.dat";
    // const char * hmcinitpath= "./hmc_init.hvom";
 
    // reading and printing of a hidden Markov out tree
@@ -45,7 +45,7 @@ int main(void)
 
       cout << endl;
       // set_seed does not seem to have an effect
-      set_seed(0);
+      set_seed(1);
 
       // simulation of hidden Markov out trees
       hsmd= hsmc_ref->simulation(error, nb_sequence, length);
@@ -56,14 +56,14 @@ int main(void)
       // discard state variable
       seq_estim = hsmd->select_variable(error, 1, select, true);
     		  
-#     ifdef DDEBUG
+#     ifdef DEBUG
       // printing of the simulated trees
-      cout << "Simulated sequences : " << endl;
-      hsmd->display(cout, 0);
-      cout << endl;
+      cout << "Simulated sequences: " << endl;
+      hsmd->MarkovianSequences::ascii_data_write(cout);
+      cout << "End simulated sequences" << endl;
 #     endif
 
-     if (seq_estim != NULL)
+    if (seq_estim != NULL)
     	 hsmc_est_file = seq_estim->hidden_semi_markov_estimation(error, &cout, *hsmc_ref, geometric_poisson , common_dispersion, estimator, counting_flag, state_sequence, 300);
      else {
     	 cout << error;
@@ -80,6 +80,7 @@ int main(void)
 	 seq_estim = NULL;
 	 hsmd = NULL;
 	 if (hsmc_est_file != NULL) {
+		 cout << "Estimated model:" << endl;
 		 hsmc_est_file->ascii_write(cout);
 		 delete hsmc_est_file;
 	 }

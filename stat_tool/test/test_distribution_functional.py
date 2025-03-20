@@ -48,6 +48,7 @@ from openalea.stat_tool.output import plot, Plot, Display
 from openalea.stat_tool.data_transform import Merge, Shift, ExtractData
 from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool.cluster import Cluster
+from openalea.stat_tool.distribution import set_seed
 
 from tools import robust_path as get_shared_data
 
@@ -55,6 +56,7 @@ plot.DISABLE_PLOT = DISABLE_PLOT
 
 
 def test():
+    set_seed(0)
     meri1 = Histogram(get_shared_data("meri1.his"))
     meri2 = Histogram(get_shared_data("meri2.his"))
     meri3 = Histogram(get_shared_data("meri3.his"))

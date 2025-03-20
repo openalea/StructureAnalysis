@@ -1326,8 +1326,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           cout << j << " : ";
           double sum = 0.;
           for (k = 0;k < hsmarkov->nb_state;k++) {
-            sum += backward[j][k];
-            cout << backward[j][k];
+            sum += backward[j];
+            cout << backward[j];
             if ((hsmarkov->sojourn_type[k] == SEMI_MARKOVIAN) && (j < length[i] - 1)){
               cout << " (" << backward1[j][k] << ") ";
             }
@@ -1341,10 +1341,10 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                 test[k][1] += auxiliary[k] * state_in[j][k];
               }
               else {
-                test[k][2] += backward[j][k];
+                test[k][2] += backward[j];
               }
               if (j == 0) {
-                test[k][3] += backward[j][k];
+                test[k][3] += backward[j];
               }
             }
           }
@@ -3127,7 +3127,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
 #           ifdef DEBUG
             sum = 0.;
-            for (m = 0;m < nb_state;m++) {
+            for (m = 0;m < hsmarkov->nb_state;m++) {
               sum += backward[m];
             }
             if ((sum < 1. - DOUBLE_ERROR) || (sum > 1. + DOUBLE_ERROR)) {

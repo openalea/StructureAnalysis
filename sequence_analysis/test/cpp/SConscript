@@ -13,9 +13,10 @@ env_test = env
 pj = os.path.join
 
 
-my_debug = True
-if env_test['debug']:
+if env_test['DEBUG']:
    env_test.Append(CPPDEFINES= ['DEBUG'])
+
+my_debug = True
 
 if my_debug:
     env_test.AppendUnique(LIBS=['efence'])
@@ -54,7 +55,7 @@ tests = Split("""
 test_hidden_semi_markov_chain.cpp
 """)
 
-tests.append(seqlib)
+# tests.append(seqlib)
 
 def prog(p):
   return env_test.ALEAProgram(p)
