@@ -2230,7 +2230,9 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
     if (occupancy_mean == D_DEFAULT) {
       occupancy_mean = MAX(length_distribution->mean , OCCUPANCY_MEAN);
     }
-
+# ifdef DEBUG
+    assert(ihsmarkov->sojourn_type == NULL);
+# endif
     ihsmarkov->sojourn_type = new state_sojourn_type[nb_state];
     ihsmarkov->state_process->absorption = new double[nb_state];
     ihsmarkov->state_process->sojourn_time = new DiscreteParametric*[nb_state];
@@ -3952,6 +3954,10 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
     if (occupancy_mean == D_DEFAULT) {
       occupancy_mean = MAX(length_distribution->mean , OCCUPANCY_MEAN);
     }
+
+# ifdef DEBUG
+    assert(ihsmarkov->sojourn_type == NULL);
+# endif
 
     ihsmarkov->sojourn_type = new state_sojourn_type[nb_state];
     ihsmarkov->state_process->absorption = new double[nb_state];

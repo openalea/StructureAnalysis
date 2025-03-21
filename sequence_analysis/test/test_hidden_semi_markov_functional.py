@@ -59,6 +59,7 @@ def test1():
     # TODO: find adequate error message in 
     # hsmc_est = Estimate(seq, "HIDDEN_SEMI-MARKOV", "Ordinary", nb_states, "LeftRight", Nbiteration=300)
     plotter = mplotlib()
+    # seg fault
     # hsmc_est.plot("Intensity", 1)
 
 def test2():
@@ -70,7 +71,7 @@ def test2():
     # TODO: find model with more separated states
     hsm = HiddenSemiMarkov(str(get_shared_data('test_hidden_semi_markov_param.dat')))
     # seg fault
-    # hsmc_est.plot("Intensity", 1) 
+    # hsmc_est.plot("Intensity", 1)
         
     # Simulate nb_seq with length seq_length
     nb_seq = 30

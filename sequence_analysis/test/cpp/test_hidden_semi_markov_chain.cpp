@@ -64,13 +64,14 @@ int main(void)
 #     endif
 
     if (seq_estim != NULL)
-    	 hsmc_est_file = seq_estim->hidden_semi_markov_estimation(error, &cout, *hsmc_ref, geometric_poisson , common_dispersion, estimator, counting_flag, state_sequence, 300);
-     else {
-    	 cout << error;
-    	 return 1;
-     }
-    		 
-	 if (hsmc_ref != NULL)
+		 hsmc_est_file = seq_estim->hidden_semi_markov_estimation(error, &cout, *hsmc_ref, geometric_poisson , common_dispersion, estimator, counting_flag, state_sequence, 300);
+	 else {
+		 cout << error;
+		 return 1;
+	 }
+   }
+
+   if (hsmc_ref != NULL)
 		delete hsmc_ref;
 	 hsmc_ref = NULL;
 	 if (hsmd != NULL)
@@ -86,6 +87,6 @@ int main(void)
 	 }
 	 hsmc_est_file = NULL;
 
-   }
+
    return 0;
 }

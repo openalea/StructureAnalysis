@@ -96,7 +96,12 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
     }
   }
 
-  sojourn_type = new state_sojourn_type[nb_state];
+# ifdef DEBUG
+  assert(sojourn_type != NULL);
+  assert(forward != NULL);
+# endif
+
+  /* sojourn_type = new state_sojourn_type[nb_state];
   forward = new Forward*[nb_state];
 
   for (i = 0;i < nb_state;i++) {
@@ -108,7 +113,7 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
     else {
       forward[i] = NULL;
     }
-  }
+  }*/
 
   if (type == EQUILIBRIUM) {
     for (i = 0;i < nb_state;i++) {
@@ -171,10 +176,13 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
     }
   }
 
-  sojourn_type = new state_sojourn_type[nb_state];
-  forward = new Forward*[nb_state];
+# ifdef DEBUG
+  assert(sojourn_type != NULL);
+  assert(forward != NULL);
+# endif
+  // forward = new Forward*[nb_state];
 
-  for (i = 0;i < nb_state;i++) {
+/*  for (i = 0;i < nb_state;i++) {
     sojourn_type[i] = (state_process->sojourn_time[i] ? SEMI_MARKOVIAN : MARKOVIAN);
 
     if ((sojourn_type[i] == SEMI_MARKOVIAN) && (stype[i] == RECURRENT)) {
@@ -183,7 +191,7 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
     else {
       forward[i] = NULL;
     }
-  }
+  }*/
 
   if (type == EQUILIBRIUM) {
     for (i = 0;i < nb_state;i++) {

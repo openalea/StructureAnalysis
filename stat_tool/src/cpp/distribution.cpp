@@ -85,7 +85,7 @@ void Distribution::mass_copy(const Distribution &dist , int inb_value)
 	  if (mass != NULL) {
 		  delete [] mass;
 		  mass = new double[alloc_nb_value];
-		  for (i = 0;i < alloc_nb_value;i++)
+		  for (i = 0;i < nb_value;i++)
 			mass[i] = dist.mass[i];
 	  }
   } else {
@@ -353,12 +353,12 @@ void Distribution::copy(const Distribution &dist , int ialloc_nb_value)
 
   if (dist.mass != NULL) {
 	  mass = new double[alloc_nb_value];
-	  for (i = 0;i < alloc_nb_value;i++)
+	  for (i = 0;i < MIN(alloc_nb_value, nb_value);i++)
 		mass[i] = dist.mass[i];
   }
   if (dist.cumul != NULL) {
 	  cumul = new double[alloc_nb_value];
-	  for (i = 0;i < alloc_nb_value;i++)
+	  for (i = 0;i < MIN(alloc_nb_value, nb_value);i++)
 		cumul[i] = dist.cumul[i];
   }
 

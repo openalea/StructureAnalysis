@@ -434,7 +434,11 @@ namespace stat_tool {
    *
    * Probabilities are represented as an array *mass, with size nb_allocated_value
    * mass[i] is only meaningful for offset <= i < nb_value.
-   * For i < offset, mass[i] may be either 0 or unspecified.
+   * For i < offset or i >= nb_value, mass[i] may be either 0 or unspecified.
+   * nb_allocated_value has to be greater or equal to nb_value.
+   * It may happen that nb_allocated_value > nb_value, particularly when mass[i]
+   * is computed for every i <= quantile(0.9999) = nb_value-1, which we do not know
+   * in advance, but we allocated nb_allocated_value > nb_value for the sake of safety.
    * */
 
 

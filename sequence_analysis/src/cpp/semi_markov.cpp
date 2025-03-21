@@ -108,7 +108,9 @@ SemiMarkovChain::SemiMarkovChain(const Chain *pchain , const CategoricalSequence
 {
   int i;
 
-
+# ifdef DEBUG
+  assert(sojourn_type == NULL);
+# endif
   sojourn_type = new state_sojourn_type[nb_state];
 
   state_process = new CategoricalSequenceProcess(*poccupancy);
@@ -121,6 +123,9 @@ SemiMarkovChain::SemiMarkovChain(const Chain *pchain , const CategoricalSequence
     }
   }
 
+# ifdef DEBUG
+  assert(forward == NULL);
+# endif
   forward = new Forward*[nb_state];
 
   for (i = 0;i < nb_state;i++) {
@@ -157,6 +162,9 @@ void SemiMarkovChain::copy(const SemiMarkovChain &smarkov , int param)
 {
   int i;
 
+# ifdef DEBUG
+  assert(sojourn_type == NULL);
+# endif
 
   sojourn_type = new state_sojourn_type[nb_state];
   for (i = 0;i < nb_state;i++) {
