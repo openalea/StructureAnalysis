@@ -4471,12 +4471,12 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
         }
 
 #       ifdef DEBUG
-        if (penalized_likelihood[0] > max_likelihood) {
-          markov->ascii_write(os);
-        }
-        else {
-          lumped_markov->ascii_write(os);
-        }
+        // if (penalized_likelihood[0] > max_likelihood) {
+        //   markov->ascii_write(os, seq);
+        // }
+        // else {
+        //  lumped_markov->ascii_write(os, seq);
+        //}
 #       endif
 
         if (penalized_likelihood[0] > max_likelihood) {
@@ -4489,7 +4489,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
         }
 
 #       ifdef DEBUG
-        lumpability_test(error , category , *os , order);
+        lumpability_test(error , *os, category , order);
 #       endif
 
         if (os) {

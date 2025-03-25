@@ -120,6 +120,7 @@ namespace stat_tool {
   class Mixture;
   class Regression;
   class VectorDistance;
+  class MultivariateMixture;
 
   /// \brief Vectors with integer- and real-valued variables
 
@@ -127,6 +128,7 @@ namespace stat_tool {
 
     friend class Regression;
     friend class Mixture;
+    friend class MultivariateMixture;
 
     friend std::ostream& operator<<(std::ostream &os , const Vectors &vec)
     { return vec.ascii_write(os); }
@@ -413,6 +415,14 @@ namespace stat_tool {
                                            double parameter = NB_ASSIGNMENT_PARAMETER ,
                                            bool assignment = true , int nb_iter = I_DEFAULT) const;
 
+    MultivariateMixture* mixture_estimation(StatError &error , std::ostream *os ,
+                                            const MultivariateMixture &imixture,
+                                            int nb_iter = I_DEFAULT ,
+                                            bool *force_param = NULL) const;
+    MultivariateMixture* mixture_estimation(StatError &error , std::ostream* os ,
+                                            int nb_component , int nb_iter = I_DEFAULT ,
+                                            bool *force_param = NULL) const;
+
     // class member access
 
     int get_nb_vector() const { return nb_vector; }
@@ -421,9 +431,9 @@ namespace stat_tool {
     variable_nature get_type(int variable) const { return type[variable]; }
     double get_min_value(int variable) const { return min_value[variable]; }
     double get_max_value(int variable) const { return max_value[variable]; }
-    FrequencyDistribution* get_marginal_distribution(int variable) const
+    FrequencyDistribution* get_marginal_distribution(int variable) const /// get marginal counts for a given variable (does not allocate a new object, returns internal pointer)
     { return marginal_distribution[variable]; }
-    Histogram* get_marginal_histogram(int variable) const
+    Histogram* get_marginal_histogram(int variable) const /// get marginal histogram for a given variable (does not allocate a new object, returns internal pointer)
     { return marginal_histogram[variable]; }
     double get_mean(int variable) const { return mean[variable]; }
     double get_covariance(int variable1, int variable2) const

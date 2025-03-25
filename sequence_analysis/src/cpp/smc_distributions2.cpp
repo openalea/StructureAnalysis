@@ -317,16 +317,21 @@ void SemiMarkovChain::state_nb_pattern_mixture(int state , count_pattern pattern
 
   for (i = 0;i < nb_state;i++) {
     delete [] state_out[i];
+    state_out[i] = NULL;
   }
   delete [] state_out;
+  state_out = NULL;
 
   for (i = 0;i < max_length - 1;i++) {
     for (j = 0;j < nb_state;j++) {
       delete [] state_in[i][j];
+      state_in[i][j] = NULL;
     }
     delete [] state_in[i];
+    state_in[i] = NULL;
   }
   delete [] state_in;
+  state_in = NULL;
 }
 
 

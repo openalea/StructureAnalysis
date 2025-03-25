@@ -83,6 +83,11 @@ namespace stat_tool {
   class ContinuousParametric;
 
   /// \brief Frequency distribution with integer or real (for EM algorithms) frequencies
+  /*
+   * Frequencies are represented as an array *frequency, with size alloc_nb_value
+   * frequency[i] is only meaningful for offset <= i < nb_value.
+   * For i < offset, frequency[i] may be either 0 or unspecified.
+   * */
 
   template <typename Type>
   class Reestimation {
@@ -104,7 +109,8 @@ namespace stat_tool {
     void init(int inb_value);
     void copy(const Reestimation<Type> &histo);
 
-    Reestimation(int inb_value = 0) { init(inb_value); }
+    Reestimation(int inb_value = 0) : nb_value(0), alloc_nb_value(0), offset(0),
+    		nb_element(0), max(0), mean(-1), variance(-1), frequency(NULL) { init(inb_value); }
     Reestimation(const Reestimation<Type> &histo);
     Reestimation(int nb_histo , const Reestimation<Type> **histo);
     ~Reestimation();
@@ -139,18 +145,19 @@ namespace stat_tool {
     void penalized_likelihood_estimation(Distribution *dist , double weight , penalty_type pen_type ,
                                          double *penalty , side_effect outside) const;
 
+    double uniform_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag) const;
     double binomial_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag) const;
     double poisson_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
                               double cumul_threshold) const;
     double negative_binomial_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
                                         double cumul_threshold) const;
-    double poisson_geometric_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
+    double geometric_poisson_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
                                         double cumul_threshold) const;
 
     double parametric_estimation(DiscreteParametric *pdist , int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
-                                 double cumul_threshold = CUMUL_THRESHOLD , bool poisson_geometric = false) const;
+                                 double cumul_threshold = CUMUL_THRESHOLD , bool geometric_poisson = false) const;
     double type_parametric_estimation(DiscreteParametric *pdist , int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
-                                      double cumul_threshold = CUMUL_THRESHOLD , bool poisson_geometric = false) const;
+                                      double cumul_threshold = CUMUL_THRESHOLD , bool geometric_poisson = false) const;
 
     DiscreteParametric* type_parametric_estimation(int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
                                                    double cumul_threshold = CUMUL_THRESHOLD) const;

@@ -45,7 +45,7 @@ from openalea.sequence_analysis._sequence_analysis import (
 )
 
 from openalea.stat_tool import error
-from .enums import stochastic_process_type
+from .enums import process_type
 from openalea.stat_tool.enums import bool_type
 
 

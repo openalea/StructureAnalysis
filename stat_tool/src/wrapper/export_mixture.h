@@ -25,7 +25,7 @@
 // Boost.Python Wrapper export function
 void class_mixture();
 void class_mixture_data();
-// void class_multivariate_mixture();
-// void class_multivariate_mixture_data();
+void class_multivariate_mixture();
+void class_multivariate_mixture_data();
 
 #endif

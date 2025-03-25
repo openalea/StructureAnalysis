@@ -407,7 +407,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
  *  \param[in] error             reference on a StatError object,
  *  \param[in] os                stream for displaying estimation intermediate results,
  *  \param[in] ihsmarkov         initial hidden semi-Markov chain,
- *  \param[in] poisson_geometric flag on the estimation of Poisson geometric state occupancy distributions,
+ *  \param[in] geometric_poisson flag on the estimation of Poisson geometric state occupancy distributions,
  *  \param[in] common_dispersion flag common dispersion parameter (continuous observation processes),
  *  \param[in] estimator         estimator type for the reestimation of the state occupancy distributions
  *                               (complete or partial likelihood),
@@ -423,7 +423,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
 
 HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &error , ostream *os ,
                                                                     const HiddenSemiMarkov &ihsmarkov ,
-                                                                    bool poisson_geometric , bool common_dispersion ,
+                                                                    bool geometric_poisson , bool common_dispersion ,
                                                                     censoring_estimator estimator , bool counting_flag ,
                                                                     bool state_sequence , int nb_iter ,
                                                                     duration_distribution_mean_estimator mean_estimator) const
@@ -446,7 +446,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
   Reestimation<double> **occupancy_reestim , **length_bias_reestim , **censored_occupancy_reestim ,
                        ***observation_reestim;
   FrequencyDistribution *hoccupancy , *hobservation;
-  HiddenSemiMarkov *hsmarkov;
+  HiddenSemiMarkov *hsmarkov, *hsmarkov_best = NULL;
   SemiMarkovData *seq;
 
 # ifdef DEBUG
@@ -1071,6 +1071,12 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         if (likelihood == D_INF) {
           break;
         }
+        if (likelihood > previous_likelihood) {
+      	  // save result
+      	  if (hsmarkov_best != NULL)
+      		  delete hsmarkov_best;
+      	  hsmarkov_best = new HiddenSemiMarkov(*hsmarkov);
+        }
 
 #       ifdef DEBUG
         for (j = 0;j < length[i];j++) {
@@ -1320,8 +1326,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           cout << j << " : ";
           double sum = 0.;
           for (k = 0;k < hsmarkov->nb_state;k++) {
-            sum += backward[j][k];
-            cout << backward[j][k];
+            sum += backward[j];
+            cout << backward[j];
             if ((hsmarkov->sojourn_type[k] == SEMI_MARKOVIAN) && (j < length[i] - 1)){
               cout << " (" << backward1[j][k] << ") ";
             }
@@ -1335,10 +1341,10 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                 test[k][1] += auxiliary[k] * state_in[j][k];
               }
               else {
-                test[k][2] += backward[j][k];
+                test[k][2] += backward[j];
               }
               if (j == 0) {
-                test[k][3] += backward[j][k];
+                test[k][3] += backward[j];
               }
             }
           }
@@ -1513,11 +1519,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                                          MAX(sqrt(occupancy_reestim[i]->variance) , 1.) * OCCUPANCY_COEFF) , MIN_NB_ELEMENT));
             if (iter <= EXPLORATION_NB_ITER) {
               occupancy_likelihood = hoccupancy->Reestimation<int>::parametric_estimation(occupancy , 1 , true ,
-                                                                                          OCCUPANCY_THRESHOLD , poisson_geometric);
+                                                                                          OCCUPANCY_THRESHOLD , geometric_poisson);
             }
             else {
               occupancy_likelihood = hoccupancy->Reestimation<int>::type_parametric_estimation(occupancy , 1 , true ,
-                                                                                               OCCUPANCY_THRESHOLD , poisson_geometric);
+                                                                                               OCCUPANCY_THRESHOLD , geometric_poisson);
             }
 
             if (occupancy_likelihood == D_INF) {
@@ -1728,6 +1734,16 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
               (min_likelihood == D_INF) || (nb_likelihood_decrease == 1))) ||
             ((nb_iter != I_DEFAULT) && (iter < nb_iter))));
 
+    if ((likelihood == D_INF) && (hsmarkov_best != NULL)) {
+    	*os << "\n Convergence failed, returning saved model with highest likelihood" << endl;
+    	delete hsmarkov;
+    	hsmarkov = NULL;
+    	hsmarkov = new HiddenSemiMarkov(*hsmarkov_best);
+    	likelihood = hsmarkov->likelihood_computation(*this);
+    	delete hsmarkov_best;
+    	hsmarkov_best = NULL;
+    }
+
     if (likelihood != D_INF) {
       if (os) {
         *os << "\n" << iter << " " << STAT_label[STATL_ITERATIONS] << endl;
@@ -1917,9 +1933,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         hsmarkov->viterbi(*seq);
         hsmarkov->remove_cumul();
 
-        seq->min_value_computation(0);
-        seq->max_value_computation(0);
+        seq->min_value[0] = 0; // seq->min_value_computation(0);
+        seq->max_value[0] = hsmarkov->nb_state-1; // seq->max_value_computation(0);
         seq->build_marginal_frequency_distribution(0);
+        // variable 0 corresponds to hidden state.
+        // The states for which characteristics are computed are those which are present
         seq->build_characteristic(0 , true , (hsmarkov->type == EQUILIBRIUM ? true : false));
 
         seq->build_transition_count(hsmarkov);
@@ -1930,8 +1948,12 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
         for (i = 0;i < hsmarkov->nb_state;i++) {
           if (hsmarkov->sojourn_type[i] == SEMI_MARKOVIAN) {
-            hsmarkov->state_process->sojourn_time[i]->computation((seq->characteristics[0] ? seq->characteristics[0]->sojourn_time[i]->nb_value : 1) ,
-                                                                  OCCUPANCY_THRESHOLD);
+
+        	if (seq->characteristics[0] != NULL && seq->characteristics[0]->sojourn_time[i] != NULL)
+				hsmarkov->state_process->sojourn_time[i]->computation(seq->characteristics[0]->sojourn_time[i]->nb_value ,
+																	  OCCUPANCY_THRESHOLD);
+        	else
+        		hsmarkov->state_process->sojourn_time[i]->computation(1 , OCCUPANCY_THRESHOLD);
             if (hsmarkov->stype[i] == RECURRENT) {
               if (hsmarkov->type == ORDINARY) {
                 hsmarkov->forward[i]->copy(*(hsmarkov->state_process->sojourn_time[i]));
@@ -2133,7 +2155,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
  *  \param[in] nb_state          number of states,
  *  \param[in] left_right        flag on the Markov chain structure,
  *  \param[in] occupancy_mean    mean state occupancy,
- *  \param[in] poisson_geometric flag on the estimation of Poisson geometric state occupancy distributions,
+ *  \param[in] geometric_poisson flag on the estimation of Poisson geometric state occupancy distributions,
  *  \param[in] common_dispersion flag common dispersion parameter (continuous observation processes),
  *  \param[in] estimator         estimator type for the reestimation of the state occupancy distributions
  *                               (complete or partial likelihood),
@@ -2150,7 +2172,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &error , ostream *os ,
                                                                     process_type itype , int nb_state ,
                                                                     bool left_right , double occupancy_mean ,
-                                                                    bool poisson_geometric , bool common_dispersion ,
+                                                                    bool geometric_poisson , bool common_dispersion ,
                                                                     censoring_estimator estimator , bool counting_flag ,
                                                                     bool state_sequence , int nb_iter ,
                                                                     duration_distribution_mean_estimator mean_estimator) const
@@ -2208,7 +2230,9 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
     if (occupancy_mean == D_DEFAULT) {
       occupancy_mean = MAX(length_distribution->mean , OCCUPANCY_MEAN);
     }
-
+# ifdef DEBUG
+    assert(ihsmarkov->sojourn_type == NULL);
+# endif
     ihsmarkov->sojourn_type = new state_sojourn_type[nb_state];
     ihsmarkov->state_process->absorption = new double[nb_state];
     ihsmarkov->state_process->sojourn_time = new DiscreteParametric*[nb_state];
@@ -2260,7 +2284,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       }
     }
 
-    hsmarkov = hidden_semi_markov_estimation(error , os , *ihsmarkov , poisson_geometric ,
+    hsmarkov = hidden_semi_markov_estimation(error , os , *ihsmarkov , geometric_poisson ,
                                              common_dispersion , estimator , counting_flag ,
                                              state_sequence , nb_iter , mean_estimator);
     delete ihsmarkov;
@@ -2277,7 +2301,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
  *  \param[in] error                  reference on a StatError object,
  *  \param[in] os                     stream for displaying estimation intermediate results,
  *  \param[in] ihsmarkov              initial hidden semi-Markov chain,
- *  \param[in] poisson_geometric      flag on the estimation of Poisson geometric state occupancy distributions,
+ *  \param[in] geometric_poisson      flag on the estimation of Poisson geometric state occupancy distributions,
  *  \param[in] common_dispersion      flag common dispersion parameter (continuous observation processes),
  *  \param[in] min_nb_state_sequence  minimum number of generated sequences,
  *  \param[in] max_nb_state_sequence  maximum number of generated sequences,
@@ -2294,7 +2318,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
 HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(StatError &error , ostream *os ,
                                                                                const HiddenSemiMarkov &ihsmarkov ,
-                                                                               bool poisson_geometric , bool common_dispersion ,
+                                                                               bool geometric_poisson , bool common_dispersion ,
                                                                                int min_nb_state_sequence ,
                                                                                int max_nb_state_sequence , double parameter ,
                                                                                censoring_estimator estimator ,
@@ -2665,7 +2689,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
         }
       }
 
-      for (i = 0;i < nb_sequence;i++) {
+      for (i = 0;i < nb_sequence;i++) { // sequence i
 
         // forward recurrence
 
@@ -2680,15 +2704,15 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
           }
         }
 
-        for (j = 0;j < length[i];j++) {
+        for (j = 0;j < length[i];j++) { // position j at sequence i
           norm[j] = 0.;
 
-          for (k = 0;k < hsmarkov->nb_state;k++) {
+          for (k = 0;k < hsmarkov->nb_state;k++) { // state k at position j and sequence i
 
             // computation of the observation probabilities
 
             observation[j][k] = 1.;
-            for (m = 0;m < hsmarkov->nb_output_process;m++) {
+            for (m = 0;m < hsmarkov->nb_output_process;m++) { // variable m
               if (hsmarkov->categorical_process[m]) {
                 observation[j][k] *= hsmarkov->categorical_process[m]->observation[k]->mass[*pioutput[m]];
               }
@@ -3105,7 +3129,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
 #           ifdef DEBUG
             sum = 0.;
-            for (m = 0;m < nb_state;m++) {
+            for (m = 0;m < hsmarkov->nb_state;m++) {
               sum += backward[m];
             }
             if ((sum < 1. - DOUBLE_ERROR) || (sum > 1. + DOUBLE_ERROR)) {
@@ -3236,11 +3260,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
             if (iter <= EXPLORATION_NB_ITER) {
               occupancy_likelihood = complete_run[i]->parametric_estimation(occupancy , 1 , true ,
-                                                                            OCCUPANCY_THRESHOLD , poisson_geometric);
+                                                                            OCCUPANCY_THRESHOLD , geometric_poisson);
             }
             else {
               occupancy_likelihood = complete_run[i]->type_parametric_estimation(occupancy , 1 , true ,
-                                                                                 OCCUPANCY_THRESHOLD , poisson_geometric);
+                                                                                 OCCUPANCY_THRESHOLD , geometric_poisson);
             }
 
 #           ifdef DEBUG
@@ -3852,7 +3876,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
  *  \param[in] nb_state              number of states,
  *  \param[in] left_right            flag on the Markov chain structure,
  *  \param[in] occupancy_mean        mean state occupancy,
- *  \param[in] poisson_geometric     flag on the estimation of Poisson geometric state occupancy distributions,
+ *  \param[in] geometric_poisson     flag on the estimation of Poisson geometric state occupancy distributions,
  *  \param[in] common_dispersion     flag common dispersion parameter (continuous observation processes),
  *  \param[in] min_nb_state_sequence minimum number of generated sequences,
  *  \param[in] max_nb_state_sequence maximum number of generated sequences,
@@ -3870,7 +3894,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(StatError &error , ostream *os ,
                                                                                process_type itype , int nb_state ,
                                                                                bool left_right , double occupancy_mean ,
-                                                                               bool poisson_geometric , bool common_dispersion ,
+                                                                               bool geometric_poisson , bool common_dispersion ,
                                                                                int min_nb_state_sequence ,
                                                                                int max_nb_state_sequence , double parameter ,
                                                                                censoring_estimator estimator ,
@@ -3931,6 +3955,10 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       occupancy_mean = MAX(length_distribution->mean , OCCUPANCY_MEAN);
     }
 
+# ifdef DEBUG
+    assert(ihsmarkov->sojourn_type == NULL);
+# endif
+
     ihsmarkov->sojourn_type = new state_sojourn_type[nb_state];
     ihsmarkov->state_process->absorption = new double[nb_state];
     ihsmarkov->state_process->sojourn_time = new DiscreteParametric*[nb_state];
@@ -3982,7 +4010,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       }
     }
 
-    hsmarkov = hidden_semi_markov_stochastic_estimation(error , os , *ihsmarkov , poisson_geometric ,
+    hsmarkov = hidden_semi_markov_stochastic_estimation(error , os , *ihsmarkov , geometric_poisson ,
                                                         common_dispersion , min_nb_state_sequence ,
                                                         max_nb_state_sequence , parameter , estimator ,
                                                         counting_flag , state_sequence , nb_iter);

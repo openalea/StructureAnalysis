@@ -39,6 +39,8 @@
 #ifndef STAT_TOOLS_H
 #define STAT_TOOLS_H
 
+#include <random>
+
 #include "config.h"
 #include "reestimation.h"
 #include "plotable.h"
@@ -115,7 +117,7 @@ namespace stat_tool {
     BINOMIAL ,
     POISSON ,
     NEGATIVE_BINOMIAL ,
-    POISSON_GEOMETRIC ,
+    GEOMETRIC_POISSON ,
     UNIFORM ,
     PRIOR_SEGMENT_LENGTH ,
     MULTINOMIAL                          // addition by Florence Chaubert
@@ -128,7 +130,8 @@ namespace stat_tool {
 
   enum distribution_computation {
     STANDARD ,
-    RENEWAL
+    RENEWAL ,
+	GEOMETRIC
   };
 
   enum continuous_parametric {
@@ -313,8 +316,9 @@ namespace stat_tool {
   const double YSCALE = 1.1;             // scale factor for y axis in plots
   const double PLOT_RANGE_RATIO = 4.;    // threshold for plotting from 0
 
-
-
+  // random generator
+  extern std::mt19937 mt;
+  extern std::uniform_real_distribution<double> rand_unif;
 /****************************************************************
  *
  *  Class definition
@@ -425,7 +429,18 @@ namespace stat_tool {
   class FrequencyDistribution;
   class DiscreteParametricModel;
 
-  /// \brief Discrete distribution
+
+  /*! \brief Discrete distribution
+   *
+   * Probabilities are represented as an array *mass, with size nb_allocated_value
+   * mass[i] is only meaningful for offset <= i < nb_value.
+   * For i < offset or i >= nb_value, mass[i] may be either 0 or unspecified.
+   * nb_allocated_value has to be greater or equal to nb_value.
+   * It may happen that nb_allocated_value > nb_value, particularly when mass[i]
+   * is computed for every i <= quantile(0.9999) = nb_value-1, which we do not know
+   * in advance, but we allocated nb_allocated_value > nb_value for the sake of safety.
+   * */
+
 
   class STAT_TOOL_API Distribution {
 
@@ -637,7 +652,7 @@ namespace stat_tool {
                              distribution_computation mode);
     void negative_binomial_computation(int inb_value , double cumul_threshold ,
                                        distribution_computation mode);
-    void poisson_geometric_computation(int inb_value , double cumul_threshold);
+    void geometric_poisson_computation(int inb_value , double cumul_threshold);
     void uniform_computation();
     void prior_segment_length_computation();
 
@@ -1021,6 +1036,8 @@ namespace stat_tool {
     double* cumul_computation() const;
   };
 
+
+  STAT_TOOL_API void set_seed(int seed, std::mt19937 &generator=mt);
 
   STAT_TOOL_API int column_width(int);
   STAT_TOOL_API int column_width(int min_value , int max_value);

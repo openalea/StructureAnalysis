@@ -1295,7 +1295,7 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
         }
 
         if (j < length[i] - 1) {
-          if ((os.rdbuf())->out_waiting() > line_nb_character) {
+          if ((os.rdbuf())->in_avail() > line_nb_character) {
             os << "\\" << endl;
           }
 
@@ -1590,7 +1590,7 @@ ostream& Sequences::ascii_print(ostream &os , output_sequence_format format , bo
 
         if (j < length[i] - 1) {
           os << ",";
-          if ((os.rdbuf())->out_waiting() > line_nb_character) {
+          if ((os.rdbuf())->in_avail() > line_nb_character) {
             os << "\\" << endl;
             os << "  ";
           }

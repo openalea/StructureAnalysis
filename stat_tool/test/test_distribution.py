@@ -7,6 +7,7 @@ from openalea.stat_tool.distribution import Distribution, Uniform, Binomial
 from openalea.stat_tool.distribution import NegativeBinomial, Poisson
 from openalea.stat_tool.distribution import Multinomial
 from openalea.stat_tool.distribution import ToHistogram, ToDistribution
+
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool import Estimate
 
@@ -110,7 +111,6 @@ class Test(interface):
         s = self.data
         _res = s.truncate(4)
 
-
 class TestDistribution():
     """Test the distribution (Uniform, Binomial, ...)
 
@@ -135,15 +135,22 @@ class TestDistribution():
     def test_uniform(self):
 
         d = Distribution("UNIFORM", 0, 10)
-        assert list(d.simulate(1000))
-        assert d.get_sup_bound == 10
-        assert d.get_inf_bound == 0
-        assert d.get_probability == -1
-        assert d.get_parameter == -1
-        assert d.get_ident() == 4
+        s = d.simulate(1000)
+        assert list(s)
+        import numpy as np
+        assert(np.sum(s) == 1000)
+        assert(d.get_sup_bound == 10)
+        assert(d.get_inf_bound == 0)
+        assert(d.get_probability == -1)
+        assert(d.get_parameter == -1)
+        from openalea.stat_tool.enums import distribution_identifier_type as dist_type
+
+        assert(dist_type['UNIFORM'] == d.get_ident())
 
         d = Uniform(0, 10)
-        assert list(d.simulate(1000))
+        s = d.simulate(1000)
+        assert list(s)
+        assert(np.sum(s) == 1000)
 
         m = d.simulate(1000).extract_model()
         assert isinstance(m, _DiscreteParametricModel)
@@ -228,7 +235,19 @@ class TestDistribution():
         assert 0.6666 < dist.get_variance < 0.6667
 
 
+    def test_set_seed(self):
+        """"Setting simulation seed"""
 
+        d = Distribution("POISSON", 0, 2.5)
+        set_seed(0)
+         # Simulate and get histograms        
+        s1 = str(list(d.simulate(200)))
+        s2 = str(list(d.simulate(200)))
+        assert s1 != s2
+        set_seed(0)
+        s3 = str(list(d.simulate(200)))
+        assert s1 == s3
+        return s1, s2, s3
 
 
 

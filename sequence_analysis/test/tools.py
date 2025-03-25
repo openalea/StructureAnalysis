@@ -1,10 +1,24 @@
 """Abstract base class used by test_mixture, test_compound, etc"""
 
-from openalea.stat_tool import *
-from openalea.stat_tool.plot import DISABLE_PLOT
-
 import os
+
+
+from openalea.stat_tool import Simulate
+from openalea.stat_tool.plot import DISABLE_PLOT
 from openalea.stat_tool.output import Display, Save
+DISABLE_PLOT=True
+
+from pathlib import Path
+from openalea.sequence_analysis import get_shared_data, get_shared_data_path
+import openalea.stat_tool as st
+import openalea.sequence_analysis as sa
+from openalea.stat_tool.distribution import set_seed
+
+# from openalea.stat_tool import *
+# from openalea.stat_tool.plot import DISABLE_PLOT
+
+# import os
+# from openalea.stat_tool.output import Display, Save
 
 
 __revision__ = "$Id$"
@@ -49,6 +63,7 @@ class interface():
         self.data = data
         self.filename = filename
         self.structure = Structure
+        set_seed(0)
 
     def build_data(self):
         raise NotImplementedError()
@@ -200,4 +215,16 @@ class interface():
     def test_extract_data(self):
         raise NotImplementedError()
 
+
+def robust_path(filename):
+    p = get_shared_data_path(sa)
+    if p is not None:
+        # module in develop mode?
+        return get_shared_data(filename)
+    
+    p = Path(sa.__path__[0])
+    if 'src' in str(p):
+        root_pkg = p/'../../..'
+        data = get_shared_data_path(root_pkg)
+        return os.path.join(data,filename)
 

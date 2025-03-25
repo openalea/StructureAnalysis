@@ -26,7 +26,7 @@ from openalea.stat_tool import ExtractData, Mixture, ToHistogram
 from openalea.stat_tool import Compound, Convolution, VarianceAnalysis
 from openalea.stat_tool import ContingencyTable
 
-from openalea.sequence_analysis import Sequences
+# from openalea.sequence_analysis import Sequences
 
 from openalea.stat_tool import get_shared_data
 
@@ -236,7 +236,7 @@ seq0 = Sequences("data/chene_sessile_15pa.seq")
 # change of unit for the variable diameter of the annual shoot
 
 marginal2 = ExtractHistogram(seq0, "Value", 2)
-print marginal2
+print(marginal2)
 Plot(Cluster(marginal2, "Information", 0.75))
 Plot(Cluster(marginal2, "Information", 0.61))
 Plot(Cluster(marginal2, "Step", 10))

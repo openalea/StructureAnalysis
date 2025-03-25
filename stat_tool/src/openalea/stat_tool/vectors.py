@@ -17,9 +17,12 @@ __version__ = "$Id$"
 
 from . import (
     error,
-    interface
+    interface,
+    mixture
 )
 
+from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
+ 
 from openalea.stat_tool._stat_tool import (
     _Vectors,
     _VectorDistance,
@@ -66,10 +69,10 @@ def _Vectors_mixture_estimation(self, model,
     # model is a MultivariateMixture class
     error.CheckType([model], [[int, _MultivariateMixture]])
     if type(model) == int:
-        return _Vectors.mixture_estimation_nb_component(self, model,
+        return self.mixture_estimation_nb_component(model,
                                             nb_iteration, force_param)
     else:
-        return _Vectors.mixture_estimation_model(self, model,
+        return self.mixture_estimation_model(model,
                                             nb_iteration, force_param)
 
 _Vectors.mixture_estimation = _Vectors_mixture_estimation

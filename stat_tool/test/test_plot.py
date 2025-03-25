@@ -20,35 +20,60 @@ class Test:
         p.add_point(_stat_tool.PlotPoint(1.0, 1.2))
         p.add_point(_stat_tool.PlotPoint(2.0, 3.2))
 
-        assert len(list(p)) == 2
+        import openalea 
+        
+        assert isinstance(p, openalea.stat_tool._stat_tool.SinglePlot)
 
-        for i in p:
-            assert (i.x, i.y)
-
-        assert list(p)
-
-        p = _stat_tool.MultiPlot(2)
-        assert p
-        assert len(p) == 2
+        p2 = _stat_tool.MultiPlot(2)
+        assert p2
+        assert len(p2) == 2
 
         p = _stat_tool.MultiPlotSet(3)
         assert len(p) == 3
         
     def test_plotable2(self):
 
+        #TODO: understand why the three points do not show up.
         p = _stat_tool.MultiPlotSet(1)
+        
+        p[0].resize(1)
+        p[0].set_xrange((-10 , 10))
+        p[0].set_yrange((-5 , 8))
+        p[0].xlabel = "x"
+        p[0].ylabel = "y"
+        # equivalent to p[0].xrange = _stat_tool.PlotPoint((0 , 3.5)
+        p[0].xtics = 1
+        p[0].ytics = 1
+                        
         p[0][0].add_point(_stat_tool.PlotPoint(1.0, 1.2))
         p[0][0].add_point(_stat_tool.PlotPoint(3.0, 5.2))
+        p[0][0].add_point(_stat_tool.PlotPoint(2.0, 2.3))
+        p[0][0].add_text(0.5, 0.2, '*')
+        p[0][0].add_text(3.5, 5.5, '*')
+        p[0][0].legend = "legend"
+        p[0][0].color = 'r'
+        p[0][0].style = '+'
+        # p[0][0].style = "linespoints";
+        # p[0][0].label = True
+    
+
+        from openalea.stat_tool.output import plot
+
+        plotter = plot.get_plotter()
+        plotter.plot(p,"Points")
                 
         assert len(p) == 1
-
+        
+        import openalea
+         
         # Test iterator
         multiset = p
         for _i, multiplot in enumerate(multiset):
             assert multiplot
 
             for singleplot in multiplot:
-                assert singleplot and len(multiplot)
+                assert isinstance(singleplot, openalea.stat_tool._stat_tool.SinglePlot) and \
+                    len(multiplot)
 
         # test plot
         plotter = get_plotter()

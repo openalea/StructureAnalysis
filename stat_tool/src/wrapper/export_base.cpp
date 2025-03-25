@@ -250,19 +250,20 @@ void class_constant()
   .export_values()
   ;
 
-  enum_<stat_tool::wrap_util::UniqueInt<3, 11> >("EstimatorHSMType")
+  enum_<stat_tool::wrap_util::UniqueInt<3, 11> >("CensoringEstimator")
   .value("PARTIAL_LIKELIHOOD", PARTIAL_LIKELIHOOD)
   .value("COMPLETE_LIKELIHOOD", COMPLETE_LIKELIHOOD)
   .value("KAPLAN_MEIER", KAPLAN_MEIER)
   .export_values()
   ;
 
-  enum_<stat_tool::wrap_util::UniqueInt<3, 12> >("ClusterType")
+  enum_<stat_tool::wrap_util::UniqueInt<3, 12> >("DurationDistributionMeanEstimator")
   .value("COMPUTED", COMPUTED)
   .value("ESTIMATED", ESTIMATED)
   .value("ONE_STEP_LATE", ONE_STEP_LATE)
   .export_values()
   ;
+
 
   enum_<stat_tool::wrap_util::UniqueInt<6, 13> >("LikelihoodPenaltyType")
   .value("AIC", AIC)
@@ -323,6 +324,13 @@ void class_constant()
   scope().attr("ORDER") = ORDER;
   
   // Vectors
+
+  enum_<stat_tool::wrap_util::UniqueInt<2, 18> >("moving_average_method")
+  .value("AVERAGING", AVERAGING)
+  .value("LEAST_SQUARES", LEAST_SQUARES)
+  .export_values()
+  ;
+
   
   enum_<stat_tool::wrap_util::UniqueInt<4, 19> >("OutputFormat")
   .value("ASCII", ASCII)
@@ -332,12 +340,21 @@ void class_constant()
   .export_values()
   ;
   
-  enum_<stat_tool::wrap_util::UniqueInt<2, 18> >("moving_average_method")
-  .value("AVERAGING", AVERAGING)
-  .value("LEAST_SQUARES", LEAST_SQUARES)
+  // compound
+  enum_<stat_tool::wrap_util::UniqueInt<2, 20> >("CompoundType")
+  .value("ELEMENTARY", ELEMENTARY)
+  .value("SUM", SUM)
   .export_values()
   ;
-  
+
+  enum_<stat_tool::wrap_util::UniqueInt<3, 21> >("ProcessType")
+  .value("ORDINARY", ORDINARY)
+  .value("EQUILIBRIUM", EQUILIBRIUM)
+  .value("DEFAULT_TYPE", DEFAULT_TYPE)
+  .export_values()
+  ;
+
+
 
   /*const int NB_STATE = 100;
   const int ORDER = 8;
@@ -432,5 +449,22 @@ void class_forward()
     void computation(const DiscreteParametric &dist);
 */
 }
+#define WRAP SetSeed
+class WRAP
+{
 
+public:
+	static void set_seed(const SetSeed&, int seed) { stat_tool::set_seed(seed); }
+};
+
+void class_set_seed()
+{
+  class_<SetSeed>
+    ("_SetSeed", "SetSeed")
+    .def("set_seed", WRAP::set_seed, "Set seed")
+	;
+
+};
+
+#undef WRAP
 

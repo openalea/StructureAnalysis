@@ -201,6 +201,8 @@ void DiscreteMixture::computation(int min_nb_value , double cumul_threshold , bo
  */
 /*--------------------------------------------------------------*/
 
+// TODO: initialize mass, even in the case of CATEGORICAL?
+
 void DiscreteMixture::init(const FrequencyDistribution &histo , bool *estimate ,
                            int min_inf_bound , bool component_flag)
 
@@ -254,8 +256,8 @@ void DiscreteMixture::init(const FrequencyDistribution &histo , bool *estimate ,
       }
 
       case NEGATIVE_BINOMIAL : {
-        component[i]->parameter = NEGATIVE_BINOMIAL_PARAMETER;
-        component[i]->probability = component[i]->parameter / (shift_mean + component[i]->parameter);
+    	  component[i]->parameter = 1.;
+    	  component[i]->probability = 1. / ((histo.nb_value)+1+shift_mean);
         break;
       }
       }
@@ -515,10 +517,11 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
                                                                     bool component_flag , double weight_step) const
 
 {
-  bool status = true;
+  bool status = true, likelihood_decrease = false, convergence_failed = false, min_inf_bound_flag = true;
   int i , j , k;
   int nb_component = imixt.nb_component , inf_bound[DISCRETE_MIXTURE_NB_COMPONENT] ,
-      sup_bound[DISCRETE_MIXTURE_NB_COMPONENT];
+      sup_bound[DISCRETE_MIXTURE_NB_COMPONENT], current_min_inf_bound = 0;
+  const int data_min_inf_bound = this->offset;
   double step , likelihood , previous_likelihood , max_likelihood = D_INF ,
          weight[DISCRETE_MIXTURE_NB_COMPONENT] , parameter[DISCRETE_MIXTURE_NB_COMPONENT] ,
          probability[DISCRETE_MIXTURE_NB_COMPONENT];
@@ -572,6 +575,10 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
         mixt->computation(nb_value);
 
         j = 0;
+        likelihood_decrease = false;
+        current_min_inf_bound = min_inf_bound;
+        min_inf_bound_flag = true;
+        convergence_failed = false;
         do {
           j++;
 
@@ -581,30 +588,25 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
           mixt->variance_correction(mixt_histo , estimate , min_inf_bound);
 
           // M-step: weight reestimation
-
           for (k = 0;k < nb_component;k++) {
             mixt->weight->mass[k] = (double)mixt_histo->weight->frequency[k] /
                                     (double)mixt_histo->weight->nb_element;
           }
 
           // M-step: reestimation of unknown component parameters
+          // TODO: check necessity of handling k=0 separately for min_inf_bound_flag.
 
           for (k = 0;k < nb_component;k++) {
             if (estimate[k]) {
-              if (((k == 0) && (!mixt_flag)) || (!component_flag)) {
+              /* if (((k == 0) && (!mixt_flag)) || (!component_flag)) {
                 mixt_histo->component[k]->Reestimation<int>::parametric_estimation(mixt->component[k] ,
                                                                                    min_inf_bound , false);
-              }
+              }*/
 
-              else { // if (k == 0) {
+              // else {
                 mixt_histo->component[k]->Reestimation<int>::parametric_estimation(mixt->component[k] ,
-                                                                                   min_inf_bound , true);
-              }
-
-/*              else {   pour yerba mate
-                mixt_histo->component[k]->Reestimation<int>::parametric_estimation(mixt->component[k] ,
-                                                                                   1 , true);
-              } */
+                		current_min_inf_bound , min_inf_bound_flag);
+              // }
             }
           }
 
@@ -615,9 +617,24 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
           previous_likelihood = likelihood;
           likelihood = mixt->Distribution::likelihood_computation(*this);
 
-          if (!mixt->component_order_test()) {
-            likelihood = D_INF;
+          if ((previous_likelihood > likelihood) && (!convergence_failed)) {
+        	  // If likelihood decreases, fix min inf bound and restart
+        	  convergence_failed = true;
+        	  likelihood_decrease = false;
+        	  min_inf_bound_flag = false;
+        	  current_min_inf_bound = data_min_inf_bound;
+        	  j = 0;
+              mixt->init(*this , estimate , min_inf_bound , component_flag);
+              mixt->computation(nb_value);
+              previous_likelihood = D_INF;
+              likelihood = previous_likelihood + 2e32;
           }
+
+          // Commenting: having increasing means does not seem
+          // to be required in mixtures
+          /* if (!mixt->component_order_test()) {
+            likelihood = D_INF;
+          }*/
         }
         while (((likelihood - previous_likelihood) / -likelihood > DISCRETE_MIXTURE_LIKELIHOOD_DIFF) &&
                (j < DISCRETE_MIXTURE_NB_ITER) && (likelihood != D_INF));
@@ -645,14 +662,14 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
             }
           }
         }
-      }
+      } // end for (step = weight_step)
 
       // case 2 components
 
       if ((mixt->nb_component == 2) && (i == 0)) {
         i++;
       }
-    }
+    } // end for (i = 0;i < nb_component;i++)
 
     likelihood = max_likelihood;
 
@@ -695,7 +712,7 @@ DiscreteMixture* FrequencyDistribution::discrete_mixture_estimation(StatError &e
       mixt = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
-  }
+  } // if (status)
 
   return mixt;
 }

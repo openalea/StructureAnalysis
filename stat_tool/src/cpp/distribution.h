@@ -48,7 +48,7 @@ namespace stat_tool {
 
   class DiscreteDistributionData;
 
-  /// \brief Discrete parametric distribution
+  /// \brief Discrete parametric distribution with pointer on DiscreteDistributionData
 
   class STAT_TOOL_API DiscreteParametricModel : public StatInterface , public DiscreteParametric {
 

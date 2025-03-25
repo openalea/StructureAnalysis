@@ -359,7 +359,7 @@ void NonhomogeneousMarkov::state_first_occurrence_distribution(int state , int m
 
 # ifdef DEBUG
   if (first_occurrence->complement > 0.) {
-    cout << "\n" << SEQ_label[SEQL_STATE_NO_OCCURRENCE] << " " << state << " : "
+    cout << "\n" << SEQ_label[SEQL_NO_OCCURRENCE] << " " << state << " : "
          << first_occurrence->complement << " | "
          << 1. - first_occurrence->cumul[first_occurrence->nb_value - 1] << endl;
   }

@@ -5,17 +5,18 @@ import os
 # Import global objects
 
 Import("env")
-Import("statlib")
-print(statlib)
+Import("seqlib")
+
 #env_test = env.Clone()
 env_test = env
 
 pj = os.path.join
 
 
-my_debug = True
-if env_test['debug']:
+if env_test['DEBUG']:
    env_test.Append(CPPDEFINES= ['DEBUG'])
+
+my_debug = True
 
 if my_debug:
     env_test.AppendUnique(LIBS=['efence'])
@@ -26,10 +27,19 @@ if my_debug:
     if '-DNDEBUG' in env._dict['CXXFLAGS']:
         env_test._dict['CXXFLAGS'] = []
 
-env_test.AppendUnique(LIBS=['vpstat_tool'])
-
+# env_test.AppendUnique(LIBS=['stat_tool', 'sequence_analysis'])
+env_test.AppendUnique(LIBS=['vpstat_tool', 'vpsequence'])
 # env_test.AppendUnique(LIBPATH=['machin'])
 # ajouterait : -Lbuild-scons/test/cpp/machin
+
+#if os.name != 'nt':
+#    env_test.AppendUnique(LIBS= ['efence'])
+
+# env_test.AppendUnique(LIBS= ['leaktrace'])
+#env.AppendUnique(CPPDEFINES=['MESSAGE'])
+
+#LIBS = ['vpstat_tool', 'vpsequence']
+#env_test.AppendUnique(LIBS=LIBS)
 
 includes= env_test.ALEAGlob('*.h')
 includes += env_test.ALEAGlob('*.hpp')
@@ -41,17 +51,11 @@ env_test.Append(CPPPATH='#/src/cpp/')
 #Sources
 
 # test_int_fl_containers.cpp
-# tests = Split("""
-# test_distribution.cpp
-# test_seed.cpp
-# test_multivariate_mixture.cpp
-# """)
-
 tests = Split("""
-test_seed.cpp
+test_hidden_semi_markov_chain.cpp
 """)
 
-# tests.append(statlib)
+# tests.append(seqlib)
 
 def prog(p):
   return env_test.ALEAProgram(p)
@@ -67,7 +71,7 @@ def prog(p):
 
 # Bug: AttributeError : 'map' object has no attribute 'get_csig'
 # test_prog=map(prog, tests)
-test_prog=env_test.ALEAProgram('test_stat_tool', tests)
+test_prog=env_test.ALEAProgram('test_sequence_analysis', tests)
 
 '''
 def rmTests(target, source, env):
@@ -83,5 +87,6 @@ Alias('clean_test', r)
 
 # map(check, test_prog)
 
-Alias('test_stat_tool', test_prog)
-Alias('test', 'test_stat_tool')
+Alias('test_sequence_analysis', test_prog)
+Alias('test', 'test_sequence_analysis')
+

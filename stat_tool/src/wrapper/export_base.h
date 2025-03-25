@@ -32,5 +32,6 @@ class StatInterfaceWrap;
 void class_stat_interface();
 void class_forward();
 
+void class_set_seed();
 
 #endif

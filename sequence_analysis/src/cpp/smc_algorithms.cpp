@@ -934,6 +934,10 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
         occupancy_reestim = new Reestimation<double>(max_length + 1);
       }
 
+# ifdef DEBUG
+      assert(smarkov->sojourn_type == NULL);
+# endif
+
       smarkov->sojourn_type = new state_sojourn_type[smarkov->nb_state];
       smarkov->state_process->absorption = new double[smarkov->nb_state];
       smarkov->state_process->sojourn_time = new DiscreteParametric*[smarkov->nb_state];

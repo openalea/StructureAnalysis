@@ -141,7 +141,7 @@ DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , DiscretePar
  */
 /*--------------------------------------------------------------*/
 
-void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process)
+void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process, bool mass_copy)
 
 {
   int i;
@@ -151,8 +151,19 @@ void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process)
   nb_value = process.nb_value;
 
   observation = new DiscreteParametric*[nb_state];
-  for (i = 0;i < nb_state;i++) {
-    observation[i] = new DiscreteParametric(*(process.observation[i]) , DISTRIBUTION_COPY , nb_value);
+  if (mass_copy && process.observation != NULL){
+	  for (i = 0;i < nb_state;i++) {
+		  if (process.observation[i] != NULL)
+			  observation[i] = new DiscreteParametric(*(process.observation[i]) , DISTRIBUTION_COPY , process.observation[i]->alloc_nb_value);
+		  	  observation[i]->mass_copy(*(process.observation[i]));
+	  }
+  } else {
+	  if (process.observation != NULL) {
+		  for (i = 0;i < nb_state;i++) {
+			  if (process.observation[i] != NULL)
+				  observation[i] = new DiscreteParametric(*(process.observation[i]) , DISTRIBUTION_COPY , nb_value);
+		  }
+	  }
   }
 
   if ((process.weight) && (process.mixture)) {
@@ -189,6 +200,7 @@ void DiscreteParametricProcess::remove()
 
     for (i = 0;i < nb_state;i++) {
       delete observation[i];
+      observation[i] = NULL;
     }
     delete [] observation;
 
@@ -399,8 +411,10 @@ DiscreteParametricProcess* DiscreteParametricProcess::parsing(StatError &error ,
 
   for (i = 0;i < nb_state;i++) {
     delete dist[i];
+    dist[i] = NULL;
   }
   delete [] dist;
+  dist = NULL;
 
   return process;
 }
@@ -1385,8 +1399,11 @@ bool DiscreteParametricProcess::plot_print(const char *prefix , const char *titl
 
   if (nb_dist > 0) {
     delete [] pdist;
+    pdist = NULL;
     delete [] scale;
+    scale = NULL;
     delete [] phisto;
+    phisto = NULL;
   }
 
   return status;
@@ -1773,6 +1790,7 @@ void DiscreteParametricProcess::state_permutation(int *permut) const
     observation[i] = pobservation[i];
   }
   delete [] pobservation;
+  pobservation = NULL;
 }
 
 
@@ -1921,7 +1939,10 @@ Distribution* DiscreteParametricProcess::mixture_computation(Distribution *pweig
  */
 /*--------------------------------------------------------------*/
 
-void DiscreteParametricProcess::init()
+// This initial proposal may cause probabilities to be equal from
+// a state to another on the relevant interval of values
+
+/** void DiscreteParametricProcess::init()
 
 {
   int i , j;
@@ -1942,7 +1963,28 @@ void DiscreteParametricProcess::init()
       *pmass++ -= noise_proba / (nb_state - 1);
     }
   }
-}
+}*/
 
+void DiscreteParametricProcess::init()
+
+{
+  int i , j;
+  double sum_proba , *pmass;
+
+
+  for (i = 0;i < nb_state;i++) {
+
+    pmass = observation[i]->mass;
+    sum_proba = 0.;
+
+    for (j = 0;j < nb_value;j++) {
+      pmass[j] = double((nb_value +1)) / pow(j+1, log(i+1));
+      sum_proba += pmass[j];
+    }
+    for (j = 0;j < nb_value;j++) {
+    	pmass[j] = pmass[j]/sum_proba;
+    }
+  }
+}
 
 };  // namespace stat_tool

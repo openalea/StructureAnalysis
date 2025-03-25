@@ -449,7 +449,7 @@ void VariableOrderMarkovChain::state_first_occurrence_distribution(int istate , 
 
 # ifdef DEBUG
   if (first_occurrence->complement > 0.) {
-    cout << "\n" << SEQ_label[SEQL_STATE_NO_OCCURRENCE] << " " << istate << " : "
+    cout << "\n" << SEQ_label[SEQL_NO_OCCURRENCE] << " " << istate << " : "
          << first_occurrence->complement << " | "
          << 1. - first_occurrence->cumul[first_occurrence->nb_value - 1] << endl;
   }
@@ -1463,7 +1463,7 @@ void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory
 
 #   ifdef DEBUG
     if (absorption > 0.) {
-      cout << "\n" << SEQ_label[SEQL_OUTPUT_ABSORPTION] << " " << output << " : "
+      cout << "\n" << SEQ_label[SEQL_ABSORPTION] << " " << output << " : "
            << absorption << " | " << 1. - sojourn_time->cumul[sojourn_time->nb_value - 1] << endl;
     }
 #   endif

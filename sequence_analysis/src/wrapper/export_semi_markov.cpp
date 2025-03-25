@@ -71,11 +71,24 @@ public:
     //SIMPLE_METHOD_TEMPLATE_1(input, extract_data, SemiMarkovData);
   }
 
-  static DiscreteParametricModel*
+  /* static DiscreteParametricModel*
   extract_histogram(const SemiMarkov &input, int state, process_distribution histo_type)
   {
     SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, state, histo_type);
-  }
+  }*/
+  static DiscreteParametricModel*
+  extract_histogram(const SemiMarkov &input, int state, int ihisto_type)
+    {
+	  process_distribution histo_type = process_distribution(ihisto_type);
+	  DiscreteParametricModel *ret = NULL;
+	  StatError error;
+
+	  ret = input.extract(error , state , histo_type);
+
+	 if (ret == NULL)
+		 sequence_analysis::wrap_util::throw_error(error);
+	 return ret;
+    }
 
   static DiscreteParametricModel*
   extract(const SemiMarkov &input, int idist_type, int variable, int value)

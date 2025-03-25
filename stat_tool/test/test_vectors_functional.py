@@ -34,8 +34,11 @@ from openalea.stat_tool.comparison import Compare
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.output import Display, Plot
 
+from tools import interface
+from tools import runTestClass, robust_path as get_shared_data
+
 def test():
-    vec10 = Vectors("data/chene_sessile.vec")
+    vec10 = Vectors(get_shared_data("chene_sessile.vec"))
     Plot(vec10)
     # plot of the pointwise averages
     Plot(Regression(vec10, "MovingAverage", 1, 2, [1]))
@@ -111,4 +114,4 @@ def test():
     
 
 if __name__ == "__main__":
-    test1()
+    test()

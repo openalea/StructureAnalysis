@@ -26,6 +26,7 @@
 #include "export_distribution.h"
 
 #include "stat_tool/distribution.h"
+#include "stat_tool/stat_label.h"
 
 #include <boost/python.hpp>
 // definition of boost::python::len
@@ -221,7 +222,6 @@ void class_distribution()
    double first_difference_norm_computation() const;
    double second_difference_norm_computation() const;
 
-   double likelihood_computation(const Reestimation<int> &histo) const   { return histo.likelihood_computation(*this); }
    double likelihood_computation(const Reestimation<double> &histo) const   { return histo.likelihood_computation(*this); }
    void chi2_fit(const FrequencyDistribution &histo , Test &test) const;
 
@@ -255,7 +255,7 @@ void class_discrete_parametric()
 
   // DiscreteParametric base class
   class_< DiscreteParametric, bases< Distribution > >
-    ("_DiscreteParametric", init< boost::python::optional< int, discrete_parametric, int, int, double, double > >())
+    ("_DiscreteParametric", init< int, discrete_parametric, boost::python::optional< int, int, double, double > >())
     .def(init<discrete_parametric, int, int, double, double, boost::python::optional< double > >())
     .def(init<int, int>())
     .def(init<const Distribution&, boost::python::optional<int> >())
@@ -331,8 +331,11 @@ public:
     DiscreteParametricModel *model = NULL;
     model = DiscreteParametricModel::ascii_read(error, filename);
 
-    if(!model) stat_tool::wrap_util::throw_error(error);
-    return boost::shared_ptr<DiscreteParametricModel>(model);
+    if(model == NULL) {
+    	stat_tool::wrap_util::throw_error(error);
+    	return NULL;
+    } else
+    	return boost::shared_ptr<DiscreteParametricModel>(model);
   }
   
   static boost::shared_ptr<DiscreteParametricModel> parametric_model_from_ident(int iident = I_DEFAULT ,
@@ -348,7 +351,13 @@ public:
     model = new DiscreteParametricModel(ident, iinf_bound, isup_bound,
                                         iparameter, iprobability, cumul_threshold);
 
-    return boost::shared_ptr<DiscreteParametricModel>(model);
+    if(model == NULL) {
+    	// In principle the constructor above cannot fail, even if parameters are not admissible.
+    	// In this case, simulation / plot / etc. will fail.
+		// stat_tool::wrap_util::throw_error(error);
+		return NULL;
+	} else
+		return boost::shared_ptr<DiscreteParametricModel>(model);
   }
   
   static boost::shared_ptr<DiscreteParametricModel> parametric_model_from_ident2(int iident = I_DEFAULT ,
@@ -360,6 +369,7 @@ public:
                                          iparameter, iprobability);
 
   }
+
   
   // simulation method wrapping
   WRAP_METHOD1(DiscreteParametricModel, simulation, DiscreteDistributionData, int);
@@ -424,6 +434,28 @@ public:
   //file_ascii_write wrapping
   WRAP_METHOD_FILE_ASCII_WRITE(DiscreteParametricModel);
 
+  // likelihood computation with p->frequency_distribution
+  static double likelihood_computation(const DiscreteParametricModel& p)
+  {
+	  StatError error;
+	  FrequencyDistribution *data = NULL;
+
+	  data = p.extract_data(error);
+	  if (data == NULL) {
+		  error.update(STAT_error[STATR_NO_DATA]);
+		  stat_tool::wrap_util::throw_error(error);
+	  } else {
+	  	  return p.likelihood_computation(*data);
+	  }
+  }
+
+  // likelihood computation with given data
+  static double likelihood_computation_histo(const DiscreteParametricModel& p, const FrequencyDistribution &histo)
+  {
+  	  return p.likelihood_computation(histo);
+  }
+
+
 };
 
 
@@ -444,6 +476,7 @@ void class_discrete_parametric_model()
   //.def(init< int, boost::python::optional <discrete_parametric, int, int, double, double > >())
   .def(init <const Distribution& >())
   .def(init <const DiscreteParametric& >())
+  .def(init <const DiscreteParametric&, const FrequencyDistribution* >())
   .def(init <const DiscreteParametricModel& , boost::python::optional< bool> >())
 
   .def("__init__", make_constructor(DiscreteParametricModelWrap::parametric_model_from_file))
@@ -462,6 +495,10 @@ void class_discrete_parametric_model()
     .def("get_plotable", &StatInterface::get_plotable,
     		return_value_policy< manage_new_object >(),
     		"Return a plotable (no parameters)")
+	.def("likelihood", DiscreteParametricModelWrap::likelihood_computation,
+			"Return loglikelihood value")
+	.def("likelihood", DiscreteParametricModelWrap::likelihood_computation_histo,
+			"Return loglikelihood value")
 
 //     .def("plot_write", DiscreteParametricModelWrap::plot_write,
 // 	 args("prefix", "title", "dists"),

@@ -69,6 +69,8 @@ BOOST_PYTHON_MODULE(_stat_tool)
   class_stat_error();
   class_stat_interface();
 
+  class_set_seed();
+
   class_regression_kernel();
   class_regression();
 
@@ -91,6 +93,10 @@ BOOST_PYTHON_MODULE(_stat_tool)
 
   class_mixture();
   class_mixture_data();
+
+  class_multivariate_mixture();
+  class_multivariate_mixture_data();
+
 
   class_convolution();
   class_convolution_data();

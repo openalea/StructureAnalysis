@@ -31,7 +31,7 @@ class Test:
     def get_mixture_2(self):
         """create another mixture data"""
         h = Histogram(get_shared_data("meri2.his"))
-        m = h.estimate_mixture("B", "NB")
+        m = h.estimate_DiscreteMixture("B", "NB")
         return m
 
     def _test_old_plot(self):
@@ -123,20 +123,20 @@ def test_output_plot_viewpoint_survival():
 
 def test_output_display_detail():
     d1 = Distribution("B", 2,19,0.5)
-    print Display(d1)
-    print Display(d1, Detail=1)
-    print Display(d1, Detail=2)
+    print(Display(d1))
+    print(Display(d1, Detail=1))
+    print(Display(d1, Detail=2))
     try:
-        print Display(d1, Detail=3)
+        print(Display(d1, Detail=3))
         assert False
     except:
        assert ValueError
 
 def test_output_display_viewpoint_survival():
     d1 = Distribution("B", 2,19,0.5)
-    print Display(d1, ViewPoint="Survival")
+    print(Display(d1, ViewPoint="Survival"))
     convol1 = Convolution("data/convolution1.conv")
-    print Display(convol1, ViewPoint="Survival")
+    print(Display(convol1, ViewPoint="Survival"))
 
 def test_output_display_viewpoint_data():
     from openalea.stat_tool import Vectors

@@ -106,7 +106,11 @@ namespace stat_tool {
     
   public:
 
-    SinglePlot() {};
+    SinglePlot() {
+    	legend = "";
+    	style = "";
+    };
+    SinglePlot(const SinglePlot& plot);
 
     void add_point(float x, float y);
     void add_point(const PlotPoint& p);
@@ -157,6 +161,9 @@ namespace stat_tool {
     xrange(0, 0), yrange(0, 0), 
     grid(false), group(0)
     {};
+
+    MultiPlot(const MultiPlot& multiplot);
+    MultiPlot(const MultiPlot *multiplot);
 
     SinglePlot& operator[](int index)
     { return plots[index]; };

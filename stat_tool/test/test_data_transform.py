@@ -276,7 +276,7 @@ class TestExtractData():
     def test_histo_extract_data(self):
 
         h = Histogram(get_shared_data("meri2.his"))
-        mixt = h.estimate_mixture(["B", "NB"])
+        mixt = h.estimate_DiscreteMixture(["B", "NB"])
         assert ExtractData(mixt)
         assert mixt.extract_data() == ExtractData(mixt)
 
@@ -335,7 +335,7 @@ class TestExtractHistogram:
     def test_mixture(self):
 
         h = Histogram(get_shared_data("meri2.his"))
-        mixt = h.estimate_mixture(["B", "NB"])
+        mixt = h.estimate_DiscreteMixture(["B", "NB"])
 
         assert ExtractHistogram(mixt, "Weight") == \
             mixt.extract_weight()

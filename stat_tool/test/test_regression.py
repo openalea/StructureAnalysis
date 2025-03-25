@@ -89,7 +89,8 @@ class TestRegression(interface):
     def test_moving_average(self):
 
         r1 = Regression(self.vector, "MovingAverage" , 1, 2, [1, ])
-        r = self.vector.moving_average_regression_values(1, 2, [1, ], 'a')
+        from openalea.stat_tool.enums import algo_map
+        r = self.vector.moving_average_regression_values(1, 2, [1, ], algo_map['Averaging'])
         assert r
         assert r1
         assert str(r)==str(r1)

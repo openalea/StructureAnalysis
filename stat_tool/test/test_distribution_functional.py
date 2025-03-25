@@ -48,6 +48,7 @@ from openalea.stat_tool.output import plot, Plot, Display
 from openalea.stat_tool.data_transform import Merge, Shift, ExtractData
 from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool.cluster import Cluster
+from openalea.stat_tool.distribution import set_seed
 
 from tools import robust_path as get_shared_data
 
@@ -55,6 +56,7 @@ plot.DISABLE_PLOT = DISABLE_PLOT
 
 
 def test():
+    set_seed(0)
     meri1 = Histogram(get_shared_data("meri1.his"))
     meri2 = Histogram(get_shared_data("meri2.his"))
     meri3 = Histogram(get_shared_data("meri3.his"))
@@ -65,6 +67,8 @@ def test():
     Plot(meri1, meri2, meri3, meri4, meri5)
     Compare(meri1, meri2, meri3, meri4, meri5, "N")
 
+    Dist = meri1.estimate_parametric("B")
+    Plot(Dist)
 
     ComparisonTest("F", meri1, meri2)
     ComparisonTest("T", meri1, meri2)
@@ -86,8 +90,8 @@ def test():
     #model selection approach: estimation of both the mixture parameters and
     # the number of components
 
-    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",
-                     NbComponent="Estimated")
+#    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",
+#                     NbComponent="Estimated")
     mixt2 = Estimate(meri, "MIXTURE", "NB", "NB")
     Plot(mixt2)
     Plot(ExtractDistribution(mixt2, "Mixture"))

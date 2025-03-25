@@ -555,7 +555,7 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
         // computation of the probabilities for the successive values (forward recurrence)
 
         log_failure = log(failure);
-
+        //TODO: check whether term should be reset to log(term)
         while ((cumul[i] < cumul_threshold) && (i < inb_value - 1)) {
           i++;
           set++;
@@ -568,7 +568,37 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
     }
     break;
   }
-  }
+
+  case GEOMETRIC : {
+
+	  // geometric distribution
+
+	  for (i = 0;i < inf_bound;i++) {
+		mass[i] = 0.;
+		cumul[i] = 0.;
+	  }
+
+	  // computation of the lower bound probability
+
+	  term = log(success);
+	  mass[i] = exp(term);
+	  cumul[i] = mass[i];
+
+	  // computation in log
+
+	  // computation of the probabilities for the successive values (forward recurrence)
+
+	  log_failure = log(failure);
+
+	  while ((cumul[i] < cumul_threshold) && (i < alloc_nb_value - 1)) {
+		  i++;
+		  term += log_failure;
+		  mass[i] = exp(term);
+		  cumul[i] = cumul[i - 1]  + mass[i];
+	  }
+	  break;
+  	}
+  } // end switch mode
 
   offset = MIN(inf_bound , i);
   nb_value = i + 1;
@@ -599,7 +629,7 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
  */
 /*--------------------------------------------------------------*/
 
-void DiscreteParametric::poisson_geometric_computation(int inb_value , double cumul_threshold)
+void DiscreteParametric::geometric_poisson_computation(int inb_value , double cumul_threshold)
 
 {
   int i , j , k;
@@ -968,7 +998,7 @@ int DiscreteParametric::nb_value_computation(discrete_parametric ident , int inf
   }
 
   else {
-    if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == POISSON_GEOMETRIC)) {
+    if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL) || (ident == GEOMETRIC_POISSON)) {
       DiscreteParametric *dist;
 
       dist = new DiscreteParametric(ident , inf_bound , sup_bound , parameter ,
@@ -1005,10 +1035,14 @@ void DiscreteParametric::computation(int min_nb_value , double cumul_threshold)
       poisson_computation(min_nb_value , cumul_threshold , STANDARD);
       break;
     case NEGATIVE_BINOMIAL :
-      negative_binomial_computation(min_nb_value , cumul_threshold , STANDARD);
+      if (parameter==1)
+		  // geometric distribution
+		  negative_binomial_computation(min_nb_value , cumul_threshold , GEOMETRIC);
+      else
+    	  negative_binomial_computation(min_nb_value , cumul_threshold , STANDARD);
       break;
-    case POISSON_GEOMETRIC :
-      poisson_geometric_computation(min_nb_value , cumul_threshold);
+    case GEOMETRIC_POISSON :
+      geometric_poisson_computation(min_nb_value , cumul_threshold);
       break;
     case UNIFORM :
       uniform_computation();
@@ -1668,7 +1702,7 @@ int cumul_method(int nb_value , const double *cumul , double scale)
   double limit;
 
 
-  limit = ((double)rand() / (RAND_MAX + 1.)) * scale;
+  limit = double(rand_unif(mt)) * scale;
 //  limit = ((double)random() / (double)0x7fffffff) * scale;
 
   if ((limit < cumul[nb_value / 2])) {
@@ -1734,11 +1768,9 @@ int DiscreteParametric::simulation() const
 
   else {
     do {
-      x = (double)rand() / (RAND_MAX + 1.);
-      y = (double)rand() / (RAND_MAX + 1.);
-//      x = (double)random() / (double)0x7fffffff;
-//      y = (double)random() / (double)0x7fffffff;
-      value = (int)(offset + range * x);
+      x = double(rand_unif(mt));
+      y = double(rand_unif(mt));
+      value = int(offset + range * x);
     }
     while (y * max > mass[value]);
   }

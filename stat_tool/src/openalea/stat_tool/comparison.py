@@ -81,6 +81,8 @@ def compare_histo(histo, *args, **kargs):
                         [[_DiscreteDistributionData, _DiscreteMixtureData,
                           _ConvolutionData, _CompoundData]])
         filename = kargs.get("Filename", "")
+        if len(kargs) > 0 and 'Format' in kargs.keys():
+            kargs['Format'] = str(kargs['Format']).upper() 
         format = error.ParseKargs(kargs, "Format",
                                   default="ASCII",
                                   possible=output_format)

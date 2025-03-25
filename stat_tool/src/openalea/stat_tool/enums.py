@@ -24,7 +24,9 @@ from openalea.stat_tool._stat_tool import (
     _Cluster, 
     _DistanceMatrix, 
     _VectorDistance, 
-    _Regression
+    _Regression,
+    _MultivariateMixture,
+    _MultivariateMixtureData
     )
 
 # map to enumerate in boost python
@@ -63,6 +65,13 @@ distribution_identifier_type = {
     "UNIFORM": DistributionIdentifierType.UNIFORM,
     "M": DistributionIdentifierType.MULTINOMIAL,
     "MULTINOMIAL": DistributionIdentifierType.MULTINOMIAL,
+    }
+
+# TODO: For the sake of consistency, should be in stat_tool.h and exported as enum?
+format_type = { \
+    "ASCII" :'a',
+    "SpreadSheet": 's',
+    "" : 'n'
     }
 
 variable_type = {
@@ -150,11 +159,6 @@ output_format = {
     "GNUPLOT":      OutputFormat.GNUPLOT,
     "PLOT":         OutputFormat.PLOT,
     }
-# format_type = {
-#     "ASCII" :'a',
-#     "SpreadSheet": 's',
-#     "" : 'n'
-#     }
 
 cluster_type = {
      "Step":        "cluster_step",
@@ -163,8 +167,8 @@ cluster_type = {
      }
 
 compound_type = {
-    'Elementary': 'e',
-    'Sum': 's',
+    'Elementary': CompoundType.ELEMENTARY,
+    'Sum': CompoundType.SUM,
     }
 
 variance_type = {
@@ -174,6 +178,18 @@ variance_type = {
     "ORDINAL":  ORDINAL,
     }
 
+duration_distribution_mean_estimator = {
+    "COMPUTED": DurationDistributionMeanEstimator.COMPUTED,
+    "ESTIMATED": DurationDistributionMeanEstimator.ESTIMATED,
+    "ONE_STEP_LATE": DurationDistributionMeanEstimator.ONE_STEP_LATE,
+    }
+
+censoring_estimator = {
+    "PARTIAL_LIKELIHOOD": CensoringEstimator.PARTIAL_LIKELIHOOD,
+    "COMPLETE_LIKELIHOOD": CensoringEstimator.COMPLETE_LIKELIHOOD,
+    "KAPLAN_MEIER": CensoringEstimator.KAPLAN_MEIER,
+  }
+  
 keep_type = {
              "keep": "Keep",
              "Keep": "Keep",
@@ -222,7 +238,9 @@ all_stat_tool_types  = [_FrequencyDistribution,
                         _Vectors,
                         _Cluster,
                         _DistanceMatrix,
-                        _Regression
+                        _Regression,
+                        _MultivariateMixture,
+                        _MultivariateMixtureData
                         ]
 
 

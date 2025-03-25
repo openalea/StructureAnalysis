@@ -31,8 +31,11 @@ from openalea.stat_tool._stat_tool import (
     VariableType,
     VariableTypeBis,
     RestorationAlgorithm,
+    _SetSeed
 )
 
+_SetSeedInstance = _SetSeed()
+set_seed = _SetSeedInstance.set_seed
 
 from .enums import distribution_identifier_type
 
@@ -45,7 +48,8 @@ __all__ = ["_Distribution",
            "NegativeBinomial",
            "Multinomial",
            "ToHistogram",
-           "ToDistribution"]
+           "ToDistribution",
+           "set_seed"]
 
 def Distribution(utype, *args):
     """
@@ -197,7 +201,7 @@ def NegativeBinomial(inf_bound, param=D_DEFAULT,
     :Parameters:
       * inf_bound (int) : lower bound to the range of possible values
         (shift parameter)
-      * param (int, float) : parameter of the Poisson distribution
+      * param (int, float) : parameter of the Negative Binomial distribution
       * proba (int, float) : probability of 'success'
 
     .. plot::

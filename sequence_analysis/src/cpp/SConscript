@@ -47,4 +47,6 @@ if lib_env['DEBUG']:
         lib_env._dict['CXXFLAGS'] = []
 
 inc = lib_env.ALEAIncludes( "sequence_analysis", includes)
-lib = lib_env.ALEALibrary( "vpsequence", sources)
+lib, install_lib = lib_env.ALEALibrary( "vpsequence", sources)
+
+Return('lib')

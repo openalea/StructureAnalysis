@@ -53,12 +53,6 @@ public:
 
   // __len__
   static int
-  histo_get_nb_value(FrequencyDistribution &h)
-  {
-    return h.nb_value;
-  }
-
-  static int
   histo_get_nb_element(FrequencyDistribution &h)
   {
     return h.nb_element;
@@ -109,12 +103,14 @@ public:
   }
 
   static std::string
-  comparison(const FrequencyDistribution &h, boost::python::tuple& histos, variable_type type,
-      const char* filename, output_format format)
+  comparison(const FrequencyDistribution &h, boost::python::tuple& histos, int itype,
+      const char* filename, int iformat)
   {
     ostringstream os;
     StatError error;
     int nb_histo = boost::python::len(histos);
+    variable_type type = variable_type(itype);
+    output_format format = output_format(iformat);
 
     // Test list length
     if (nb_histo == 0)
@@ -166,11 +162,12 @@ public:
 
   static DiscreteMixture*
   discrete_mixture_estimation2(const FrequencyDistribution &h, boost::python::list& ident_list,
-      int min_inf_bound, bool flag, bool component_flag, model_selection_criterion criterion)
+      int min_inf_bound, bool flag, bool component_flag, int icriterion)
   {
     DiscreteMixture* ret;
     ostringstream os;
     StatError error;
+    model_selection_criterion criterion = model_selection_criterion(icriterion);
 
     int nb_component = boost::python::len(ident_list);
     discrete_parametric ident[DISCRETE_MIXTURE_NB_COMPONENT];
@@ -209,12 +206,14 @@ public:
 
   static Convolution*
   convolution_estimation2(const FrequencyDistribution &h, const DiscreteParametric &known_dist,
-      int min_inf_bound, estimation_criterion estimator, int nb_iter, double weight,
-      penalty_type pen_type, side_effect outside)
+      int min_inf_bound, int iestimator, int nb_iter, double weight, int ipen_type, int ioutside)
   {
     Convolution* ret;
     ostringstream os;
     StatError error;
+    estimation_criterion estimator = estimation_criterion(iestimator);
+	penalty_type pen_type = penalty_type(ipen_type);
+	side_effect outside = side_effect(ioutside);
 
     ret = h.convolution_estimation(error, &os, known_dist, min_inf_bound,
         estimator, nb_iter, weight, pen_type, outside);
@@ -227,12 +226,16 @@ public:
 
   static Compound*
   compound_estimation1(const FrequencyDistribution &h, const DiscreteParametric &sum_dist,
-      const DiscreteParametric &dist, compound_distribution type, estimation_criterion estimator, int nb_iter,
-      double weight, penalty_type pen_type, side_effect outside)
+      const DiscreteParametric &dist, int itype, int iestimator, int nb_iter,
+      double weight, int ipen_type, int ioutside)
   {
     Compound* ret;
     ostringstream os;
     StatError error;
+    compound_distribution type = compound_distribution(itype);
+    estimation_criterion estimator = estimation_criterion(iestimator);
+    penalty_type pen_type = penalty_type(ipen_type);
+    side_effect outside = side_effect(ioutside);
 
     ret = h.compound_estimation(error, &os, sum_dist, dist, type, estimator,
         nb_iter, weight, pen_type, outside);
@@ -245,12 +248,17 @@ public:
 
   static Compound*
   compound_estimation2(const FrequencyDistribution &h, const DiscreteParametric &known_dist,
-      compound_distribution type, int min_inf_bound, estimation_criterion estimator, int nb_iter, double weight,
-      penalty_type pen_type, side_effect outside)
+      int itype, int min_inf_bound, int iestimator, int nb_iter, double weight,
+	  int ipen_type, int ioutside)
   {
     Compound* ret;
     ostringstream os;
     StatError error;
+    compound_distribution type = compound_distribution(itype);
+    estimation_criterion estimator = estimation_criterion(iestimator);
+    penalty_type pen_type = penalty_type(ipen_type);
+    side_effect outside = side_effect(ioutside);
+
 
     ret = h.compound_estimation(error, &os, known_dist, type, min_inf_bound,
         estimator, nb_iter, weight, pen_type, outside);
@@ -285,7 +293,17 @@ public:
     return histo;
   }
 
-  WRAP_METHOD3(FrequencyDistribution, parametric_estimation, DiscreteParametricModel, discrete_parametric, int, bool);
+  static DiscreteParametric* parametric_estimation(const DiscreteDistributionData& histo, int ident, int min_inf_bound, bool flag)
+  {
+    discrete_parametric iident = discrete_parametric(ident);
+    DiscreteParametric *dist = NULL;
+
+    dist = histo.parametric_estimation(iident, min_inf_bound, flag);
+
+    return dist;
+  }
+
+  // WRAP_METHOD3(FrequencyDistribution, parametric_estimation, DiscreteParametricModel, discrete_parametric, int, bool);
   WRAP_METHOD3(FrequencyDistribution, value_select, DiscreteDistributionData, int, int, bool);
   WRAP_METHOD1(FrequencyDistribution, shift, DiscreteDistributionData, int);
   WRAP_METHOD1(FrequencyDistribution, fit, DiscreteParametricModel, DiscreteParametric);
@@ -396,6 +414,12 @@ void class_frequency_distribution()
   .def(self != self) .def(self_ns::str(self))
   .def("__len__", FrequencyDistributionWrap::histo_get_nb_element)
   .def("__getitem__", FrequencyDistributionWrap::histo_get_item)
+
+  // Statistics
+  .add_property("offset", &FrequencyDistribution::offset, "Get offset (inf_bound)")
+  .add_property("variance", &FrequencyDistribution::variance, "Get variance")
+  .add_property("nb_value", &FrequencyDistribution::nb_value, "Get highest possible value (sup_bound)")
+  .add_property("mean", &FrequencyDistribution::mean, "mean")
 
   // Comparison
   .def("compare", FrequencyDistributionWrap::comparison,
@@ -569,7 +593,7 @@ void class_distribution_data()
 
     .def("__init__", make_constructor(DistributionDataWrap::distribution_data_from_list ))
     .def("__init__", make_constructor(DistributionDataWrap::distribution_data_from_file))
-
+    .def(init <const FrequencyDistribution& >())
     .def(self_ns::str(self)) // __str__
 
     // Output

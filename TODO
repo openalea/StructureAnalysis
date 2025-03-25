@@ -3,9 +3,20 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
 [ ] Repare `stat_tool` and `sequence_analysis` tests
     + create a new branch for each new development (do not systematically use new_python_api)
     + update tests to be compliant with python 3
+    + Switch to pytest instead of nosetests.
+    + Fix stat_tool_examples.py, test_estimate.py (rewrite NB estimation), test_multivariate_mixture_functional.py, test_vector_distance.py, test_hidden_semi_markov_functional.py
+    + ~~export set_seed in stat_tool.h, fix C++ functioning~~
+    + use valgrind to find memory errors (possibly due to probability computations in NB distributions)
+    + find the cause of "hidden_semi_markov::likelihood_computation" displaying different results on the same sequence in DEBUG mode (check this behaviour)
+    + either make HEADER_OS statements work in sequence_analysis wrappers or remove them.
+    + merge implementations of Mixture and MultivariateMixture (same semantics)
+    + matplotlib output to Survival (remove gnuplot)
+    + Translate C++ comments
     + let enumerated types be systematically transferred from python to wrappers to C++ by intermediate conversions to int
+    + check consistency of naming and methods vs. global functions (develop methods, reduce global functions). Maybe hide some low-level methods defined in low-level wrappers.
     + think about a more automated manner to handle and wrap enumerated types, possibly by replacing them by classes with dictionary and inverse dictionary: {0: "VALUE0", 1: "VALUE1"} and {"VALUE0": 0, "VALUE1": 1}
     + currently, distributions are picked withing a closed list and reimplemented from scratch. Consider finding existing C++ libraries with python interface (scipy, scikitlearn, boost?) and extend base classes to add estimation methods.
+    + Reread the scikitlearn manual and get inspired by their API.
     + nosetests raised an error in test_mixture_functional.py (should be solved by robust_path?)
         File "StructureAnalysis/stat_tool/src/openalea/stat_tool/__init__.py", line 24, in get_shared_data
             return pj(shared_data_path, file)
@@ -14,6 +25,7 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
         TypeError: expected str, bytes or os.PathLike object, not NoneType
     + python
     + Update C++ version
+    + Once downloadable, put a pointer on INRAE Gitlab INCA-HSMM
 [ ] Add `stat_tool` and `sequence_analysis` documentation
 [ ] Fix auto-build: missing .conda file?
 [ ] Specify and document classes design patterns (e.g. should all wrappers be adaptable to a potential `Rcpp` implementation)
