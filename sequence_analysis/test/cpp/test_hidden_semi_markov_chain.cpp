@@ -26,7 +26,9 @@ int main(void)
    HiddenSemiMarkov *hsmc= NULL, *hsmc_ref= NULL, *hsmc_est_file= NULL;
    SemiMarkovData *hsmd= NULL;
    stat_tool::censoring_estimator estimator=stat_tool::COMPLETE_LIKELIHOOD;
+   MultiPlotSet *plotable= NULL;
    // Hidden_variable_order_markov *hmc= NULL, *hmc_init= NULL;
+
 
    MarkovianSequences *seq_estim= NULL;
    StatError error;
@@ -69,6 +71,9 @@ int main(void)
 		 cout << error;
 		 return 1;
 	 }
+     plotable = hsmc_est_file->get_plotable();
+     if (plotable)
+    	 delete plotable;
    }
 
    if (hsmc_ref != NULL)
