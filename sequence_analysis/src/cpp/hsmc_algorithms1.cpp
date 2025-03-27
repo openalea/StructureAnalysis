@@ -115,6 +115,10 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
     }
 
     norm = new double[length];
+    for (i = 0;i < length;i++) {
+    	norm[i] = 0.;
+    }
+
     state_norm = new double[nb_state];
     forward1 = new double[nb_state];
 

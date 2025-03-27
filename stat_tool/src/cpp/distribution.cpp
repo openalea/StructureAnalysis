@@ -353,6 +353,9 @@ void Distribution::copy(const Distribution &dist , int ialloc_nb_value)
 
   if (dist.mass != NULL) {
 	  mass = new double[alloc_nb_value];
+#     ifdef DEBUG
+	  assert( MIN(alloc_nb_value, nb_value) > 0);
+#     endif
 	  for (i = 0;i < MIN(alloc_nb_value, nb_value);i++)
 		mass[i] = dist.mass[i];
   }

@@ -101,7 +101,7 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
       delete first_occurrence[i];
       first_occurrence[i] = NULL;
     }
-    delete first_occurrence;
+    delete [] first_occurrence;
     first_occurrence = NULL;
   }
   first_occurrence = new Distribution*[nb_value];
@@ -126,6 +126,7 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
       delete sojourn_time[i];
       sojourn_time[i] = NULL;
     }
+    delete [] sojourn_time;
     sojourn_time = NULL;
   }
 
@@ -157,6 +158,7 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
         delete recurrence_time[i];
         recurrence_time[i] = NULL;
       }
+      delete [] recurrence_time;
       recurrence_time = NULL;
     }
     recurrence_time = new Distribution*[nb_value];
@@ -172,6 +174,7 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
         delete nb_run[i];
         nb_run[i] = NULL;
       }
+      delete [] nb_run;
     }
     nb_run = new Distribution*[nb_value];
 
@@ -185,6 +188,7 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
         delete nb_occurrence[i];
         nb_occurrence[i] = NULL;
       }
+      delete [] nb_occurrence;
       nb_occurrence = NULL;
     }
 
@@ -243,7 +247,7 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
       delete first_occurrence[i];
       first_occurrence[i] = NULL;
     }
-    delete first_occurrence;
+    delete [] first_occurrence;
     first_occurrence = NULL;
   }
   first_occurrence = new Distribution*[nb_value];
@@ -268,6 +272,7 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
       delete recurrence_time[i];
       recurrence_time[i] = NULL;
     }
+    delete [] recurrence_time;
     recurrence_time = NULL;
   }
   recurrence_time = new Distribution*[nb_value];
@@ -292,7 +297,8 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
         delete sojourn_time[i];
         sojourn_time[i] = NULL;
       }
-      sojourn_time = NULL;
+      delete [] sojourn_time;
+	  sojourn_time = NULL;
     }
     sojourn_time = new DiscreteParametric*[nb_value];
 
@@ -320,6 +326,7 @@ void CategoricalSequenceProcess::create_characteristic(const Distribution &ileng
         delete nb_occurrence[i];
         nb_occurrence[i] = NULL;
       }
+      delete [] nb_occurrence;
       nb_occurrence = NULL;
     }
 
