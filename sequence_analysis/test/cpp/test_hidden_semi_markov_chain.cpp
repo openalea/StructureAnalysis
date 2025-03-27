@@ -27,7 +27,7 @@ int main(void)
    SemiMarkovData *hsmd= NULL;
    stat_tool::censoring_estimator estimator=stat_tool::COMPLETE_LIKELIHOOD;
    // Hidden_variable_order_markov *hmc= NULL, *hmc_init= NULL;
-
+   MultiPlotSet *plotable=NULL;
    MarkovianSequences *seq_estim= NULL;
    StatError error;
    std::vector< int > select;
@@ -42,11 +42,12 @@ int main(void)
    {
       cout << "Reference hidden semi Markov model : " << endl;
       hsmc_ref->ascii_write(cout, false);
-
       cout << endl;
-      // set_seed does not seem to have an effect
+
       set_seed(1);
 
+      plotable = hsmc_ref->get_plotable();
+      delete plotable;
       // simulation of hidden Markov out trees
       hsmd= hsmc_ref->simulation(error, nb_sequence, length);
       cout << error;
@@ -69,6 +70,8 @@ int main(void)
 		 cout << error;
 		 return 1;
 	 }
+     plotable = hsmc_est_file->get_plotable();
+     delete plotable;
    }
 
    if (hsmc_ref != NULL)

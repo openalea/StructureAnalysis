@@ -15,8 +15,8 @@ from openalea.stat_tool.cluster import Transcode, Cluster
 import openalea.stat_tool.plot #import DISABLE_PLOT
 # openalea.stat_tool.plot.DISABLE_PLOT = True
 from openalea.stat_tool.plot import DISABLE_PLOT
-# DISABLE_PLOT = False
-DISABLE_PLOT = True
+DISABLE_PLOT = False
+# DISABLE_PLOT = True
 
 from tools import interface
 from tools import runTestClass, robust_path as get_shared_data
@@ -39,7 +39,8 @@ def test1():
     # TODO: find model with more separated states
     hsm = HiddenSemiMarkov(str(get_shared_data('test_hidden_semi_markov.dat')))
     # seg fault
-    # hsmc_est.plot("Intensity", 1) 
+    # hsm.plot("Intensity", 1) 
+    hsm.plot()
     
     # Simulate nb_seq with length seq_length
     nb_seq = 30
@@ -87,12 +88,13 @@ def test2():
     print(seq_estim.display())
 
     # TODO: why are two states the same?
-    # hsmc_est = Estimate(seq_estim, "HIDDEN_SEMI-MARKOV", "Ordinary", nb_states, "Irreducible", Nbiteration=300)   
-    # print(hsmc_est.display())
-    #
-    # # TODO: find adequate error message in 
-    # plotter = mplotlib()
-    # # hsmc_est.plot("Intensity", 1)
+    hsmc_est = Estimate(seq_estim, "HIDDEN_SEMI-MARKOV", "Ordinary", nb_states, "Irreducible", Nbiteration=300)   
+    print(hsmc_est.display())
+    
+     # TODO: find adequate error message in 
+    plotter = mplotlib()
+    # hsmc_est.plot("Intensity", 1)
+    hsmc_est.plot()
     #
     # hsmc_est.extract_histogram(1,1).plot()
     # hsmc_est.extract(seq_map['Observation'],1,1).plot(Title="Observation distribution for state 1")
@@ -102,5 +104,5 @@ def test2():
     print(hsmc_est_file.display())
     
 if __name__ == "__main__":
-    # test1()
+    test1()
     test2()

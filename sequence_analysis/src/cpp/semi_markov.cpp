@@ -2405,14 +2405,14 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
       }
     }
 
-    if ((seq->observation_distribution) || (seq->observation_histogram)) {
+    if ((seq != NULL) && ((seq->observation_distribution) || (seq->observation_histogram))) {
       nb_plot_set += nb_state;
     }
     else {
       nb_plot_set++;
     }
 
-    if ((categorical_process[i]) && (seq->marginal_distribution[variable])) {
+    if ((seq != NULL) && (categorical_process[i]) && (seq->marginal_distribution[variable])) {
       if ((categorical_process[i]->weight) &&
           (categorical_process[i]->mixture)) {
         nb_plot_set++;
@@ -2423,7 +2423,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
       }
     }
 
-    if ((discrete_parametric_process[i]) && (seq->marginal_distribution[variable])) {
+    if ((seq != NULL) && (discrete_parametric_process[i]) && (seq->marginal_distribution[variable])) {
       if ((discrete_parametric_process[i]->weight) &&
           (discrete_parametric_process[i]->mixture)) {
         nb_plot_set += 2;
@@ -2434,7 +2434,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
       }
     }
 
-    if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
+    if ((seq != NULL) && (continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
         (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL) &&
         ((seq->marginal_histogram[variable]) || (seq->marginal_distribution[variable]))) {
       if (continuous_parametric_process[i]->weight) {
@@ -2454,7 +2454,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
   plot_set = new MultiPlotSet(nb_plot_set , nb_output_process + 1);
   plot_set->border = "15 lw 0";
 
-  if ((seq) && (seq->type[0] == STATE)) {
+  if ((seq != NULL) && (seq->type[0] == STATE)) {
     characteristics = seq->characteristics[0];
     length_distribution = seq->length_distribution;
   }
@@ -2472,7 +2472,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
   }
 
   for (i = 0;i < nb_output_process;i++) {
-    if (seq) {
+    if (seq != NULL) {
       switch (seq->type[0]) {
       case STATE :
         variable = i + 1;
