@@ -37,7 +37,7 @@ from openalea.sequence_analysis._sequence_analysis import (
 )
 
 
-from openalea.sequence_analysis.enums import type_dict, norm_type
+from openalea.sequence_analysis.enums_seq import type_dict, norm_type
 from openalea.sequence_analysis.data_transform import _check_nb_variable
 from openalea.stat_tool import error
 

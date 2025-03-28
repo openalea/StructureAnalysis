@@ -39,7 +39,27 @@ def test1():
     # TODO: find model with more separated states
     hsm = HiddenSemiMarkov(str(get_shared_data('test_hidden_semi_markov.dat')))
     # seg fault
-    # hsm.plot("Intensity", 1) 
+    hsm.plot("Intensity", 1) 
+    hsm.plot("Observation", 1)
+    hsm.plot("Counting", 1)
+    hsm.plot("Recurrence", 1)
+    hsm.plot("Sojourn", 1)
+    try:
+        hsm.plot("InitialRun", 1)
+    except:
+        pass
+    else:
+        raise RuntimeError("Failed to raise error")
+    try:
+        hsm.plot("FinalRun", 1)
+    except:
+        pass
+    else:
+        raise RuntimeError("Failed to raise error")            
+    # Should actually work. TODO: fix
+    hsm.plot("NbRun", 1)
+    hsm.plot("NbOccurrence", 1)
+    hsm.plot("FirstOccurrence", 1)
     hsm.plot()
     
     # Simulate nb_seq with length seq_length
@@ -61,7 +81,11 @@ def test1():
     # hsmc_est = Estimate(seq, "HIDDEN_SEMI-MARKOV", "Ordinary", nb_states, "LeftRight", Nbiteration=300)
     plotter = mplotlib()
     # seg fault
-    # hsmc_est.plot("Intensity", 1)
+    hsmc_est.plot("Intensity", 1)
+    hsmc_est.plot("Observation", 1)
+    hsmc_est.plot("Counting", 1)
+    hsmc_est.plot("Recurrence", 1)
+    hsmc_est.plot("Sojourn", 1)    
 
 def test2():
 

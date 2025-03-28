@@ -75,6 +75,17 @@ public:
 
 	 plot.yrange = range;
   }
+
+  static boost::python::list get_viewpoint(const MultiPlotSet& plot)
+  {
+	  boost::python::list lviewpoint;
+
+      for (int i=0; i < plot.viewpoint.size(); i++ ) {
+    	  lviewpoint.append(int(plot.viewpoint[i]));
+      }
+
+	 return lviewpoint;
+  }
 };
 
 
@@ -144,7 +155,8 @@ void class_plotable()
     //.def("variable", (std::vector<int>)&MultiPlotSet::variable)
     .def_readwrite("variable", &MultiPlotSet::variable)
     .def_readwrite("variable_nb_viewpoint", &MultiPlotSet::variable_nb_viewpoint)
-    .def_readwrite("viewpoint", &MultiPlotSet::viewpoint)
+    // .def_readwrite("viewpoint", &MultiPlotSet::viewpoint)
+	.def("viewpoint",  WRAP::get_viewpoint)
 
 
     .def("__len__", &MultiPlotSet::size)

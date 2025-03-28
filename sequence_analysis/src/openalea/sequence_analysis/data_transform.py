@@ -53,7 +53,7 @@ from openalea.sequence_analysis._sequence_analysis import GAUSSIAN_CHANGE
 from openalea.sequence_analysis._sequence_analysis import NB_EVENT
 from openalea.stat_tool._stat_tool import MIN_PROBABILITY
 
-from .enums import (
+from .enums_seq import (
     markovian_sequence_type, output_map, histogram_type,
     mode_type, func_map, estimator_map, model_type, seq_map,
     renewal_nb_event_map, sub_func_map, nb_segment_map,

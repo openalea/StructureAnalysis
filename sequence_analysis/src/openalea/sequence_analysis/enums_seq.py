@@ -163,7 +163,7 @@ index_parameter_type_map = {
         }
 
 
-process_type = {
+stochastic_process_type = {
     'ORDINARY': _stat_tool.ProcessType.ORDINARY,
     'EQUILIBRIUM' : _stat_tool.ProcessType.EQUILIBRIUM,
     'DEFAULT_TYPE' : _stat_tool.ProcessType.DEFAULT_TYPE
@@ -211,13 +211,6 @@ likelihood_penalty_type = {
     'BICc': _stat_tool.LikelihoodPenaltyType.BICc,
     'ICL' : _stat_tool.LikelihoodPenaltyType.ICL,
     'ICLc': _stat_tool.LikelihoodPenaltyType.ICLc,
-    }
-
-
-duration_distribution_mean_estimator = {
-    "COMPUTED": _stat_tool.DurationDistributionMeanEstimator.COMPUTED,
-    "ESTIMATED": _stat_tool.DurationDistributionMeanEstimator.ESTIMATED,
-    "ONE_STEP_LATE": _stat_tool.DurationDistributionMeanEstimator.ONE_STEP_LATE,
     }
 
 estimator_semi_markov_type = {

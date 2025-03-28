@@ -30,6 +30,7 @@ from openalea.stat_tool._stat_tool import  (
 
 from openalea.stat_tool.enums import (
     estimator_type,
+    duration_distribution_mean_estimator,
     censoring_estimator
 )
 
@@ -40,16 +41,15 @@ from openalea.stat_tool.estimate import (
     smoothing_penalty_type,    
 )
 
-from openalea.sequence_analysis.enums import (
+from openalea.sequence_analysis.enums_seq import (
     estimator_semi_markov_type,
-    process_type, 
     ident_map,
     markovian_algorithms,
     sub_markovian_algorithms,
     algorithm,
     estimator,
-    duration_distribution_mean_estimator,
-    likelihood_penalty_type
+    likelihood_penalty_type,
+    stochastic_process_type
 )
 
 # structure class
@@ -153,9 +153,9 @@ def _estimate_renewal_count_data(obj, itype, **kargs):
     error.CheckType([obj, itype], [[_TimeEvents, _RenewalData], str])
     if isinstance(itype, str):
         if itype.upper() == "ORDINARY":
-            Type = process_type["ORDINARY"]
+            Type = stochastic_process_type["ORDINARY"]
         elif itype.upper() == "EQUILIBRIUM":
-            Type = process_type["EQUILIBRIUM"]
+            Type = stochastic_process_type["EQUILIBRIUM"]
         else:
             raise AttributeError("type must be Ordinary or Equilibrium")
     else:
@@ -303,7 +303,7 @@ def _estimate_semi_markov(obj, *args, **kargs):
     Type = 'v'
     #error.CheckType([args[0]], [str])
 
-    Type = error.CheckDictKeys(args[0], stochastic_process_type)
+    Type = error.CheckDictKeys(args[0], stochastic_stochastic_process_type)
 
     NbIteration = kargs.get("NbIteration", I_DEFAULT)
     Counting = kargs.get("Counting", True)
@@ -395,7 +395,7 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
         if args[0].upper() == "ORDINARY":
             error.CheckArgumentsLength(args, 3, 3)
             error.CheckType([args[2]], [str])
-            Type = process_type["ORDINARY"]
+            Type = stochastic_process_type["ORDINARY"]
             if args[2] not in ["LeftRight", "Irreducible"]:
                 raise ValueError(
                         "third argument must be LeftRight or Irreducible.")
@@ -405,12 +405,12 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
                 LeftRight = False
         elif args[0].uppper() == "EQUILIBRIUM":
             error.CheckArgumentsLength(args, 2, 2)
-            Type = process_type["EQUILIBRIUM"]
+            Type = stochastic_process_type["EQUILIBRIUM"]
             LeftRight = False
         else:
             raise AttributeError("type must be Ordinary or Equilibrium")
 
-        if ((Type != process_type["EQUILIBRIUM"]) or (Estimator == PARTIAL_LIKELIHOOD) or \
+        if ((Type != stochastic_process_type["EQUILIBRIUM"]) or (Estimator == PARTIAL_LIKELIHOOD) or \
             (Algorithm != NO_COMPUTATION)) and \
             kargs.get(InitialOccupancyMean):
             raise ValueError("Incompatible user arguments")
@@ -489,7 +489,7 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
     #args0 is a string
     if len(args)>0 and isinstance(args[0], str):
         Type = 'v'
-        Type = error.CheckDictKeys(args[0], stochastic_process_type)
+        Type = error.CheckDictKeys(args[0], stochastic_stochastic_process_type)
 
         # check validity of the input arguments following AML's code
         if Algorithm != LOCAL_BIC and not kargs.get("Threshold"):

@@ -36,7 +36,7 @@ from openalea.stat_tool import error
 
 
 
-from .enums import index_parameter_type_map, ms_vomd_smd_nhmd
+from .enums_seq import index_parameter_type_map, ms_vomd_smd_nhmd
 from openalea.stat_tool.enums import bool_type
 
 __all__ = ['Sequences',

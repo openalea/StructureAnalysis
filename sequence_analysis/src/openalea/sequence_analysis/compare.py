@@ -30,10 +30,8 @@ from openalea.stat_tool.enums import (
     format_type, algorithm_type
 )
 
-from .enums import begin_aligned_map
-
-from .enums import (
-    sequence_alignment_first_arg, output_sequence, 
+from .enums_seq import (
+    begin_aligned_map, sequence_alignment_first_arg, output_sequence, 
     markov_model_comparison_first_arg, indel_cost_map, ms_vomd_smd_nhmd,
     markov_model_for_sequences_first_arg, markovian_algorithms, 
     markov_model_for_sequences_second_arg
