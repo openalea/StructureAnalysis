@@ -61,8 +61,10 @@ from .enums_seq import (
 )
 
 
-from openalea.stat_tool.enums import keep_type, bool_type
-from openalea.stat_tool.enums import format_type
+from openalea.stat_tool.enums import (
+    keep_type, bool_type, format_type,
+    threshold_direction
+)
 
 
 
@@ -674,7 +676,7 @@ def Reverse(obj):
 
 def Thresholding(obj, MinProbability=MIN_PROBABILITY):
     """
-
+        Probability thresholding in Markovian models 
     .. todo:: documentation
     """
     error.CheckType([MinProbability], [[int, float]])
@@ -1617,3 +1619,62 @@ def BuildAuxiliaryVariable(obj):
     except:
         ValueError("build_axiliary_variable failed with the given object.Check the types")
     return ret
+
+
+# Add methods to _Sequences
+
+def _Sequences_thresholding(self, variable , threshold , mode):
+    """
+    :Usage:
+    
+        Thresholding values in Sequences (discrete_sequences, markov_data, semi-markov_data).
+        If mode == "ABOVE", all values for variable given in argument that are 
+            above threshold are set to threshold 
+        If mode == "BELOW", all values for variable given in argument that are 
+            below threshold are set to threshold 
+    
+    .. doctest::
+        :options: +SKIP
+
+        >>> seq.thresholding(1, 2.01, "ABOVE")
+        >>> seq.thresholding(1, 2.01, "BELOW")
+
+    :Arguments:
+
+    * variable (int),
+    * threshold (int or float),
+    * mode (str), "ABOVE" or "BELOW"
+    
+     
+    """
+    assert(issubclass(self.__class__, _Sequences))
+    mmode = str.upper(mode)
+    try:
+        imode = threshold_direction[mmode]
+    except KeyError:
+        msg = "Bad thresholding mode: " + str(mode) + \
+        ". Should be ABOVE or BELOW"
+        raise ValueError(msg)
+    error.CheckType([variable], [int])
+    if type(threshold) != int:
+        error.CheckType([threshold], [float])
+    thresh_type = ""
+    if type(threshold) == int:
+        try:
+            ret = self.thresholding_int(variable, threshold, imode)
+        except:
+            thresh_type = "float"
+    else:
+        try:
+            ret = self.thresholding_float(variable, threshold, imode)
+        except:
+            thresh_type = "int"
+    if ret is None:
+        if   thresh_type == "float":
+            ret = self.thresholding_float(variable, float(threshold), imode)
+        elif   thresh_type == "int":
+            ret = self.thresholding_float(variable, int(threshold), imode)
+    return(ret)
+
+_Sequences.thresholding = _Sequences_thresholding
+

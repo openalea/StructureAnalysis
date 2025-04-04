@@ -378,7 +378,7 @@ def Sequences(obj, **kargs):
 
     # build up a list of unique vertex identifiers if none is provided
     if len(VertexIdentifiers)>0:
-        assert len([x for x in VertexIdentifiers if x<=0]) == 0
+        assert len([i for x in VertexIdentifiers for i in x if i<=0]) == 0
     else:
         #create a standard identifiers list [0,1,2,....] for each sequences ?
         index = 0
@@ -461,7 +461,7 @@ def IndexParameterType(obj):
     error.CheckType([obj], [[_Sequences, _MarkovianSequences,
                              _VariableOrderMarkovData, _SemiMarkovData,
                              _NonHomogeneousMarkovData]])
-    from openalea.sequence_analysis.enums import index_parameter_type_map
+    from openalea.sequence_analysis.enums_seq import index_parameter_type_map
 
     type = obj.index_parameter_type
     for key, value in index_parameter_type_map.items():

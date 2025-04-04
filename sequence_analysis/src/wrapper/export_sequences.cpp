@@ -785,6 +785,39 @@ public:
     FOOTER(ret);
   }
 
+  static Sequences*
+  thresholding_int(const Sequences &seq, int variable , int threshold, int imode)
+  {
+	StatError error;
+	threshold_direction mode = threshold_direction(imode);
+	Sequences* ret = NULL;
+
+    ret = seq.thresholding(error, variable, threshold, mode);
+
+    if (ret == NULL)
+    	sequence_analysis::wrap_util::throw_error(error);
+
+    return(ret);
+  }
+
+  static Sequences*
+  thresholding_double(const Sequences &seq, int variable , double threshold, int imode)
+  {
+	StatError error;
+	threshold_direction mode = threshold_direction(imode);
+	Sequences* ret = NULL;
+
+    if (seq.get_type(variable - 1) == REAL_VALUE)
+      ret = seq.thresholding(error, variable, (double) threshold, mode);
+    else
+      ret = seq.thresholding(error, variable, threshold, mode);
+
+    if (ret == NULL)
+    	sequence_analysis::wrap_util::throw_error(error);
+
+    return(ret);
+  }
+
   // Merge
   static Sequences*
   merge(const Sequences &input_seq, const boost::python::list& seqs)
@@ -1523,6 +1556,8 @@ class_sequences()
    DEF_RETURN_VALUE("segmentation_array", SequencesWrap::segmentation_array, args("todo"), "todo")
 //   DEF_RETURN_VALUE("segmentation_vector_distance", SequencesWrap::segmentation_vector_distance, args("todo"), "todo")
    DEF_RETURN_VALUE("shift", SequencesWrap::shift, args("variable","param"),"Shift")
+   DEF_RETURN_VALUE("thresholding_int", SequencesWrap::thresholding_int, args("variable","threshold", "mode"),"Thresholding")
+   DEF_RETURN_VALUE("thresholding_float", SequencesWrap::thresholding_double, args("variable","threshold", "mode"),"Thresholding")
    DEF_RETURN_VALUE("sojourn_time_sequences", SequencesWrap::sojourn_time_sequences, args("variable"), "Sojourn time sequences")
    DEF_RETURN_VALUE("transcode", SequencesWrap::transcode, args("variable", "symbols"),"Transcode")
    DEF_RETURN_VALUE("transform_position", SequencesWrap::transform_position, args("step"), "Transform position")
