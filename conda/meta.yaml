@@ -34,7 +34,7 @@ requirements:
 
 test:
   imports:
-    - stat_tool
-    - noses
+    - openalea.stat_tool
+    - nose
   commands:
     - run_test.sh
