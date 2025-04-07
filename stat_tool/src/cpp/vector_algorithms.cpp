@@ -2394,7 +2394,7 @@ bool Vectors::sup_norm_distance(StatError &error , ostream &os , const Vectors &
 
 #         ifdef DEBUG
           cout << i << "  ";
-          if ((double)marginal_distribution[0]->frequency[i] / (double)nb_vector < (double)ivec.marginal_distribution[0]->frequency[i] / (double)ivec.nb_vector)) {
+          if ((double)marginal_distribution[0]->frequency[i] / (double)nb_vector < (double)ivec.marginal_distribution[0]->frequency[i] / (double)ivec.nb_vector) {
             cout << marginal_distribution[0]->frequency[i];
           }
           else {
