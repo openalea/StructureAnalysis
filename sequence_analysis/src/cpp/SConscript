@@ -36,11 +36,12 @@ lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])
 #lib_env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
 lib_env.AppendUnique(LIBS=['vpstat_tool'])
 
+if lib_env['with_efence']:
+    lib_env.AppendUnique(LIBS=['efence'])
+
 if lib_env['debug']:
     lib_env.Append(CPPDEFINES= ['DEBUG'])
-    # CPPFLAGS=["-g"]
-    # lib_env.AppendUnique(CPPFLAGS=CPPFLAGS)
-    lib_env.AppendUnique(LIBS=['efence'])
+
     if '-DNDEBUG' in lib_env._dict['CCFLAGS']:
         lib_env._dict['CCFLAGS'] = []
     if '-DNDEBUG' in lib_env._dict['CXXFLAGS']:
