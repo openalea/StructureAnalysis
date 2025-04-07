@@ -28,11 +28,9 @@ requirements:
    - scons
    - openalea.sconsx
    - boost
-   - openalea.stat_tool
   run:
    - python
    - boost
-   - openalea.stat_tool
 
 test:
   imports:
