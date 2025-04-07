@@ -37,3 +37,6 @@ requirements:
 test:
   imports:
     - stat_tool
+    - noses
+  commands:
+    - run_test.sh
