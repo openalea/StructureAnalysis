@@ -35,6 +35,10 @@ requirements:
 test:
   imports:
     - openalea.stat_tool
+    - openalea.deploy
     - nose
+    - os
+    - pathlib
+    - numpy
   commands:
     - run_test.sh
