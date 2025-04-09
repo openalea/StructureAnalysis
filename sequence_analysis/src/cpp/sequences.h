@@ -737,7 +737,9 @@ namespace sequence_analysis {
     RenewalData* extract_renewal_data(stat_tool::StatError &error , int variable ,
                                       int begin_index_parameter , int end_index_parameter) const;
 
+    /// Merge several sets of Sequences (arrays of Sequences)
     Sequences* merge(stat_tool::StatError &error , int nb_sample , const Sequences **iseq) const;
+    /// Merge several sets of Sequences (std::vector<Sequences>)
     Sequences* merge(stat_tool::StatError &error , int nb_sample , const std::vector<Sequences> &iseq) const;
 
     Sequences* shift(stat_tool::StatError &error , int variable , int shift_param) const;
@@ -1204,8 +1206,11 @@ namespace sequence_analysis {
     stat_tool::DiscreteDistributionData* extract(stat_tool::StatError &error , stat_tool::process_distribution type ,
                                                  int variable , int value) const;
 
+
+    /// Merge several sets of MarkovianSequences (arrays of MarkovianSequences)
     MarkovianSequences* merge(stat_tool::StatError &error , int nb_sample ,
                               const MarkovianSequences **iseq) const;
+    /// Merge several sets of MarkovianSequences (std::vector<MarkovianSequences>)
     MarkovianSequences* merge(stat_tool::StatError &error , int nb_sample ,
                               const std::vector<MarkovianSequences> &iseq) const;
 
