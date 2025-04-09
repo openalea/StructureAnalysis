@@ -123,6 +123,7 @@ def test2():
     # hsmc_est.extract_histogram(1,1).plot()
     # hsmc_est.extract(seq_map['Observation'],1,1).plot(Title="Observation distribution for state 1")
     # hsmc_est.extract(seq_map['Sojourn'],0,0).plot(Title="Sojourn distribution for state 0")
+    hsmc_est.extract(seq_map['Counting'],1,1).plot(Title="Distribution of counts for variable 1")
 
     hsmc_est_file = Estimate(seq_estim, "HIDDEN_SEMI-MARKOV", hsm, Nbiteration=300)   
     print(hsmc_est_file.display())

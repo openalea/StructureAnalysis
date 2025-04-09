@@ -103,14 +103,14 @@ SemiMarkovChain::SemiMarkovChain(process_type itype , int inb_state)
 /*--------------------------------------------------------------*/
 
 SemiMarkovChain::SemiMarkovChain(const Chain *pchain , const CategoricalSequenceProcess *poccupancy)
-:Chain(*pchain)
+:Chain(*pchain),
+ sojourn_type(NULL),
+ state_process(NULL),
+ forward(NULL)
 
 {
   int i;
 
-# ifdef DEBUG
-  assert(sojourn_type == NULL);
-# endif
   sojourn_type = new state_sojourn_type[nb_state];
 
   state_process = new CategoricalSequenceProcess(*poccupancy);
@@ -147,6 +147,21 @@ SemiMarkovChain::SemiMarkovChain(const Chain *pchain , const CategoricalSequence
   }
 }
 
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the SemiMarkovChain class.
+ *
+ *  \param[in] smarkov    reference on a Chain SemiMarkovChain object,
+ *  \param[in] param      parameter
+ */
+/*--------------------------------------------------------------*/
+
+SemiMarkovChain::SemiMarkovChain(const SemiMarkovChain &smarkov , int param)
+: Chain(smarkov),
+  sojourn_type(NULL),
+  state_process(NULL),
+  forward(NULL)
+{ copy(smarkov , param); }
 
 /*--------------------------------------------------------------*/
 /**
@@ -407,6 +422,30 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
   characteristic_computation(length , counting_flag);
 }
 
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the SemiMarkov class.
+ *
+ *  \param[in] smarkov       reference on a SemiMarkov object,
+ *  \param[in] data_flag     flag copy of the included SemiMarkovData object,
+ *  \param[in] pobservation  pointer on a CategoricalProcess object,
+ *  \param[in] param         parameter.
+ */
+/*--------------------------------------------------------------*/
+
+SemiMarkov::SemiMarkov(const SemiMarkov &smarkov ,
+					   bool data_flag,
+					   int param)
+: nb_iterator(0),
+  semi_markov_data(NULL),
+  nb_output_process(0),
+  categorical_process(NULL),
+  discrete_parametric_process(NULL),
+  continuous_parametric_process(NULL),
+SemiMarkovChain(smarkov , param)
+{ copy(smarkov , data_flag , param); }
 
 /*--------------------------------------------------------------*/
 /**
