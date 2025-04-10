@@ -1055,7 +1055,7 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
   int max_inf_bound , inf_bound , sup_bound , sup_sup_bound , est_sup_bound ,
       min_sup_bound , max_sup_bound;
   double shift_mean , probability , likelihood , inf_bound_likelihood , max_likelihood = D_INF;
-
+/*
 
   if (mean - min_inf_bound >= variance) {
 
@@ -1165,7 +1165,7 @@ double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int mi
 #     endif
     }
   }
-
+*/
   return max_likelihood;
 }
 
@@ -1191,7 +1191,7 @@ double Reestimation<Type>::uniform_estimation(DiscreteParametric *dist , int min
   int i , j;
   int inf_bound , sup_bound;
   double likelihood = D_INF;
-
+/*
 
     if (!min_inf_bound_flag) {
       inf_bound = min_inf_bound;
@@ -1208,7 +1208,7 @@ double Reestimation<Type>::uniform_estimation(DiscreteParametric *dist , int min
       dist->init(inf_bound , sup_bound , D_DEFAULT, D_DEFAULT);
     }
 
-
+*/
   return likelihood;
 }
 
@@ -1237,7 +1237,7 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
   int max_inf_bound , inf_bound;
   double diff , parameter , likelihood , max_likelihood = D_INF;
 
-
+/*
   // computation of the interval tested on the lower bound of the support
 
   if (!min_inf_bound_flag) {
@@ -1294,7 +1294,7 @@ double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min
 //         << " | number of computations: " << (max_inf_bound - i + 1) << endl;
 #   endif
   }
-
+*/
   return max_likelihood;
 }
 
@@ -1325,7 +1325,7 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
   double dmin_param, dmax_param, left_l, right_l;
   DiscreteParametric *dist_cpl = NULL, *dist_cpr = NULL;
   bool moment_estimation_failure = false;
-
+/*
   // computation of the interval tested on the lower bound of the support
 
   if (!min_inf_bound_flag) {
@@ -1439,7 +1439,7 @@ double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist
 		} // else likelihood = D_INF;
 	}
   }
-
+*/
   return max_likelihood;
 }
 
@@ -1466,7 +1466,7 @@ double Reestimation<Type>::geometric_poisson_estimation(DiscreteParametric *dist
   int i;
   int max_inf_bound , inf_bound;
   double diff , buff , parameter , probability , likelihood , max_likelihood = D_INF;
-
+/*
 
   // computation of the interval tested on the lower bound of the support
 
@@ -1524,7 +1524,7 @@ double Reestimation<Type>::geometric_poisson_estimation(DiscreteParametric *dist
 //         << " | number of computations: " << (max_inf_bound - i + 1) << endl;
 #   endif
   }
-
+*/
   return max_likelihood;
 }
 
@@ -1551,9 +1551,9 @@ double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int 
                                                  bool geometric_poisson) const
 
 {
-  double likelihood;
+  double likelihood = D_INF;
 
-
+/*
   switch (dist->ident) {
   case UNIFORM :
     likelihood = uniform_estimation(dist , min_inf_bound , min_inf_bound_flag);
@@ -1571,7 +1571,7 @@ double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int 
     likelihood = geometric_poisson_estimation(dist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
     break;
   }
-
+*/
   return likelihood;
 }
 
@@ -1598,10 +1598,10 @@ double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist ,
                                                       bool geometric_poisson) const
 
 {
-  double likelihood , max_likelihood;
+  double likelihood , max_likelihood = D_INF;
   DiscreteParametric *bdist;
 
-
+/*
   bdist = new DiscreteParametric(dist->alloc_nb_value);
 
   max_likelihood = binomial_estimation(dist , min_inf_bound , min_inf_bound_flag);
@@ -1643,7 +1643,7 @@ double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist ,
   }
 
   delete bdist;
-
+*/
   return max_likelihood;
 }
 
@@ -1666,10 +1666,10 @@ DiscreteParametric* Reestimation<Type>::type_parametric_estimation(int min_inf_b
                                                                    double cumul_threshold) const
 
 {
-  double likelihood;
+  double likelihood = D_INF;
   DiscreteParametric *dist;
 
-
+/*
   // construction of a DiscreteParametric object
 
   dist = new DiscreteParametric((int)(nb_value * SAMPLE_NB_VALUE_COEFF));
@@ -1687,7 +1687,7 @@ DiscreteParametric* Reestimation<Type>::type_parametric_estimation(int min_inf_b
     delete dist;
     dist = NULL;
   }
-
+*/
   return dist;
 }
 

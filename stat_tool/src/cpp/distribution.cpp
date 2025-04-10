@@ -43,7 +43,7 @@
 #include <fstream>
 #include <cstring>
 
-#include "stat_tools.h"
+#include "distribution.h"
 #include "curves.h"
 #include "stat_label.h"
 
@@ -3258,6 +3258,357 @@ void Distribution::log_computation()
 
 {
   stat_tool::log_computation(nb_value , mass , cumul);
+}
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor for discrete uniform distribution
+ */
+/*--------------------------------------------------------------*/
+
+Uniform::Uniform(int iinf_bound , int isup_bound)
+: DiscreteParametric(iinf_bound, isup_bound, std::vector<boost::variant<int, float> >())
+{
+	init(inf_bound, sup_bound, std::vector<boost::variant<int, float> >());
+	computation();
+}
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability mass function of a discrete uniform distribution.
+ *
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.*
+ */
+
+/*--------------------------------------------------------------*/
+
+void Uniform::computation(int min_nb_value, double cumul_threshold)
+
+{
+  int i;
+  double proba;
+
+
+  offset = inf_bound;
+  nb_value = sup_bound + 1;
+
+  for (i = 0;i < inf_bound;i++) {
+    mass[i] = 0.;
+  }
+
+  proba = 1. / (double)(sup_bound - inf_bound + 1);
+  for (i = inf_bound;i <= sup_bound;i++) {
+    mass[i] = proba;
+  }
+
+  cumul_computation();
+}
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy discrete uniform distribution
+ */
+/*--------------------------------------------------------------*/
+DiscreteParametric* Uniform::ptr_copy() const
+{
+	Uniform *cp = NULL;
+
+	cp = new Uniform(inf_bound, sup_bound);
+
+	return cp;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor for categorical distribution
+ */
+/*--------------------------------------------------------------*/
+
+Categorical::Categorical(int iinf_bound , int isup_bound, const std::vector<boost::variant<int, float> > &probabilities)
+: DiscreteParametric(iinf_bound, isup_bound, probabilities)
+{
+	init(inf_bound, sup_bound, std::vector<boost::variant<int, float> >());
+	computation();
+}
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability mass function of a discrete uniform distribution.
+ *
+ *  \param[in] min_nb_value    minimum number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function.*
+ */
+/*--------------------------------------------------------------*/
+
+void Categorical::computation(int min_nb_value, double cumul_threshold)
+
+{
+  int i;
+
+  for (i = 0;i < inf_bound;i++) {
+    mass[i] = 0.;
+  }
+
+  for (i = inf_bound;i <= sup_bound;i++) {
+    mass[i] =  boost::get<double>(parameter[i]);
+  }
+
+  cumul_computation();
+}
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy discrete uniform distribution
+ */
+/*--------------------------------------------------------------*/
+DiscreteParametric* Categorical::ptr_copy() const
+{
+	Categorical *cp = NULL;
+
+	cp = new Categorical(inf_bound, sup_bound, parameter);
+
+	return cp;
+}
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor for negative binomial distribution
+ */
+/*--------------------------------------------------------------*/
+
+NegativeBinomial::NegativeBinomial(int iinf_bound , int isup_bound,  const std::vector<boost::variant<int, float> > &parameter)
+: DiscreteParametric(iinf_bound, isup_bound, parameter)
+{
+	assert(parameter.size() == 2);
+
+	init(inf_bound, sup_bound, parameter);
+	computation();
+}
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor for negative binomial distribution
+ */
+/*--------------------------------------------------------------*/
+
+NegativeBinomial::NegativeBinomial(int iinf_bound , int isup_bound,  double dparameter, double probability)
+: DiscreteParametric(iinf_bound, isup_bound, std::vector<boost::variant<int, float> >())
+{
+	parameter.resize(2);
+	parameter[0] = dparameter;
+	parameter[1] = probability;
+
+	init(inf_bound, sup_bound, parameter);
+	computation();
+}
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability mass function of a negative binomial distribution.
+ *
+ *  \param[in] inb_value       number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function,
+ *  \param[in] mode            computation mode (STANDARD/RENEWAL).*
+ *
+ */
+/*--------------------------------------------------------------*/
+
+void NegativeBinomial::computation(int inb_value, double cumul_threshold)
+{
+	computation(inb_value , cumul_threshold, STANDARD);
+}
+
+void NegativeBinomial::computation(int inb_value , double cumul_threshold ,
+                                  distribution_computation mode)
+
+{
+  int i;
+  const double dparameter = boost::get<double>(parameter[0]),
+		  probability = boost::get<double>(parameter[1]);
+  double failure = 1. - probability , success = probability , log_failure ,
+         set , subset , scale , term;
+
+
+  switch (mode) {
+
+    // case complete computation
+
+    case STANDARD : {
+
+    // null probability values before the lower bound of the support
+
+    for (i = 0;i < inf_bound;i++) {
+      mass[i] = 0.;
+      cumul[i] = 0.;
+    }
+
+    subset = dparameter - 1.;
+    set = subset;
+
+    // computation of the lower bound probability
+
+    term = pow(success , dparameter);
+    mass[i] = term;
+    cumul[i] = mass[i];
+
+    // case direct computation
+
+    if (sqrt(dparameter) / success < NB_THRESHOLD) {
+
+      // computation of the probabilities for the successive values (forward recurrence)
+
+      while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+             (i < alloc_nb_value - 1)) {
+        i++;
+        set++;
+        scale = set / (set - subset);
+        term *= scale * failure;
+        mass[i] = term;
+        cumul[i] = cumul[i - 1] + mass[i];
+      }
+    }
+
+    // case computation in log
+
+    else {
+
+      // computation of the probabilities for the successive values (forward recurrence)
+
+      log_failure = log(failure);
+
+      while (((cumul[i] < cumul_threshold) || (i < inb_value - 1)) &&
+             (i < alloc_nb_value - 1)) {
+        i++;
+        set++;
+        scale = set / (set - subset);
+        term += log(scale) + log_failure;
+        mass[i] = exp(term);
+        cumul[i] = cumul[i - 1]  + mass[i];
+      }
+    }
+    break;
+  }
+
+  // case incomplete computation (renewal process)
+
+  case RENEWAL : {
+
+    // null probability values before the lower bound of the support
+
+    for (i = 0;i < MIN(inf_bound , inb_value);i++) {
+      mass[i] = 0.;
+      cumul[i] = 0.;
+    }
+
+    if (inb_value > inf_bound) {
+      subset = dparameter - 1.;
+      set = subset;
+
+      // computation of the lower bound probability
+
+      term = pow(success , dparameter);
+      mass[i] = term;
+      cumul[i] = mass[i];
+
+      // case direct computation
+
+      if (sqrt(dparameter) / success < NB_THRESHOLD) {
+
+        // computation of the probabilities for the successive values (forward recurrence)
+
+        while ((cumul[i] < cumul_threshold) && (i < inb_value - 1)) {
+          i++;
+          set++;
+          scale = set / (set - subset);
+          term *= scale * failure;
+          mass[i] = term;
+          cumul[i] = cumul[i - 1] + mass[i];
+        }
+      }
+
+      // case computation in log
+
+      else {
+
+        // computation of the probabilities for the successive values (forward recurrence)
+
+        log_failure = log(failure);
+        //TODO: check whether term should be reset to log(term)
+        while ((cumul[i] < cumul_threshold) && (i < inb_value - 1)) {
+          i++;
+          set++;
+          scale = set / (set - subset);
+          term += log(scale) + log_failure;
+          mass[i] = exp(term);
+          cumul[i] = cumul[i - 1] + mass[i];
+        }
+      }
+    }
+    break;
+  }
+
+  case GEOMETRIC : {
+
+	  // geometric distribution
+
+	  for (i = 0;i < inf_bound;i++) {
+		mass[i] = 0.;
+		cumul[i] = 0.;
+	  }
+
+	  // computation of the lower bound probability
+
+	  term = log(success);
+	  mass[i] = exp(term);
+	  cumul[i] = mass[i];
+
+	  // computation in log
+
+	  // computation of the probabilities for the successive values (forward recurrence)
+
+	  log_failure = log(failure);
+
+	  while ((cumul[i] < cumul_threshold) && (i < alloc_nb_value - 1)) {
+		  i++;
+		  term += log_failure;
+		  mass[i] = exp(term);
+		  cumul[i] = cumul[i - 1]  + mass[i];
+	  }
+	  break;
+  	}
+  } // end switch mode
+
+  offset = MIN(inf_bound , i);
+  nb_value = i + 1;
+
+# ifdef DEBUG2
+  if (mode == STANDARD) {
+    negative_binomial dist(dparameter , probability);
+
+    cout << "TEST negative binomial distribution" << endl;
+    for (i = inf_bound;i < nb_value;i++) {
+      cout << i << "  " << pdf(dist , i - inf_bound) << " | " << mass[i]
+           << "   " << cdf(dist , i - inf_bound) << " | " << cumul[i] << endl;
+    }
+  }
+# endif
+
+}
+
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy discrete uniform distribution
+ */
+/*--------------------------------------------------------------*/
+DiscreteParametric* NegativeBinomial::ptr_copy() const
+{
+	NegativeBinomial *cp = NULL;
+
+	cp = new NegativeBinomial(inf_bound, sup_bound, parameter);
+
+	return cp;
 }
 
 

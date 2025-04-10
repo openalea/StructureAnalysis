@@ -40,6 +40,7 @@
 #define STAT_TOOLS_H
 
 #include <random>
+# include "boost/variant.hpp"
 
 #include "config.h"
 #include "reestimation.h"
@@ -590,27 +591,21 @@ namespace stat_tool {
 
   public :
 
-    discrete_parametric ident;  ///< identifier
     int inf_bound;          ///< lower bound
     union {
       int sup_bound;        ///< upper bound (binomial, uniform)
       int no_segment;       ///< number of segments (prior segment length distribution)
     };
-    double parameter;       ///< parameter (Poisson, negative binomial, Poisson geometric)
-    double probability;     ///< probability of success (binomial, negative binomial, Poisson geometric)
+    std::vector<boost::variant<int, float> > parameter;       ///< parameters (except inf_bound and sup_bound)
+    std::vector<variable_nature> ptypes;       ///< parameter types
     int sequence_length;    ///< sequence length (prior segment length distribution)
 
-    void init(int iinf_bound , int isup_bound , double iparameter , double iprobability);
-    void init(discrete_parametric iident , int iinf_bound , int isup_bound ,
-              double iparameter , double iprobability);
-    void copy(const DiscreteParametric &dist);
+    /// initialize distribution parameters
+    void init(int iinf_bound , int isup_bound , std::vector<boost::variant<int, float> > parameter);
+    /// copy distribution
+    virtual void copy(const DiscreteParametric &dist);
 
-    DiscreteParametric(int inb_value = 0 , discrete_parametric iident = CATEGORICAL ,
-                       int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
-                       double iparameter = D_DEFAULT , double iprobability = D_DEFAULT);
-    DiscreteParametric(discrete_parametric iident , int iinf_bound , int isup_bound ,
-                       double iparameter , double iprobability ,
-                       double cumul_threshold = CUMUL_THRESHOLD);
+    DiscreteParametric(int iinf_bound , int isup_bound , const std::vector<boost::variant<int, float> > &parameter);
     DiscreteParametric(int iinf_bound , int ino_segment , int isequence_length);
     DiscreteParametric(const Distribution &dist , int ialloc_nb_value = I_DEFAULT);
     DiscreteParametric(const Distribution &dist , double scaling_coeff);
@@ -619,7 +614,10 @@ namespace stat_tool {
     DiscreteParametric(const DiscreteParametric &dist ,
                        distribution_transformation transform = DISTRIBUTION_COPY ,
                        int ialloc_nb_value = I_DEFAULT);
-    DiscreteParametric& operator=(const DiscreteParametric &dist);
+    virtual DiscreteParametric& operator=(const DiscreteParametric &dist);
+
+    /// return copy of object
+    virtual DiscreteParametric* ptr_copy() const = 0;
 
     static DiscreteParametric* parsing(StatError &error , std::ifstream &in_file , int &line ,
                                        discrete_parametric last_ident = NEGATIVE_BINOMIAL ,
@@ -634,31 +632,24 @@ namespace stat_tool {
     std::ostream& plot_title_print(std::ostream &os) const;
 
     static int nb_value_computation(discrete_parametric ident , int inf_bound , int sup_bound ,
-                                    double parameter , double probability ,
+    								std::vector<boost::variant<int, float> > parameter,
                                     double cumul_threshold = CUMUL_THRESHOLD);
 
     int nb_parameter_computation();
     void nb_parameter_update();
 
-    double parametric_mean_computation() const;
-    double parametric_variance_computation() const;
-    double parametric_skewness_computation() const;
-    double parametric_kurtosis_computation() const;
+    virtual double parametric_mean_computation() const;
+    virtual double parametric_variance_computation() const;
+    virtual double parametric_skewness_computation() const;
+    virtual double parametric_kurtosis_computation() const;
 
-    double sup_norm_distance_computation(const DiscreteParametric &dist) const;
+    virtual double sup_norm_distance_computation(const DiscreteParametric &dist) const;
 
-    void binomial_computation(int inb_value , distribution_computation mode);
-    void poisson_computation(int inb_value , double cumul_threshold ,
-                             distribution_computation mode);
-    void negative_binomial_computation(int inb_value , double cumul_threshold ,
-                                       distribution_computation mode);
-    void geometric_poisson_computation(int inb_value , double cumul_threshold);
-    void uniform_computation();
     void prior_segment_length_computation();
 
-    void computation(int min_nb_value = 1 ,
-                     double cumul_threshold = CUMUL_THRESHOLD);
-    int simulation() const;
+    virtual void computation(int min_nb_value = 1 ,
+                             double cumul_threshold = CUMUL_THRESHOLD);
+    virtual int simulation() const;
 
     double renewal_likelihood_computation(const Forward &forward_dist ,
                                           const FrequencyDistribution &within ,
@@ -701,12 +692,9 @@ namespace stat_tool {
 
     Forward(int inb_value = 0 , discrete_parametric iident = CATEGORICAL ,
             int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
-            double iparameter = D_DEFAULT , double iprobability = D_DEFAULT)
-    :DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability) {}
-    Forward(const DiscreteParametric &dist , int ialloc_nb_value = I_DEFAULT)
-    :DiscreteParametric(dist , DISTRIBUTION_COPY , ialloc_nb_value) { computation(dist); }
-    Forward(const Forward &forward , int ialloc_nb_value = I_DEFAULT)
-    :DiscreteParametric((DiscreteParametric&)forward , DISTRIBUTION_COPY , ialloc_nb_value) {}
+            double iparameter = D_DEFAULT , double iprobability = D_DEFAULT);
+    Forward(const DiscreteParametric &dist , int ialloc_nb_value = I_DEFAULT);
+    Forward(const Forward &forward , int ialloc_nb_value = I_DEFAULT);
 
     void computation(const DiscreteParametric &dist);
   };

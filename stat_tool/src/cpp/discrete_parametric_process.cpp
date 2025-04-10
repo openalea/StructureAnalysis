@@ -42,6 +42,7 @@
 
 #include <boost/tokenizer.hpp>
 
+#include "distribution.h"
 #include "markovian.h"
 #include "stat_label.h"
 
@@ -75,7 +76,7 @@ DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , int inb_val
     observation = new DiscreteParametric*[nb_state];
     if (nb_value > 0) {
       for (i = 0;i < nb_state;i++) {
-        observation[i] = new DiscreteParametric(UNIFORM , 0 , nb_value , D_DEFAULT , D_DEFAULT);
+        observation[i] = new Uniform(0 , nb_value);
       }
     }
 
@@ -123,7 +124,7 @@ DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , DiscretePar
 
   observation = new DiscreteParametric*[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = new DiscreteParametric(*pobservation[i] , DISTRIBUTION_COPY , nb_value);
+    observation[i] = pobservation[i]->ptr_copy();
   }
 
   weight = NULL;
@@ -154,14 +155,13 @@ void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process, b
   if (mass_copy && process.observation != NULL){
 	  for (i = 0;i < nb_state;i++) {
 		  if (process.observation[i] != NULL)
-			  observation[i] = new DiscreteParametric(*(process.observation[i]) , DISTRIBUTION_COPY , process.observation[i]->alloc_nb_value);
-		  	  observation[i]->mass_copy(*(process.observation[i]));
+			  observation[i] = process.observation[i]->ptr_copy();
 	  }
   } else {
 	  if (process.observation != NULL) {
 		  for (i = 0;i < nb_state;i++) {
 			  if (process.observation[i] != NULL)
-				  observation[i] = new DiscreteParametric(*(process.observation[i]) , DISTRIBUTION_COPY , nb_value);
+				  observation[i] = process.observation[i]->ptr_copy();
 		  }
 	  }
   }

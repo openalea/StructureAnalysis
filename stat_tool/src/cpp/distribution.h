@@ -49,6 +49,35 @@ namespace stat_tool {
   class DiscreteDistributionData;
 
   /// \brief Discrete parametric distribution with pointer on DiscreteDistributionData
+  class STAT_TOOL_API Uniform : public DiscreteParametric {
+
+	  public:
+	  	  Uniform(int iinf_bound , int isup_bound);
+	  	  void computation(int min_nb_value = 1 ,
+	  			  	       double cumul_threshold = CUMUL_THRESHOLD);
+	  	  DiscreteParametric* ptr_copy() const;
+  };
+
+  class STAT_TOOL_API Categorical : public DiscreteParametric {
+
+	  public:
+	  	  Categorical(int iinf_bound , int isup_bound,  const std::vector<boost::variant<int, float> > &probabilities);
+	  	  void computation(int min_nb_value = 1 ,
+	  			  	       double cumul_threshold = CUMUL_THRESHOLD);
+	  	  DiscreteParametric* ptr_copy() const;
+  };
+
+  class STAT_TOOL_API NegativeBinomial : public DiscreteParametric {
+
+	  public:
+	  	  NegativeBinomial(int iinf_bound , int isup_bound,  const std::vector<boost::variant<int, float> > &probabilities);
+	  	  NegativeBinomial(int iinf_bound , int isup_bound,  double dparameter, double probability);
+	  	  void computation(int min_nb_value = 1 ,
+	  			  	       double cumul_threshold = CUMUL_THRESHOLD);
+	  	  void computation(int inb_value , double cumul_threshold ,
+	  	                                  distribution_computation mode);
+	  	  DiscreteParametric* ptr_copy() const;
+  };
 
   class STAT_TOOL_API DiscreteParametricModel : public StatInterface , public DiscreteParametric {
 
@@ -72,15 +101,8 @@ namespace stat_tool {
 
   public :
 
-    DiscreteParametricModel(int inb_value = 0 , discrete_parametric iident = CATEGORICAL ,
-                            int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
-                            double iparameter = D_DEFAULT, double iprobability = D_DEFAULT)
-    :DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability)
-    { frequency_distribution = NULL; }
-    DiscreteParametricModel(discrete_parametric iident , int iinf_bound , int isup_bound ,
-                            double iparameter , double iprobability ,
-                            double cumul_threshold = CUMUL_THRESHOLD)
-    :DiscreteParametric(iident , iinf_bound , isup_bound , iparameter , iprobability , cumul_threshold)
+    DiscreteParametricModel(int iinf_bound , int isup_bound , std::vector<boost::variant<int, float> > parameter)
+    :DiscreteParametric(iinf_bound , isup_bound , parameter)
     { frequency_distribution = NULL; }
     DiscreteParametricModel(int iinf_bound , int ino_segment , int isequence_length)
     :DiscreteParametric(iinf_bound , ino_segment , isequence_length)

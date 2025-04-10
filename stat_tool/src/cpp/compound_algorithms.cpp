@@ -65,6 +65,7 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
 {
   int i , j;
   DiscreteParametric *power_dist;
+  std::vector<boost::variant<int, float> > parameter;
 
 
   // computation of the sum distribution and the basis distribution
@@ -79,8 +80,12 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
   // computation of convolution powers of the basis distribution and
   // computation of the resulting compound distribution
 
-  power_dist = new DiscreteParametric((sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1 ,
-                                      distribution->ident);
+  parameter.resize((sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1);
+  for (i = 0;i < parameter.size();i++){
+	  parameter[i] = boost::variant<float>(1./ parameter.size());
+  }
+
+  power_dist = new Categorical(0, (sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1, parameter);
 
   for (i = 0;i < MIN(power_dist->nb_value , alloc_nb_value);i++) {
     mass[i] = 0.;
@@ -89,13 +94,20 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
     mass[0] += sum_distribution->mass[0];
   }
 
-  if (((distribution->ident == CATEGORICAL) || (distribution->ident == UNIFORM)) &&
-      (sum_distribution->offset > 1)) {
+  if (sum_distribution->offset > 1) {
     power_dist->mass_copy(*distribution);
     for (i = 2;i < sum_distribution->offset;i++) {
       power_dist->convolution(*power_dist , *distribution);
     }
   }
+  /* if (((distribution->ident == CATEGORICAL) || (distribution->ident == UNIFORM)) &&
+       (sum_distribution->offset > 1)) {
+     power_dist->mass_copy(*distribution);
+     for (i = 2;i < sum_distribution->offset;i++) {
+       power_dist->convolution(*power_dist , *distribution);
+     }
+   }*/
+
 
   for (i = MAX(sum_distribution->offset , 1);i < sum_distribution->nb_value;i++) {
     if (i == 1) {
@@ -103,18 +115,21 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
     }
 
     else {
-      if ((distribution->ident == CATEGORICAL) || (distribution->ident == UNIFORM)) {
+    	power_dist->convolution(*power_dist , *distribution);
+        // }
+      /* if ((distribution->ident == CATEGORICAL) || (distribution->ident == UNIFORM)) {
         power_dist->convolution(*power_dist , *distribution);
-      }
+      */
  
-      else {
+      // else {
         power_dist->inf_bound = i * distribution->inf_bound;
         power_dist->sup_bound = (distribution->sup_bound != I_DEFAULT ? i * distribution->sup_bound : I_DEFAULT);
-        power_dist->parameter = (distribution->parameter != D_DEFAULT ? i * distribution->parameter : D_DEFAULT);
-        power_dist->probability = distribution->probability;
+        power_dist->parameter.resize( distribution->parameter.size());
+        for (j = 0; j < distribution->parameter.size(); j++)
+        	power_dist->parameter[j] = distribution->parameter[j];
 
         power_dist->computation(min_nb_value , cumul_threshold);
-      }
+      //}
     }
 
     for (j = power_dist->offset;j < MIN(power_dist->nb_value , alloc_nb_value);j++) {
@@ -174,7 +189,7 @@ void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
     min = sum_nb_value;
   }
 
-  if ((distribution->ident == CATEGORICAL) || (distribution->ident == UNIFORM)) {
+  /* if ((distribution->ident == CATEGORICAL) || (distribution->ident == UNIFORM)) {
     power_dist[min]->ident = distribution->ident;
 
     if (dist_flag) {
@@ -194,22 +209,22 @@ void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
     }
   }
 
-  else {
+  else { */
     if (min == 1) {
       power_dist[min]->mass_copy(*distribution);
       min++;
     }
 
     for (i = min;i < sum_distribution->nb_value;i++) {
-      power_dist[i]->ident = distribution->ident;
-      power_dist[i]->inf_bound = i * distribution->inf_bound;
-      power_dist[i]->sup_bound = (distribution->sup_bound != I_DEFAULT ? i * distribution->sup_bound : I_DEFAULT);
-      power_dist[i]->parameter = (distribution->parameter != D_DEFAULT ? i * distribution->parameter : D_DEFAULT);
-      power_dist[i]->probability = distribution->probability;
+        power_dist[i]->inf_bound = i * distribution->inf_bound;
+        power_dist[i]->sup_bound = (distribution->sup_bound != I_DEFAULT ? i * distribution->sup_bound : I_DEFAULT);
+        power_dist[i]->parameter.resize( distribution->parameter.size());
+        for (j = 0; j < distribution->parameter.size(); j++)
+        	power_dist[i]->parameter[j] = distribution->parameter[j];
 
-      power_dist[i]->computation(min_nb_value , cumul_threshold);
+        power_dist[i]->computation(min_nb_value , cumul_threshold);
     }
-  }
+  //}
 
   // computation of the resulting compound distribution
 
@@ -410,13 +425,14 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 
 {
   bool status = true , sum_compute , dist_compute;
-  int i;
+  int i, j;
   int sum_nb_value , nb_likelihood_decrease;
   double likelihood , previous_likelihood , hlikelihood , *penalty;
   DiscreteParametric **power_dist;
   Reestimation<double> *sum_reestim , *reestim;
   Compound *compound;
   CompoundData *compound_histo;
+  std::vector<boost::variant<int, float> > parameter;
 
 
   compound = NULL;
@@ -487,8 +503,12 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 
     power_dist = new DiscreteParametric*[sum_nb_value];
     for (i = MAX(sum_dist.offset - 1 , 1);i < sum_nb_value;i++) {
-      power_dist[i] = new DiscreteParametric(i * (compound->distribution->alloc_nb_value - 1) + 1 ,
-                                             compound->distribution->ident);
+        parameter.resize(i * (compound->distribution->alloc_nb_value - 1) + 1);
+        for (j = 0;j < parameter.size();j++)
+      	  parameter[j] = 1./ parameter.size();
+
+        power_dist[i] = new Categorical(0, i * (compound->distribution->alloc_nb_value - 1) + 1 ,
+        		                        parameter);
     }
 
     sum_reestim = new Reestimation<double>(sum_nb_value);
@@ -503,11 +523,13 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 
     switch (type) {
     case SUM :
-      compound->sum_distribution->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
-      break;
+    	parameter.resize(0);
+    	compound->sum_distribution->init(I_DEFAULT , I_DEFAULT , parameter);
+    	break;
     case ELEMENTARY :
-      compound->distribution->init(CATEGORICAL , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
-      break;
+    	parameter.resize(0);
+    	compound->distribution->init(I_DEFAULT , I_DEFAULT , parameter);
+    	break;
     }
 
     likelihood = D_INF;
@@ -783,7 +805,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
   double proba;
   DiscreteParametric *unknown_dist;
   Compound *compound;
-
+  std::vector<boost::variant<int, float> > parameter;
 
   error.init();
 
@@ -803,13 +825,17 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
 
     switch (type) {
     case SUM :
-      unknown_dist = new DiscreteParametric(NEGATIVE_BINOMIAL , min_inf_bound , I_DEFAULT ,
-                                            1. , proba);
-      break;
+		parameter.resize(2);
+		parameter[0] = 1.;
+		parameter[1] = proba;
+		unknown_dist = new NegativeBinomial(min_inf_bound , I_DEFAULT , parameter);
+		break;
     case ELEMENTARY :
-      unknown_dist = new DiscreteParametric(NEGATIVE_BINOMIAL , min_inf_bound , I_DEFAULT ,
-                                            1. , proba , COMPOUND_THRESHOLD);
-      break;
+		parameter.resize(2);
+		parameter[0] = 1.;
+		parameter[1] = proba;
+		unknown_dist = new NegativeBinomial(min_inf_bound , I_DEFAULT , parameter);
+		break;
     }
 
 #   ifdef DEBUG

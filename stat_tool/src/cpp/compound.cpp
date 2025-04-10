@@ -86,9 +86,8 @@ Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric
 {
   compound_data = NULL;
 
-  sum_distribution = new DiscreteParametric(sum_dist , NORMALIZATION);
-  distribution = new DiscreteParametric(dist.ident , dist.inf_bound , dist.sup_bound ,
-                                        dist.parameter , dist.probability , cumul_threshold);
+  sum_distribution = sum_dist.ptr_copy(NORMALIZATION);
+  distribution = dist.ptr_copy();
 
   Distribution::init((sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1);
 
