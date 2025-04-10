@@ -169,20 +169,17 @@ public:
   static DistanceMatrix*
   read_from_file(char *filename)
   {
-    DistanceMatrix * data;
+    DistanceMatrix * data = NULL;
     StatError error;
 
     // not implemented. see vectors.cpp for an exmaple.
     // data = DistanceMatrix::ascii_read(error, filename);
 
-    if (data)
-      {
-        return data;
-      }
-    else
+    if (!data)
       {
         stat_tool::wrap_util::throw_error(error);
       }
+    return data;
 
   }
   ;

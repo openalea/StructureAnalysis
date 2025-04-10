@@ -62,15 +62,16 @@ public:
   static int
   histo_get_item(FrequencyDistribution &h, const object& key)
   {
-    int val = extract<int> (key);
+    int val = extract<int> (key), ret = I_DEFAULT;
 
     if ((val >= 0) && (val < h.nb_value))
-      return h.frequency[val];
+      ret = h.frequency[val];
     else
       {
         PyErr_SetString(PyExc_IndexError, "Bad Index");
         throw_error_already_set();
       }
+    return(ret);
   }
 
   static std::string

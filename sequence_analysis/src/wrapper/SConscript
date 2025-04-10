@@ -24,6 +24,6 @@ sources = env.ALEAGlob('*.cpp')
 LIBS = ['vpstat_tool', 'vpsequence']
 env.AppendUnique(LIBS=LIBS)
 
-env.AppendUnique(CPPDEFINES=['MESSAGE'])
+env.AppendUnique(CPPDEFINES=['MESSAGE', 'BOOST_NO_AUTO_PTR'])
 
 env.ALEAWrapper("../openalea/sequence_analysis", "_sequence_analysis", sources)

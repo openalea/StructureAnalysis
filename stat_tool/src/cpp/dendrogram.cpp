@@ -836,7 +836,7 @@ double Dendrogram::coefficient_computation(cluster_scale iscale) const
 double Dendrogram::coefficient_computation() const
 
 {
-  coefficient_computation(scale);
+  return coefficient_computation(scale);
 }
 
 

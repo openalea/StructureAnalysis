@@ -433,7 +433,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                                                                     duration_distribution_mean_estimator mean_estimator) const
 
 {
-  bool status;
+  bool status, reload_prev_optimal = false;
   int i , j , k , m , n;
   int max_nb_value , iter , nb_likelihood_decrease , offset , nb_value , *occupancy_nb_value ,
       *censored_occupancy_nb_value , **pioutput;
@@ -1746,6 +1746,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
     	likelihood = hsmarkov->likelihood_computation(*this);
     	delete hsmarkov_best;
     	hsmarkov_best = NULL;
+    	reload_prev_optimal = true;
     }
 
     if (likelihood != D_INF) {
@@ -1769,21 +1770,22 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       }
 
       // reestimation of the initial probabilities
+      if (!reload_prev_optimal) {
+		  if (hsmarkov->type == ORDINARY) {
+			reestimation(hsmarkov->nb_state , chain_reestim->initial ,
+						 hsmarkov->initial , MIN_PROBABILITY , true);
+		  }
 
-      if (hsmarkov->type == ORDINARY) {
-        reestimation(hsmarkov->nb_state , chain_reestim->initial ,
-                     hsmarkov->initial , MIN_PROBABILITY , true);
-      }
+		  // reestimation of the transition probabilities
 
-      // reestimation of the transition probabilities
+		  for (i = 0;i < hsmarkov->nb_state;i++) {
+			reestimation(hsmarkov->nb_state , chain_reestim->transition[i] ,
+						 hsmarkov->transition[i] , MIN_PROBABILITY , true);
+		  }
 
-      for (i = 0;i < hsmarkov->nb_state;i++) {
-        reestimation(hsmarkov->nb_state , chain_reestim->transition[i] ,
-                     hsmarkov->transition[i] , MIN_PROBABILITY , true);
-      }
-
-      if (hsmarkov->type == EQUILIBRIUM) {
-        hsmarkov->initial_probability_computation();
+		  if (hsmarkov->type == EQUILIBRIUM) {
+			hsmarkov->initial_probability_computation();
+		  }
       }
 
       for (i = 0;i < hsmarkov->nb_state;i++) {
