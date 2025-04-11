@@ -465,6 +465,7 @@ namespace stat_tool {
     void init(int inb_value);
     void copy(const Distribution &dist , int ialloc_nb_value = I_DEFAULT);
     void normalization_copy(const Distribution &dist);
+    void normalization(double complement); ///< renormalize distribution
 
     Distribution(int inb_value = 0);
     Distribution(int inb_value , double *imass);
@@ -596,16 +597,18 @@ namespace stat_tool {
       int sup_bound;        ///< upper bound (binomial, uniform)
       int no_segment;       ///< number of segments (prior segment length distribution)
     };
-    std::vector<boost::variant<int, float> > parameter;       ///< parameters (except inf_bound and sup_bound)
+    std::vector<boost::variant<int, double> > parameter;       ///< parameters (except inf_bound and sup_bound)
     std::vector<variable_nature> ptypes;       ///< parameter types
     int sequence_length;    ///< sequence length (prior segment length distribution)
+    std::string name; ///< distribution name
 
     /// initialize distribution parameters
-    void init(int iinf_bound , int isup_bound , std::vector<boost::variant<int, float> > parameter);
+    void init(int iinf_bound , int isup_bound , std::vector<boost::variant<int, double> > parameter);
     /// copy distribution
     virtual void copy(const DiscreteParametric &dist);
 
-    DiscreteParametric(int iinf_bound , int isup_bound , const std::vector<boost::variant<int, float> > &parameter);
+    DiscreteParametric(int iinf_bound , int isup_bound , const std::vector<boost::variant<int, double> > &parameter,
+                       double cumul_threshold = CUMUL_THRESHOLD);
     DiscreteParametric(int iinf_bound , int ino_segment , int isequence_length);
     DiscreteParametric(const Distribution &dist , int ialloc_nb_value = I_DEFAULT);
     DiscreteParametric(const Distribution &dist , double scaling_coeff);
@@ -618,6 +621,8 @@ namespace stat_tool {
 
     /// return copy of object
     virtual DiscreteParametric* ptr_copy() const = 0;
+    /// return copy of object with transformation
+    virtual DiscreteParametric* ptr_copy(distribution_transformation transform) const = 0;
 
     static DiscreteParametric* parsing(StatError &error , std::ifstream &in_file , int &line ,
                                        discrete_parametric last_ident = NEGATIVE_BINOMIAL ,
@@ -632,7 +637,7 @@ namespace stat_tool {
     std::ostream& plot_title_print(std::ostream &os) const;
 
     static int nb_value_computation(discrete_parametric ident , int inf_bound , int sup_bound ,
-    								std::vector<boost::variant<int, float> > parameter,
+    								std::vector<boost::variant<int, double> > parameter,
                                     double cumul_threshold = CUMUL_THRESHOLD);
 
     int nb_parameter_computation();

@@ -1,6 +1,7 @@
 TODO list for `StructureAnalysis` to be updated / completed. We target a next official release of the package that must integrate with openalea CI/CD workflow and work on all plateforms.
 
 [ ] Repare `stat_tool` and `sequence_analysis` tests
+    + Add vector of parameter types in DiscreteParametric
     + Add copy constructor DiscreteParametric::ptr_copy(distribution_transformation)?
     + create a new branch for each new development (do not systematically use new_python_api)
     + update tests to be compliant with python 3

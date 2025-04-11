@@ -48,35 +48,45 @@ namespace stat_tool {
 
   class DiscreteDistributionData;
 
-  /// \brief Discrete parametric distribution with pointer on DiscreteDistributionData
+  /// \brief Discrete Uniform distribution
   class STAT_TOOL_API Uniform : public DiscreteParametric {
 
 	  public:
-	  	  Uniform(int iinf_bound , int isup_bound);
+	  	  Uniform(int iinf_bound , int isup_bound, double cumul_threshold = CUMUL_THRESHOLD);
 	  	  void computation(int min_nb_value = 1 ,
 	  			  	       double cumul_threshold = CUMUL_THRESHOLD);
 	  	  DiscreteParametric* ptr_copy() const;
+	  	  DiscreteParametric* ptr_copy(distribution_transformation transform) const;
   };
 
+  /// \brief Categorical distribution
   class STAT_TOOL_API Categorical : public DiscreteParametric {
 
 	  public:
-	  	  Categorical(int iinf_bound , int isup_bound,  const std::vector<boost::variant<int, float> > &probabilities);
+	  	  Categorical(int iinf_bound , int isup_bound,  const std::vector<boost::variant<int, double> > &probabilities,
+	  			  	  double cumul_threshold = CUMUL_THRESHOLD);
 	  	  void computation(int min_nb_value = 1 ,
 	  			  	       double cumul_threshold = CUMUL_THRESHOLD);
 	  	  DiscreteParametric* ptr_copy() const;
+	  	  DiscreteParametric* ptr_copy(distribution_transformation transform) const;
   };
 
+  /// \brief Negative binomial distribution
+  /// \brief parameters: number of successes and success probability
   class STAT_TOOL_API NegativeBinomial : public DiscreteParametric {
 
 	  public:
-	  	  NegativeBinomial(int iinf_bound , int isup_bound,  const std::vector<boost::variant<int, float> > &probabilities);
+		  NegativeBinomial(int iinf_bound , const std::vector<boost::variant<int, double> > &probabilities,
+								   double cumul_threshold = CUMUL_THRESHOLD);
+		  NegativeBinomial(int iinf_bound , int isup_bound,  const std::vector<boost::variant<int, double> > &probabilities,
+							   double cumul_threshold = CUMUL_THRESHOLD);
 	  	  NegativeBinomial(int iinf_bound , int isup_bound,  double dparameter, double probability);
 	  	  void computation(int min_nb_value = 1 ,
 	  			  	       double cumul_threshold = CUMUL_THRESHOLD);
 	  	  void computation(int inb_value , double cumul_threshold ,
 	  	                                  distribution_computation mode);
 	  	  DiscreteParametric* ptr_copy() const;
+	  	  DiscreteParametric* ptr_copy(distribution_transformation transform) const;
   };
 
   class STAT_TOOL_API DiscreteParametricModel : public StatInterface , public DiscreteParametric {
@@ -101,7 +111,7 @@ namespace stat_tool {
 
   public :
 
-    DiscreteParametricModel(int iinf_bound , int isup_bound , std::vector<boost::variant<int, float> > parameter)
+    DiscreteParametricModel(int iinf_bound , int isup_bound , std::vector<boost::variant<int, double> > parameter)
     :DiscreteParametric(iinf_bound , isup_bound , parameter)
     { frequency_distribution = NULL; }
     DiscreteParametricModel(int iinf_bound , int ino_segment , int isequence_length)

@@ -94,7 +94,7 @@ Convolution::Convolution(int nb_dist , const DiscreteParametric **pdist)
 
   distribution = new DiscreteParametric*[nb_distribution];
   for (i = 0;i < nb_distribution;i++) {
-    distribution[i] = new DiscreteParametric(*pdist[i] , NORMALIZATION);
+    distribution[i] = pdist[i]->ptr_copy(NORMALIZATION);
     cnb_value += distribution[i]->nb_value - 1;
   }
 
@@ -124,7 +124,7 @@ Convolution::Convolution(int nb_dist , const vector<DiscreteParametric> &idist)
 
   distribution = new DiscreteParametric*[nb_distribution];
   for (i = 0;i < nb_distribution;i++) {
-    distribution[i] = new DiscreteParametric(idist[i] , NORMALIZATION);
+    distribution[i] = idist[i]->ptr_copy(NORMALIZATION);
     cnb_value += distribution[i]->nb_value - 1;
   }
 
@@ -147,22 +147,27 @@ Convolution::Convolution(const DiscreteParametric &known_dist ,
 
 {
   convolution_data = NULL;
+  std::vector<boost::variant<int, double> > parameter;
 
   nb_distribution = 2;
   distribution = new DiscreteParametric*[nb_distribution];
 
-  if ((known_dist.ident == POISSON) || (known_dist.ident == NEGATIVE_BINOMIAL)) {
-    distribution[0] = new DiscreteParametric(known_dist.ident , known_dist.inf_bound ,
-                                             known_dist.sup_bound , known_dist.parameter ,
-                                             known_dist.probability , CONVOLUTION_THRESHOLD);
-  }
-  else {
-    distribution[0] = new DiscreteParametric(known_dist , NORMALIZATION);
-  }
-  distribution[1] = new DiscreteParametric(unknown_dist , DISTRIBUTION_COPY ,
-                                           (int)(unknown_dist.nb_value * NB_VALUE_COEFF));
+  // distribution[0] = known_dist->ptr_copy();
+  // distribution[0]->computation(known_dist.inf_bound, CONVOLUTION_THRESHOLD);
 
-  Distribution::init(distribution[0]->alloc_nb_value + distribution[1]->alloc_nb_value - 1);
+  distribution[1] = unknown_dist>ptr_copy();
+
+
+  parameter.resize(known_dist->alloc_nb_value + unknown_dist->alloc_nb_value - 1);
+
+  for (i = 0;i < parameter.size();i++){
+	  parameter[i] = boost::variant<double>(1./ parameter.size());
+  }
+
+  distribution[0] = new Categorical(0, parameter.size()+1, parameter);
+
+
+  Distribution::init();
 }
 
 
@@ -192,7 +197,7 @@ void Convolution::copy(const Convolution &convol , bool data_flag)
 
   distribution = new DiscreteParametric*[nb_distribution];
   for (i = 0;i < nb_distribution;i++) {
-    distribution[i] = new DiscreteParametric(*(convol.distribution[i]));
+    distribution[i] = convol.distribution[i]->ptr_copy();
   }
 }
 
@@ -282,8 +287,7 @@ DiscreteParametricModel* Convolution::extract(StatError &error , int index) cons
 
   else {
     index--;
-    pdist = new DiscreteParametricModel(*distribution[index] ,
-                                        (convolution_data ? convolution_data->frequency_distribution[index] : NULL));
+    pdist = distribution[index]->ptr_copy();
   }
 
   return pdist;

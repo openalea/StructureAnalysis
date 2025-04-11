@@ -422,6 +422,36 @@ void Distribution::normalization_copy(const Distribution &dist)
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Renormalization of a Distribution object using
+ *  	probability complement
+ *
+ *  \param[in] complement probability (double)
+ */
+/*--------------------------------------------------------------*/
+
+void Distribution::normalization(double complement)
+
+{
+    int i;
+
+    if (complement != 0.) {
+
+		for (i = 0;i < nb_value;i++) {
+		  mass[i] = mass[i] / (1. - complement);
+		}
+
+		max = max / (1. - complement);
+
+		complement = 0.;
+
+		cumul_computation();
+		mean_computation();
+		variance_computation();
+    }
+}
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Copy constructor of the Distribution class.
  *
  *  \param[in] dist            reference on a Distribution object,
@@ -3263,14 +3293,18 @@ void Distribution::log_computation()
 /*--------------------------------------------------------------*/
 /**
  *  \brief Constructor for discrete uniform distribution
+ *  \param[in] iinf_bound inferior bound (int)
+ *  \param[in] isup_bound superior bound (int)
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function (double)
  */
 /*--------------------------------------------------------------*/
 
-Uniform::Uniform(int iinf_bound , int isup_bound)
-: DiscreteParametric(iinf_bound, isup_bound, std::vector<boost::variant<int, float> >())
+Uniform::Uniform(int iinf_bound , int isup_bound, double cumul_threshold)
+: DiscreteParametric(iinf_bound, isup_bound, std::vector<boost::variant<int, double> >())
 {
-	init(inf_bound, sup_bound, std::vector<boost::variant<int, float> >());
-	computation();
+	name = "Uniform";
+	init(inf_bound, sup_bound, std::vector<boost::variant<int, double> >());
+	computation(inf_bound, cumul_threshold);
 }
 /*--------------------------------------------------------------*/
 /**
@@ -3318,22 +3352,51 @@ DiscreteParametric* Uniform::ptr_copy() const
 	return cp;
 }
 
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy discrete uniform distribution with transformation
+ *
+ *  \param[in] transform  type of transform (DISTRIBUTION_COPY/NORMALIZATION),
+ */
+/*--------------------------------------------------------------*/
+DiscreteParametric* Uniform::ptr_copy(distribution_transformation transform) const
+{
+	Uniform *cp = NULL;
+
+	cp = new Uniform(inf_bound, sup_bound);
+
+	if (transform==NORMALIZATION)
+		cp->normalization(complement);
+
+	return cp;
+}
 
 /*--------------------------------------------------------------*/
 /**
  *  \brief Constructor for categorical distribution
+ *
+ *  \param[in] iinf_bound inferior bound (int)
+ *  \param[in] isup_bound superior bound (int)
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function (double)
  */
 /*--------------------------------------------------------------*/
 
-Categorical::Categorical(int iinf_bound , int isup_bound, const std::vector<boost::variant<int, float> > &probabilities)
+Categorical::Categorical(int iinf_bound , int isup_bound, const std::vector<boost::variant<int, double> > &probabilities,
+		                 double  cumul_threshold)
 : DiscreteParametric(iinf_bound, isup_bound, probabilities)
 {
-	init(inf_bound, sup_bound, std::vector<boost::variant<int, float> >());
-	computation();
+	int i = probabilities.size();
+
+	ptypes.resize(i);
+	for (i = 0; i < ptypes.size(); i++)
+		ptypes[i] = REAL_VALUE;
+	name = "Categorical";
+	init(inf_bound, sup_bound, std::vector<boost::variant<int, double> >());
+	computation(inf_bound, cumul_threshold);
 }
 /*--------------------------------------------------------------*/
 /**
- *  \brief Computation of the probability mass function of a discrete uniform distribution.
+ *  \brief Computation of the probability mass function of a categorical distribution.
  *
  *  \param[in] min_nb_value    minimum number of values,
  *  \param[in] cumul_threshold threshold on the cumulative distribution function.*
@@ -3358,7 +3421,7 @@ void Categorical::computation(int min_nb_value, double cumul_threshold)
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Copy discrete uniform distribution
+ *  \brief Copy categorical distribution
  */
 /*--------------------------------------------------------------*/
 DiscreteParametric* Categorical::ptr_copy() const
@@ -3370,20 +3433,65 @@ DiscreteParametric* Categorical::ptr_copy() const
 	return cp;
 }
 
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy categorical distribution with transformation
+ *
+ *  \param[in] transform  type of transform (DISTRIBUTION_COPY/NORMALIZATION),
+ */
+/*--------------------------------------------------------------*/
+DiscreteParametric* Categorical::ptr_copy(distribution_transformation transform) const
+{
+	Categorical *cp = NULL;
+
+	cp = new Categorical(inf_bound, sup_bound, parameter);
+
+	if (transform==NORMALIZATION)
+		cp->normalization(complement);
+
+	return cp;
+}
 
 /*--------------------------------------------------------------*/
 /**
  *  \brief Constructor for negative binomial distribution
+ *
+ *  \param[in] iinf_bound inferior bound (int)
+ *  \param[in] parameters: number of successes and success probability (std::vector<boost::variant<int, double> >)
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function (double)
  */
 /*--------------------------------------------------------------*/
 
-NegativeBinomial::NegativeBinomial(int iinf_bound , int isup_bound,  const std::vector<boost::variant<int, float> > &parameter)
+NegativeBinomial::NegativeBinomial(int iinf_bound , const std::vector<boost::variant<int, double> > &parameter,
+		                           double cumul_threshold)
+: NegativeBinomial(iinf_bound , I_DEFAULT,  parameter, cumul_threshold)
+{}
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor for negative binomial distribution
+ *
+ *  \param[in] iinf_bound inferior bound (int)
+ *  \param[in] isup bound: not used, necessary for inheritance from DiscreteParametric
+ *  \param[in] parameters: number of successes and success probability (std::vector<boost::variant<int, double> >)
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function (double)
+ */
+/*--------------------------------------------------------------*/
+
+NegativeBinomial::NegativeBinomial(int iinf_bound , int isup_bound,  const std::vector<boost::variant<int, double> > &parameter,
+		                           double cumul_threshold)
 : DiscreteParametric(iinf_bound, isup_bound, parameter)
 {
+	int i;
+
 	assert(parameter.size() == 2);
 
+	ptypes.resize(2);
+	for (i = 0; i < ptypes.size(); i++)
+		ptypes[i] = REAL_VALUE;
+
 	init(inf_bound, sup_bound, parameter);
-	computation();
+	computation(inf_bound, cumul_threshold);
 }
 
 /*--------------------------------------------------------------*/
@@ -3393,15 +3501,31 @@ NegativeBinomial::NegativeBinomial(int iinf_bound , int isup_bound,  const std::
 /*--------------------------------------------------------------*/
 
 NegativeBinomial::NegativeBinomial(int iinf_bound , int isup_bound,  double dparameter, double probability)
-: DiscreteParametric(iinf_bound, isup_bound, std::vector<boost::variant<int, float> >())
+: DiscreteParametric(iinf_bound, isup_bound, std::vector<boost::variant<int, double> >())
 {
 	parameter.resize(2);
 	parameter[0] = dparameter;
 	parameter[1] = probability;
 
+	name = "NegativeBinomial";
 	init(inf_bound, sup_bound, parameter);
 	computation();
 }
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Computation of the probability mass function
+ *  	of a negative binomial distribution with standard mode.
+ *
+ *  \param[in] inb_value       number of values,
+ *  \param[in] cumul_threshold threshold on the cumulative distribution function,
+ *
+ */
+/*--------------------------------------------------------------*/
+void NegativeBinomial::computation(int inb_value, double cumul_threshold)
+{
+	computation(inb_value , cumul_threshold, STANDARD);
+}
+
 /*--------------------------------------------------------------*/
 /**
  *  \brief Computation of the probability mass function of a negative binomial distribution.
@@ -3412,12 +3536,6 @@ NegativeBinomial::NegativeBinomial(int iinf_bound , int isup_bound,  double dpar
  *
  */
 /*--------------------------------------------------------------*/
-
-void NegativeBinomial::computation(int inb_value, double cumul_threshold)
-{
-	computation(inb_value , cumul_threshold, STANDARD);
-}
-
 void NegativeBinomial::computation(int inb_value , double cumul_threshold ,
                                   distribution_computation mode)
 
@@ -3599,7 +3717,7 @@ void NegativeBinomial::computation(int inb_value , double cumul_threshold ,
 
 /*--------------------------------------------------------------*/
 /**
- *  \brief Copy discrete uniform distribution
+ *  \brief Copy negative binomial distribution
  */
 /*--------------------------------------------------------------*/
 DiscreteParametric* NegativeBinomial::ptr_copy() const
@@ -3611,5 +3729,23 @@ DiscreteParametric* NegativeBinomial::ptr_copy() const
 	return cp;
 }
 
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy negative binomial  distribution with transformation
+ *
+ *  \param[in] transform  type of transform (DISTRIBUTION_COPY/NORMALIZATION),
+ */
+/*--------------------------------------------------------------*/
+DiscreteParametric* NegativeBinomial::ptr_copy(distribution_transformation transform) const
+{
+	NegativeBinomial *cp = NULL;
+
+	cp = new NegativeBinomial(inf_bound, sup_bound, parameter);
+
+	if (transform==NORMALIZATION)
+		cp->normalization(complement);
+
+	return cp;
+}
 
 };  // namespace stat_tool

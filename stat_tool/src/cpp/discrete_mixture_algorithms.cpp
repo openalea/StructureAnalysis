@@ -141,9 +141,9 @@ void DiscreteMixture::computation(int min_nb_value , double cumul_threshold , bo
 
   // computation of the weight distribution
 
-  if (weight->ident != CATEGORICAL) {
-    weight->computation(1 , cumul_threshold);
-  }
+  assert (weight->name == "Categorical");
+  weight->computation(1 , cumul_threshold);
+
 
   // computation of the components
 
@@ -216,7 +216,7 @@ void DiscreteMixture::init(const FrequencyDistribution &histo , bool *estimate ,
   for (i = 0;i < nb_component;i++) {
 
     if (estimate[i]) {
-      if ((i > 0) && (component_flag) && (component[i]->ident != BINOMIAL)) {
+      if ((i > 0) && (component_flag)) {
         component[i]->inf_bound = j;
       }
       else {
@@ -242,7 +242,8 @@ void DiscreteMixture::init(const FrequencyDistribution &histo , bool *estimate ,
     }
 
     if (estimate[i]) {
-      switch (component[i]->ident) {
+      component[i]->em_initialize(histo, shift_mean);
+      /* switch (component[i]->ident) {
 
       case BINOMIAL : {
         component[i]->sup_bound = histo.nb_value - 1;
@@ -260,7 +261,7 @@ void DiscreteMixture::init(const FrequencyDistribution &histo , bool *estimate ,
     	  component[i]->probability = 1. / ((histo.nb_value)+1+shift_mean);
         break;
       }
-      }
+      }*/
     }
   }
 

@@ -119,25 +119,18 @@ Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric
 
   switch (type) {
 
-  case SUM : {
-    sum_distribution = new DiscreteParametric(sum_dist , DISTRIBUTION_COPY ,
-                                              (int)(sum_dist.nb_value * NB_VALUE_COEFF));
-    if ((dist.ident == POISSON) || (dist.ident == NEGATIVE_BINOMIAL)) {
-      distribution = new DiscreteParametric(dist.ident , dist.inf_bound , dist.sup_bound ,
-                                            dist.parameter , dist.probability , COMPOUND_THRESHOLD);
-    }
-    else {
-      distribution = new DiscreteParametric(dist , NORMALIZATION);
-    }
-    break;
-  }
+	  case SUM : {
+		sum_distribution = sum_dist.ptr_copy();
+		distribution = dist.ptr_copy();
+		distribution->computation(dist.offset, COMPOUND_THRESHOLD);
+		break;
+	  }
 
-  case ELEMENTARY : {
-    sum_distribution = new DiscreteParametric(sum_dist , NORMALIZATION);
-    distribution = new DiscreteParametric(dist , DISTRIBUTION_COPY ,
-                                          (int)(dist.nb_value * NB_VALUE_COEFF));
-    break;
-  }
+	  case ELEMENTARY : {
+		sum_distribution = sum_dist.ptr_copy(NORMALIZATION);
+		distribution = dist.ptr_copy();
+		break;
+	  }
   }
 
   Distribution::init((sum_distribution->alloc_nb_value - 1) * (distribution->alloc_nb_value - 1) + 1);
@@ -163,8 +156,8 @@ void Compound::copy(const Compound &compound , bool data_flag)
     compound_data = NULL;
   }
 
-  sum_distribution = new DiscreteParametric(*(compound.sum_distribution));
-  distribution = new DiscreteParametric(*(compound.distribution));
+  sum_distribution = compound.sum_distribution->ptr_copy();
+  distribution = compound.distribution->ptr_copy();
 }
 
 

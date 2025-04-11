@@ -65,7 +65,7 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
 {
   int i , j;
   DiscreteParametric *power_dist;
-  std::vector<boost::variant<int, float> > parameter;
+  std::vector<boost::variant<int, double> > parameter;
 
 
   // computation of the sum distribution and the basis distribution
@@ -82,7 +82,7 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
 
   parameter.resize((sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1);
   for (i = 0;i < parameter.size();i++){
-	  parameter[i] = boost::variant<float>(1./ parameter.size());
+	  parameter[i] = boost::variant<double>(1./ parameter.size());
   }
 
   power_dist = new Categorical(0, (sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1, parameter);
@@ -432,7 +432,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
   Reestimation<double> *sum_reestim , *reestim;
   Compound *compound;
   CompoundData *compound_histo;
-  std::vector<boost::variant<int, float> > parameter;
+  std::vector<boost::variant<int, double> > parameter;
 
 
   compound = NULL;
@@ -505,7 +505,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
     for (i = MAX(sum_dist.offset - 1 , 1);i < sum_nb_value;i++) {
         parameter.resize(i * (compound->distribution->alloc_nb_value - 1) + 1);
         for (j = 0;j < parameter.size();j++)
-      	  parameter[j] = 1./ parameter.size();
+      	  parameter[j] = boost::variant<double>(1./ parameter.size());
 
         power_dist[i] = new Categorical(0, i * (compound->distribution->alloc_nb_value - 1) + 1 ,
         		                        parameter);
@@ -805,7 +805,7 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
   double proba;
   DiscreteParametric *unknown_dist;
   Compound *compound;
-  std::vector<boost::variant<int, float> > parameter;
+  std::vector<boost::variant<int, double> > parameter;
 
   error.init();
 
@@ -826,14 +826,14 @@ Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream 
     switch (type) {
     case SUM :
 		parameter.resize(2);
-		parameter[0] = 1.;
-		parameter[1] = proba;
+		parameter[0] = boost::variant<double>(1.);
+		parameter[1] = boost::variant<double>(proba);
 		unknown_dist = new NegativeBinomial(min_inf_bound , I_DEFAULT , parameter);
 		break;
     case ELEMENTARY :
 		parameter.resize(2);
-		parameter[0] = 1.;
-		parameter[1] = proba;
+		parameter[0] = boost::variant<double>(1.);
+		parameter[1] = boost::variant<double>(proba);
 		unknown_dist = new NegativeBinomial(min_inf_bound , I_DEFAULT , parameter);
 		break;
     }
