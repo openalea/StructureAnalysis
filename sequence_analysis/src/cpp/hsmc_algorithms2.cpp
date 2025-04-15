@@ -6784,6 +6784,26 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence 
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Simulation of semi-markov-switching linear models, which require a single int covariate.
+ *
+ *  \param[in] error         reference on a StatError object,
+ *  \param[in] nb_sequence   number of sequences (int),
+ *  \param[in] iseq          reference on a Sequences object (covariate)
+ *  \param[in] ivariable     variable to be used as covariate (iseq.index_parameter if I_DEFAULT)
+ *  \param[in] counting_flag flag on the computation of the counting distributions.
+ *
+ *  \return                  SemiMarkovData object.
+ */
+/*--------------------------------------------------------------*/
+
+SemiMarkovData* HiddenSemiMarkov::semi_markov_switching_lm_simulation(StatError &error , int nb_sequence ,
+   																	  const Sequences &covariate,
+																	  int ivariable, bool counting_flag) const
+{
+}
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Computation of Kullback-Leibler divergences between hidden semi-Markov chains.
  *
  *  \param[in] error               reference on a StatError object,

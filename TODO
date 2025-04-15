@@ -5,7 +5,9 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
     + update tests to be compliant with python 3
     + Switch to pytest instead of nosetests.
     + How to generate documentation: C++, python (does sphinx make all?)
-    + Fix stat_tool_examples.py, test_estimate.py (rewrite NB estimation), test_multivariate_mixture_functional.py, test_vector_distance.py, test_hidden_semi_markov_functional.py
+    + Fix SConscript for multiple C++ tests
+    + Fix stat_tool_examples.py, test_estimate.py (rewrite NB estimation),
+    test_multivariate_mixture_functional.py, test_vector_distance.py, test_hidden_semi_markov_functional.py
     + ~~export set_seed in stat_tool.h, fix C++ functioning~~
     + use valgrind to find memory errors (possibly due to probability computations in NB distributions)
     + find the cause of "hidden_semi_markov::likelihood_computation" displaying different results on the same sequence in DEBUG mode (check this behaviour)

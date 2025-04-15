@@ -395,7 +395,20 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
 Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
                      index_parameter_type iindex_param_type , int inb_variable ,
                      variable_nature itype , int ***iint_sequence)
-
+: identifier(NULL),
+  max_length(0),
+  cumul_length(0),
+  length_distribution(NULL),
+  vertex_identifier(NULL),
+  index_parameter_distribution(NULL),
+  index_interval(NULL),
+  index_parameter(NULL),
+  type(NULL),
+  min_value(NULL),
+  max_value(NULL),
+  marginal_distribution(NULL),
+  marginal_histogram(NULL),
+  real_sequence(NULL)
 {
   int i , j , k;
   int *pisequence , *cisequence;
@@ -467,6 +480,20 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
 
 Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
                      int inb_variable , double ***ireal_sequence)
+: identifier(NULL),
+  max_length(0),
+  cumul_length(0),
+  length_distribution(NULL),
+  vertex_identifier(NULL),
+  index_parameter_distribution(NULL),
+  index_interval(NULL),
+  index_parameter(NULL),
+  type(NULL),
+  min_value(NULL),
+  max_value(NULL),
+  marginal_distribution(NULL),
+  marginal_histogram(NULL),
+  int_sequence(NULL)
 
 {
   int i , j , k;
@@ -520,7 +547,21 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
                      int **ivertex_identifier , index_parameter_type iindex_param_type ,
                      int **iindex_parameter , int inb_variable , variable_nature *itype ,
                      int ***iint_sequence , double ***ireal_sequence)
-
+: identifier(NULL),
+  max_length(0),
+  cumul_length(0),
+  length_distribution(NULL),
+  vertex_identifier(NULL),
+  index_parameter_distribution(NULL),
+  index_interval(NULL),
+  index_parameter(NULL),
+  type(NULL),
+  min_value(NULL),
+  max_value(NULL),
+  marginal_distribution(NULL),
+  marginal_histogram(NULL),
+  int_sequence(NULL),
+  real_sequence(NULL)
 {
   int i , j , k , m , n;
 
@@ -528,7 +569,6 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
   init(inb_sequence , iidentifier , ilength , ivertex_identifier ,
        iindex_param_type , inb_variable , itype , true , false);
 
-//  if (index_param_type != IMPLICIT_TYPE) {
   if (index_parameter) {
     for (i = 0;i < nb_sequence;i++) {
       for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
@@ -570,7 +610,12 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
     }
   }
 
+  min_value = new double[nb_variable];
+  max_value = new double[nb_variable];
+
   for (i = 0;i < nb_variable;i++) {
+	// min_value[i] = 0.;
+	// max_value[i] = 0.;
     min_value_computation(i);
     max_value_computation(i);
 
@@ -1735,6 +1780,174 @@ void Sequences::add_state_variable(const Sequences &seq)
   }
 }
 
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Copy of a Sequences object transforming some given existing
+ *  variable into an index parameter
+ *
+ *  \param[in] error     reference on a StatError object,
+ *  \param[in] ivariable variable index (int)
+ *  \param[in] check     flag on checking increasing index or not (bool)
+ *
+ *  \return             Sequences* object. */
+/*--------------------------------------------------------------*/
+
+Sequences* Sequences::set_variable_as_index_parameter(stat_tool::StatError &error,
+                                                      int ivariable,
+													  index_parameter_type index_param_type) const
+{
+	bool status = true;
+	int i, j, s;
+	int **iindex_parameter = NULL;
+	int ***iint_sequence = NULL;;
+	double ***ireal_sequence = NULL;;
+	Sequences *seq = NULL;
+	const int inb_sequence = this->nb_sequence;
+	const int inb_variable = this->nb_variable;
+	stat_tool::variable_nature *itype = NULL;
+	ostringstream error_message, correction_message;
+
+	error.init();
+
+	if ((ivariable < 1) || (ivariable > nb_variable)) {
+		status = false;
+		error_message << ivariable << ": " << STAT_error[STATR_VARIABLE_INDEX];
+		error.update((error_message.str()).c_str());
+	}
+	if ((status) && (type[ivariable-1] != INT_VALUE)) {
+		status = false;
+		error_message << ivariable << ": " << STAT_error[STATR_VARIABLE_TYPE];
+		error.update((error_message.str()).c_str());
+	}
+
+	if (status) {
+		itype = new stat_tool::variable_nature[inb_variable-1];
+		j = 0; // indices of variables in seq
+		iint_sequence = new int**[inb_sequence];
+		ireal_sequence = new double**[inb_sequence];
+		for (s = 0; s < inb_sequence; s++) {
+			iint_sequence[s] = new int*[inb_variable-1];
+			ireal_sequence[s] = new double*[inb_variable-1];
+		}
+		for (i = 0; i < inb_variable; i++) { // indices of variables in *this
+			if (i != ivariable-1) {
+				itype[j] = this->type[i];
+				for (s = 0; s < inb_sequence; s++) {
+					if (itype[j] == INT_VALUE) {
+						iint_sequence[s][j] = this->int_sequence[s][i];
+						ireal_sequence[s][j] = NULL;
+					} else {
+						ireal_sequence[s][j] = this->real_sequence[s][i];
+						iint_sequence[s][j] = NULL;
+					}
+				}
+				j++;
+			}
+		}
+		iindex_parameter = new int*[inb_sequence];
+		for (s = 0;s < inb_sequence;s++) {
+		    iindex_parameter[s] = new int[index_param_type != POSITION ? this->length[s] : this->length[s]+1];
+		    iindex_parameter[s][0] = this->int_sequence[s][ivariable-1][0];
+		    for (j = 1;j < this->length[s];j++) {
+		      iindex_parameter[s][j] = this->int_sequence[s][ivariable-1][j];
+		      if (iindex_parameter[s][j] < iindex_parameter[s][j-1]) {
+		    	  status = false;
+		    	  // if (error.get_nb_error() < error.get_max_nb_error())) {
+		    	  if (error.get_nb_error() == 0) {
+		    		  correction_message << " - " ;
+		    		  correction_message << SEQ_label[SEQL_SEQUENCE] << " " << s << " - ";
+		    		  correction_message << SEQ_label[SEQL_POSITION] << " " << j << " - ";
+		    		  correction_message << SEQ_label[SEQL_INDEX]  << " " << iindex_parameter[s][j] << " is less than previous " ;
+		    		  correction_message << SEQ_label[SEQL_INDEX]  << " " <<  iindex_parameter[s][j-1] << endl;
+					  error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER], (correction_message.str()).c_str());
+		    	  }
+		      }
+		    }
+		    if (index_param_type == POSITION )
+		    	iindex_parameter[s][this->length[s]] = iindex_parameter[s][this->length[s]-1] + 1;
+		}
+		if (status)
+			seq = new Sequences(inb_sequence , this->identifier , this->length ,
+								this->vertex_identifier, index_param_type, iindex_parameter ,
+								this->nb_variable-1, itype , iint_sequence , ireal_sequence);
+
+		for (s = 0;s < inb_sequence;s++) {
+		    delete [] iindex_parameter[s];
+		    iindex_parameter[s] = NULL;
+			delete [] iint_sequence[s];
+			delete [] ireal_sequence[s];
+			iint_sequence[s] = NULL;
+			ireal_sequence[s] = NULL;
+		}
+		delete [] itype;
+		itype = NULL;
+		delete [] iindex_parameter;
+		iindex_parameter = NULL;
+		delete [] iint_sequence;
+		iint_sequence = NULL;
+		delete [] ireal_sequence;
+		ireal_sequence = NULL;
+
+	}
+
+	return seq;
+
+}
+/* if (index_parameter) {
+  for (i = 0;i < nb_sequence;i++) {
+    for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
+      index_parameter[i][j] = iindex_parameter[i][j];
+    }
+  }
+
+  build_index_parameter_frequency_distribution();
+
+  if ((index_param_type == TIME) || (index_param_type == POSITION)) {
+    index_interval_computation();
+  }
+}
+
+i = 0;
+j = 0;
+for (k = 0;k < nb_variable;k++) {
+  switch (type[k]) {
+
+  case INT_VALUE : {
+    for (m = 0;m < nb_sequence;m++) {
+      for (n = 0;n < length[m];n++) {
+        int_sequence[m][k][n] = iint_sequence[m][i][n];
+      }
+    }
+    i++;
+    break;
+  }
+
+  case REAL_VALUE : {
+    for (m = 0;m < nb_sequence;m++) {
+      for (n = 0;n < length[m];n++) {
+        real_sequence[m][k][n] = ireal_sequence[m][j][n];
+      }
+    }
+    j++;
+    break;
+  }
+  }
+}
+
+for (i = 0;i < nb_variable;i++) {
+  min_value_computation(i);
+  max_value_computation(i);
+
+  switch (type[i]) {
+  case INT_VALUE :
+    build_marginal_frequency_distribution(i);
+    break;
+  case REAL_VALUE :
+    build_marginal_histogram(i);
+    break;
+  }
+}
+}*/
 
 /*--------------------------------------------------------------*/
 /**

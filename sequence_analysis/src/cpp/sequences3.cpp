@@ -3144,7 +3144,6 @@ void Sequences::build_index_parameter_frequency_distribution()
   if (index_parameter) {
     int i , j;
 
-
     index_parameter_distribution = new FrequencyDistribution(max_index_parameter_computation() + 1);
 
     for (i = 0;i < nb_sequence;i++) {

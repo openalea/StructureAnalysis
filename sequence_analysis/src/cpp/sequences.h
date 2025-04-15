@@ -440,7 +440,18 @@ namespace sequence_analysis {
   class TimeEvents;
   class RenewalData;
 
-  /// \brief Sequences
+  /*! \brief Sequences
+  *
+  * Sequences implements a collection of multivariate sequences.
+  * Variables can be either integers, doubles or indices (int).
+  * Integer and double variables are stored in int_sequence and real_sequence,
+  * respectively. Both have the same numbers of variables; if type[i] == INT_VALUE,
+  * real_sequence[s][i] == NULL for all sequences s, and vice versa if
+  * type[i] == REAL_VALUE.
+  * real_sequence[s][i][p] represents the value for sequence s for variable i
+  * (assumed to be REAL_VALUE) at position p
+  * index_parameter is the sequence index, if explicit, it has to be non-decreasing.
+  * */
 
   class Sequences : public stat_tool::StatInterface {
 
@@ -777,6 +788,8 @@ namespace sequence_analysis {
     Sequences* select_individual(stat_tool::StatError &error , int inb_sequence , std::vector<int> &iidentifier ,
                                  bool keep = true) const;
 
+    Sequences* set_variable_as_index_parameter(stat_tool::StatError &error, int ivariable,
+    		                                   index_parameter_type index_param_type) const;
     Sequences* remove_index_parameter(stat_tool::StatError &error) const;
     Sequences* explicit_index_parameter(stat_tool::StatError &error) const;
     Sequences* select_variable(stat_tool::StatError &error , int inb_variable , int *ivariable ,
