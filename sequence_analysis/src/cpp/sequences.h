@@ -787,7 +787,10 @@ namespace sequence_analysis {
                                  bool keep = true) const;
     Sequences* select_individual(stat_tool::StatError &error , int inb_sequence , std::vector<int> &iidentifier ,
                                  bool keep = true) const;
-
+    /// Add index parameter
+    void set_index_parameter(stat_tool::StatError &error, int **index_parameter,
+    		                 index_parameter_type index_param_type);
+    /// Copy of a Sequences object transforming some given existing variable into an index parameter
     Sequences* set_variable_as_index_parameter(stat_tool::StatError &error, int ivariable,
     		                                   index_parameter_type index_param_type) const;
     Sequences* remove_index_parameter(stat_tool::StatError &error) const;
@@ -999,8 +1002,12 @@ namespace sequence_analysis {
     index_parameter_type get_index_param_type() const { return index_param_type; }
     stat_tool::FrequencyDistribution* get_index_parameter_distribution() const { return index_parameter_distribution; }
     stat_tool::FrequencyDistribution* get_index_interval() const { return index_interval; }
+    /// return index parameter for sequence iseq and given index
     int get_index_parameter(int iseq , int index) const
     { return index_parameter[iseq][index]; }
+    /// return whole set of index parameters
+    int** get_index_parameter() const
+    { return index_parameter; }
     int get_nb_variable() const { return nb_variable; }
     stat_tool::variable_nature get_type(int variable) const { return type[variable]; }
     double get_min_value(int variable) const { return min_value[variable]; }
@@ -1013,6 +1020,10 @@ namespace sequence_analysis {
     { return int_sequence[iseq][variable][index]; }
     double get_real_sequence(int iseq , int variable , int index) const
     { return real_sequence[iseq][variable][index]; }
+    int** get_int_sequence(int iseq) const
+    { return int_sequence[iseq]; }
+    double** get_real_sequence(int iseq) const
+    { return real_sequence[iseq]; }
   };
 
 

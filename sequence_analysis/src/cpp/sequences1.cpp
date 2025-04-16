@@ -1787,11 +1787,10 @@ void Sequences::add_state_variable(const Sequences &seq)
  *
  *  \param[in] error     reference on a StatError object,
  *  \param[in] ivariable variable index (int)
- *  \param[in] check     flag on checking increasing index or not (bool)
+ *  \param[in] index_param_type type of index parameter
  *
  *  \return             Sequences* object. */
 /*--------------------------------------------------------------*/
-
 Sequences* Sequences::set_variable_as_index_parameter(stat_tool::StatError &error,
                                                       int ivariable,
 													  index_parameter_type index_param_type) const
@@ -1870,7 +1869,6 @@ Sequences* Sequences::set_variable_as_index_parameter(stat_tool::StatError &erro
 			seq = new Sequences(inb_sequence , this->identifier , this->length ,
 								this->vertex_identifier, index_param_type, iindex_parameter ,
 								this->nb_variable-1, itype , iint_sequence , ireal_sequence);
-
 		for (s = 0;s < inb_sequence;s++) {
 		    delete [] iindex_parameter[s];
 		    iindex_parameter[s] = NULL;
@@ -1893,61 +1891,75 @@ Sequences* Sequences::set_variable_as_index_parameter(stat_tool::StatError &erro
 	return seq;
 
 }
-/* if (index_parameter) {
-  for (i = 0;i < nb_sequence;i++) {
-    for (j = 0;j < (index_param_type == POSITION ? length[i] + 1 : length[i]);j++) {
-      index_parameter[i][j] = iindex_parameter[i][j];
-    }
-  }
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Add index parameter
+ *
+ *  \param[in] error            reference on a StatError object,
+ *  \param[in] index_parameter  index values (int**)
+ *  \param[in] index_param_type type of index parameter
+ *
+ *  \return             Sequences* object. */
+/*--------------------------------------------------------------*/
+void Sequences::set_index_parameter(stat_tool::StatError &error, int **iindex_parameter,
+		                 	 	 	index_parameter_type iindex_param_type)
+{
+	bool status = true;
+	int j, s;
+	ostringstream correction_message;
 
-  build_index_parameter_frequency_distribution();
+	error.init();
 
-  if ((index_param_type == TIME) || (index_param_type == POSITION)) {
-    index_interval_computation();
-  }
+	for (s = 0;s < nb_sequence;s++) {
+	    for (j = 1;j < (iindex_param_type == POSITION ? length[s] : length[s]+1);j++) {
+			if (iindex_parameter[s][j] < iindex_parameter[s][j-1]) {
+			  status = false;
+			  if (error.get_nb_error() == 0) {
+				  correction_message << " - " ;
+				  correction_message << SEQ_label[SEQL_SEQUENCE] << " " << s << " - ";
+				  correction_message << SEQ_label[SEQL_POSITION] << " " << j << " - ";
+				  correction_message << SEQ_label[SEQL_INDEX]  << " " << iindex_parameter[s][j] << " is less than previous " ;
+				  correction_message << SEQ_label[SEQL_INDEX]  << " " <<  iindex_parameter[s][j-1] << endl;
+				  error.correction_update(SEQ_error[SEQR_INDEX_PARAMETER], (correction_message.str()).c_str());
+			  }
+			}
+	    }
+	}
+
+	if (status) {
+		index_param_type = iindex_param_type;
+		if (index_parameter != NULL) {
+			for (s = 0; s < nb_sequence; s++){
+				delete [] index_parameter[s];
+				index_parameter[s] = NULL;
+			}
+			delete [] index_parameter;
+			index_parameter;
+		}
+		index_parameter = new int*[nb_sequence];
+		for (s = 0;s < nb_sequence;s++) {
+			index_parameter[s] = new int[iindex_param_type == POSITION ? length[s]+1 : length[s]];
+		    for (j = 0;j < (iindex_param_type == POSITION ? length[s]+1 : length[s]);j++) {
+		    	index_parameter[s][j] = iindex_parameter[s][j];
+		    }
+		}
+		if (index_parameter_distribution != NULL) {
+			delete index_parameter_distribution;
+			index_parameter_distribution = NULL;
+		}
+		if (index_interval != NULL) {
+			delete index_interval;
+			index_interval = NULL;
+		}
+
+		build_index_parameter_frequency_distribution();
+
+		if ((index_param_type == TIME) || (index_param_type == POSITION)) {
+		  index_interval_computation();
+		}
+	}
 }
 
-i = 0;
-j = 0;
-for (k = 0;k < nb_variable;k++) {
-  switch (type[k]) {
-
-  case INT_VALUE : {
-    for (m = 0;m < nb_sequence;m++) {
-      for (n = 0;n < length[m];n++) {
-        int_sequence[m][k][n] = iint_sequence[m][i][n];
-      }
-    }
-    i++;
-    break;
-  }
-
-  case REAL_VALUE : {
-    for (m = 0;m < nb_sequence;m++) {
-      for (n = 0;n < length[m];n++) {
-        real_sequence[m][k][n] = ireal_sequence[m][j][n];
-      }
-    }
-    j++;
-    break;
-  }
-  }
-}
-
-for (i = 0;i < nb_variable;i++) {
-  min_value_computation(i);
-  max_value_computation(i);
-
-  switch (type[i]) {
-  case INT_VALUE :
-    build_marginal_frequency_distribution(i);
-    break;
-  case REAL_VALUE :
-    build_marginal_histogram(i);
-    break;
-  }
-}
-}*/
 
 /*--------------------------------------------------------------*/
 /**

@@ -6787,19 +6787,169 @@ SemiMarkovData* HiddenSemiMarkov::simulation(StatError &error , int nb_sequence 
  *  \brief Simulation of semi-markov-switching linear models, which require a single int covariate.
  *
  *  \param[in] error         reference on a StatError object,
- *  \param[in] nb_sequence   number of sequences (int),
- *  \param[in] iseq          reference on a Sequences object (covariate)
+ *  \param[in] inb_sequence   number of sequences (int),
+ *  \param[in] covariate          reference on a Sequences object (covariate)
  *  \param[in] ivariable     variable to be used as covariate (iseq.index_parameter if I_DEFAULT)
+ *                               or numbered from 1 to covariate.nb_variable otherwise
  *  \param[in] counting_flag flag on the computation of the counting distributions.
  *
  *  \return                  SemiMarkovData object.
  */
 /*--------------------------------------------------------------*/
 
-SemiMarkovData* HiddenSemiMarkov::semi_markov_switching_lm_simulation(StatError &error , int nb_sequence ,
+SemiMarkovData* HiddenSemiMarkov::semi_markov_switching_lm_simulation(StatError &error , int inb_sequence ,
    																	  const Sequences &covariate,
 																	  int ivariable, bool counting_flag) const
 {
+    int v, k, s, rep, pos, lmv, length;
+    const int nb_sequence = covariate.get_nb_sequence();
+    std::vector<int> lm_var = std::vector<int>(); // variable to be simulated
+    bool status = true;
+    bool covariate_is_index = false;
+    index_parameter_type iindex_param_type;
+    ostringstream error_message;
+    int *covariate_values = NULL, **seq_int_values = NULL, **iindex_parameter = NULL;
+    double **seq_real_values = NULL;
+    SemiMarkovData *seq = NULL, **seq_array = NULL;
+    MarkovianSequences *seqm = NULL, *observed_seq = NULL, *mcovariate = NULL;
+
+    error.init();
+
+	for (v = 0; v < nb_output_process; v++) {
+		if (continuous_parametric_process[v] != NULL) {
+			if (continuous_parametric_process[v]->observation[0]->ident == LINEAR_MODEL)
+				lm_var.push_back(v);
+			for (k = 1; k < nb_state; k++) {
+				if ((continuous_parametric_process[v]->observation[0]->ident == LINEAR_MODEL) &&
+						(continuous_parametric_process[v]->observation[k]->ident != LINEAR_MODEL)) {
+					status = false;
+					error_message << SEQ_error[SEQR_OUTPUT_PROCESS_TYPE] << " " << v << " "
+							      << STAT_label[STATL_STATE] << " " << k
+								  << ": should be " << STAT_label[STATL_LINEAR_MODEL] << endl;
+					error.update((error_message.str()).c_str());
+				}
+			}
+		}
+	}
+
+	if (lm_var.size() == 0) {
+		status = false;
+		error_message << SEQ_error[SEQR_OUTPUT_PROCESS_TYPE] << ": should be "
+				      << STAT_label[STATL_LINEAR_MODEL] << endl;
+		error.update((error_message.str()).c_str());
+	}
+
+	if (status) {
+		if (ivariable = I_DEFAULT) {
+			// check that index parameter is present in covariate
+			if (covariate.get_index_parameter() == NULL) {
+				status = false;
+				error_message << SEQ_error[SEQR_INDEX_PARAMETER] << ": "
+						      << STAT_error[STATR_NOT_PRESENT];
+				error.update((error_message.str()).c_str());
+			} else
+				covariate_is_index = true;
+		} else {
+			// check that covariate has type INT_VALUE
+			if ((ivariable < 1) || (ivariable > covariate.get_nb_variable())) {
+				status = false;
+				error_message << ivariable << ": " << STAT_error[STATR_VARIABLE_INDEX] << endl;
+				error.update((error_message.str()).c_str());
+			}
+			seq_int_values = covariate.get_int_sequence(0);
+			if ((status) && (seq_int_values[ivariable-1] == NULL)) {
+				status = false;
+				error_message << ivariable << ": " << STAT_error[STATR_VARIABLE_TYPE] << endl;
+				error.update((error_message.str()).c_str());
+			}
+		}
+	}
+
+	if (status) {
+		mcovariate = new MarkovianSequences(covariate);
+		// simulate ibn_sequence times nb_sequence
+		iindex_parameter = new int*[nb_sequence*inb_sequence];
+		seq_array = new SemiMarkovData*[inb_sequence];
+		for (s = 0; s < inb_sequence; s++) {
+			// simulate sequence using implicit index as covariate
+			// simulate a set of nb_sequence sequences
+			seq_array[s] = SemiMarkov::simulation(error , nb_sequence , *mcovariate, counting_flag);
+			if (seq_array[s] != NULL) {
+				// resimulate each sequence within seq_array[s]
+				for (rep = 0; rep < nb_sequence; rep++) {
+					// seq_int_values = seq_array[s]->get_int_sequence(rep);
+					length = mcovariate->get_length(rep);
+					seq_real_values = seq_array[s]->get_real_sequence(rep);
+					if (!covariate_is_index) {
+						covariate_values = covariate.get_int_sequence(rep)[ivariable-1];
+						iindex_param_type = TIME;
+					}
+					else {
+						covariate_values = covariate.get_index_parameter()[rep];
+						iindex_param_type = covariate.get_index_param_type();
+					}
+					// resimulate sequence using given covariate
+					for (pos = 0; pos < length; pos++) {
+						k = seq_array[s]->int_sequence[rep][0][pos]; // state
+						for (v = 0; v < lm_var.size(); v++) {
+							lmv = lm_var[v];
+							seq_real_values[lmv+1][pos]=
+								this->continuous_parametric_process[lmv]->observation[k]->intercept +
+								this->continuous_parametric_process[lmv]->observation[k]->slope * covariate_values[pos] +
+								this->continuous_parametric_process[lmv]->observation[k]->simulation();
+						}
+					}
+					iindex_parameter[s * nb_sequence + rep] = covariate_values;
+				}
+			}
+		}
+		delete mcovariate;
+		mcovariate = NULL;
+		if (inb_sequence == 1)
+			seq = seq_array[0];
+		else {
+		    const MarkovianSequences **seq_array_merge = new const MarkovianSequences*[inb_sequence-1];
+			for (s = 1; s < inb_sequence; s++) {
+				seq_array_merge[s-1] = seq_array[s];
+			}
+			seqm = seq_array[0]->merge(error, inb_sequence-1, seq_array_merge);
+			delete [] seq_array_merge;
+			seq_array_merge = NULL;
+			seq = new SemiMarkovData(*seqm, SEQUENCE_COPY, true);
+			seq->semi_markov = new HiddenSemiMarkov(*this);
+			delete seqm;
+			seqm = NULL;
+		}
+	}
+
+	if (seq != NULL) {
+		seq->set_index_parameter(error, iindex_parameter, iindex_param_type);
+		delete [] iindex_parameter;
+		iindex_parameter = NULL;
+		seq->posterior_probability = new double[seq->nb_sequence];
+		for (s = 0;s < seq->nb_sequence;s++) {
+		  seq->posterior_probability[s] = SemiMarkov::likelihood_computation(*seq , s);
+		}
+
+		observed_seq = seq->remove_variable_1();
+		seq->likelihood = likelihood_computation(*observed_seq , seq->posterior_probability);
+		delete observed_seq;
+
+		forward_backward(*seq);
+
+		if (inb_sequence > 1) {
+			for (s = 0; s < inb_sequence; s++) {
+				delete seq_array[s];
+				seq_array[s] = NULL;
+			}
+			delete [] seq_array;
+			seq_array = NULL;
+		}
+		delete [] seq_array;
+		seq_array = NULL;
+	}
+
+	return seq;
 }
 
 /*--------------------------------------------------------------*/

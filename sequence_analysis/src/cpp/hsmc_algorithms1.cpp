@@ -485,6 +485,15 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                          << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
+# ifdef DEBUG
+    if (type[i] == STATE)
+    	cout << "Warning: " << STAT_label[STATL_VARIABLE] << " " << i + 1 << " has type " << STAT_variable_word[STATE];
+# endif
+# ifdef MESSAGE
+    if (type[i] == STATE)
+    	cout << "Warning: " << STAT_label[STATL_VARIABLE] << " " << i + 1 << " has type " << STAT_variable_word[STATE];
+# endif
+
   }
 
   if (ihsmarkov.nb_output_process != nb_variable) {
@@ -1712,6 +1721,13 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                                    hsmarkov->continuous_parametric_process[i]);
               break;
             case LINEAR_MODEL :
+              if ((index_param_type != TIME) && (index_param_type != IMPLICIT_TYPE)) {
+            	  likelihood = D_INF;
+            	  stringstream error_message , correction_message;
+            	  error_message << SEQ_error[SEQR_INDEX_PARAMETER_TYPE] << ": shoud be ";
+            	  correction_message << SEQ_label[SEQL_TIME] << " or IMPLICIT" << endl;
+						error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+              }
               linear_model_estimation(state_sequence_count , i ,
                                       hsmarkov->continuous_parametric_process[i]);
               break;
@@ -3459,8 +3475,15 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
                                    hsmarkov->continuous_parametric_process[i]);
               break;
             case LINEAR_MODEL :
-              linear_model_estimation(state_sequence_count , i ,
-                                      hsmarkov->continuous_parametric_process[i]);
+                if ((index_param_type != TIME) && (index_param_type != IMPLICIT_TYPE)) {
+              	  likelihood = D_INF;
+              	  stringstream error_message , correction_message;
+              	  error_message << SEQ_error[SEQR_INDEX_PARAMETER_TYPE] << ": shoud be ";
+              	  correction_message << SEQ_label[SEQL_TIME] << " or IMPLICIT" << endl;
+  						error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+                }
+                linear_model_estimation(state_sequence_count , i ,
+                                        hsmarkov->continuous_parametric_process[i]);
               break;
             case AUTOREGRESSIVE_MODEL :
               autoregressive_model_estimation(state_sequence_count , i ,

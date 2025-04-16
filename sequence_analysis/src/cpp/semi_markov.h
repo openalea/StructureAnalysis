@@ -111,8 +111,19 @@ namespace sequence_analysis {
 
   class SemiMarkovData;
 
-  /// \brief Semi-Markov chain
-
+  /**
+     \class SemiMarkov
+     \brief Semi-Markov processes with an output process (conditionally independent
+       	    given states).
+       	    Emission distributions are represented by
+		    CategoricalSequenceProcess **categorical_process
+			DiscreteParametricProcess **discrete_parametric_process and
+			ContinuousParametricProcess **continuous_parametric_process
+			categorical_process[0] represents the semi-Markov chain (states)
+			for v > 0  among categorical_process[v], discrete_parametric_process[v]
+			and continuous_parametric_process[v], exactly one is non NULL, representing
+			the nature of <em>v</em>th observed process.
+  */
   class SemiMarkov : public stat_tool::StatInterface , protected SemiMarkovChain {
 
     friend class MarkovianSequences;
