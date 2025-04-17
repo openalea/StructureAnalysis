@@ -118,6 +118,20 @@ public:
         length, counting_flag);
   }
 
+  static SemiMarkovData*
+  semi_markov_switching_lm_simulation(const HiddenSemiMarkov &input, int nb_sequence,
+		  const Sequences &covariate, int ivariable=I_DEFAULT, bool counting_flag=true)
+  {
+	  stat_tool::StatError error;
+	  SemiMarkovData *ret = NULL;
+
+	  ret = input.semi_markov_switching_lm_simulation(error, nb_sequence , covariate,
+													  ivariable, counting_flag);
+
+	  if (ret == NULL)
+	        sequence_analysis::wrap_util::throw_error(error);
+	  return ret;
+  }
 
   static DistanceMatrix*
   divergence_computation_histo(const HiddenSemiMarkov &input,
@@ -252,7 +266,10 @@ void class_hidden_semi_markov() {
     DEF_RETURN_VALUE("simulation_histogram", &WRAP::simulation_histogram, args("nb_sequence", "input_seq", "counting_flag"), "todo")
     DEF_RETURN_VALUE("simulation_nb_sequences", &WRAP::simulation_nb_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
     DEF_RETURN_VALUE("simulation_markovian_sequences", &WRAP::simulation_markovian_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
-
+    DEF_RETURN_VALUE("semi_markov_switching_lm_simulation", &WRAP::semi_markov_switching_lm_simulation, args("nb_sequence", "covariate", "ivariable", "counting_flag"),
+    		"Simulation of semi-markov-switching linear models, which require a single int covariate.\n"
+    		"The Sequences argument covariate is used as covariate, either from index parameter if ivariable "
+    		"is I_DEFAULT, or using the given variable index otherwise. Each sequence in covariates is repeated nbs_equences times")
     DEF_RETURN_VALUE("divergence_computation_histo", WRAP::divergence_computation_histo, args("input", "input_markov", "input_sequence", "filename"), "todo")
     DEF_RETURN_VALUE("divergence_computation_length", WRAP::divergence_computation_length, args("input", "input_markov", "input_sequence", "filename"), "todo")
     DEF_RETURN_VALUE("divergence_computation_sequences", WRAP::divergence_computation_sequences, args("input", "input_markov", "input_sequence", "filename"), "todo")

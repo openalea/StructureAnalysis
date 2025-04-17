@@ -1911,7 +1911,7 @@ void Sequences::set_index_parameter(stat_tool::StatError &error, int **iindex_pa
 	error.init();
 
 	for (s = 0;s < nb_sequence;s++) {
-	    for (j = 1;j < (iindex_param_type == POSITION ? length[s] : length[s]+1);j++) {
+	    for (j = 1;j < (iindex_param_type == POSITION ? length[s]+1 : length[s]);j++) {
 			if (iindex_parameter[s][j] < iindex_parameter[s][j-1]) {
 			  status = false;
 			  if (error.get_nb_error() == 0) {

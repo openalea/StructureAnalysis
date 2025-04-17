@@ -1221,6 +1221,70 @@ public:
     return res;
   }
 
+  static void
+  set_index_parameter(Sequences &input, const boost::python::list& index, int iindex_parameter_type)
+  {
+    bool status = true;
+    stat_tool::StatError error;
+    int **index_parameter = NULL;
+    index_parameter_type index_param_type = index_parameter_type(iindex_parameter_type);
+    const int nb_seq = len(index);
+    boost::python::list l;
+    int s, pos;
+
+    if (nb_seq == 0) {
+    	error.update(SEQ_error[SEQR_LENGTH]);
+    	sequence_analysis::wrap_util::throw_error(error);
+    } else {
+		index_parameter = new int*[nb_seq];
+    	for (s = 0; s < nb_seq; s++) {
+    		l = boost::python::extract<boost::python::list> (index[s]);
+    		if (len(l) > 0)  {
+    			index_parameter[s] = new int[len(l)];
+				for (pos = 0; pos < len(l); pos++)
+					index_parameter[s][pos] = boost::python::extract<int> (index[s][pos]);
+    		} else
+    			status = false;
+    	}
+    	if (!status) {
+        	error.update(SEQ_error[SEQR_LENGTH]);
+        	for (s = 0; s < nb_seq; s++) {
+        		l = boost::python::extract<boost::python::list> (index[s]);
+        		if (len(l) > 0) {
+        			delete [] index_parameter[s];
+        			index_parameter[s] = NULL;
+        		}
+        	}
+        	delete [] index_parameter;
+        	index_parameter = NULL;
+    	}
+    }
+
+    if (status)
+    	input.set_index_parameter(error, index_parameter, index_param_type);
+    else
+    	sequence_analysis::wrap_util::throw_error(error);
+
+    if (error.get_nb_error() > 1)
+    	sequence_analysis::wrap_util::throw_error(error);
+
+  }
+
+  static Sequences*
+  set_variable_as_index_parameter(const Sequences &input, int ivariable, int iindex_parameter_type)
+  {
+	Sequences *res = NULL;
+    index_parameter_type index_param_type = index_parameter_type(iindex_parameter_type);
+    stat_tool::StatError error;
+
+    res = input.set_variable_as_index_parameter(error, ivariable, index_param_type);
+
+    if (res == NULL)
+    	sequence_analysis::wrap_util::throw_error(error);
+
+    return(res);
+  }
+
   static MarkovianSequences*
   markovian_sequences(const Sequences &input)
   {
@@ -1566,6 +1630,9 @@ class_sequences()
    DEF_RETURN_VALUE("extract_vectors", SequencesWrap::extract_vectors, args("type","variable","value"), "extract vectors")
 
    DEF_RETURN_VALUE_NO_ARGS("extract_length", SequencesWrap::extract_length, "extract length of the sequences and returns a vector")
+   DEF_RETURN_VALUE("set_index_parameter", SequencesWrap::set_index_parameter, args("index", "index_parameter_type"), "Add index parameter")
+   DEF_RETURN_VALUE("set_variable_as_index_parameter", SequencesWrap::set_variable_as_index_parameter, args("variable", "index_parameter_type"),
+		   "Copy of a Sequences object transforming some given existing variable into an index parameter")
    DEF_RETURN_VALUE_NO_ARGS("remove_index_parameter", SequencesWrap::remove_index_parameter,"Remove index parameter")
    DEF_RETURN_VALUE_NO_ARGS("reverse", SequencesWrap::reverse,"reverse")
    DEF_RETURN_VALUE_NO_ARGS("cross", SequencesWrap::cross, "Cross")
