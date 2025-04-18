@@ -1211,15 +1211,10 @@ namespace sequence_analysis {
     MarkovianSequences();
     MarkovianSequences(int inb_sequence , int *iidentifier , int *ilength ,
                        int **ivertex_identifier , index_parameter_type iindex_param_type , int inb_variable ,
-                       stat_tool::variable_nature *itype , bool vertex_identifier_copy = true , bool init_flag = false)
-    :Sequences(inb_sequence , iidentifier , ilength , ivertex_identifier ,
-               iindex_param_type , inb_variable , itype ,
-               vertex_identifier_copy , init_flag) { init(); }
+                       stat_tool::variable_nature *itype , bool vertex_identifier_copy = true , bool init_flag = false);
     MarkovianSequences(const stat_tool::FrequencyDistribution &ilength_distribution , int inb_variable ,
-                       stat_tool::variable_nature *itype , bool init_flag = false)
-    :Sequences(ilength_distribution , inb_variable , itype , init_flag) { init(); }
-    MarkovianSequences(const MarkovianSequences &seq , int variable , stat_tool::variable_nature itype)
-    :Sequences(seq , variable , itype) { init(); }
+                       stat_tool::variable_nature *itype , bool init_flag = false);
+    MarkovianSequences(const MarkovianSequences &seq , int variable , stat_tool::variable_nature itype);
     MarkovianSequences(const Sequences &seq);
     MarkovianSequences(const MarkovianSequences &seq , bool *auxiliary);
     MarkovianSequences(const MarkovianSequences &seq , sequence_transformation transform = SEQUENCE_COPY ,

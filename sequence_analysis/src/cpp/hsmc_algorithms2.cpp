@@ -6901,6 +6901,16 @@ SemiMarkovData* HiddenSemiMarkov::semi_markov_switching_lm_simulation(StatError 
 					}
 					iindex_parameter[s * nb_sequence + rep] = covariate_values;
 				}
+				for (v = 1;v < seq_array[s]->nb_variable;v++) {
+				      seq_array[s]->min_value_computation(v);
+				      seq_array[s]->max_value_computation(v);
+
+				      seq_array[s]->build_marginal_frequency_distribution(v);
+				      seq_array[s]->min_interval_computation(v);
+				 }
+				seq_array[s]->build_observation_frequency_distribution(nb_state);
+				seq_array[s]->build_observation_histogram(nb_state);
+				seq_array[s]->build_characteristic(I_DEFAULT , true , (type == EQUILIBRIUM ? true : false));
 			}
 		}
 		delete mcovariate;

@@ -23,6 +23,8 @@ int main(void)
 
    bool status, geometric_poisson=false, common_dispersion=false, counting_flag=true, state_sequence=true;
    const int nb_sequence = 30 , length = 100;
+   double max = D_INF;
+   std::vector<int> argmax = std::vector<int>();
    HiddenSemiMarkov *hsmc= NULL, *hsmc_ref= NULL, *hsmc_est_file= NULL;
    SemiMarkovData *hsmd= NULL;
    stat_tool::censoring_estimator estimator=stat_tool::COMPLETE_LIKELIHOOD;
@@ -187,6 +189,18 @@ int main(void)
 		 return 1;
      }
      assert(hsmd->get_type(1) == REAL_VALUE);
+     argmax.resize(2);
+     for (u = 0; u < nb_sequence; u++)
+   	  for (t = 0; t < length; t++)
+   		  if (max < hsmd->get_real_sequence(u,1,t)) {
+   			max = hsmd->get_real_sequence(u,1,t);
+   		    argmax[0] = u;
+   		    argmax[1] = t;
+   		  }
+     if (max != hsmd->get_max_value(1))
+    	 cout << "argmax: (" << argmax[0] << ", " << argmax[1] << ")" << endl;
+     assert (max == hsmd->get_max_value(1));
+
      // discard state variable
      select[0] = 2;
      seq_estim = hsmd->select_variable(error, 1, select, true);
@@ -198,7 +212,8 @@ int main(void)
      }
      assert(seq_estim->get_type(0) == REAL_VALUE);
 
-	 hsmc_est_file = seq_estim->hidden_semi_markov_estimation(error, &cout, *hsmc_ref, geometric_poisson , common_dispersion, estimator, counting_flag, state_sequence, 300);
+	 // hsmc_est_file = seq_estim->hidden_semi_markov_estimation(error, &cout, *hsmc_ref, geometric_poisson , common_dispersion, estimator, counting_flag, state_sequence, 300);
+     hsmc_est_file = seq_estim->hidden_semi_markov_estimation(error, &cout, *hsmc_ref, geometric_poisson , common_dispersion, estimator, counting_flag, state_sequence, 33);
      if (hsmc_est_file != NULL) {
     	 plotable = hsmc_est_file->get_plotable();
     	 delete plotable;

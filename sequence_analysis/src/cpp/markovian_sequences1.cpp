@@ -176,6 +176,82 @@ MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , bool *aux
 
 /*--------------------------------------------------------------*/
 /**
+ *  \brief Construction of a MarkovianSequences exactly as a Sequences object
+ *
+ *  \param[in] inb_sequence           number of sequences,
+ *  \param[in] iidentifier            sequence identifiers,
+ *  \param[in] ilength                sequence lengths,
+ *  \param[in] ivertex_identifier     vertex identifiers of the associated MTG,
+ *  \param[in] iindex_param_type      index parameter type,
+ *  \param[in] inb_variable           number of variables,
+ *  \param[in] itype                  variable types,
+ *  \param[in] vertex_identifier_copy flag copy of vertex identifiers,
+ *  \param[in] init_flag              flag initialization.
+ */
+/*--------------------------------------------------------------*/
+
+MarkovianSequences::MarkovianSequences(int inb_sequence , int *iidentifier , int *ilength ,
+                   int **ivertex_identifier , index_parameter_type iindex_param_type , int inb_variable ,
+                   stat_tool::variable_nature *itype , bool vertex_identifier_copy, bool init_flag)
+
+: min_interval(NULL),
+  self_transition(NULL),
+  observation_distribution(NULL),
+  observation_histogram(NULL),
+  characteristics(NULL),
+  Sequences(inb_sequence , iidentifier , ilength , ivertex_identifier ,
+	 	 iindex_param_type , inb_variable , itype ,
+	 	 vertex_identifier_copy , init_flag)
+{
+	init();
+
+}
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a MarkovianSequences exactly as a Sequences object
+ *
+ *  \param[in] ilength_distribution sequence length frequency distribution,
+ *  \param[in] inb_variable         number of variables,
+ *  \param[in] itype                variable types,
+ *  \param[in] init_flag            flag initialization.
+ */
+/*--------------------------------------------------------------*/
+
+MarkovianSequences::MarkovianSequences(const stat_tool::FrequencyDistribution &ilength_distribution , int inb_variable ,
+										stat_tool::variable_nature *itype , bool init_flag)
+: min_interval(NULL),
+  self_transition(NULL),
+  observation_distribution(NULL),
+  observation_histogram(NULL),
+  characteristics(NULL),
+  Sequences(ilength_distribution , inb_variable , itype , init_flag)
+{
+	init();
+}
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Construction of a MarkovianSequences exactly as a Sequences object
+ *
+ *  \param[in] seq      reference on a Sequences object,
+ *  \param[in] variable variable index,
+ *  \param[in] itype    selected variable type.
+ */
+/*--------------------------------------------------------------*/
+MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , int variable , stat_tool::variable_nature itype)
+: min_interval(NULL),
+  self_transition(NULL),
+  observation_distribution(NULL),
+  observation_histogram(NULL),
+  characteristics(NULL),
+  Sequences(seq , variable , itype)
+{
+	init();
+}
+
+/*--------------------------------------------------------------*/
+/**
  *  \brief Copy of a MarkovianSequences object.
  *
  *  \param[in] seq   reference on a MarkovianSequences object,
@@ -3509,9 +3585,9 @@ void MarkovianSequences::min_interval_computation(int variable)
   }
 
   else if (type[variable] != AUXILIARY) {
-    bool *selected_value;
+    bool *selected_value = NULL;
     int i , j , k , m;
-    int int_min , int_value , nb_value , max_frequency , *frequency , *index;
+    int int_min , int_value , nb_value , max_frequency , *frequency = NULL , *index = NULL;
     double real_min , real_value;
 
 
@@ -3564,7 +3640,7 @@ void MarkovianSequences::min_interval_computation(int variable)
     case REAL_VALUE : {
 //      double max_interval = 0.;
 
-      frequency = new int[cumul_length];
+    	frequency = new int[cumul_length];
 
       j = 0;
 
@@ -3764,6 +3840,10 @@ void MarkovianSequences::self_transition_computation()
 
 
     state_variable_init();
+#   ifdef DEBUG
+    assert(self_transition == NULL);
+#   endif
+
     self_transition = new SelfTransition*[marginal_distribution[0]->nb_value];
 
     for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
@@ -3786,9 +3866,9 @@ void MarkovianSequences::self_transition_computation()
 void MarkovianSequences::self_transition_computation(bool *homogeneity)
 
 {
-  if (!self_transition) {
-    int i;
+  int i;
 
+  if (self_transition == NULL) {
 
     state_variable_init();
     self_transition = new SelfTransition*[marginal_distribution[0]->nb_value];
@@ -3802,6 +3882,11 @@ void MarkovianSequences::self_transition_computation(bool *homogeneity)
         self_transition_computation(i);
       }
     }
+  } else {
+		for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+		  if (!homogeneity[i])
+			self_transition_computation(i);
+		}
   }
 }
 
@@ -3823,6 +3908,9 @@ Distribution* MarkovianSequences::weight_computation() const
 
 
   if (type[0] == STATE) {
+#   ifdef DEBUG
+	assert(weight == NULL);
+#   endif
     weight = new Distribution(marginal_distribution[0]->nb_value);
 
     for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
@@ -3960,7 +4048,7 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
 
     if (observation_histogram[variable]) {
       for (i = 0;i < nb_state;i++) {
-        observation_histogram[variable][i]->nb_bin = (int)floor((max_value[variable] - imin_value) / bin_width) + 1;
+        observation_histogram[variable][i]->nb_bin = (int)ceil((max_value[variable] - imin_value) / bin_width) + 1;
 
         delete [] observation_histogram[variable][i]->frequency;
         observation_histogram[variable][i]->frequency = new int[observation_histogram[variable][i]->nb_bin];
@@ -3971,7 +4059,7 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
       observation_histogram[variable] = new Histogram*[nb_state];
 
       for (i = 0;i < nb_state;i++) {
-        observation_histogram[variable][i] = new Histogram((int)floor((max_value[variable] - imin_value) / bin_width) + 1 , false);
+        observation_histogram[variable][i] = new Histogram((int)ceil((max_value[variable] - imin_value) / bin_width) + 1 , false);
 
         observation_histogram[variable][i]->nb_element = marginal_distribution[0]->frequency[i];
         observation_histogram[variable][i]->type = type[variable];
@@ -4060,6 +4148,16 @@ void MarkovianSequences::build_observation_histogram(int variable , int nb_state
         proutput = real_sequence[i][variable];
         for (j = 0;j < length[i];j++) {
 //          (observation_histogram[variable][*pstate++]->frequency[(int)((*proutput++ - imin_value) / bin_width)]++;
+# ifdef DEBUG
+        	assert(variable < nb_variable);
+        	assert(*pstate < nb_state);
+        	assert(observation_histogram[variable][*pstate]->frequency != NULL);
+        	if ((int)floor((*proutput - imin_value) / bin_width) >= observation_histogram[variable][*pstate]->nb_bin)
+        		cout << "Inconsistency sequence " << i << " variable " << variable << " value " << *proutput << " state "
+				<< *pstate << " bin " << (*proutput - imin_value) / bin_width << " max bin " << observation_histogram[variable][*pstate]->nb_bin
+				<< " max_value[variable] " << max_value[variable] << endl;
+        	assert((int)floor((*proutput - imin_value) / bin_width) < observation_histogram[variable][*pstate]->nb_bin);
+# endif
           (observation_histogram[variable][*pstate++]->frequency[(int)floor((*proutput++ - imin_value) / bin_width)])++;
         }
       }

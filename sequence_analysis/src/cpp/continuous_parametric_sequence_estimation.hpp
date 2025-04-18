@@ -1258,13 +1258,15 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
     if (state_frequency[i] > 2) {
       process->observation[i]->dispersion = sqrtl(residual_square_sum[i]);
 
-      if (mean[i] != 0.) {
+      // Commented by JB: cannot find the reason for code below.
+      // Moreover if mean[i] < 0 dispersion would be < 0
+      /* if (mean[i] != 0.) {
         if (process->observation[i]->dispersion / mean[i] < GAUSSIAN_MIN_VARIATION_COEFF) {
           process->observation[i]->dispersion = mean[i] * GAUSSIAN_MIN_VARIATION_COEFF;
         }
-      }
+      }*/
 
-      else {
+      // else {
         threshold = sqrt(variance_computation(variable , mean_computation(variable)));
 
 #       ifdef DEBUG
@@ -1276,7 +1278,7 @@ void MarkovianSequences::linear_model_estimation(Type ***state_sequence_count , 
         if (process->observation[i]->dispersion < threshold) {
           process->observation[i]->dispersion = threshold;
         }
-      }
+      // }
     }
 
 #   ifdef DEBUG
