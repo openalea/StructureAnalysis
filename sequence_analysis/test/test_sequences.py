@@ -20,14 +20,10 @@ from tools import interface
 from tools import runTestClass
 
 from openalea.sequence_analysis.sequences import Sequences, IndexParameterType
-from openalea.sequence_analysis import get_shared_data
-
+from tools import robust_path as get_shared_data
 
 class Test(interface):
-    """a simple unittest class
 
-
-    """
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
@@ -270,7 +266,26 @@ class Test(interface):
         shifted = s.shift(1,2)
         assert shifted[0,0] == [3, 1, 1]
         assert shifted[0,1] == [4, 2, 2]
-
+    
+    def test_threshold_seq1(self):
+        s = self.seqn
+        thresholded = s.thresholding(1,10,"ABOVE")
+        for x in thresholded:
+            for v in x:
+                assert(v[0] <= 10)
+        
+    def test_threshold_seq(self):        
+        s = Sequences([[[1.01,1.07],[2.01,2.07],[1.99,1.07],[2.41,2.07]],[[1.97,1.07],[1.98,2.07],[1.99,1.07],[2.00,2.07]]])
+        thresholded = s.thresholding(1,1.99, "ABOVE")
+        for x in thresholded:
+            for v in x:
+                assert(v[0] <= 1.99)
+        thresholded = s.thresholding(1,1.99, "BELOW")
+        for x in thresholded:
+            for v in x:
+                assert(v[0] >= 1.99)
+        
+        assert s        
     def test_merge (self):
         s1 = self.seqn
         s2 = self.seqn

@@ -103,14 +103,14 @@ SemiMarkovChain::SemiMarkovChain(process_type itype , int inb_state)
 /*--------------------------------------------------------------*/
 
 SemiMarkovChain::SemiMarkovChain(const Chain *pchain , const CategoricalSequenceProcess *poccupancy)
-:Chain(*pchain)
+:Chain(*pchain),
+ sojourn_type(NULL),
+ state_process(NULL),
+ forward(NULL)
 
 {
   int i;
 
-# ifdef DEBUG
-  assert(sojourn_type == NULL);
-# endif
   sojourn_type = new state_sojourn_type[nb_state];
 
   state_process = new CategoricalSequenceProcess(*poccupancy);
@@ -147,6 +147,21 @@ SemiMarkovChain::SemiMarkovChain(const Chain *pchain , const CategoricalSequence
   }
 }
 
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the SemiMarkovChain class.
+ *
+ *  \param[in] smarkov    reference on a Chain SemiMarkovChain object,
+ *  \param[in] param      parameter
+ */
+/*--------------------------------------------------------------*/
+
+SemiMarkovChain::SemiMarkovChain(const SemiMarkovChain &smarkov , int param)
+: Chain(smarkov),
+  sojourn_type(NULL),
+  state_process(NULL),
+  forward(NULL)
+{ copy(smarkov , param); }
 
 /*--------------------------------------------------------------*/
 /**
@@ -407,6 +422,30 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const CategoricalSequenceProcess *p
   characteristic_computation(length , counting_flag);
 }
 
+
+
+/*--------------------------------------------------------------*/
+/**
+ *  \brief Constructor of the SemiMarkov class.
+ *
+ *  \param[in] smarkov       reference on a SemiMarkov object,
+ *  \param[in] data_flag     flag copy of the included SemiMarkovData object,
+ *  \param[in] pobservation  pointer on a CategoricalProcess object,
+ *  \param[in] param         parameter.
+ */
+/*--------------------------------------------------------------*/
+
+SemiMarkov::SemiMarkov(const SemiMarkov &smarkov ,
+					   bool data_flag,
+					   int param)
+: nb_iterator(0),
+  semi_markov_data(NULL),
+  nb_output_process(0),
+  categorical_process(NULL),
+  discrete_parametric_process(NULL),
+  continuous_parametric_process(NULL),
+SemiMarkovChain(smarkov , param)
+{ copy(smarkov , data_flag , param); }
 
 /*--------------------------------------------------------------*/
 /**
@@ -2405,14 +2444,14 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
       }
     }
 
-    if ((seq->observation_distribution) || (seq->observation_histogram)) {
+    if ((seq != NULL) && ((seq->observation_distribution) || (seq->observation_histogram))) {
       nb_plot_set += nb_state;
     }
     else {
       nb_plot_set++;
     }
 
-    if ((categorical_process[i]) && (seq->marginal_distribution[variable])) {
+    if ((seq != NULL) && (categorical_process[i]) && (seq->marginal_distribution[variable])) {
       if ((categorical_process[i]->weight) &&
           (categorical_process[i]->mixture)) {
         nb_plot_set++;
@@ -2423,7 +2462,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
       }
     }
 
-    if ((discrete_parametric_process[i]) && (seq->marginal_distribution[variable])) {
+    if ((seq != NULL) && (discrete_parametric_process[i]) && (seq->marginal_distribution[variable])) {
       if ((discrete_parametric_process[i]->weight) &&
           (discrete_parametric_process[i]->mixture)) {
         nb_plot_set += 2;
@@ -2434,7 +2473,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
       }
     }
 
-    if ((continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
+    if ((seq != NULL) && (continuous_parametric_process[i]) && (continuous_parametric_process[i]->ident != LINEAR_MODEL) &&
         (continuous_parametric_process[i]->ident != AUTOREGRESSIVE_MODEL) &&
         ((seq->marginal_histogram[variable]) || (seq->marginal_distribution[variable]))) {
       if (continuous_parametric_process[i]->weight) {
@@ -2454,7 +2493,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
   plot_set = new MultiPlotSet(nb_plot_set , nb_output_process + 1);
   plot_set->border = "15 lw 0";
 
-  if ((seq) && (seq->type[0] == STATE)) {
+  if ((seq != NULL) && (seq->type[0] == STATE)) {
     characteristics = seq->characteristics[0];
     length_distribution = seq->length_distribution;
   }
@@ -2472,7 +2511,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
   }
 
   for (i = 0;i < nb_output_process;i++) {
-    if (seq) {
+    if (seq != NULL) {
       switch (seq->type[0]) {
       case STATE :
         variable = i + 1;

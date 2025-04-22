@@ -190,6 +190,11 @@ censoring_estimator = {
     "KAPLAN_MEIER": CensoringEstimator.KAPLAN_MEIER,
   }
   
+threshold_direction = {
+    "ABOVE": ThresholdDirection.ABOVE,
+    "BELOW": ThresholdDirection.BELOW,
+  }
+
 keep_type = {
              "keep": "Keep",
              "Keep": "Keep",

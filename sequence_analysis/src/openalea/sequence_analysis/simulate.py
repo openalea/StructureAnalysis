@@ -45,8 +45,10 @@ from openalea.sequence_analysis._sequence_analysis import (
 )
 
 from openalea.stat_tool import error
-from .enums import process_type
-from openalea.stat_tool.enums import bool_type
+from openalea.stat_tool.enums import ( 
+    ProcessType,
+    bool_type
+)
 
 
 def Simulate(obj, *args, **kargs):

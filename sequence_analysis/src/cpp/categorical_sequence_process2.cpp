@@ -2898,122 +2898,14 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
 
 {
   int i , j;
-  int index_length , dist_nb_value;
+  int index_length = 0 , dist_nb_value = 0;
   double scale , max;
   Curves *smoothed_curves;
   ostringstream title , legend;
 
-
-  // computation of the number of plots
-
-/*  nb_plot_set = 0;
-
-  if ((index_value) || (characteristics)) {
-    nb_plot_set++;
-
-    if (characteristics) {
-      index_length = characteristics->index_value->plot_length_computation();
-
-      if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
-        nb_plot_set++;
-      }
-      nb_plot_set++;
-    }
-  }
-
-  if ((first_occurrence) || (characteristics)) {
-    for (i = 0;i < nb_value;i++) {
-      if ((first_occurrence) && (first_occurrence[i])) {
-        nb_plot_set++;
-      }
-      else if ((characteristics) && (i < characteristics->nb_value) &&
-               (characteristics->first_occurrence[i]->nb_element > 0)) {
-        nb_plot_set++;
-      }
-    }
-  }
-
-  if ((recurrence_time) || (characteristics)) {
-    for (i = 0;i < nb_value;i++) {
-      if ((recurrence_time) && (recurrence_time[i])) {
-        nb_plot_set++;
-      }
-      else if ((characteristics) && (i < characteristics->nb_value) &&
-               (characteristics->recurrence_time[i]->nb_element > 0)) {
-        nb_plot_set++;
-      }
-    }
-  }
-
-  if ((sojourn_time) || (characteristics)) {
-    for (i = 0;i < nb_value;i++) {
-      if ((sojourn_time) && (sojourn_time[i])) {
-        nb_plot_set++;
-      }
-      else if ((characteristics) && (i < characteristics->nb_value) &&
-               (characteristics->sojourn_time[i]->nb_element > 0)) {
-        nb_plot_set++;
-      }
-
-      if ((characteristics) && (i < characteristics->nb_value) &&
-          (characteristics->initial_run) &&
-          (characteristics->initial_run[i]->nb_element > 0)) {
-        nb_plot_set++;
-      }
-
-      if ((forward) && (forward[i])) {
-        nb_plot_set++;
-      }
-      else if ((characteristics) && (i < characteristics->nb_value) &&
-               (characteristics->final_run[i]->nb_element > 0)) {
-        nb_plot_set++;
-      }
-    }
-  }
-
-  if ((nb_run) || (nb_occurrence) ||
-      ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence))) {
-    for (i = 0;i < nb_value;i++) {
-      if (nb_run) {
-        nb_plot_set++;
-      }
-      else if ((characteristics) && (i < characteristics->nb_value) &&
-               (characteristics->nb_run) && (characteristics->nb_run[i]->nb_element > 0)) {
-        nb_plot_set++;
-      }
-
-      if (nb_occurrence) {
-        nb_plot_set++;
-      }
-      else if ((characteristics) && (i < characteristics->nb_value) &&
-               (characteristics->nb_occurrence) &&
-               (characteristics->nb_occurrence[i]->nb_element > 0)) {
-        nb_plot_set++;
-      }
-    }
-
-    if ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence)) {
-      nb_plot_set++;
-    }
-  }
-
-  if (observation) {
-    if (empirical_observation) {
-      nb_plot_set += nb_state;
-    }
-    else {
-      nb_plot_set++;
-    }
-
-    if (marginal_distribution) {
-      if ((weight) && (mixture)) {
-        nb_plot_set++;
-      }
-      if ((restoration_weight) && (restoration_mixture)) {
-        nb_plot_set++;
-      }
-    }
-  } */
+  // Order of plots:
+  // + intensity (one per variable)
+  //
 
   if ((index_value) || (characteristics)) {
     plot.variable_nb_viewpoint[process]++;
@@ -3165,7 +3057,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
   else {
 
     // theoretical intensity
-
+    index_length = index_value->length;
     plot.variable[index] = process;
     plot.viewpoint[index] = INTENSITY;
 
@@ -4058,11 +3950,11 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
                                               weight->mass[i] * marginal_distribution->nb_element);
         }
 
-        plot[index][nb_state + 2].legend = STAT_label[STATL_MIXTURE];
+        plot[index][nb_state + 1].legend = STAT_label[STATL_MIXTURE];
 
-        plot[index][nb_state + 2].style = "linespoints";
+        plot[index][nb_state + 1].style = "linespoints";
 
-        mixture->plotable_mass_write(plot[index][nb_state + 2] ,
+        mixture->plotable_mass_write(plot[index][nb_state + 1] ,
                                      marginal_distribution->nb_element);
 
         index++;
@@ -4110,11 +4002,11 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
                                               restoration_weight->mass[i] * marginal_distribution->nb_element);
         }
 
-        plot[index][nb_state + 2].legend = STAT_label[STATL_MIXTURE];
+        plot[index][nb_state + 1].legend = STAT_label[STATL_MIXTURE];
 
-        plot[index][nb_state + 2].style = "linespoints";
+        plot[index][nb_state + 1].style = "linespoints";
 
-        restoration_mixture->plotable_mass_write(plot[index][nb_state + 2] ,
+        restoration_mixture->plotable_mass_write(plot[index][nb_state + 1] ,
                                                  marginal_distribution->nb_element);
 
         index++;

@@ -89,8 +89,7 @@ namespace sequence_analysis {
     SemiMarkovChain();
     SemiMarkovChain(stat_tool::process_type itype , int inb_state);
     SemiMarkovChain(const stat_tool::Chain *pchain , const CategoricalSequenceProcess *poccupancy);
-    SemiMarkovChain(const SemiMarkovChain &smarkov , int param = stat_tool::I_DEFAULT)
-    :Chain(smarkov) { copy(smarkov , param); }
+    SemiMarkovChain(const SemiMarkovChain &smarkov , int param = stat_tool::I_DEFAULT);
     ~SemiMarkovChain();
     SemiMarkovChain& operator=(const SemiMarkovChain &smarkov);
 
@@ -183,8 +182,7 @@ namespace sequence_analysis {
                const stat_tool::CategoricalProcess *pobservation , int length ,
                bool counting_flag);
     SemiMarkov(const SemiMarkov &smarkov , bool data_flag = true ,
-               int param = stat_tool::I_DEFAULT)
-    :SemiMarkovChain(smarkov , param) { copy(smarkov , data_flag , param); }
+               int param = stat_tool::I_DEFAULT);
     void conditional_delete();
     ~SemiMarkov();
     SemiMarkov& operator=(const SemiMarkov &smarkov);

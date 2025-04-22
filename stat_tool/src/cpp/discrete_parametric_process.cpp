@@ -1598,11 +1598,11 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
                                             weight->mass[i] * marginal_distribution->nb_element);
       }
 
-      plot[index][nb_state + 2].legend = STAT_label[STATL_MIXTURE];
+      plot[index][nb_state + 1].legend =  STAT_label[STATL_MIXTURE];
 
-      plot[index][nb_state + 2].style = "linespoints";
+      plot[index][nb_state + 1].style = "linespoints";
 
-      mixture->plotable_mass_write(plot[index][nb_state + 2] ,
+      mixture->plotable_mass_write(plot[index][nb_state + 1] ,
                                    marginal_distribution->nb_element);
 
       index++;
@@ -1693,11 +1693,11 @@ void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index ,
                                             restoration_weight->mass[i] * marginal_distribution->nb_element);
       }
 
-      plot[index][nb_state + 2].legend = STAT_label[STATL_MIXTURE];
+      plot[index][nb_state + 1].legend = STAT_label[STATL_MIXTURE];
 
-      plot[index][nb_state + 2].style = "linespoints";
+      plot[index][nb_state + 1].style = "linespoints";
 
-      restoration_mixture->plotable_mass_write(plot[index][nb_state + 2] ,
+      restoration_mixture->plotable_mass_write(plot[index][nb_state + 1] ,
                                                marginal_distribution->nb_element);
 
       index++;

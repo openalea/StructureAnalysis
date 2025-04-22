@@ -13,19 +13,17 @@ env_test = env
 pj = os.path.join
 
 
-if env_test['DEBUG']:
-   env_test.Append(CPPDEFINES= ['DEBUG'])
-
-my_debug = True
-
-if my_debug:
-    env_test.AppendUnique(LIBS=['efence'])
-    CPPFLAGS=["-g"] # No. This is managed by sconsx. Use scons debug=1
-    env_test.AppendUnique(CPPFLAGS=CPPFLAGS)
+if env_test['debug']:
+    env_test.Append(CPPDEFINES= ['DEBUG'])
+    env_test.Append(CPPDEFINES= ['DEBUG'])
     if '-DNDEBUG' in env._dict['CCFLAGS']:
         env_test._dict['CCFLAGS'] = []
     if '-DNDEBUG' in env._dict['CXXFLAGS']:
         env_test._dict['CXXFLAGS'] = []
+
+if env_test['with_efence']:
+    env_test.AppendUnique(LIBS=['efence'])
+
 
 # env_test.AppendUnique(LIBS=['stat_tool', 'sequence_analysis'])
 env_test.AppendUnique(LIBS=['vpstat_tool', 'vpsequence'])

@@ -4535,7 +4535,7 @@ void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable 
 {
   int i , j;
   int run_length , *pisequence;
-  FrequencyDistribution **sojourn_time , **initial_run , **final_run;
+  FrequencyDistribution **sojourn_time=NULL, **initial_run=NULL , **final_run=NULL;
 
 
   // construction of the frequency distributions

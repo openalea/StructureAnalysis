@@ -10,14 +10,17 @@ pj = os.path.join
 ALEASolution = config.ALEASolution
 
 options = Variables(['../options.py', 'options.py'], ARGUMENTS)
-options.Add(BoolVariable('with_efence', 'build tests with efence library', 1))
-options.Add(BoolVariable('DEBUG', 'my debug', 0))
-options.Add(BoolVariable('with_test', 'Add c++ tests', 1))
+# Firstly get options in ../options.py and then in options.py and finally in ARGUMENTS
+options.Add(BoolVariable('with_efence', 'build with efence library', False))
+options.Add(BoolVariable('with_test', 'build with efence library', False))
 
 tools = ['boost_python']
 
 env = ALEASolution(options, tools)
 env.AppendUnique(CXXFLAGS=['-x', 'c++', '-std=c++14'])
+# env.Add(BoolVariable('with_test', 'build tests', with_test))
+
+
 if env['with_efence']:
     env.AppendUnique(LIBS=['efence'])
 

@@ -116,13 +116,18 @@ void Reestimation<Type>::copy(const Reestimation<Type> &histo)
 	  delete [] frequency;
 	  frequency = NULL;
   }
-  frequency = new Type[nb_value];
 
-  for (i = 0;i < offset;i++) {
-    frequency[i] = 0.;
-  }
-  for (i = offset;i < nb_value;i++) {
-    frequency[i] = histo.frequency[i];
+  if (nb_value == 0) {
+    frequency = NULL;
+  } else {
+	  frequency = new Type[nb_value];
+
+	  for (i = 0;i < offset;i++) {
+		frequency[i] = 0.;
+	  }
+	  for (i = offset;i < nb_value;i++) {
+		frequency[i] = histo.frequency[i];
+	  }
   }
 }
 
@@ -372,9 +377,11 @@ void Reestimation<Type>::nb_value_computation()
   pfrequency = frequency + alloc_nb_value;
   nb_value = alloc_nb_value;
 
-  while ((*--pfrequency == 0) && (nb_value > 0)) {
+  while ((nb_value > 1) && (*--pfrequency == 0)) {
     nb_value--;
   }
+  if ((nb_value == 1) && (frequency[nb_value] == 0))
+	nb_value = 0;
 }
 
 
@@ -454,7 +461,7 @@ template <typename Type>
 double Reestimation<Type>::mode_computation() const
 
 {
-  int i;
+  int i = I_DEFAULT;
   int max_frequency;
   double mode;
 
@@ -466,15 +473,15 @@ double Reestimation<Type>::mode_computation() const
       mode = i;
     }
   }
-
   i = mode;
-  while (frequency[i + 1] == frequency[i]) {
-    i++;
+  if ((frequency != NULL) && (i < nb_value-1)) {
+	  while (frequency[i + 1] == frequency[i]) {
+		i++;
+	  }
+	  if (i > mode) {
+		mode = (i + mode) / 2.;
+	  }
   }
-  if (i > mode) {
-    mode = (i + mode) / 2.;
-  }
-
   return mode;
 }
 

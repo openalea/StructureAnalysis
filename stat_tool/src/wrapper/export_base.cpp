@@ -354,6 +354,11 @@ void class_constant()
   .export_values()
   ;
 
+  enum_<stat_tool::wrap_util::UniqueInt<3, 22> >("ThresholdDirection")
+  .value("ABOVE", ABOVE)
+  .value("BELOW", BELOW)
+  .export_values()
+  ;
 
 
   /*const int NB_STATE = 100;

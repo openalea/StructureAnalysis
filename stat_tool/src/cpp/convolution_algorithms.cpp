@@ -454,7 +454,7 @@ Convolution* FrequencyDistribution::convolution_estimation(StatError &error , os
                                           1. , proba , CONVOLUTION_THRESHOLD);
 
 #   ifdef DEBUG
-    unknown_dist->ascii_print(os);
+    unknown_dist->ascii_print(*os);
 #   endif
 
     convol = convolution_estimation(error , os , known_dist , *unknown_dist , estimator ,

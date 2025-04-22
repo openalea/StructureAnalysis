@@ -33,7 +33,7 @@ from openalea.stat_tool._stat_tool import (
 )
 
 try:
-    from openalea.sequence_analysis.enums import (
+    from openalea.sequence_analysis.enums_seq import (
         NB_STATE_SEQUENCE,
         NB_SEGMENTATION,
 )
@@ -405,7 +405,7 @@ class StatInterface(object):
                     models = []
                     for model in args[2]:
                         try:
-                            from openalea.sequence_analysis.enums import model_type
+                            from openalea.sequence_analysis.enums_seq import model_type
                             models.append(model_type[args[2]])
                         except:
                             pass
@@ -628,7 +628,7 @@ class StatInterface(object):
 
         """
         try:
-            from openalea.sequence_analysis.enums import output_display
+            from openalea.sequence_analysis.enums_seq import output_display
         except:
             from openalea.stat_tool.enums import output_display
 
@@ -642,7 +642,7 @@ class StatInterface(object):
                 print('warning could not import output_display from sequence_analysis')
         else:
             try:
-                from openalea.sequence_analysis.enums import output_display
+                from openalea.sequence_analysis.enums_seq import output_display
             except:
                 from openalea.stat_tool.enums import output_display
             Output = None
@@ -658,6 +658,7 @@ class StatInterface(object):
 
         plotable = None
         #calling the plot functions from here
+        explicit_error = False
         try:
             if ViewPoint=='s':
                 from openalea.stat_tool.enums import histogram_types
@@ -670,7 +671,8 @@ class StatInterface(object):
                     #equivalent to histo->survival_plot_write(error , Plot_prefix , title)
                     output = self.survival_get_plotable(*params)
                 else:
-                    raise ValueError("""(%s) has no survival point. Use another
+                    explicit_error = True
+                    local_error = ValueError("""(%s) has no survival point. Use another
                         Viewpoint or use a first argument in DISTRIBUTION or MIXTURE or
                         CONVOLUTION or COMPOUND or FREQUENCY_DISTRIBUTION or
                         MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA"""
@@ -686,12 +688,14 @@ class StatInterface(object):
                     plotable = self.state_profile_plotable_write(args[0])
                 elif type(self) == _HiddenSemiMarkov:
                     if len(args)==0:
-                        raise SyntaxError("expect an identifier (Plot(hsmc25, 1, ViewPoint='StateProfile')")
+                        explicit_error = True
+                        local_error = SyntaxError("expect an identifier (Plot(hsmc25, 1, ViewPoint='StateProfile')")
                     elif len(args)==1:
                         identifier = args[0]
                     else:
                         #print 'iiiiiiiiiiiiiii'
-                        raise SyntaxError("expect only one identifier Plot(hsmc25, 1, ViewPoint='StateProfile'")
+                        explicit_error = True
+                        local_error = SyntaxError("expect only one identifier Plot(hsmc25, 1, ViewPoint='StateProfile'")
                     plotable = self.state_profile_plotable_write(identifier, Output)
                 else:
                     #todo 3 args required
@@ -703,7 +707,8 @@ class StatInterface(object):
                     elif type(args[1])==_HiddenSemiMarkov:
                         plotable = args[1].state_profile_plotable_write2(self , args[0], Output)
                     else:
-                        raise TypeError("expect HiddenVariableOrderMarkov or HiddenSemiMarkov")
+                        explicit_error = True
+                        local_error = TypeError("expect HiddenVariableOrderMarkov or HiddenSemiMarkov")
 
                 if plotable == None:
                     try:
@@ -714,17 +719,19 @@ class StatInterface(object):
             elif ViewPoint=='q':
                 from openalea.sequence_analysis._sequence_analysis import _Sequences, _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData
                 if type(self) not in [_Sequences, _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData]:
-                    raise TypeError('object must be in SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA')
+                    explicit_error = True
+                    local_error = TypeError('object must be in SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA')
 
                 try:
                     self.nb_variable
                 except:
-                    raise ValueError("object has no nb_variable. check that it is a sequence")
+                    explicit_error = True
+                    local_error = ValueError("object has no nb_variable. check that it is a sequence")
                 nb_variable = self.nb_variable
                 assert len(args)>=2
                 error.CheckType([args[0], args[1]], [[int], [int]])
                 #construct model_type
-                from openalea.sequence_analysis.enums import model_type
+                from openalea.sequence_analysis.enums_seq import model_type
                 types = []
                 for i in range(0, nb_variable):
                     error.CheckType([args[i+2]], [str])
@@ -763,26 +770,33 @@ class StatInterface(object):
                     #sequence case:
                     #todo: make it looser: observation, intensity INTENSITY?
                     choices = ["SelfTransition", "Observation", "Intensity",
-                         "FirstOccurrence", "Recurrence", "Sojourn", "Counting"]
+                         "FirstOccurrence", "Recurrence", "Sojourn", "Counting",
+                         "NbRun", "NbOccurrence"]
                     if args[0] in choices:
                         multiplotset = self.get_plotable()
-                        viewpoints = [x for x in multiplotset.viewpoint]
+                        viewpoints = [x for x in multiplotset.viewpoint()]
                         plotable = []
                         try:
-                            from openalea.sequence_analysis import enums
+                            from openalea.sequence_analysis import enums_seq
                         except:
-                            raise ImportError("sequence analysis not installed !!")
+                            explicit_error = True
+                            errlocal_erroror = ImportError("sequence analysis not installed !!")
 
                         if len(args)==1:
                             variable = 0
                         elif len(args)==2:
                             variable = args[1]
-                        for index, xx in enumerate(viewpoints):
-                            if xx==enums.markovian_sequence_type[args[0]]:
-                                if multiplotset.variable[index]==variable:
-                                    plotable.append(multiplotset[index])
+                        try:
+                            for index, xx in enumerate(viewpoints):
+                                if xx==enums_seq.markovian_sequence_type[args[0]]:
+                                    if multiplotset.variable[index]==variable:
+                                        plotable.append(multiplotset[index])
+                        except AttributeError:
+                            explicit_error = True
+                            local_error = ImportError("sequence analysis not installed !!")
                     elif len(args) == 1 and type(args[0]) == str:
-                        raise SyntaxError("first argument must be in %s and second arg (int) may be provided." % choices)
+                        explicit_error = True
+                        local_error = SyntaxError("first argument must be in %s and second arg (int) may be provided." % choices)
                     elif len(args)==1 and type(args[0])==int:
                         from openalea.stat_tool._stat_tool import _Vectors
                         if type(self)==_Vectors:
@@ -793,7 +807,8 @@ class StatInterface(object):
                             try:
                                 from openalea.sequence_analysis import enums
                             except:
-                                raise ImportError("sequence analysis not installed !!")
+                                explicit_error = True
+                                local_error = ImportError("sequence analysis not installed !!")
                             plotable = [multiplotset[args[0]]]
                         else:
                             #Plot(hist1, hist2, hist3)
@@ -801,6 +816,9 @@ class StatInterface(object):
                     elif len(args)==1:
                         #e.g., list of histograms
                         plotable = self.get_plotable_list(list(args), *params)
+                    elif (type(args[0]) == str) and not(args[0] in choices):
+                        explicit_error = True
+                        local_error = ValueError("Bad viewpoint: " + args[0])
                     else:
                         plotable = self.get_plotable_list(list(args), *params)
                 else:
@@ -810,6 +828,8 @@ class StatInterface(object):
             import warnings
             warnings.warn("Cannot use new plotter. Use old style plot.")
             plotable = None
+        if explicit_error:
+            raise local_error
 
         if plot.DISABLE_PLOT:
             return
@@ -873,7 +893,7 @@ class StatInterface(object):
         # then, to give a default value!=None. But be aware that tis default
         # value is a dummy variable that is not used.
         try:
-            from openalea.sequence_analysis.enums import output_display
+            from openalea.sequence_analysis.enums_seq import output_display
         except:
             from openalea.stat_tool.enums import output_display
 
@@ -885,7 +905,7 @@ class StatInterface(object):
                 print('warning could not import output_display from sequence_analysis')
         else:
             try:
-                from openalea.sequence_analysis.enums import output_display
+                from openalea.sequence_analysis.enums_seq import output_display
             except:
                 from openalea.stat_tool.enums import output_display
             Output = None
@@ -1028,7 +1048,7 @@ class StatInterface(object):
             error.CheckType([args[0], args[1]], [[int],[int]])
             #construct model_type
             try:
-                from openalea.sequence_analysis.enums import model_type
+                from openalea.sequence_analysis.enums_seq import model_type
             except:
                 pass
             types = []
@@ -1051,7 +1071,7 @@ class StatInterface(object):
         elif ViewPoint == 'v':
             from openalea.stat_tool.enums import all_stat_tool_types
             try:
-                from openalea.sequence_analysis.enums import all_sequences_types
+                from openalea.sequence_analysis.enums_seq import all_sequences_types
             except ImportError:
                 if type(self) in all_stat_tool_types:
                     output = self.ascii_write(exhaustive)
