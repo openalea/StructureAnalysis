@@ -50,9 +50,12 @@ env_test.Append(CPPPATH='#/src/cpp/')
 
 # test_int_fl_containers.cpp
 tests = Split("""
-test_hidden_semi_markov_chain.cpp
+test_sm_switching_lm.cpp
 """)
 
+# tests = Split("""
+# test_hidden_semi_markov_chain.cpp
+# """)
 # tests.append(seqlib)
 
 def prog(p):

@@ -195,6 +195,13 @@ namespace sequence_analysis {
     SemiMarkovData* simulation(StatError &error , int nb_sequence ,
                                const MarkovianSequences &iseq , bool counting_flag = true) const;
 
+    /// simulation of semi-markov-switching linear models, which require a single int covariate.
+    SemiMarkovData* semi_markov_switching_lm_simulation(StatError &error , int nb_sequence ,
+                               	   	   	   	   	   	    const Sequences &covariate,
+														int ivariable=I_DEFAULT, bool counting_flag = true) const;
+
+
+
     stat_tool::DistanceMatrix* divergence_computation(StatError &error , std::ostream *os , int nb_model ,
                                                       const HiddenSemiMarkov **ihsmarkov ,
                                                       stat_tool::FrequencyDistribution **hlength ,

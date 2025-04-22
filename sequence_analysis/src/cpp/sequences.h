@@ -440,7 +440,18 @@ namespace sequence_analysis {
   class TimeEvents;
   class RenewalData;
 
-  /// \brief Sequences
+  /*! \brief Sequences
+  *
+  * Sequences implements a collection of multivariate sequences.
+  * Variables can be either integers, doubles or indices (int).
+  * Integer and double variables are stored in int_sequence and real_sequence,
+  * respectively. Both have the same numbers of variables; if type[i] == INT_VALUE,
+  * real_sequence[s][i] == NULL for all sequences s, and vice versa if
+  * type[i] == REAL_VALUE.
+  * real_sequence[s][i][p] represents the value for sequence s for variable i
+  * (assumed to be REAL_VALUE) at position p
+  * index_parameter is the sequence index, if explicit, it has to be non-decreasing.
+  * */
 
   class Sequences : public stat_tool::StatInterface {
 
@@ -737,7 +748,9 @@ namespace sequence_analysis {
     RenewalData* extract_renewal_data(stat_tool::StatError &error , int variable ,
                                       int begin_index_parameter , int end_index_parameter) const;
 
+    /// Merge several sets of Sequences (arrays of Sequences)
     Sequences* merge(stat_tool::StatError &error , int nb_sample , const Sequences **iseq) const;
+    /// Merge several sets of Sequences (std::vector<Sequences>)
     Sequences* merge(stat_tool::StatError &error , int nb_sample , const std::vector<Sequences> &iseq) const;
 
     Sequences* shift(stat_tool::StatError &error , int variable , int shift_param) const;
@@ -774,7 +787,12 @@ namespace sequence_analysis {
                                  bool keep = true) const;
     Sequences* select_individual(stat_tool::StatError &error , int inb_sequence , std::vector<int> &iidentifier ,
                                  bool keep = true) const;
-
+    /// Add index parameter
+    void set_index_parameter(stat_tool::StatError &error, int **index_parameter,
+    		                 index_parameter_type index_param_type);
+    /// Copy of a Sequences object transforming some given existing variable into an index parameter
+    Sequences* set_variable_as_index_parameter(stat_tool::StatError &error, int ivariable,
+    		                                   index_parameter_type index_param_type) const;
     Sequences* remove_index_parameter(stat_tool::StatError &error) const;
     Sequences* explicit_index_parameter(stat_tool::StatError &error) const;
     Sequences* select_variable(stat_tool::StatError &error , int inb_variable , int *ivariable ,
@@ -984,8 +1002,12 @@ namespace sequence_analysis {
     index_parameter_type get_index_param_type() const { return index_param_type; }
     stat_tool::FrequencyDistribution* get_index_parameter_distribution() const { return index_parameter_distribution; }
     stat_tool::FrequencyDistribution* get_index_interval() const { return index_interval; }
+    /// return index parameter for sequence iseq and given index
     int get_index_parameter(int iseq , int index) const
     { return index_parameter[iseq][index]; }
+    /// return whole set of index parameters
+    int** get_index_parameter() const
+    { return index_parameter; }
     int get_nb_variable() const { return nb_variable; }
     stat_tool::variable_nature get_type(int variable) const { return type[variable]; }
     double get_min_value(int variable) const { return min_value[variable]; }
@@ -998,6 +1020,10 @@ namespace sequence_analysis {
     { return int_sequence[iseq][variable][index]; }
     double get_real_sequence(int iseq , int variable , int index) const
     { return real_sequence[iseq][variable][index]; }
+    int** get_int_sequence(int iseq) const
+    { return int_sequence[iseq]; }
+    double** get_real_sequence(int iseq) const
+    { return real_sequence[iseq]; }
   };
 
 
@@ -1185,15 +1211,10 @@ namespace sequence_analysis {
     MarkovianSequences();
     MarkovianSequences(int inb_sequence , int *iidentifier , int *ilength ,
                        int **ivertex_identifier , index_parameter_type iindex_param_type , int inb_variable ,
-                       stat_tool::variable_nature *itype , bool vertex_identifier_copy = true , bool init_flag = false)
-    :Sequences(inb_sequence , iidentifier , ilength , ivertex_identifier ,
-               iindex_param_type , inb_variable , itype ,
-               vertex_identifier_copy , init_flag) { init(); }
+                       stat_tool::variable_nature *itype , bool vertex_identifier_copy = true , bool init_flag = false);
     MarkovianSequences(const stat_tool::FrequencyDistribution &ilength_distribution , int inb_variable ,
-                       stat_tool::variable_nature *itype , bool init_flag = false)
-    :Sequences(ilength_distribution , inb_variable , itype , init_flag) { init(); }
-    MarkovianSequences(const MarkovianSequences &seq , int variable , stat_tool::variable_nature itype)
-    :Sequences(seq , variable , itype) { init(); }
+                       stat_tool::variable_nature *itype , bool init_flag = false);
+    MarkovianSequences(const MarkovianSequences &seq , int variable , stat_tool::variable_nature itype);
     MarkovianSequences(const Sequences &seq);
     MarkovianSequences(const MarkovianSequences &seq , bool *auxiliary);
     MarkovianSequences(const MarkovianSequences &seq , sequence_transformation transform = SEQUENCE_COPY ,
@@ -1204,8 +1225,11 @@ namespace sequence_analysis {
     stat_tool::DiscreteDistributionData* extract(stat_tool::StatError &error , stat_tool::process_distribution type ,
                                                  int variable , int value) const;
 
+
+    /// Merge several sets of MarkovianSequences (arrays of MarkovianSequences)
     MarkovianSequences* merge(stat_tool::StatError &error , int nb_sample ,
                               const MarkovianSequences **iseq) const;
+    /// Merge several sets of MarkovianSequences (std::vector<MarkovianSequences>)
     MarkovianSequences* merge(stat_tool::StatError &error , int nb_sample ,
                               const std::vector<MarkovianSequences> &iseq) const;
 

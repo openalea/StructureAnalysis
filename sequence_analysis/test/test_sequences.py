@@ -30,6 +30,7 @@ class Test(interface):
                            str(get_shared_data("sequences1.seq")),
                            Sequences)
         self.seqn = self.build_seqn()
+        self.seqrealn = self.build_seq_realn()
         self.seq1 = self.build_seq1()
 
     def build_data(self):
@@ -58,6 +59,10 @@ class Test(interface):
 
     def build_seq1(self):
         s = Sequences([[1,1,1],[2,2,2]])
+        return s
+    
+    def build_seq_realn(self):
+        s = Sequences([[[1.5,1.5,1.5],[12.5,12.5,12.5]],[[2.5,2.5,2.5],[22.5,23.5,24.5]]])
         return s
 
     def build_seq_wrong_identifiers(self):
@@ -212,8 +217,8 @@ class Test(interface):
         assert a
         assert str(ValueSelect(seqn, 1, 1, 2)) == str(seqn.value_select(1,1,2, True))
 
-    def test_select_variable(self):
-        "test_select_variable implemented but need to be checked (index issue)"
+    def test_select_variable_int(self):
+        "test_select_variable_int implemented but need to be checked (index issue)"
         # !!!!!!!! NEED to CHECK THE INDEX 0, 1 , ... or 1,2,....
         # what about identifiers ?
         # Variable seems to start at 1 not 0
@@ -222,6 +227,17 @@ class Test(interface):
         select = s.select_variable([1], keep=True)
         assert select[0,0] == [1]
         assert select[1,0] == [2]
+
+    def test_select_variable_real(self):
+        "test_select_variable_real implemented but need to be checked (index issue)"
+        # !!!!!!!! NEED to CHECK THE INDEX 0, 1 , ... or 1,2,....
+        # what about identifiers ?
+        # Variable seems to start at 1 not 0
+        s = self.seqrealn
+        #select variable 1
+        select = s.select_variable([1], keep=True)
+        assert select[0,0] == [1.5]
+        assert select[1,0] == [2.5]
 
 
     def test_select_individual(self):

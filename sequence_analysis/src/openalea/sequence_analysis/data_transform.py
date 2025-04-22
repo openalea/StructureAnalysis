@@ -57,7 +57,7 @@ from .enums_seq import (
     markovian_sequence_type, output_map, histogram_type,
     mode_type, func_map, estimator_map, model_type, seq_map,
     renewal_nb_event_map, sub_func_map, nb_segment_map,
-    output_type
+    output_type, index_parameter_type_map
 )
 
 
@@ -1678,3 +1678,74 @@ def _Sequences_thresholding(self, variable , threshold , mode):
 
 _Sequences.thresholding = _Sequences_thresholding
 
+_Sequences.set_index_parameter_backup = _Sequences.set_index_parameter
+
+def _Sequences_set_index_parameter(self, index , index_parameter_type):
+    """
+    :Usage:
+    
+        Add an index to a Sequences object
+    
+    .. doctest::
+        :options: +SKIP
+
+        >>> seq.set_index_parameter([[0, 1, 2], [1, 2, 3, 4]], "TIME")
+
+    :Arguments:
+
+    * index (list of lists),
+    * index_parameter_type (str), "TIME", "POSITION", 
+    
+     
+    """
+    assert(issubclass(self.__class__, _Sequences))
+    mtype = str.upper(index_parameter_type)
+    try:
+        itype = index_parameter_type_map[mtype]
+    except KeyError:
+        msg = "Bad index type: " + str(index_parameter_type) + \
+        ". Should be in : " + str(list(index_parameter_type_map.keys()))
+        raise ValueError(msg)
+    if not(hasattr(index, "__getitem__")):
+        msg = "Bad index type: " + str(type(index)) + \
+        ". Should be a list"
+        raise TypeError(msg)
+    ret = self.set_index_parameter_backup(index, itype)    
+    return(ret)
+
+_Sequences.set_index_parameter = _Sequences_set_index_parameter
+
+
+_Sequences.set_variable_as_index_parameter_backup = _Sequences.set_variable_as_index_parameter
+
+def _Sequences_set_variable_as_index_parameter(self, variable , index_parameter_type):
+    """
+    :Usage:
+    
+        Transform a integer variable to a Sequences index (must be non-decreasing)
+    
+    .. doctest::
+        :options: +SKIP
+
+        >>> seq.set_variable_as_index_parameter(1, "TIME")
+
+    :Arguments:
+
+    * variable (int),
+    * index_parameter_type (str), "TIME", "POSITION", 
+    
+     
+    """
+    assert(issubclass(self.__class__, _Sequences))
+    mtype = str.upper(index_parameter_type)
+    try:
+        itype = index_parameter_type_map[mtype]
+    except KeyError:
+        msg = "Bad index type: " + str(index_parameter_type) + \
+        ". Should be in : " + str(list(index_parameter_type_map.keys()))
+        raise ValueError(msg)
+    error.CheckType([variable], [int])
+    ret = self.set_variable_as_index_parameter_backup(variable, itype)    
+    return(ret)
+
+_Sequences.set_variable_as_index_parameter = _Sequences_set_variable_as_index_parameter

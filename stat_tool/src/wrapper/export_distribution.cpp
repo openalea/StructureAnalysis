@@ -439,14 +439,16 @@ public:
   {
 	  StatError error;
 	  FrequencyDistribution *data = NULL;
+	  double l = D_INF;
 
 	  data = p.extract_data(error);
 	  if (data == NULL) {
 		  error.update(STAT_error[STATR_NO_DATA]);
 		  stat_tool::wrap_util::throw_error(error);
 	  } else {
-	  	  return p.likelihood_computation(*data);
+	  	  l = p.likelihood_computation(*data);
 	  }
+	  return l;
   }
 
   // likelihood computation with given data

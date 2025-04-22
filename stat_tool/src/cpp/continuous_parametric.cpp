@@ -1302,6 +1302,7 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
   }
   }
   os << endl;
+  return os;
 }
 
 

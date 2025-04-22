@@ -3144,7 +3144,6 @@ void Sequences::build_index_parameter_frequency_distribution()
   if (index_parameter) {
     int i , j;
 
-
     index_parameter_distribution = new FrequencyDistribution(max_index_parameter_computation() + 1);
 
     for (i = 0;i < nb_sequence;i++) {
@@ -3428,8 +3427,13 @@ void Sequences::build_marginal_frequency_distribution(int variable)
   if (type[variable] != AUXILIARY) {
     if ((type[variable] != REAL_VALUE) && (min_value[variable] >= 0) &&
         (max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
-      marginal_distribution[variable] = new FrequencyDistribution((int)max_value[variable] + 1);
-      marginal_frequency_distribution_computation(variable);
+#ifdef DEBUG
+    	assert(marginal_distribution != NULL);
+#endif
+    	if (marginal_distribution[variable] != NULL)
+    		delete marginal_distribution[variable];
+        marginal_distribution[variable] = new FrequencyDistribution((int)max_value[variable] + 1);
+        marginal_frequency_distribution_computation(variable);
     }
 
     else {
@@ -3458,7 +3462,6 @@ void Sequences::build_marginal_histogram(int variable , double bin_width , doubl
     int *pisequence;
     double *prsequence;
 
-
     // construction of the histogram
 
     if (bin_width == D_DEFAULT) {
@@ -3471,6 +3474,9 @@ void Sequences::build_marginal_histogram(int variable , double bin_width , doubl
 #     endif
 
     }
+#	ifdef DEBUG
+    assert(marginal_histogram != NULL);
+#	endif
 
     if (imin_value == D_INF) {
       imin_value = floor(min_value[variable] / bin_width) * bin_width;

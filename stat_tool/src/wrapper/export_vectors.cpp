@@ -1050,7 +1050,6 @@ public:
     if (variable<input.get_nb_variable() && variable>=0)
         {
             ret = input.get_marginal_histogram(variable);
-            return ret;
         }
     else
         {
@@ -1059,6 +1058,7 @@ public:
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
+    return ret;
   }
 
   static void plot_write(const Vectors &input, const std::string& prefix,

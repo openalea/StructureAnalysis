@@ -608,6 +608,7 @@ public:
   _is_parametric(const MultivariateMixture& mixt, int ivariable)
   {
     ostringstream error_message;
+    bool ret = false;
 
     if ((ivariable < 0) || (ivariable > mixt.get_nb_component()))
       {
@@ -616,7 +617,8 @@ public:
         throw_error_already_set();
       }
     else
-      return mixt.is_parametric(ivariable);
+    	ret = mixt.is_parametric(ivariable);
+    return ret;
   }
 
   static void

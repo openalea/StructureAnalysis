@@ -1004,7 +1004,10 @@ namespace stat_tool {
 
 
   /// \brief Histogram
-
+  /**
+   * Histogram are represented as an array *frequency, with size nb_bin
+   *
+   * */
   class STAT_TOOL_API Histogram {
 
   public :
@@ -1012,11 +1015,11 @@ namespace stat_tool {
     int nb_element;         ///< sample size
     int nb_bin;             ///< number of bins
     double bin_width;       ///< constant bin width
-    int max;                ///< maximum frequency
+    int max;                ///< maximum value in frequency
     int *frequency;         ///< frequency for each bin
     int type;               ///< variable type (INT_VALUE/REAL_VALUE)
-    double min_value;       ///< minimum value
-    double max_value;       ///< maximum value
+    double min_value;       ///< minimum value of support
+    double max_value;       ///< maximum value of support
 
     void copy(const Histogram &histo);
 

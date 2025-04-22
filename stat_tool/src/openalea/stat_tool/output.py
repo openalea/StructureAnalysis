@@ -632,8 +632,6 @@ class StatInterface(object):
         except:
             from openalea.stat_tool.enums import output_display
 
-
-
         if kargs.get('Output'):
             try:
                 Output = None
@@ -839,6 +837,7 @@ class StatInterface(object):
         else:
             self.old_plot(*args, **kargs)
 
+    
     @add_doc
     def display(self, *args, **kargs):
         format_map = {
