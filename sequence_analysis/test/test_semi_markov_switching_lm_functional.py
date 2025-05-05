@@ -111,7 +111,12 @@ def test1():
     plt.show()
     seq_estim = hsmd.select_variable([2], True);
 
-    hsmc_est_file = Estimate(seq_estim, "HIDDEN_SEMI-MARKOV", hsm, Nbiteration=300)   
+    hsmc_est_file = Estimate(seq_estim, "HIDDEN_SEMI-MARKOV", hsm, Nbiteration=300)
+    print(hsmc_est_file.display())
+    
+    hsmc_est_default = Estimate(seq_estim, "HIDDEN_SEMI-MARKOV", "Ordinary", 3, "Irreducible", Nbiteration=300)
+    print(hsmc_est_default.display())
+       
     
 
 if __name__ == "__main__":
