@@ -210,7 +210,6 @@ MarkovianSequences::MarkovianSequences(int inb_sequence , int *iidentifier , int
 /*--------------------------------------------------------------*/
 /**
  *  \brief Construction of a MarkovianSequences exactly as a Sequences object
- *
  *  \param[in] ilength_distribution sequence length frequency distribution,
  *  \param[in] inb_variable         number of variables,
  *  \param[in] itype                variable types,
