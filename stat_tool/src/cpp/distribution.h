@@ -45,10 +45,6 @@
 
 namespace stat_tool {
 
-  /// @brief make visible these global variables
-  extern std::mt19937 mt;
-  extern std::uniform_real_distribution<double> rand_unif;
-
   class DiscreteDistributionData;
 
   /// \brief Discrete parametric distribution with pointer on DiscreteDistributionData

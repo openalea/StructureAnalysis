@@ -444,7 +444,7 @@ namespace stat_tool {
 
   class STAT_TOOL_API Distribution {
 
-    friend std::ostream& operator<<(std::ostream& , const Distribution&);
+    STAT_TOOL_API friend std::ostream& operator<<(std::ostream& , const Distribution&);
 
   public :
 
@@ -584,7 +584,7 @@ namespace stat_tool {
 
   class STAT_TOOL_API DiscreteParametric : public Distribution {
 
-    friend std::ostream& operator<<(std::ostream& , const DiscreteParametric&);
+    STAT_TOOL_API friend std::ostream& operator<<(std::ostream& , const DiscreteParametric&);
 
   public :
 
