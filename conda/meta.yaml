@@ -25,15 +25,18 @@ requirements:
   # it doesn't really require python, but maybe that will fix
   # the missing bin directory
   host:
-    - python
+    - python x.x
+    - numpy x.x
     - setuptools
     - boost
   build:
    - openalea.deploy
    - scons
    - openalea.sconsx
+   - {{ compiler('cxx') }}
+   - python 
   run:
-   - python
+   - python x.x
    - boost
 
 test:
