@@ -504,6 +504,10 @@ namespace stat_tool {
     int plot_nb_value_computation(const FrequencyDistribution *histo = NULL) const;
     bool plot_print(const char *path , double *concentration , double scale) const;
     bool plot_print(const char *path , const FrequencyDistribution *histo = NULL) const;
+    // CPL added
+    bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
+              double *scale , int *dist_nb_value , int nb_histo ,
+              const FrequencyDistribution **histo) const;
     virtual std::ostream& plot_title_print(std::ostream &os) const
     { return os; }
     bool survival_plot_print(const char *path , double *survivor) const;
@@ -553,6 +557,7 @@ namespace stat_tool {
     double overlap_distance_computation(const Distribution &dist) const;
 
     void log_computation();
+    void log_computation(int nb_value , const double *pmass , double *plog);
 
     double survivor_likelihood_computation(const FrequencyDistribution &histo) const;
     double chi2_value_computation(const FrequencyDistribution &histo) const;
