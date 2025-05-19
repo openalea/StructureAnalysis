@@ -26,7 +26,7 @@ from . import (
 )
 
 # Output functions
-from openalea.stat_tool._stat_tool import (
+from ._stat_tool import (
     FORWARD_DYNAMIC_PROGRAMMING,
     FORWARD_BACKWARD_SAMPLING, GENERALIZED_VITERBI,
     FORWARD_BACKWARD_SAMPLING,
