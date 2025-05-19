@@ -317,8 +317,8 @@ namespace stat_tool {
   const double PLOT_RANGE_RATIO = 4.;    // threshold for plotting from 0
 
   // random generator
-  extern std::mt19937 mt;
-  extern std::uniform_real_distribution<double> rand_unif;
+  //STAT_TOOL_API std::mt19937 mt;
+  //STAT_TOOL_API std::uniform_real_distribution<double> rand_unif;
 /****************************************************************
  *
  *  Class definition
@@ -507,7 +507,7 @@ namespace stat_tool {
     // CPL added
     bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
               double *scale , int *dist_nb_value , int nb_histo ,
-              const FrequencyDistribution **histo) const;
+              const FrequencyDistribution **histo);
     virtual std::ostream& plot_title_print(std::ostream &os) const
     { return os; }
     bool survival_plot_print(const char *path , double *survivor) const;
@@ -557,7 +557,6 @@ namespace stat_tool {
     double overlap_distance_computation(const Distribution &dist) const;
 
     void log_computation();
-    void log_computation(int nb_value , const double *pmass , double *plog);
 
     double survivor_likelihood_computation(const FrequencyDistribution &histo) const;
     double chi2_value_computation(const FrequencyDistribution &histo) const;
@@ -578,12 +577,6 @@ namespace stat_tool {
 
     DiscreteParametricModel* truncate(StatError &error , int imax_value) const;
   };
-
-
-  bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
-                  double *scale , int *dist_nb_value , int nb_histo ,
-                  const FrequencyDistribution **histo);
-
 
   class Forward;
 
@@ -754,6 +747,7 @@ namespace stat_tool {
                     const FrequencyDistribution **histo = NULL) const;
     bool plot_print(const char *path , double *cumul , double *concentration ,
                     double shift = 0.) const;
+                    
     bool survival_plot_print(const char *path , double *survivor) const;
     std::ostream& plot_title_print(std::ostream &os) const
     { return os; }
@@ -915,11 +909,6 @@ namespace stat_tool {
   };
 
 
-  bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
-                  double *scale , int *dist_nb_value , int nb_histo ,
-                  const FrequencyDistribution **histo);
-
-
   class Histogram;
 
   /// \brief Continuous parametric distribution
@@ -1044,6 +1033,9 @@ namespace stat_tool {
     double* cumul_computation() const;
   };
 
+  /// @brief make visible these global variables
+  STAT_TOOL_API extern std::mt19937 mt;
+  STAT_TOOL_API extern std::uniform_real_distribution<double> rand_unif;
 
   STAT_TOOL_API void set_seed(int seed, std::mt19937 &generator=mt);
 
@@ -1055,6 +1047,11 @@ namespace stat_tool {
 
   STAT_TOOL_API void cumul_computation(int nb_value , const double *pmass , double *pcumul);
   STAT_TOOL_API int cumul_method(int nb_value , const double *cumul , double scale = 1.);
+
+  STAT_TOOL_API bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
+                  double *scale , int *dist_nb_value , int nb_histo ,
+                  const FrequencyDistribution **histo);
+  STAT_TOOL_API void log_computation(int nb_value , const double *pmass , double *plog);
 
 
 };  // namespace stat_tool
