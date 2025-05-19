@@ -15,19 +15,23 @@ about:
 build:
   preserve_egg_dir: True
   number: 0
-  script: python multisetup.py install --prefix=$PREFIX
+  script:
+    python multisetup.py install --prefix=$PREFIX
+
+
 
 
 requirements:
   # it doesn't really require python, but maybe that will fix
   # the missing bin directory
+  host:
+    - python
+    - setuptools
+    - boost
   build:
-   - python
-   - setuptools
    - openalea.deploy
    - scons
    - openalea.sconsx
-   - boost
   run:
    - python
    - boost
