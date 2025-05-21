@@ -634,6 +634,16 @@ void CategoricalSequenceProcess::init_occupancy(const CategoricalSequenceProcess
 CategoricalSequenceProcess::CategoricalSequenceProcess(const CategoricalSequenceProcess &process ,
                                                        categorical_sequence_process_transformation transform ,
                                                        int param)
+: length(NULL),
+  index_value(NULL),
+  no_occurrence(NULL),
+  first_occurrence(NULL),
+  leave(NULL),
+  recurrence_time(NULL),
+  absorption(NULL),
+  sojourn_time(NULL),
+  nb_run(NULL),
+  nb_occurrence(NULL)
 
 {
   switch (transform) {

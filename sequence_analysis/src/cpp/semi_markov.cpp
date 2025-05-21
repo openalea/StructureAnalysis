@@ -557,7 +557,6 @@ void SemiMarkov::remove()
 {
   int i;
 
-
   if (semi_markov_data != NULL){
 	  delete semi_markov_data;
 	  semi_markov_data = NULL;

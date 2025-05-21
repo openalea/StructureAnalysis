@@ -447,8 +447,8 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 
 {
   int i;
-  double failure = 1. - probability , success = probability , log_failure ,
-         set , subset , scale , term;
+  double failure = 1. - probability , success = probability , log_failure = D_INF,
+         set = 0., subset  = 0., scale  = 1., term = 0.;
 
 
   switch (mode) {

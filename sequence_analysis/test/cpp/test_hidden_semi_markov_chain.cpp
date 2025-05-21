@@ -1,6 +1,6 @@
 /****************************************************************
  *
- *  Test hidden semi-Markov tree
+ *  Test hidden semi-Markov chains
  */
 
 #include "stat_tool/stat_tools.h"

@@ -74,9 +74,9 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
 {
   int i , j , k , m;
   int nb_value , length , **pioutput;
-  double likelihood = 0. , seq_likelihood , obs_product , residual , **observation ,
-         *norm , *state_norm , *forward1 , **state_in , **proutput;
-  DiscreteParametric *occupancy;
+  double likelihood = 0. , seq_likelihood = 0. , obs_product = 0. , residual = 0., **observation = NULL,
+         *norm  = NULL, *state_norm  = NULL, *forward1  = NULL, **state_in  = NULL, **proutput = NULL;
+  DiscreteParametric *occupancy = NULL;
 
 
   // checking of the compatibility of the model with the data
@@ -435,23 +435,24 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 {
   bool status, reload_prev_optimal = false;
   int i , j , k , m , n;
-  int max_nb_value , iter , nb_likelihood_decrease , offset , nb_value , *occupancy_nb_value ,
-      *censored_occupancy_nb_value , **pioutput;
+  int max_nb_value , iter , nb_likelihood_decrease , offset , nb_value , *occupancy_nb_value  = NULL,
+      *censored_occupancy_nb_value  = NULL, **pioutput = NULL;
   double likelihood = D_INF , previous_likelihood , occupancy_likelihood , observation_likelihood ,
          min_likelihood , obs_product , residual , buff , sum , occupancy_mean , **observation ,
-         *norm , *state_norm , **forward1 , **state_in , *backward , **backward1 , *auxiliary ,
-         *ofrequency , *lfrequency , *occupancy_survivor , *censored_occupancy_survivor , diff ,
-         variance , **mean_direction , global_mean_direction , concentration , ***state_sequence_count ,
-         **proutput;
-  double *complete_occupancy_weight , *censored_occupancy_weight;
-  Distribution *weight;
-  DiscreteParametric *occupancy;
-  ChainReestimation<double> *chain_reestim;
-  Reestimation<double> **occupancy_reestim , **length_bias_reestim , **censored_occupancy_reestim ,
-                       ***observation_reestim;
-  FrequencyDistribution *hoccupancy , *hobservation;
-  HiddenSemiMarkov *hsmarkov, *hsmarkov_best = NULL;
-  SemiMarkovData *seq;
+         *norm  = NULL, *state_norm  = NULL, **forward1  = NULL, **state_in  = NULL, *backward  = NULL,
+		 **backward1  = NULL, *auxiliary  = NULL, *ofrequency  = NULL, *lfrequency  = NULL,
+		 *occupancy_survivor  = NULL, *censored_occupancy_survivor  = NULL, diff ,
+         variance , **mean_direction  = NULL, global_mean_direction , concentration , ***state_sequence_count  = NULL,
+         **proutput = NULL;
+  double *complete_occupancy_weight  = NULL, *censored_occupancy_weight = NULL;
+  Distribution *weight = NULL;
+  DiscreteParametric *occupancy = NULL;
+  ChainReestimation<double> *chain_reestim = NULL;
+  Reestimation<double> **occupancy_reestim  = NULL, **length_bias_reestim  = NULL,
+		  	  	  	   **censored_occupancy_reestim  = NULL, ***observation_reestim  = NULL;
+  FrequencyDistribution *hoccupancy  = NULL, *hobservation = NULL;
+  HiddenSemiMarkov *hsmarkov = NULL, *hsmarkov_best = NULL;
+  SemiMarkovData *seq = NULL;
 
 # ifdef DEBUG
   double test[NB_STATE][4];
@@ -1342,8 +1343,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           cout << j << " : ";
           double sum = 0.;
           for (k = 0;k < hsmarkov->nb_state;k++) {
-            sum += backward[j];
-            cout << backward[j];
+            sum += backward[k];
+            cout << backward[k];
             if ((hsmarkov->sojourn_type[k] == SEMI_MARKOVIAN) && (j < length[i] - 1)){
               cout << " (" << backward1[j][k] << ") ";
             }

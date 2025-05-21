@@ -298,39 +298,51 @@ void Chain::remove()
   int i;
 
 
-  if (accessibility) {
+  if (accessibility != NULL) {
     for (i = 0;i < nb_state;i++) {
       delete [] accessibility[i];
+      accessibility[i] = NULL;
     }
     delete [] accessibility;
+    accessibility = NULL;
   }
 
   delete [] component_nb_state;
+  component_nb_state = NULL;
 
-  if (component) {
+  if (component != NULL) {
     for (i = 0;i < nb_component;i++) {
       delete [] component[i];
+      component[i] = NULL;
     }
     delete [] component;
+    component = NULL;
   }
 
   delete [] stype;
+  stype = NULL;
 
   delete [] initial;
+  initial = NULL;
   delete [] cumul_initial;
+  cumul_initial = NULL;
 
-  if (transition) {
+  if (transition != NULL) {
     for (i = 0;i < nb_row;i++) {
       delete [] transition[i];
+      transition[i] = NULL;
     }
     delete [] transition;
+    transition = NULL;
   }
 
-  if (cumul_transition) {
+  if (cumul_transition  != NULL) {
     for (i = 0;i < nb_row;i++) {
       delete [] cumul_transition[i];
+      cumul_transition[i] = NULL;
     }
     delete [] cumul_transition;
+    cumul_transition = NULL;
   }
 }
 
