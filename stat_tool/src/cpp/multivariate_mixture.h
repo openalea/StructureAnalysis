@@ -67,7 +67,7 @@ namespace stat_tool {
 
   // \brief Multivariate mixture of distributions
 
-  class MultivariateMixture : public StatInterface {
+  class STAT_TOOL_API MultivariateMixture : public StatInterface {
 
     friend class FrequencyDistribution;
     friend class Vectors;
@@ -188,18 +188,18 @@ namespace stat_tool {
   };
 
 
-  MultivariateMixture* multivariate_mixture_building(StatError &error , int nb_component ,
+  STAT_TOOL_API MultivariateMixture* multivariate_mixture_building(StatError &error , int nb_component ,
                                                      int nb_variable, double *weight,
                                                      DiscreteParametricProcess **ppcomponent,
                                                      CategoricalProcess **pnpcomponent);
-  MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const std::string &path ,
+  STAT_TOOL_API MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const std::string &path ,
                                                        double cumul_threshold = CUMUL_THRESHOLD);
 
 
 
   // structure de donnees correspondant
   // a un melange
-  class MultivariateMixtureData : public Vectors {
+  class STAT_TOOL_API MultivariateMixtureData : public Vectors {
 
     friend class FrequencyDistribution;
     friend class MultivariateMixture;

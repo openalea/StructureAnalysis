@@ -8,7 +8,7 @@ from openalea.deploy.multisetup import Multisetup
 
 dirs = [#'tool',
         'stat_tool',
-        'sequence_analysis',
+        #'sequence_analysis',
         #'tree',
         #'tree_statistic',
         #'tree_reduction',

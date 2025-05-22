@@ -513,13 +513,13 @@ namespace stat_tool {
     int get_period(int variable) const { return period[variable]; }
   };
 
-  bool identifier_checking(StatError &error , int nb_individual , int *identifier);
-  bool selected_identifier_checking(StatError &error , int nb_individual , int *identifier ,
+  STAT_TOOL_API bool identifier_checking(StatError &error , int nb_individual , int *identifier);
+  STAT_TOOL_API bool selected_identifier_checking(StatError &error , int nb_individual , int *identifier ,
                                     int nb_selected_individual , int *selected_identifier ,
                                     const char *data_label);
-  int* identifier_select(int nb_individual , int *identifier , int nb_selected_individual ,
+  STAT_TOOL_API int* identifier_select(int nb_individual , int *identifier , int nb_selected_individual ,
                          int *selected_identifier , bool keep);
-  int* select_variable(int nb_variable , int nb_selected_variable ,
+  STAT_TOOL_API int* select_variable(int nb_variable , int nb_selected_variable ,
                        int *selected_variable , bool keep);
 
 

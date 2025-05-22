@@ -3903,13 +3903,10 @@ Distribution* MarkovianSequences::weight_computation() const
 
 {
   int i;
-  Distribution *weight;
+  Distribution *weight = NULL;
 
 
   if (type[0] == STATE) {
-#   ifdef DEBUG
-	assert(weight == NULL);
-#   endif
     weight = new Distribution(marginal_distribution[0]->nb_value);
 
     for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
@@ -3920,10 +3917,6 @@ Distribution* MarkovianSequences::weight_computation() const
     weight->cumul_computation();
     weight->max = (double)marginal_distribution[0]->max /
                   (double)marginal_distribution[0]->nb_element;
-  }
-
-  else {
-    weight = NULL;
   }
 
   return weight;
