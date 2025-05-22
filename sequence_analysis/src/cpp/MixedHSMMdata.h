@@ -1,7 +1,9 @@
-#ifndef CLASSE_HPP_INCLUDED
-#define CLASSE_HPP_INCLUDED
+#ifndef MIXEDHSMMDATA_H
+#define MIXEDHSMMDATA_H
 
 #include "semi_markov.h"
+
+namespace sequence_analysis {
 
 
 /*
@@ -23,20 +25,21 @@ Objet contenant :
 - les covariables (X^q)_q [non dynamique], ou bien ((X^q_t)_t)_q [dynamique], qui sont contenues dans un objet Sequences
 ##################################################################################################################*/
 
-class MixedHSMMData : public SemiMarkovData
+class MixedHSMMdata : public SemiMarkovData
 {
 
     private :
     /*************************************** Attributs *****************************************/
 
-    bool covariate_are_dynamic;                         // (true : dynamique, false : non dynamique)
-    sequence_analysis::Sequences* covariate;            // pointeur vers un objet Sequences contenant les covariables
+    bool covariate_are_dynamic;            // (true : dynamique, false : non dynamique)
+    Sequences* covariate;                  // pointeur vers un objet Sequences contenant les covariables
 
     /*
     ----- Attributs "utiles" hérités de Sequences :
 
     int *identifier;        /// sequence identifiers  (????)
     int nb_sequence;        /// number of sequences
+    int *length;            /// sequence lengths
     int max_length;         /// maximum sequence length
     int nb_variable;        /// number of variables
     stat_tool::variable_nature *type;  /// variable types (INT_VALUE/REAL_VALUE/STATE)
@@ -48,7 +51,8 @@ class MixedHSMMData : public SemiMarkovData
     rien ?
 
     ----- Attributs "utiles" hérités de SemiMarkovData :
-    double likelihood;      /// log-likelihood for the observed sequences
+    double likelihood;        /// log-likelihood for the observed sequences
+    SemiMarkov *semi_markov;  /// pointer on a SemiMarkov object  (pour le modèle)
 
     */
    /*******************************************************************************************/
@@ -58,16 +62,19 @@ class MixedHSMMData : public SemiMarkovData
     /*************************************** Méthodes ****************************************/
 
     // Constructeur nul par défaul (0 séquence produite)
-    MixedHSMMData ();
+    MixedHSMMdata ();
 
     // Constructeur par défaul
-    MixedHSMMData (bool _is_dynamic);
+    MixedHSMMdata (bool _covariate_are_dynamic, const MarkovianSequences& observed_data, const Sequences& covariate_data);
+
+    // Destructeur
+    ~MixedHSMMdata ();
 
 
 
     // class member access
     bool get_covariate_are_dynamic() const { return covariate_are_dynamic; }
-    sequence_analysis::Sequences* get_covariate() const { return covariate; }
+    Sequences* get_covariate() const { return new Sequences (*covariate); }
 
     /*****************************************************************************************/
 
@@ -76,5 +83,7 @@ class MixedHSMMData : public SemiMarkovData
 
 };
 
+
+}
 
 #endif
