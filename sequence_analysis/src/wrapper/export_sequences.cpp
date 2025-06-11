@@ -611,10 +611,12 @@ public:
   }
 
   static std::string
-  ascii_data_write(const Sequences &d, output_sequence_format format, bool exhaustive)
+  ascii_data_write(const Sequences &d, int iformat, bool exhaustive)
   {
     ostringstream os;
     std::string res;
+    output_sequence_format format = output_sequence_format(iformat);
+
     d.ascii_data_write(os, format, exhaustive);
     res = os.str();
     return res;
@@ -622,10 +624,11 @@ public:
 
   static void
   file_ascii_data_write(const Sequences &d, const char *path,
-                        output_sequence_format format, bool exhaustive)
+                        int iformat, bool exhaustive)
   {
     bool result = true;
     StatError error;
+    output_sequence_format format = output_sequence_format(iformat);
 
     result = d.ascii_data_write(error, path, format, exhaustive);
     if (!result)

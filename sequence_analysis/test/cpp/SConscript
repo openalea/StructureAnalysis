@@ -54,7 +54,7 @@ env_test.Append(CPPPATH='#/src/cpp/')
 #""")
 
 tests = Split("""
-test_hidden_semi_markov_chain.cpp
+test_sequences.cpp
 """)
 # tests.append(seqlib)
 

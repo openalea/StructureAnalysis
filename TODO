@@ -31,7 +31,7 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
     + python
     + Update C++ version
     + Once downloadable, put a pointer on INRAE Gitlab INCA-HSMM
-[ ] Add `stat_tool` and `sequence_analysis` documentation
+[ ] Add `stat_tool` and `sequence_analysis` documentation, including file formats
 [ ] Fix auto-build: missing .conda file?
 [ ] Specify and document classes design patterns (e.g. should all wrappers be adaptable to a potential `Rcpp` implementation)
     + Most models are composed by elementary distributions chained or aggregated in some manner. Data sets are associated with models estimated from these data through pointers. When displaying (text) or plotting (matplotlib) distributions, this allows the elementary distributions to be compared to histograms or curves.

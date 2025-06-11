@@ -368,8 +368,16 @@ const int TOP_SIZE = 2000000;          // taille memoire maximum (en int) d'un e
      .value("NB_EVENT", NB_EVENT)
      .value("MIXTURE", MIXTURE)
      .export_values();
-   /*
 
+   enum_<sequence_analysis::wrap_util::UniqueInt<5, 112> >("OutputSequenceFormat")
+     .value("LINE", LINE)
+     .value("COLUMN", COLUMN)
+     .value("VECTOR", VECTOR)
+     .value("ARRAY", ARRAY)
+     .value("POSTERIOR_PROBABILITY", POSTERIOR_PROBABILITY)
+     .export_values();
+
+   /*
    const double MIN_NB_EVENT = 0.4;       // nombre d'evenements moyen minimum
   const double MIN_INTER_EVENT = 1.;     // temps moyen minimum entre 2 evenements
   const double RENEWAL_INIT_PROBABILITY = 0.001;  // seuil pour l'initialisation de la probabilite
