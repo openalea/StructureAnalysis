@@ -1315,10 +1315,10 @@ bool CategoricalProcess::plot_print(const char *prefix , const char *title , int
 
   if (observation) {
     int i , j , k , m;
-    int nb_dist , nb_histo , *dist_nb_value;
-    double *scale;
-    const Distribution **pdist;
-    const FrequencyDistribution **phisto;
+    int nb_dist = 0 , nb_histo = 0, *dist_nb_value= NULL;
+    double *scale = NULL;
+    const Distribution **pdist= NULL;
+    const FrequencyDistribution **phisto = NULL;
     ostringstream data_file_name;
 
 
@@ -1342,9 +1342,9 @@ bool CategoricalProcess::plot_print(const char *prefix , const char *title , int
         scale[i] = 1.;
       }
     }
+    nb_dist = nb_state;
 
     if (marginal_distribution) {
-      nb_dist = nb_state;
 
       if ((weight) && (mixture)) {
         for (i = 0;i < nb_state;i++) {

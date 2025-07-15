@@ -641,7 +641,7 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const st
   size_t position;
   typedef tokenizer<char_separator<char>> tokenizer;
   char_separator<char> separator(" \t");
-  bool status , lstatus, categorical = false;
+  bool status = true, lstatus = true, categorical = false;
   int i , j;
   int line, nb_variable;
   long index , nb_component, value;
@@ -702,6 +702,7 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const st
           status = false;
           error.update(STAT_parsing[STATP_FORMAT] , line);
         }
+        break;
       }
     } // while (getline(in_file , buffer))
 
@@ -755,6 +756,7 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const st
           status = false;
           error.update(STAT_parsing[STATP_FORMAT] , line);
         }
+        break;
       }
     } // while (getline(in_file , buffer))
 
@@ -762,8 +764,10 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const st
       status = false;
       error.update(STAT_parsing[STATP_FORMAT] , line);
     }
-    else
+    else {
       weight = new double[nb_component];
+      lstatus = true;
+    }
 
     if (status) {
       nb_variable = I_DEFAULT;
@@ -774,7 +778,8 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const st
       // read weights
 
       index= 0;
-      i = 0;
+      i = 0; // token to be read (WEIGHTS and values)
+      cumul = .0;
 
       while (getline(in_file , buffer)) {
         line++;
@@ -797,33 +802,36 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const st
               status = false;
               error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] ,
                           STAT_word[STATW_WEIGHTS] , line , i + 1);
-            }
+            } else
+            i++;
           }
           else {
             if (index < nb_component) {
-                weight[index] = atoi(token->c_str());
+                weight[index] = atof(token->c_str());
                 if (lstatus) {
                   if ((weight[index] <= 0.) || (weight[index] > 1. - cumul + DOUBLE_ERROR)) {
                     lstatus = false;
                   }
                   else {
                     cumul += weight[index];
+                    i++;
                   }
                 }
 
                 if (!lstatus) {
                   status = false;
-                  error.update(STAT_parsing[STATP_WEIGHT_VALUE] , line , i + 1);
+                  error.update(STAT_parsing[STATP_WEIGHT_VALUE] , line , i);
                 }
               index++;
             }
           }
-        i++;
-        } // for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++)
-        if (i >= nb_component) {
+       } // for (tokenizer::iterator token = tok_buffer.begin();token != tok_buffer.end();token++)
+       if (index > nb_component){
           status = false;
           error.update(STAT_parsing[STATP_FORMAT] , line);
-        }
+       }
+       if (i >= nb_component+1)
+    	   break;
       } // end : while (getline(in_file , buffer))
 
       if (index != nb_component) {
@@ -999,7 +1007,7 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const st
 
                   case true : {
                       np_observation[index-1]= CategoricalProcess::parsing(error, in_file, line,
-                                                                                nb_component, MIXTURE, true);
+                                                                                nb_component, HIDDEN_MARKOV, true);
                       if (np_observation[index-1] == NULL)
                         status= false;
                       break;
@@ -1007,7 +1015,7 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const st
 
                   case false : {
                       p_observation[index-1]= DiscreteParametricProcess::parsing(error, in_file, line,
-                                                                                  nb_component, MIXTURE,
+                                                                                  nb_component, HIDDEN_MARKOV,
                                                                                   cumul_threshold);
                       if (p_observation[index-1] == NULL)
                         status = false;
@@ -1752,8 +1760,8 @@ MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *v
   ostringstream title , legend;
   StatError error;
 
-
-  // computation of the number of plots
+  // computation of the number of plots:
+  // empirical weights if data are present, emission distributions, marginal distributions
 
   nb_plot_set = 1;
 
@@ -1881,12 +1889,16 @@ MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *v
     else
       pcomponent[i]->plotable_write(*plot_set , index , i + 1 , observation_dist ,
                                                      marginal_dist , MIXTURE);
+    // marginal distribution for variable i
     marginal_mixture = extract_distribution(error, i+1);
     marginal_plot_set = marginal_mixture->get_plotable();
     // TODO: investigate seg fault, may be create copy operator or plotable_write method.
 	plot[index].resize(marginal_plot_set[0].size());
     for (j=0; j < marginal_plot_set[0].size(); j++)   {
     	plot[index][j] = (*marginal_plot_set)[0][j];
+    	title.str("");
+    	title << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_DISTRIBUTION];
+    	plot[index].title = title.str();
     }
     delete marginal_mixture;
     delete marginal_plot_set;

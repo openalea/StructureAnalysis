@@ -114,7 +114,7 @@ namespace stat_tool {
   };
 
 
-  // \brief Frequency distribution
+  // \brief Frequency distribution (discrete histogram)
 
   class STAT_TOOL_API DiscreteDistributionData : public StatInterface , public FrequencyDistribution {
 

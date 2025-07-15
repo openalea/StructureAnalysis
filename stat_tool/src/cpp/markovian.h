@@ -208,7 +208,12 @@ namespace stat_tool {
 
 
   /// \brief Categorical observation process
-
+  /**
+   * Collection of univariate categorical emission distributions.
+   * In the multivariate case, use a collection of conditionally independent CategoricalProcesses
+   * observations[k] is a pointer to emission distribution for state k
+   *
+   * */
   class STAT_TOOL_API CategoricalProcess {
 
   public :
@@ -265,7 +270,12 @@ namespace stat_tool {
 
 
   /// \brief Discrete parametric observation process
-
+  /**
+   * Collection of univariate discrete parametric emission distributions.
+   * In the multivariate case, use a collection of conditionally independent DiscreteParametricProcesses
+   * observations[k] is a pointer to emission distribution for state k
+   *
+   * */
   class STAT_TOOL_API DiscreteParametricProcess {
 
   public :
@@ -320,7 +330,12 @@ namespace stat_tool {
 
 
   /// \brief Continuous parametric observation process
-
+  /**
+   * Collection of univariate continuous parametric emission distributions.
+   * In the multivariate case, use a collection of conditionally independent ContinuousParametricProcesses
+   * observations[k] is a pointer to emission distribution for state k
+   *
+   * */
   class STAT_TOOL_API ContinuousParametricProcess {
 
   public :

@@ -27,25 +27,16 @@ def test1():
     m = _MultivariateMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
     print(m)
 
-    Plot(m, variable=0, Title="Simulated mixture: ")
+    Plot(m, variable=0, Title="Mixture model used for simulation: ")
 
-    #m2 = _MultivariateMixture("mixture_mv1.mixt")
-    #print m2
-
-    #print "Egalite des melanges construits par liste ",\
-    #  "de distributions et par fichiers : ", str(str(m)==str(m2))
-
-    #m = _MultivariateMixture("mixture_mv_nonparam.mixt")
-   # print m
-
-    print("Simulation de melanges multivaries : ")
+    print("Simulate multivariate mixture: ")
     v = m.simulate(500000)
     print(v)
 
     # TODO: matplotlib output for ._MultivariateMixtureData
     Plot(v, variable=1, Title="Simulated mixture: ")
 
-    print("Estimation de melanges multivaries ")
+    print("Estimate multivariate mixture")
     #    "d'apres un modele initial : "
     m_estim_model = v.mixture_estimation(m, 100,  [True, True])
 

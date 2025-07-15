@@ -36,6 +36,7 @@ int main(void) {
   MultivariateMixtureData *mv_data = NULL, *cluster = NULL;
   DiscreteParametric **dt1 = NULL, **dt2 = NULL;
   DiscreteParametricProcess **ppcomponent = NULL;
+  MultiPlotSet *plotable = NULL;
 
 
   // constructors of Mv_Mixture
@@ -59,17 +60,19 @@ int main(void) {
 
 
 
-  dt1[0] = new DiscreteParametric(0, BINOMIAL, 2, 12, D_DEFAULT, 0.1);
-  dt1[1] = new DiscreteParametric(0, BINOMIAL, 0, 10, D_DEFAULT, 0.5);
-  dt1[2] = new DiscreteParametric(0, BINOMIAL, 3, 10, D_DEFAULT, 0.8);
+  dt1[0] = new DiscreteParametric(BINOMIAL, 2, 12, D_DEFAULT, 0.1);
+  dt1[1] = new DiscreteParametric(BINOMIAL, 0, 10, D_DEFAULT, 0.5);
+  dt1[2] = new DiscreteParametric(BINOMIAL, 3, 10, D_DEFAULT, 0.8);
 
-  dt2[0] = new DiscreteParametric(0, POISSON, 2, I_DEFAULT, 8.0, D_DEFAULT);
-  dt2[1] = new DiscreteParametric(0, POISSON, 4, I_DEFAULT, 5.0, D_DEFAULT);
-  dt2[2] = new DiscreteParametric(0, POISSON, 0, I_DEFAULT, 2.0, D_DEFAULT);
+  dt2[0] = new DiscreteParametric(POISSON, 2, I_DEFAULT, 8.0, D_DEFAULT);
+  dt2[1] = new DiscreteParametric(POISSON, 4, I_DEFAULT, 5.0, D_DEFAULT);
+  dt2[2] = new DiscreteParametric(POISSON, 0, I_DEFAULT, 2.0, D_DEFAULT);
 
   cout << "Observation distributions for variable 1:" << endl;
   for (i = 0; i < nb_component; i++) {
-    dt1[i]-> ascii_print(cout);
+	  dt1[i]->computation();
+	  dt2[i]->computation();
+      dt1[i]-> ascii_print(cout);
   }
 
   ppcomponent[0] = new DiscreteParametricProcess(nb_component, dt1);
@@ -91,6 +94,12 @@ int main(void) {
 
   mv1->ascii_write(cout, true);
   cout << endl;
+
+  // get_plotable()
+  plotable = mv1->get_plotable();
+
+  if (plotable != NULL)
+	  delete plotable;
 
   // copy
   mv_cp = new MultivariateMixture(*mv1);
@@ -150,6 +159,12 @@ int main(void) {
   mv_data->plot_write(error, gnu_datapath, "");
   cout << error << endl;
 
+  // get_plotable()
+  plotable = mv_data->get_plotable();
+
+  if (plotable != NULL)
+	  delete plotable;
+
   cout << "Extract marginal distribution for variable 1" << endl;
   marginal = mv1->extract_distribution(error, 1);
   marginal_histo = mv_data->extract_marginal(error, 1);
@@ -170,7 +185,7 @@ int main(void) {
     cout << error;
 
   cout << "Estimate MultivariateMixture from initial model: " << endl;
-  mv_estim = mv_data->mixture_estimation(error, cout, *mv1);
+  mv_estim = mv_data->mixture_estimation(error, &cout, *mv1);
 
   if (mv_estim == NULL) {
     cout << error;
@@ -190,7 +205,7 @@ int main(void) {
   fparam[1] = false;
 
   cout << "Estimate MultivariateMixture from initial nb_component: " << endl;
-  mv_estim = mv_data->mixture_estimation(error, cout, 3, I_DEFAULT, fparam);
+  mv_estim = mv_data->mixture_estimation(error, &cout, 3, I_DEFAULT, fparam);
 
   delete [] fparam;
 
@@ -267,7 +282,7 @@ int main(void) {
 
 
   cout << "Estimate MultivariateMixture from initial nb_component: " << endl;
-  mv_estim = mv_data->mixture_estimation(error, cout, 3);
+  mv_estim = mv_data->mixture_estimation(error, &cout, 3);
 
   if (mv_estim == NULL) {
     cout << error;
@@ -326,13 +341,13 @@ int main(void) {
   // compute state entropies on data
   cout << "Compute state entropies on data" << endl;
 
-  vec = vectors_ascii_read(error, entropy_data);
+  vec = Vectors::ascii_read(error, entropy_data);
   if (vec == NULL) {
     cout << error;
     return 1;
   }
 
-  mv_estim = vec->mixture_estimation(error, cout, 3, 300);
+  mv_estim = vec->mixture_estimation(error, &cout, 3, 300);
 
   if (mv_estim == NULL) {
     cout << error;

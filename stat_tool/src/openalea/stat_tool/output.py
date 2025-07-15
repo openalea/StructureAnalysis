@@ -667,7 +667,7 @@ class StatInterface(object):
                     plotable = self.survival_get_plotable(*params)
                 elif type(self) in histogram_types:
                     #equivalent to histo->survival_plot_write(error , Plot_prefix , title)
-                    output = self.survival_get_plotable(*params)
+                    plotable = self.survival_get_plotable(*params)
                 else:
                     explicit_error = True
                     local_error = ValueError("""(%s) has no survival point. Use another

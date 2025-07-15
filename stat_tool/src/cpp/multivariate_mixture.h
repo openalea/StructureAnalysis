@@ -45,11 +45,10 @@
 
 namespace stat_tool {
 
-// TODO: translate comments
 
 /****************************************************************
  *
- *  Constantes :
+ *  Constants :
  */
 
   const double MVMIXTURE_LIKELIHOOD_DIFF = 1.e-8; // stopping criterion for relative log-likelihood in EM
@@ -58,15 +57,22 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Definition des classes :
+ *  Class definitions
  */
 
 
   class MultivariateMixtureData;
 
 
-  // \brief Multivariate mixture of distributions
-
+  // \brief Multivariate mixture of discrete distributions
+  /**
+   * Emission distributions are represented by arrays of DiscreteParametricProcess*
+   * and CategoricalProcess*.
+   * pcomponent[var] == NULL if and only if npcomponent[var] != NULL
+   * in which case the variable is represented by a categorical distribution
+   * for each mixture components
+   *
+   * */
   class STAT_TOOL_API MultivariateMixture : public StatInterface {
 
     friend class FrequencyDistribution;
@@ -83,12 +89,12 @@ namespace stat_tool {
 
   private :
 
-    MultivariateMixtureData *mixture_data;  // pointeur sur un objet MultivariateMixtureData
-    int nb_component;       // nombre de composantes
-    int nb_var;       // dimension
-    DiscreteParametric *weight;     // poids de chaque composante
-    DiscreteParametricProcess **pcomponent; // composantes parametriques
-    CategoricalProcess **npcomponent; // composantes non parametriques
+    MultivariateMixtureData *mixture_data;  /// pointer on MultivariateMixtureData object
+    int nb_component;       /// number of components
+    int nb_var;       /// number of variables
+    DiscreteParametric *weight;     /// component weights
+    DiscreteParametricProcess **pcomponent; /// parametric components
+    CategoricalProcess **npcomponent; /// nonparametric components
 
     void copy(const MultivariateMixture &mixt , bool data_flag = true);
     void remove();
@@ -175,7 +181,7 @@ namespace stat_tool {
     /** return "true" if process ivariable is parametric */
     bool is_parametric(int ivariable) const;
 
-    // acces membres de la classe
+    // Access to class members
 
     MultivariateMixtureData* get_mixture_data() const { return mixture_data; }
     int get_nb_component() const { return nb_component; }
@@ -197,8 +203,8 @@ namespace stat_tool {
 
 
 
-  // structure de donnees correspondant
-  // a un melange
+  // \brief Data structure associated with multivariate mixture
+
   class STAT_TOOL_API MultivariateMixtureData : public Vectors {
 
     friend class FrequencyDistribution;
@@ -210,11 +216,11 @@ namespace stat_tool {
 
   private :
 
-    MultivariateMixture *mixture;       // pointeur sur un objet MultivariateMixture
-    int nb_component;          // nombre de composantes
-    FrequencyDistribution *weight;      // loi empirique des poids
+    MultivariateMixture *mixture;  /// pointer on MultivariateMixture object
+    int nb_component;          /// number of components
+    FrequencyDistribution *weight;      /// empirical distribution of weights
     /// component[variable][state]
-    FrequencyDistribution ***component;  // composantes empiriques pour chaque variable
+    FrequencyDistribution ***component;  // empirical emission distribution for each variable
 
     void copy(const MultivariateMixtureData &mixt_data , bool model_flag = true);
     void remove();
@@ -247,7 +253,7 @@ namespace stat_tool {
 
     double information_computation() const;
 
-    // acces membres de la classe
+    // access to class members
 
     MultivariateMixture* get_mixture() const { return mixture; }
     int get_nb_component() const { return nb_component; }
