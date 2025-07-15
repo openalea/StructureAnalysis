@@ -1761,7 +1761,7 @@ MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *v
   StatError error;
 
   // computation of the number of plots:
-  // empirical weights if data are present, emission distributions, marginal distributions
+  // empirical weights if data are present, marginal distributions
 
   nb_plot_set = 1;
 
@@ -1794,11 +1794,11 @@ MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *v
     if ((pcomponent[i]) && (vec) && (vec->marginal_distribution[variable])) {
       if ((pcomponent[i]->weight) &&
           (pcomponent[i]->mixture)) {
-        nb_plot_set += 2;
+        nb_plot_set += 1;
       }
     }
   }
-  nb_plot_set += nb_component+2;
+  // nb_plot_set += nb_component+2;
 
   plot_set = new MultiPlotSet(nb_plot_set , nb_var + 1);
   MultiPlotSet &plot = *plot_set;
@@ -1886,23 +1886,27 @@ MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *v
       npcomponent[i]->plotable_write(*plot_set , index , i + 1 , observation_dist ,
                                              marginal_dist , MIXTURE);
     }
-    else
-      pcomponent[i]->plotable_write(*plot_set , index , i + 1 , observation_dist ,
-                                                     marginal_dist , MIXTURE);
-    // marginal distribution for variable i
-    marginal_mixture = extract_distribution(error, i+1);
-    marginal_plot_set = marginal_mixture->get_plotable();
-    // TODO: investigate seg fault, may be create copy operator or plotable_write method.
-	plot[index].resize(marginal_plot_set[0].size());
-    for (j=0; j < marginal_plot_set[0].size(); j++)   {
-    	plot[index][j] = (*marginal_plot_set)[0][j];
+    else {
+    	plot[index].resize(nb_component+1);
+    	for (j=0; j < nb_component; j++) {
+    		legend.str("");
+    		pcomponent[i]->observation[j]->plotable_mass_write(plot[index][j], weight->mass[j]);
+    		legend << STAT_label[STATL_COMPONENT] << " " << j;
+    		plot[index][j].legend = legend.str();
+    	}
     	title.str("");
-    	title << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_DISTRIBUTION];
+    	title << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_DISTRIBUTION] << " and "
+    		  << STAT_word[STATW_COMPONENTS];
     	plot[index].title = title.str();
     }
+    marginal_mixture = extract_distribution(error, i+1);
+    marginal_mixture->plotable_mass_write(plot[index][nb_component], 1.0);
+	legend.str("");
+	legend << STAT_label[STATL_MIXTURE];
+	plot[index][nb_component].legend = legend.str();
+	index++;
+
     delete marginal_mixture;
-    delete marginal_plot_set;
-    index++;
   }
 
 
