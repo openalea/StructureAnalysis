@@ -270,7 +270,6 @@ void class_mixture()
 
 
   //others
-  //  DEF_RETURN_VALUE_NO_ARGS("get_plotable", &StatInterface::get_plotable,"Return a plotable (no parameters)");
   .def("file_ascii_write", WRAP::file_ascii_write,
       "Save Mixture into a file")
   .def("spreadsheet_write", WRAP::spreadsheet_write,
@@ -832,6 +831,16 @@ public:
     return ret;
   }
 
+  static MultiPlotSet*
+  get_plotable(const MultivariateMixtureData &mixt_histo)
+  {
+    StatError error;
+    MultiPlotSet *ret = mixt_histo.get_plotable();
+    if (!ret)
+      stat_tool::wrap_util::throw_error(error);
+    return ret;
+  }
+
   WRAP_METHOD2(MultivariateMixtureData, extract, DiscreteDistributionData, int, int);
   WRAP_METHOD1(MultivariateMixtureData, extract_marginal, DiscreteDistributionData, int);
   WRAP_METHOD_FILE_ASCII_WRITE( MultivariateMixtureData);
@@ -853,6 +862,7 @@ void class_multivariate_mixture_data()
     DEF_RETURN_VALUE_NO_ARGS("extract_marginal", WRAP::extract_marginal, "Return a _MultivariateMixtureData for a particular variable.")
     DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight, "Return a _MultivariateMixtureData for mixture weights.")
     DEF_RETURN_VALUE_NO_ARGS("extract_mixture", WRAP::extract_mixture, "Return a _MultivariateMixtureData for mixture model")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "return plotable")
     .def("file_ascii_write", WRAP::file_ascii_write, "Save _MultivariateMixtureData into a file")
     .def("file_spreadsheet_write", WRAP::spreadsheet_write, "Save _MultivariateMixtureData into a file")
     .def("plot_write", WRAP::plot_write, args("prefix", "title"), "Write GNUPLOT files")

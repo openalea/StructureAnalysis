@@ -142,9 +142,4 @@ def _MultivariateMixtureData_old_plot(self, variable, Title=""):
     interface.StatInterface.old_plot(self, Title=Title, Suffix=file_id)
 
 
-def _MultivariateMixtureData_get_plotable(self):
-    """Return a plotable object (not yet implemented)"""
-    return None
-
 _MultivariateMixtureData.old_plot = _MultivariateMixtureData_old_plot
-_MultivariateMixtureData.get_plotable = _MultivariateMixtureData_get_plotable
