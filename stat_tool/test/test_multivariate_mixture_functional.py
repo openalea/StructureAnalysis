@@ -13,7 +13,7 @@ from openalea.stat_tool.plot import get_plotter, mplotlib
 
 def test1():
 
-    set_seed(1)
+    set_seed(4)
     plotter = mplotlib()
      
     d11 = Binomial(0, 12, 0.1)

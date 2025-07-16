@@ -54,25 +54,20 @@ public:
   WRAP_METHOD_SPREADSHEET_WRITE( Vectors);WRAP_METHOD2(Vectors,scaling,
        Vectors, int, int);
   WRAP_METHOD2(Vectors,round, Vectors, int, rounding);
-  WRAP_METHOD_FILE_ASCII_WRITE( Vectors)
+  WRAP_METHOD_FILE_ASCII_WRITE( Vectors);
 
-  static Vectors*
+  static boost::shared_ptr<Vectors>
   read_from_file(char *filename)
   {
-    Vectors *vec;
+    Vectors *vec = NULL;
     StatError error;
 
     vec = Vectors::ascii_read(error, filename);
 
-    if (vec)
-      {
-        return vec;
-      }
-    else
-      {
+    if (vec == NULL) {
         stat_tool::wrap_util::throw_error(error);
-      }
-
+    }
+    return boost::shared_ptr<Vectors>(vec);
   }
 
 
@@ -1071,6 +1066,7 @@ public:
 
 };
 
+
 void
 class_vectors()
 {
@@ -1189,38 +1185,10 @@ class_vectors()
 
   ;
 
-  /*
-
-    Vectors (int inb_vector , int *iidentifier , int inb_variable , int *itype ,  bool init_flag = false)
-    Vectors(int inb_vector , int *iidentifier , int inb_variable , int *itype ,  int **iint_vector , double **ireal_vector);
-    Vectors(const Vectors &vec , int inb_vector , int *index);
-
-
-
-
-
-
-   Vectors();
-   Vectors(const Vectors &vec , int inb_vector , int *index);
-
-   bool check(StatError &error);
-
-   -->bool plot_write(StatError &error , const char *prefix ,
-   const char *title = 0) const;
-
-   double mean_absolute_deviation_computation(int variable) const;
-   double mean_absolute_difference_computation(int variable) const;
-   double skewness_computation(int variable) const;
-   double kurtosis_computation(int variable) const;
-
-   // acces membres de la classe
-   --     FrequencyDistribution* get_marginal(int variable) const { return marginal[variable]; }
-   --double get_covariance(int variable1, int variable2) const { return covariance[variable1][variable2]; }
-   */
 
 }
 
-// Vectors
+// VectorDistance
 
 class VectorDistanceWrap
 {
@@ -1284,8 +1252,26 @@ public:
       stat_tool::wrap_util::throw_error(error);
 
   }
-  WRAP_METHOD_SPREADSHEET_WRITE(DistanceMatrix);
 
+  static void
+  spreadsheet_write(const VectorDistance& d, const std::string path)
+  {
+    bool result = true;
+    StatError error;
+
+    result = d.spreadsheet_write(error, path);
+    if (!result)
+      stat_tool::wrap_util::throw_error(error);
+
+  }
+
+  static int
+  get_distance_type(const VectorDistance& d)
+  {
+	  const metric dt = d.get_distance_type();
+	  const int idt = int(dt);
+	  return idt;
+  }
 };
 
 
@@ -1295,6 +1281,7 @@ void class_vectordistance()
 
   class_< VectorDistance, bases< StatInterface > >
   ("_VectorDistance", "Distance class", init<>())
+
   // constructors
   .def("__init__", make_constructor(VectorDistanceWrap::build_from_types))
   .def("__init__", make_constructor(VectorDistanceWrap::read_from_file))
@@ -1303,33 +1290,12 @@ void class_vectordistance()
   .def("__len__", &VectorDistance::get_nb_variable)
   .def("file_ascii_write", VectorDistanceWrap::file_ascii_write, "Save vector distance summary into a file")
 
-  .add_property("nb_variable", &VectorDistance::get_nb_variable, "returns number of variable")
-  .add_property("distance_type", &VectorDistance::get_distance_type, "returns distance type")
-  //   .def("spreadsheet_write", VectorDistanceWrap::spreadsheet_write, "Save data into CSV file")
-    ;
+  .add_property("nb_variable", &VectorDistance::get_nb_variable, "return number of variable")
 
-  /*
-  VectorDistance();
-    VectorDistance(int inb_variable , int idistance_type , int *ivariable_type ,
-                   double *iweight , int *inb_value , double ***isymbol_distance ,
-                   int *iperiod);
+  .def("get_distance_type", VectorDistanceWrap::get_distance_type, "return distance type")
 
-
-    // fonctions pour la compatibilite avec la classe StatInterface
-
-    double* max_symbol_distance_computation(int variable) const;
-
-    void dispersion_computation(int variable , const FrequencyDistribution *marginal , double *rank = 0) const;
-
-    // acces membres de la classe
-
-    int get_variable_type(int variable) const { return variable_type[variable]; }
-    double get_weight(int variable) const { return weight[variable]; }
-    double get_dispersion(int variable) const { return dispersion[variable]; }
-    int get_nb_value(int variable) const { return nb_value[variable]; }
-    double get_symbol_distance(int variable , int symbol1 , int symbol2) const    { return symbol_distance[variable][symbol1][symbol2]; }
-    int get_period(int variable) const { return period[variable]; }
-    */
+  .def("spreadsheet_write", VectorDistanceWrap::spreadsheet_write, "Save data into CSV file")
+  ;
 
 }
 

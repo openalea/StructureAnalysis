@@ -1065,7 +1065,12 @@ bool VectorDistance::ascii_write(StatError &error , const string path , bool exh
 bool VectorDistance::spreadsheet_write(StatError &error , const string path) const
 
 {
-  return false;
+	ostringstream error_message;
+	error_message << STAT_error[STATR_NOT_PRESENT];
+	error_message << ": NOT IMPLEMENTED" ;
+	error.update((error_message.str()).c_str());
+
+	return false;
 }
 
 
@@ -1073,7 +1078,12 @@ bool VectorDistance::plot_write(StatError &error , const char *prefix ,
                                 const char *title) const
 
 {
-  return false;
+	ostringstream error_message;
+	error_message << STAT_error[STATR_NOT_PRESENT];
+	error_message << ": NOT IMPLEMENTED" ;
+	error.update((error_message.str()).c_str());
+
+	return false;
 }
 
 

@@ -48,7 +48,7 @@ env_test.Append(CPPPATH='#/src/cpp/')
 # """)
 
 tests = Split("""
-test_multivariate_mixture.cpp
+test_vector_distance.cpp
 """)
 
 # tests.append(statlib)
