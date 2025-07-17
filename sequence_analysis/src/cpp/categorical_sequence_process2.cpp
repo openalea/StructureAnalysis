@@ -3817,7 +3817,7 @@ void CategoricalSequenceProcess::plotable_write(MultiPlotSet &plot , int &index 
     if (empirical_observation) {
       for (i = 0;i < nb_state;i++) {
 
-        // fit of observation distributions
+        // plot observation distributions
 
         plot.variable[index] = process;
         plot.viewpoint[index] = OBSERVATION;

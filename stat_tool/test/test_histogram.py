@@ -54,6 +54,12 @@ class Test(interface):
     def test_plot(self):
         self.plot()
 
+    def test_plot_null_variance(self):
+        """Test plotting frequency distribution
+        with null variance"""
+        v = Histogram([0] * 100)
+        v.plot()
+
     def test_save(self):
         self.save()
 
@@ -125,7 +131,7 @@ def test_extract_vec():
 
 
 if __name__ == "__main__":
-    #runTestClass(Test())
-    test_extract_vec()
+    runTestClass(Test())
+    # test_extract_vec()
 
 #test_extract_vec()

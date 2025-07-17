@@ -194,7 +194,9 @@ namespace stat_tool {
     std::string border;
     int nb_variable;
     std::vector<int> variable_nb_viewpoint;
+    /// identifier / number of the variable to be displayed
     std::vector<int> variable;
+    /// nature of the graph, for example observation distribution...
     std::vector<Type> viewpoint;
 
     TemplateMultiPlotSet(int size = 1);

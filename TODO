@@ -8,7 +8,7 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
     + Fix SConscript for multiple C++ tests
     + Default EM initialization in switching LM estimation
     + Memcheck semi-Markov switching LM Simulation (C++ test in mode DEBUG)
-    + Fix test_hidden_semi_markov_functional.py
+    + Try tests in sequences_analysis
     + ~~export set_seed in stat_tool.h, fix C++ functioning~~
     + use valgrind to find memory errors (possibly due to probability computations in NB distributions, Distribution::copy)
     + find the cause of "hidden_semi_markov::likelihood_computation" displaying different results on the same sequence in DEBUG mode (check this behaviour)

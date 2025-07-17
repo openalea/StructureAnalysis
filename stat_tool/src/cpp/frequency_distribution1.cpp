@@ -1248,7 +1248,6 @@ void FrequencyDistribution::plotable_frequency_write(SinglePlot &plot) const
 {
   int i;
 
-
   for (i = offset;i < nb_value;i++) {
     if (frequency[i] > 0) {
       plot.add_point(i , frequency[i]);

@@ -3863,14 +3863,13 @@ void ContinuousParametricProcess::plotable_write(MultiPlotSet &plot , int &index
   }
 
   plot.variable_nb_viewpoint[process] = 1;
+  // plot observation distribution
+
+  plot.variable[index] = process;
+  plot.viewpoint[index] = OBSERVATION;
 
   if ((observation_histogram) || (observation_distribution)) {
     for (i = 0;i < nb_state;i++) {
-
-      // fit of observation distribution
-
-      plot.variable[index] = process;
-//      plot.viewpoint[index] = OBSERVATION;
 
       title.str("");
       title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;

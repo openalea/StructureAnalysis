@@ -249,6 +249,9 @@ class mplotlib(plotter):
 
             lines = []
             legends = []
+            # Impulses do not show up at the boundaries of plot
+            adjust_xrange_impulse = False
+            
             # List of argument for the plot function
             for j, singleplot in enumerate(multiplot):
                 style = singleplot.style
@@ -294,6 +297,7 @@ class mplotlib(plotter):
 
                     if "impulses" in style:
                         l = pylab.vlines(x, 0, y, **line2d)
+                        adjust_xrange_impulse = True 
                     elif "linespoints" in style:
                         #l = pylab.plot(x, y, '-', x, y, pointstyle)
                         l = pylab.plot(x, y, pointstyle + '-',**line2d)
@@ -308,6 +312,13 @@ class mplotlib(plotter):
 
                     if(color):
                         pylab.setp(l, color=color)
+
+                    if (adjust_xrange_impulse):
+                        axes = pylab.gca()
+                        for child in axes.get_children():
+                            if isinstance(child, matplotlib.spines.Spine):
+                                child.set_color('#f5f5f5')                                
+                                #child.set_color('#ffffff')
 
                     lines.append(l)
                     legends.append(legend)

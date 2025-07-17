@@ -35,9 +35,8 @@ def test1():
     """Estimate HSMC with nonparametric emission distributions"""
     set_seed(0)
 
-    # TODO: find model with more separated states
     hsm = HiddenSemiMarkov(str(get_shared_data('test_hidden_semi_markov.dat')))
-    # seg fault
+    
     hsm.plot("Intensity", 1)  
     hsm.plot("Observation", 1)
     hsm.plot("Counting", 1)
@@ -81,7 +80,7 @@ def test1():
     # TODO: find adequate error message in 
     # hsmc_est = Estimate(seq, "HIDDEN_SEMI-MARKOV", "Ordinary", nb_states, "LeftRight", Nbiteration=300)
     plotter = mplotlib()
-    # seg fault
+
     hsmc_est.plot("Intensity", 1)
     hsmc_est.plot("Observation", 1)
     hsmc_est.plot("Counting", 1)
@@ -101,10 +100,16 @@ def test2():
     
         
     hsm = HiddenSemiMarkov(str(get_shared_data('test_hidden_semi_markov_param.dat')))
-    
-    # TODO: find adequate error message
-    # hsm.plot("Intensity", 1)
-    hsm.plot("Intensity", 0)   
+        
+    # Plot Intensity for a non-categorical variable
+    try:
+        hsm.plot("Intensity", 1)
+    except ValueError:
+        pass
+    else:
+        raise RuntimeError("Failed to raise error")
+        
+    hsm.plot("Intensity", 0)       
     hsm.plot("Observation", 1) 
         
     # Simulate nb_seq with length seq_length

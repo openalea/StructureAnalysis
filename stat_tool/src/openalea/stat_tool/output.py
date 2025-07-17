@@ -792,6 +792,10 @@ class StatInterface(object):
                         except AttributeError:
                             explicit_error = True
                             local_error = ImportError("sequence analysis not installed !!")
+                        if ((enums_seq.markovian_sequence_type[args[0]] in viewpoints) and (len(plotable) == 0)):
+                            explicit_error = True
+                            msg = "ViewPoint " + str(args[0]) + " not found for variable "  + str(variable) + "." 
+                            local_error = ValueError(msg)                            
                     elif len(args) == 1 and type(args[0]) == str:
                         explicit_error = True
                         local_error = SyntaxError("first argument must be in %s and second arg (int) may be provided." % choices)
