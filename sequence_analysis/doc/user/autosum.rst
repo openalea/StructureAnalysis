@@ -4,8 +4,6 @@ Reference guide
 ###############
 .. contents::
 
-
-
 Data structures
 ====================
 

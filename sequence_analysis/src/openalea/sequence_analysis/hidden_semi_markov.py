@@ -78,7 +78,9 @@ def HiddenSemiMarkov(*args, **kargs):
         :func:`~openalea.sequence_analysis.estimate.Estimate` (Markovian models),
         :func:`~openalea.sequence_analysis.data_transform.ComputeStateSequences`,
         :func:`~openalea.sequence_analysis.simulate.Simulate` (Markovian models).
+        
     """
+    #: Doc comment for class attribute HiddenSemiMarkov
     Length = kargs.get("Length", DEFAULT_LENGTH)
     CountingFlag = kargs.get("Counting", True)
     OldFormat = error.ParseKargs(kargs, "Format", "Current",

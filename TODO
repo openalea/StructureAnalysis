@@ -4,7 +4,7 @@ TODO list for `StructureAnalysis` to be updated / completed. We target a next of
     + create a new branch for each new development (do not systematically use new_python_api)
     + update tests to be compliant with python 3
     + Switch to pytest instead of nosetests.
-    + How to generate documentation: C++, python (does sphinx make all?)
+    + How to generate documentation: C++, python (does sphinx make all?). autodoc / autosum not working? Probably replace all .rst tutorials by jupyter notebooks.
     + Fix SConscript for multiple C++ tests
     + Default EM initialization in switching LM estimation
     + Memcheck semi-Markov switching LM Simulation (C++ test in mode DEBUG)
