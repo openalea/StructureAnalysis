@@ -836,6 +836,7 @@ bool FrequencyDistribution::comparison(StatError &error , ostream *os , int nb_h
             if (type == NUMERIC) {
               distance = m - k;
             }
+            // In this case the dissimilarity is E[|X-Y|]
             dissimilarity[i][j] += (dist[i]->mass[k] * dist[j]->mass[m] -
                                     dist[i]->mass[m] * dist[j]->mass[k]) * distance;
           }

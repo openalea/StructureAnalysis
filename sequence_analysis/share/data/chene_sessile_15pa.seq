@@ -1,23 +1,23 @@
 #########################################################################
 #
-#  Pousses annuelles successives de chenes sessiles (observees dans la Meuse).
+#  Successive annual shoots of sessile oaks (observed in Meuse, France).
 #
 #########################################################################
 
 
 6 VARIABLES
 
-VARIABLE 1 : STATE    # annee de formation (95, 96, 97)
+VARIABLE 1 : STATE    # year of growth (95, 96, 97)
 
-VARIABLE 2 : STATE   # longueur de la pousse annuelle en cm
+VARIABLE 2 : STATE   # annual shoot length in cm
 
-VARIABLE 3 : STATE   # diametre de la pousse en 1/10 de mm
+VARIABLE 3 : STATE   # shoot diameter in tenths of mm
 
-VARIABLE 4 : STATE   # nombre de cycles
+VARIABLE 4 : STATE   # number of growth cycles
 
-VARIABLE 5 : STATE   # nombre d'entrenoeuds
+VARIABLE 5 : STATE   # number of metamers
 
-VARIABLE 6 : STATE   # nombre de branches
+VARIABLE 6 : STATE   # number of branches
 
 # sequence length histogram - sample size: 46
 # mean: 3   variance: 0   standard deviation: 0

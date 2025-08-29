@@ -51,7 +51,7 @@ def Regression(vec, utype, explanatory, response,
         index of the response variable
       * filter : list of float
         filter values on the half width i.e. from one extremity to the central value
-        (with the constraint filter[i] + filter[m] = 1),
+        (with the constraint sum(filter) = 1),
       * frequencies : list of float
         frequencies defining the filter,
       * dist : distribution, mixture, convolution, compound 
