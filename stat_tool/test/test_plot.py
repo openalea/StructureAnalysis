@@ -6,6 +6,9 @@ from openalea.stat_tool import _stat_tool
 from openalea.stat_tool.plot import DISABLE_PLOT, get_plotter, gnuplot
 
 DISABLE_PLOT = True
+from openalea.stat_tool.plot import get_plotter, gnuplot 
+from openalea.stat_tool.plot import DISABLE_PLOT
+#DISABLE_PLOT = True
 
 from .tools import runTestClass
 
