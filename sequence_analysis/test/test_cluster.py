@@ -15,8 +15,7 @@ from openalea.stat_tool.convolution import Convolution
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.vectors import Vectors
 
-from tools import runTestClass
-from openalea.sequence_analysis import get_shared_data
+from tools import runTestClass, robust_path as get_shared_data
 
 class _Cluster():
     """Test class to test cluster function and classes

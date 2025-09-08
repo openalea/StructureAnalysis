@@ -7,13 +7,13 @@ __revision__ = "$Id$"
 
 
 from openalea.sequence_analysis import *
-from tools import runTestClass
+from tools import runTestClass, robust_path as get_shared_data
 
 
-seq0 = Sequences(get_shared_data("chene_sessile_15pa.seq"))
+seq0 = Sequences(str(get_shared_data("chene_sessile_15pa.seq")))
 vec10 = Vectors(seq0)
 vec95 = ValueSelect(vec10, 1, 95)
-seq20 = Sequences(get_shared_data("belren1.seq"))
+seq20 = Sequences(str(get_shared_data("belren1.seq")))
 
 
 class Test():

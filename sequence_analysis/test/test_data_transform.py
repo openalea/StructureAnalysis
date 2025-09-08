@@ -17,7 +17,7 @@ from openalea.stat_tool import SelectStep
 from openalea.stat_tool import Plot
 from openalea.stat_tool import Display
 from openalea.stat_tool import Vectors
-from tools import runTestClass
+from tools import runTestClass, robust_path as get_shared_data
 
 class TestRemoveRun():
 
@@ -136,6 +136,6 @@ def test_select_step():
     Plot(vec1)
 
 if __name__ == "__main__":
-    runTestClass(TestMerge())
+    runTestClass(test_merge())
     runTestClass(TestRemoveRun())
     test_compute_state_sequence()

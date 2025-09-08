@@ -16,7 +16,7 @@ from openalea.sequence_analysis.correlation import ComputePartialAutoCorrelation
 
 from openalea.stat_tool.distribution import Distribution
 from tools import runTestClass
-from openalea.sequence_analysis import get_shared_data
+from tools import runTestClass, robust_path as get_shared_data
 
 class Data():
 
@@ -27,7 +27,7 @@ class Data():
 
     def create_sequence_data(self):
 
-        seq66 = Sequences(get_shared_data( "laricio_date66.seq"))
+        seq66 = Sequences(str(get_shared_data( "laricio_date66.seq")))
         seq69 = MovingAverage(VariableScaling(seq66, 3, 100),
                           Distribution("B", 0, 6, 0.5), BeginEnd=True,
                           Output="Residual")
@@ -37,7 +37,7 @@ def CorrelationData(index=1):
     """Returns a correlation
 
     index from 1 to 3"""
-    seq66 = Sequences(get_shared_data( "laricio_date66.seq"))
+    seq66 = Sequences(str(get_shared_data( "laricio_date66.seq")))
     ret = ComputeCorrelation(seq66, index)
     return ret
 
@@ -62,7 +62,7 @@ class TestComputeCorrelation(Data):
         cf = ComputeCorrelation(seq, self.variable)
 
     def test_spearman(self):
-        seq = Sequences(get_shared_data( "laricio_date66.seq"))
+        seq = Sequences(str(get_shared_data( "laricio_date66.seq")))
         ComputeCorrelation(seq, 1, Type="Spearman")
         ComputeCorrelation(seq, 1, 2,Type="Spearman")
         try:

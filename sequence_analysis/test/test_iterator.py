@@ -9,13 +9,13 @@ from openalea.sequence_analysis import _sequence_analysis as sa
 from openalea.sequence_analysis.hidden_variable_order_markov import *
 from openalea.sequence_analysis.hidden_semi_markov import *
 from openalea.sequence_analysis.renewal import *
-from openalea.sequence_analysis import get_shared_data
+from tools import runTestClass, robust_path as get_shared_data
 
 N = 10
 import os
 # SEMI MARKOV case
 def test_semi_markov_iterator():
-    hsm = HiddenSemiMarkov(get_shared_data('test_hidden_semi_markov.dat'))
+    hsm = HiddenSemiMarkov(str(get_shared_data('test_hidden_semi_markov.dat')))
     smi = sa._SemiMarkovIterator(hsm)
     sim = smi.simulation(N, True)
 
@@ -25,7 +25,7 @@ def hsm_iterator(fn):
     return it
 
 def test_semi_markov_iterator2():
-    fn = get_shared_data('test_hidden_semi_markov.dat')
+    fn = str(get_shared_data('test_hidden_semi_markov.dat'))
     smi = hsm_iterator(fn)
     sim = smi.simulation(N, True)
 
@@ -37,12 +37,12 @@ def vom_iterator(fn):
     return it
 
 def test_variable_order_markov_iterator():
-    vom = HiddenVariableOrderMarkov(get_shared_data('dupreziana21.hc'))
+    vom = HiddenVariableOrderMarkov(str(get_shared_data('dupreziana21.hc')))
     smi = sa._VariableOrderMarkovIterator(vom)
     sim = smi.simulation(N, True)
 
 def test_variable_order_markov_iterator2():
-    fn = get_shared_data('dupreziana21.hc')
+    fn = str(get_shared_data('dupreziana21.hc'))
     smi = vom_iterator(fn)
     sim = smi.simulation(N, True)
 

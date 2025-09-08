@@ -16,11 +16,11 @@ from openalea.sequence_analysis import get_shared_data
 #from openalea.stat_tool.cluster import Transcode, Cluster
 
 from tools import interface
-from tools import runTestClass
+from tools import runTestClass, robust_path as get_shared_data
 
 
 def NonhomogeneousMarkovData():
-    seq =  Sequences(get_shared_data('vanille_m.seq'))
+    seq =  Sequences(str(get_shared_data('vanille_m.seq')))
     mc_m = Estimate(seq_m, "NONHOMOGENEOUS_MARKOV", "MONOMOLECULAR", "VOID")
     return mc_m
 
@@ -31,11 +31,11 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           get_shared_data("test_nonhomogeneous.dat"),
+                           str(get_shared_data("test_nonhomogeneous.dat")),
                            NonhomogeneousMarkov)
 
     def build_data(self):
-        sm =  NonhomogeneousMarkov(get_shared_data('test_nonhomogeneous.dat'))
+        sm =  NonhomogeneousMarkov(str(get_shared_data('test_nonhomogeneous.dat')))
         return sm
 
     def test_empty(self):
@@ -84,5 +84,5 @@ class Test(interface):
         pass
 
 
-#if __name__ == "__main__":
-#    runTestClass(Test())
+if __name__ == "__main__":
+    runTestClass(Test())

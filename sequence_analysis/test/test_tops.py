@@ -11,12 +11,12 @@ from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis import *
 
 from tools import interface
-from tools import runTestClass
+from tools import runTestClass, robust_path as get_shared_data
 
 
 def TopsData():
     """Returns simulated top"""
-    param1 = TopParameters(get_shared_data("test_param1.p"), MaxPosition=20)
+    param1 = TopParameters(str(get_shared_data("test_param1.p")), MaxPosition=20)
     tops = Simulate(param1, 100, 30)
     return tops
 
@@ -29,12 +29,12 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           get_shared_data("test_tops1.dat"),
+                           str(get_shared_data("test_tops1.dat")),
                            Tops)
 
     def build_data(self):
 
-        return Tops(get_shared_data('test_tops1.dat'))
+        return Tops(str(get_shared_data('test_tops1.dat')))
 
     def _test_empty(self):
         self.empty()

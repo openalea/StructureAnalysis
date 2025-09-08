@@ -1,5 +1,5 @@
 from openalea.sequence_analysis import *
-
+from tools import runTestClass, robust_path as get_shared_data
 
 def test1():
     seq6 = Sequences(str(get_shared_data("pin_laricio_6.seq")))
@@ -16,3 +16,6 @@ def test1():
     # Plot(hsmc30, 1)
     seq31 = BuildAuxiliaryVariable(ExtractData(hsmc30))
     Plot(SelectIndividual(seq31, [95]), ViewPoint="Data")
+    
+if __name__ == "__main__":
+    test1()

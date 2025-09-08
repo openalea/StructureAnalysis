@@ -16,16 +16,18 @@ from test_semi_markov import SemiMarkovData
 
 from openalea.sequence_analysis import *
 
-_seq1 = Sequences(get_shared_data('dupreziana_20a2.seq'))
+from tools import runTestClass, robust_path as get_shared_data
+
+_seq1 = Sequences(str(get_shared_data('dupreziana_20a2.seq')))
 
 seq2 = RemoveRun(_seq1, 1, 0, "End")
-seq3 = Sequences(get_shared_data('dupreziana_40a2.seq'))
+seq3 = Sequences(str(get_shared_data('dupreziana_40a2.seq')))
 seq4_0 = RemoveRun(seq3, 2, 0, "End")
 seq4 = SegmentationExtract(seq4_0, 1, 2)
-seq5 = Sequences(get_shared_data('dupreziana_60a2.seq'))
+seq5 = Sequences(str(get_shared_data('dupreziana_60a2.seq')))
 seq6_0 = RemoveRun(seq5, 2, 0, "End")
 seq6 = LengthSelect(SegmentationExtract(seq6_0, 1, 2), 1, Mode="Reject")
-seq7 = Sequences(get_shared_data('dupreziana_80a2.seq'))
+seq7 = Sequences(str(get_shared_data('dupreziana_80a2.seq')))
 seq8_0 = RemoveRun(seq7, 2, 0, "End")
 seq8 = SegmentationExtract(seq8_0, 1, 2)
 seq10 = Merge(seq2, seq4, seq6, seq8)
@@ -38,7 +40,7 @@ class Test_Estimate_Histogram():
         self.data = self.create_data()
 
     def create_data(self):
-        seq0 = Sequences(get_shared_data( "chene_sessile_15pa.seq"))
+        seq0 = Sequences(str(get_shared_data( "chene_sessile_15pa.seq")))
         vec10 = Vectors(seq0)
         return vec10
 
@@ -106,8 +108,8 @@ class Test_Estimate_VARIABLE_ORDER_MARKOV_from_markovian():
 
 class Test_Estimate_HIDDEN_VARIABLE_ORDER_MARKOV():
     def test_estimate(self):
-        seq1 = Sequences(get_shared_data('sequences1.seq'))
-        hvom_sample = HiddenVariableOrderMarkov(get_shared_data("dupreziana21.hc"))
+        seq1 = Sequences(str(get_shared_data('sequences1.seq')))
+        hvom_sample = HiddenVariableOrderMarkov(str(get_shared_data("dupreziana21.hc")))
         hmc_estimated = Estimate(seq1, "HIDDEN_VARIABLE_ORDER_MARKOV", hvom_sample,
                          GlobalInitialTransition=True, NbIteration=80)
         assert hmc_estimated
@@ -116,7 +118,7 @@ class Test_Estimate_HIDDEN_SEMI_MARKOV():
 
     def __init__(self):
         self.data = HiddenSemiMarkovData()
-        self.sequence = Sequences(get_shared_data( "wij1.seq"))
+        self.sequence = Sequences(str(get_shared_data( "wij1.seq")))
 
 
     def test_estimate(self):
@@ -129,7 +131,7 @@ class Test_Estimate_SEMI_MARKOV():
 
     def __init__(self):
         #self.data = SemiMarkovData()
-        self.sequence = Sequences(get_shared_data( "wij1.seq"))
+        self.sequence = Sequences(str(get_shared_data( "wij1.seq")))
 
     def _test_estimate(self):
         seq = self.sequence

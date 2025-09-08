@@ -9,7 +9,7 @@ __revision__ = "$Id$"
 from openalea.sequence_analysis.sequences import Sequences
 from openalea.sequence_analysis.semi_markov import SemiMarkov
 from openalea.sequence_analysis.data_transform import AddAbsorbingRun
-from openalea.sequence_analysis import get_shared_data
+from tools import runTestClass, robust_path as get_shared_data
 
 class _AddAbsorbingRun():
     """
@@ -72,7 +72,7 @@ class Test_AddAbsorbingRun_Sequences(_AddAbsorbingRun):
         self.max_length = 30
 
     def create_data(self):
-        seq = Sequences(get_shared_data('sequences1.seq'))
+        seq = Sequences(str(get_shared_data('sequences1.seq')))
         return seq
     
 class Test_AddAbsorbingRun_SemiMarkov(_AddAbsorbingRun):
@@ -83,7 +83,11 @@ class Test_AddAbsorbingRun_SemiMarkov(_AddAbsorbingRun):
         self.max_length = 1000
 
     def create_data(self):
-        markov = SemiMarkov(get_shared_data('test_semi_markov.dat') )
+        markov = SemiMarkov(str(get_shared_data('test_semi_markov.dat')))
         semi_markov_data = markov.simulation_nb_elements(1, 1000, True)
         return semi_markov_data
+    
+if __name__ == "__main__":
+    runTestClass(Test_AddAbsorbingRun_Sequences())
+    runTestClass(Test_AddAbsorbingRun_SemiMarkov())
     

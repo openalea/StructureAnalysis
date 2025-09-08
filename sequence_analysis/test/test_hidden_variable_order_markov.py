@@ -17,8 +17,8 @@ from openalea.stat_tool.cluster import Transcode, Cluster
 from tools import interface
 from tools import runTestClass
 
-from openalea.sequence_analysis import get_shared_data
-\
+from tools import runTestClass, robust_path as get_shared_data
+
 
 class Test(interface):
     """a simple unittest class

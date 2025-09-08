@@ -26,8 +26,9 @@ import os
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.estimate import  Estimate
 from openalea.sequence_analysis.compare import  Compare
+from tools import runTestClass, robust_path as get_shared_data
 
-seq69 = Sequences(get_shared_data( "pin_laricio_7x.seq"))
+seq69 = Sequences(str(get_shared_data( "pin_laricio_7x.seq")))
 seq70 = Cluster(seq69, "Step", 1, 10)
 #seq70 = IndexParameterExtract(Cluster(seq69, "Step", 2, 10), 1927, MaxIndex=1992)
 
@@ -130,10 +131,10 @@ Plot(seq70, 5, 4, "Gaussian", "Gaussian", ViewPoint="SegmentProfile", Output="Ch
 
 # estimation of a hidden semi-Markov chain
 
-hmc60 = HiddenSemiMarkov(get_shared_data( "pin_laricio_6.hsc"))
+hmc60 = HiddenSemiMarkov(str(get_shared_data( "pin_laricio_6.hsc")))
 hmc6 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", hmc60)
 
-hsmc60 = HiddenSemiMarkov(get_shared_data( "pin_laricio_6.hsc"))
+hsmc60 = HiddenSemiMarkov(str(get_shared_data( "pin_laricio_6.hsc")))
 hsmc6 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", hsmc60)
 hsmc61 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", "Ordinary", 6, "LeftRight")
 

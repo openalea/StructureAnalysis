@@ -16,12 +16,12 @@ from openalea.stat_tool.cluster import Cluster
 from openalea.stat_tool.cluster import Transcode, Cluster 
 
 from tools import interface
-from tools import runTestClass
+from tools import runTestClass, robust_path as get_shared_data
 
 
 def TimeEventsData():
     """Returns simulated top"""
-    time_events = TimeEvents(get_shared_data("test_time_events.dat"))
+    time_events = TimeEvents(str(get_shared_data("test_time_events.dat")))
     return time_events
 
 class Test(interface):
@@ -31,14 +31,14 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           get_shared_data("test_time_events.dat"),
+                           str(get_shared_data("test_time_events.dat")),
                            TimeEvents)
         
     def build_data(self):
         """todo: check identifier output. should be a list """
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        return TimeEvents(get_shared_data("test_time_events.dat"))
+        return TimeEvents(str(get_shared_data("test_time_events.dat")))
    
     def _test_empty(self):
         self.empty()

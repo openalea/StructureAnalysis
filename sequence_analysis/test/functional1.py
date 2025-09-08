@@ -8,25 +8,25 @@ __revision__ = "$Id$"
 import os
 from openalea.stat_tool import *
 from openalea.sequence_analysis import *
-from openalea.sequence_analysis import get_shared_data
+from tools import runTestClass, robust_path as get_shared_data
 
-seq1 = Sequences(get_shared_data( 'dupreziana_20a2.seq'))   # correct
+seq1 = Sequences(str(get_shared_data( 'dupreziana_20a2.seq')))   # correct
 seq2 = RemoveRun(seq1, 1, 0, "End")              # correct
 
 histo21 = ExtractHistogram(seq2, "Recurrence", 1)  # correct
 histo22 = ExtractHistogram(seq2, "Recurrence", 2)  # correct
 
-seq3 = Sequences(get_shared_data( 'dupreziana_40a2.seq'))   #correct
+seq3 = Sequences(str(get_shared_data( 'dupreziana_40a2.seq')))   #correct
 seq4_0 = RemoveRun(seq3, 2, 0, "End")            #correct
 seq4 = SegmentationExtract(seq4_0, 1, 2)         #correct
 
 
-seq5 = Sequences(get_shared_data( 'dupreziana_60a2.seq'))   #correct
+seq5 = Sequences(str(get_shared_data( 'dupreziana_60a2.seq')))   #correct
 seq6_0 = RemoveRun(seq5, 2, 0, "End")            #correct
 seq6 = LengthSelect(SegmentationExtract(seq6_0, 1, 2), 1, Mode="Reject") #correct
 
 
-seq7 = Sequences(get_shared_data( 'dupreziana_80a2.seq'))   #correct
+seq7 = Sequences(str(get_shared_data( 'dupreziana_80a2.seq')))   #correct
 seq8_0 = RemoveRun(seq7, 2, 0, "End")            #correct
 seq8 = SegmentationExtract(seq8_0, 1, 2)         #correct
 
@@ -85,7 +85,7 @@ mc8 = Estimate(seq8, "VARIABLE_ORDER_MARKOV", mc11, GlobalInitialTransition=Fals
 
 
 # test #
-hmc9 = HiddenVariableOrderMarkov(get_shared_data( "dupreziana21.hc"))
+hmc9 = HiddenVariableOrderMarkov(str(get_shared_data( "dupreziana21.hc")))
 hmc10 = Estimate(seq10, "HIDDEN_VARIABLE_ORDER_MARKOV", hmc9, GlobalInitialTransition=True, NbIteration=80)
 hmc11 = Estimate(seq10, "HIDDEN_VARIABLE_ORDER_MARKOV", hmc9, GlobalInitialTransition=False, NbIteration=80)
 

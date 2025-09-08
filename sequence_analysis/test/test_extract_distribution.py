@@ -9,13 +9,14 @@ __revision__ = "$Id$"
 from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.sequence_analysis import *
 
+from tools import runTestClass, robust_path as get_shared_data
 
 
 def test_hidden_semi_markov():
-    seq = Sequences(get_shared_data("pin_laricio_7x.seq"))
+    seq = Sequences(str(get_shared_data("pin_laricio_7x.seq")))
     seq_cluster = Cluster(seq, "Step", 1, 10)
 
-    hsmc60 = HiddenSemiMarkov(get_shared_data('pin_laricio_6.hsc'))
+    hsmc60 = HiddenSemiMarkov(str(get_shared_data('pin_laricio_6.hsc')))
     hsmc6 = Estimate(seq_cluster, "HIDDEN_SEMI-MARKOV", hsmc60)
 
     for process in range(1, hsmc6.nb_output_process):
@@ -29,3 +30,9 @@ def test_semi_markov():
     """tests not yet implemented"""
 def test_top_param():
     """tests not yet implemented"""
+
+if __name__ == "__main__":
+    test_hidden_semi_markov()
+    test_renewal()
+    test_semi_markov()
+    test_top_param()
