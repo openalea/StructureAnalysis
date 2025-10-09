@@ -3,24 +3,26 @@
 
 author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 """
+
 __version__ = "$Id$"
 
 import os
 
-
 from openalea.stat_tool import Simulate
-from openalea.stat_tool.plot import DISABLE_PLOT
 from openalea.stat_tool.output import Display, Save
-DISABLE_PLOT=True
+from openalea.stat_tool.plot import DISABLE_PLOT
+
+DISABLE_PLOT = True
 
 from pathlib import Path
-from openalea.stat_tool import get_shared_data, get_shared_data_path
+
 import openalea.stat_tool as st
+from openalea.stat_tool import get_shared_data
 from openalea.stat_tool.distribution import set_seed
 
 
 def runTestClass(myclass):
-    functions = [x for x in dir(myclass) if x.startswith('test')]
+    functions = [x for x in dir(myclass) if x.startswith("test")]
     for function in functions:
         getattr(myclass, function)()
 
@@ -33,7 +35,7 @@ def _remove_file(filename):
         pass
 
 
-class interface():
+class interface:
     """Interface to be used by test files related to data structure such as
     compound, convolution, mixture, histogram, vectors.
 
@@ -61,13 +63,12 @@ class interface():
                 return data
 
     """
-    def __init__(self, data=None, filename=None, Structure=None):
 
+    def __init__(self, data=None, filename=None, Structure=None):
         if data is None:
             raise AttributeError("data must be provided")
         if Structure is None:
             raise AttributeError("Structure  must be provided")
-
 
         self.data = data
         self.filename = filename
@@ -104,7 +105,7 @@ class interface():
         data = self.data
         data.display()
         Display(data)
-        assert data.display()==Display(data)
+        assert data.display() == Display(data)
 
     def display_versus_ascii_write(self):
         """check that display is equivalent to ascii_write"""
@@ -117,7 +118,7 @@ class interface():
         assert Display(data) == s
 
     def plot(self):
-        """run plotting routines """
+        """run plotting routines"""
         if DISABLE_PLOT == False:
             self.data.plot()
 
@@ -128,51 +129,50 @@ class interface():
 
         .. todo:: This is surely a bug. to be checked"""
 
-
         c1 = self.data
-        #_remove_file('test1.dat')
-        #_remove_file('test2.dat')
+        # _remove_file('test1.dat')
+        # _remove_file('test2.dat')
 
         if Format is None:
-            c1.save('test1.dat')
-            Save(c1, 'test2.dat')
+            c1.save("test1.dat")
+            Save(c1, "test2.dat")
         else:
-            c1.save('test1.dat', Format="Data")
-            Save(c1, 'test2.dat', Format="Data")
+            c1.save("test1.dat", Format="Data")
+            Save(c1, "test2.dat", Format="Data")
 
         if skip_reading:
             pass
         else:
-            c1_read = self.structure('test1.dat')
-            c2_read = self.structure('test2.dat')
+            c1_read = self.structure("test1.dat")
+            c2_read = self.structure("test2.dat")
 
             assert c1 and c1_read and c2_read
             assert str(c1_read) == str(c2_read)
 
-        _remove_file('test1.dat')
-        _remove_file('test2.dat')
+        _remove_file("test1.dat")
+        _remove_file("test2.dat")
 
     def plot_write(self):
         h = self.data
-        h.plot_write('test', 'title')
-        _remove_file('test.print')
-        _remove_file('test.plot')
-        _remove_file('test0.dat')
+        h.plot_write("test", "title")
+        _remove_file("test.print")
+        _remove_file("test.plot")
+        _remove_file("test0.dat")
 
     def file_ascii_write(self):
         h = self.data
-        h.file_ascii_write('test.dat', True)
-        _remove_file('test.dat')
+        h.file_ascii_write("test.dat", True)
+        _remove_file("test.dat")
 
     def file_ascii_data_write(self):
         h = self.data
-        h.file_ascii_data_write('test.dat', True)
-        _remove_file('test.dat')
+        h.file_ascii_data_write("test.dat", True)
+        _remove_file("test.dat")
 
     def spreadsheet_write(self):
         h = self.data
-        h.spreadsheet_write('test.dat')
-        _remove_file('test.dat')
+        h.spreadsheet_write("test.dat")
+        _remove_file("test.dat")
 
     def survival_ascii_write(self):
         d = self.data
@@ -180,7 +180,7 @@ class interface():
 
     def survival_plot_write(self):
         d = self.data
-        d.survival_plot_write('test','test')
+        d.survival_plot_write("test", "test")
 
     def survival_file_ascii_write(self):
         d = self.data
@@ -188,8 +188,8 @@ class interface():
 
     def survival_spreadsheet_write(self):
         d = self.data
-        d.survival_spreadsheet_write('test.xsl')
-        _remove_file('test.xsl')
+        d.survival_spreadsheet_write("test.xsl")
+        _remove_file("test.xsl")
 
     def simulate(self, N=-1):
         """Test the simulate method"""
@@ -215,13 +215,13 @@ class interface():
 
 
 def robust_path(filename):
-    p = get_shared_data_path(st)
+    p = st.get_shared_data(filename)
     if p is not None:
         # module in develop mode?
         return get_shared_data(filename)
-    
+
     p = Path(st.__path__[0])
-    if 'src' in str(p):
-        root_pkg = p/'../../..'
-        data = get_shared_data_path(root_pkg)
-        return os.path.join(data,filename)
+    if "src" in str(p):
+        root_pkg = p + "/../../.."
+        data = st.get_shared_data(root_pkg)
+        return os.path.join(data, filename)

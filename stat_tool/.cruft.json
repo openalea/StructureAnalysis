@@ -1,0 +1,23 @@
+{
+  "template": "https://github.com/openalea/cookiecutter-openalea",
+  "commit": "3c9c14f6b7964b5493c1eb80ea1cbd40af6c3d1d",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "full_name": "Jean-Baptiste Durand",
+      "email": "Jean-Baptiste.Durand@cirad.fr",
+      "github_username": "openalea",
+      "project_name": "stat_tool",
+      "project_slug": "stat_tool",
+      "description": "Basic Statistical tools used by different Structure Analysis libraries.",
+      "pure_python": false,
+      "version": "1.3.0",
+      "_copy_without_render": [
+        ".github/workflows/openalea_ci.yml"
+      ],
+      "_template": "https://github.com/openalea/cookiecutter-openalea",
+      "_commit": "3c9c14f6b7964b5493c1eb80ea1cbd40af6c3d1d"
+    }
+  },
+  "directory": null
+}

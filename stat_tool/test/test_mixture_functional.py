@@ -1,26 +1,27 @@
 """
 Mixture functional test from exploratory.aml and stat_tool_test.aml files
 """
+
 __version__ = "$Id$"
 
-from openalea.stat_tool.plot import DISABLE_PLOT
-
-from openalea.stat_tool.mixture import Mixture
-from openalea.stat_tool.data_transform import ExtractDistribution
-from openalea.stat_tool.data_transform import ExtractHistogram
-from openalea.stat_tool.distribution import ToHistogram
-from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.distribution import Distribution
-from openalea.stat_tool.estimate import Estimate
-from openalea.stat_tool.comparison import Compare, ComparisonTest
-
-from openalea.stat_tool.output import plot, Plot, Display
-from openalea.stat_tool.data_transform import Merge, Shift, ExtractData
-from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool.cluster import Cluster
-from openalea.stat_tool.distribution import set_seed
+from openalea.stat_tool.comparison import Compare, ComparisonTest
+from openalea.stat_tool.data_transform import (
+    ExtractData,
+    ExtractDistribution,
+    ExtractHistogram,
+    Merge,
+    Shift,
+)
+from openalea.stat_tool.distribution import Distribution, ToHistogram, set_seed
+from openalea.stat_tool.estimate import Estimate
+from openalea.stat_tool.histogram import Histogram
+from openalea.stat_tool.mixture import Mixture
+from openalea.stat_tool.output import Display, Plot, plot
+from openalea.stat_tool.plot import DISABLE_PLOT
+from openalea.stat_tool.simulate import Simulate
 
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import robust_path as get_shared_data
 
 
 def test():
@@ -59,18 +60,16 @@ def test():
     #########################################################################
     """
     set_seed(0)
-    
+
     plot.DISABLE_PLOT = DISABLE_PLOT
     meri1 = Histogram(get_shared_data("meri1.his"))
     meri2 = Histogram(get_shared_data("meri2.his"))
     meri3 = Histogram(get_shared_data("meri3.his"))
     meri4 = Histogram(get_shared_data("meri4.his"))
     meri5 = Histogram(get_shared_data("meri5.his"))
-    
 
     Plot(meri1, meri2, meri3, meri4, meri5)
     Compare(meri1, meri2, meri3, meri4, meri5, "N")
-
 
     ComparisonTest("F", meri1, meri2)
     ComparisonTest("T", meri1, meri2)
@@ -91,13 +90,14 @@ def test():
     # model selection approach: estimation of both the mixture parameters and
     # the number of components"""
 
-    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",
-                     NbComponent="Estimated")
+    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B", NbComponent="Estimated")
     mixt2 = Estimate(meri, "MIXTURE", "NB", "NB")
     Plot(mixt2)
     Plot(ExtractDistribution(mixt2, "Mixture"))
-    Plot(ExtractDistribution(mixt2, "Component", 1),
-         ExtractDistribution(mixt2, "Component", 2))
+    Plot(
+        ExtractDistribution(mixt2, "Component", 1),
+        ExtractDistribution(mixt2, "Component", 2),
+    )
     Display(mixt2)
 
     _mixt_data = ExtractData(mixt2)
@@ -110,16 +110,14 @@ def test():
     Display(histo5, Detail=2)
     Plot(histo5)
 
-    peup1 = Histogram(get_shared_data( "peup1.his"))
-    peup2 = Histogram(get_shared_data( "peup2.his"))
-    peup3 = Histogram(get_shared_data( "peup3.his"))
-    peup4 = Histogram(get_shared_data( "peup4.his"))
-    peup5 = Histogram(get_shared_data( "peup5.his"))
-    peup6 = Histogram(get_shared_data( "peup6.his"))
+    peup1 = Histogram(get_shared_data("peup1.his"))
+    peup2 = Histogram(get_shared_data("peup2.his"))
+    peup3 = Histogram(get_shared_data("peup3.his"))
+    peup4 = Histogram(get_shared_data("peup4.his"))
+    peup5 = Histogram(get_shared_data("peup5.his"))
+    peup6 = Histogram(get_shared_data("peup6.his"))
 
-
-    _mixt10 = Estimate(peup2, "MIXTURE", "B", "NB", "NB", "NB",
-                      NbComponent="Estimated")
+    _mixt10 = Estimate(peup2, "MIXTURE", "B", "NB", "NB", "NB", NbComponent="Estimated")
 
     peup = Merge(peup1, peup2, peup3, peup4, peup5, peup6)
 
@@ -130,8 +128,7 @@ def test():
     Display(histo4, Detail=2)
     Plot(histo4)
 
-    _mixt11 = Estimate(peup, "MIXTURE", "B", "NB", "NB", "NB",
-                      NbComponent="Estimated")
+    _mixt11 = Estimate(peup, "MIXTURE", "B", "NB", "NB", "NB", NbComponent="Estimated")
 
     _mixt11 = Estimate(peup, "MIXTURE", "B", "NB")
 
@@ -140,8 +137,9 @@ def test2():
     """finite mixture of discrete distributions"""
 
     mixt1 = Mixture("data//mixture1.mixt")
-    mixt1 = Mixture(0.6, Distribution("B", 2, 18, 0.5), 0.4,
-                    Distribution("NB", 10, 10, 0.5))
+    mixt1 = Mixture(
+        0.6, Distribution("B", 2, 18, 0.5), 0.4, Distribution("NB", 10, 10, 0.5)
+    )
 
     mixt_histo1 = Simulate(mixt1, 200)
     Plot(mixt_histo1)
@@ -156,8 +154,15 @@ def test2():
 
     # estimation
 
-    mixt2 = Estimate(mixt_histo1, "MIXTURE", "B", "NB", MinInfBound=0,
-                     InfBoundStatus="Fixed", DistInfBoundStatus="Fixed")
+    mixt2 = Estimate(
+        mixt_histo1,
+        "MIXTURE",
+        "B",
+        "NB",
+        MinInfBound=0,
+        InfBoundStatus="Fixed",
+        DistInfBoundStatus="Fixed",
+    )
 
     _mixt_histo2 = ExtractData(mixt2)
 
@@ -165,25 +170,25 @@ def test2():
     _histo15 = ToHistogram(ExtractDistribution(mixt2, "Component", 1))
 
     # estimation and selection of the number of components
-    
-    meri1 = Histogram(get_shared_data( "meri1.his"))
-    meri2 = Histogram(get_shared_data( "meri2.his"))
-    meri3 = Histogram(get_shared_data( "meri3.his"))
-    meri4 = Histogram(get_shared_data( "meri4.his"))
-    meri5 = Histogram(get_shared_data( "meri5.his"))
-    
-    #mixt3 = Estimate(meri1, "MIXTURE", Distribution("B", 6, 7, 0.5), "B")
+
+    meri1 = Histogram(get_shared_data("meri1.his"))
+    meri2 = Histogram(get_shared_data("meri2.his"))
+    meri3 = Histogram(get_shared_data("meri3.his"))
+    meri4 = Histogram(get_shared_data("meri4.his"))
+    meri5 = Histogram(get_shared_data("meri5.his"))
+
+    # mixt3 = Estimate(meri1, "MIXTURE", Distribution("B", 6, 7, 0.5), "B")
     mixt3 = Estimate(meri1, "MIXTURE", "B", "B")
     Plot(mixt3)
     # NbComponent="Fixed" (default) / "Estimated"
     # Penalty="AIC"/ "AICc" / "BIC" / "BICc" (default), option
     # valide if NbComponent="Estimated"
 
-
     meri = Merge(meri1, meri2, meri3, meri4, meri5)
 
-    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",
-                     NbComponent="Estimated", Penalty="BIC")
+    mixt2 = Estimate(
+        meri, "MIXTURE", "B", "B", "B", "B", NbComponent="Estimated", Penalty="BIC"
+    )
     Display(mixt2, Detail=2)
     dist_mixt = ExtractDistribution(mixt2, "Mixture")
     Plot(dist_mixt)

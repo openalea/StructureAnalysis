@@ -33,24 +33,29 @@
 #
 #########################################################################
 """
+
 __version__ = "$Id$"
 
 
 from openalea.stat_tool.plot import DISABLE_PLOT
+
 DISABLE_PLOT = False
 
-from openalea.stat_tool.data_transform import ExtractDistribution
-from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.estimate import Estimate
-from openalea.stat_tool.comparison import Compare, ComparisonTest
-
-from openalea.stat_tool.output import plot, Plot, Display
-from openalea.stat_tool.data_transform import Merge, Shift, ExtractData
-from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool.cluster import Cluster
+from openalea.stat_tool.comparison import Compare, ComparisonTest
+from openalea.stat_tool.data_transform import (
+    ExtractData,
+    ExtractDistribution,
+    Merge,
+    Shift,
+)
 from openalea.stat_tool.distribution import set_seed
+from openalea.stat_tool.estimate import Estimate
+from openalea.stat_tool.histogram import Histogram
+from openalea.stat_tool.output import Display, Plot, plot
+from openalea.stat_tool.simulate import Simulate
 
-from tools import robust_path as get_shared_data
+from .tools import robust_path as get_shared_data
 
 plot.DISABLE_PLOT = DISABLE_PLOT
 
@@ -62,7 +67,6 @@ def test():
     meri3 = Histogram(get_shared_data("meri3.his"))
     meri4 = Histogram(get_shared_data("meri4.his"))
     meri5 = Histogram(get_shared_data("meri5.his"))
-
 
     Plot(meri1, meri2, meri3, meri4, meri5)
     Compare(meri1, meri2, meri3, meri4, meri5, "N")
@@ -82,25 +86,25 @@ def test():
     # sub-population of GUs made only of a preformed part and a second
     # sub-population made of both a preformed part and a neoformed part
 
-
     _mixt1 = Estimate(meri2, "MIXTURE", "B", "B")
 
     meri = Merge(meri1, meri2, meri3, meri4, meri5)
 
-    #model selection approach: estimation of both the mixture parameters and
+    # model selection approach: estimation of both the mixture parameters and
     # the number of components
 
-#    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",
-#                     NbComponent="Estimated")
+    #    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",
+    #                     NbComponent="Estimated")
     mixt2 = Estimate(meri, "MIXTURE", "NB", "NB")
     Plot(mixt2)
     Plot(ExtractDistribution(mixt2, "Mixture"))
 
     print(type(ExtractDistribution(mixt2, "Component", 1)))
 
-
-    Plot(ExtractDistribution(mixt2, "Component", 1),
-         ExtractDistribution(mixt2, "Component", 2))
+    Plot(
+        ExtractDistribution(mixt2, "Component", 1),
+        ExtractDistribution(mixt2, "Component", 2),
+    )
     Display(mixt2)
 
     _mixt_data = ExtractData(mixt2)
@@ -113,16 +117,14 @@ def test():
     Display(histo5, Detail=2)
     Plot(histo5)
 
+    peup1 = Histogram(get_shared_data("peup1.his"))
+    peup2 = Histogram(get_shared_data("peup2.his"))
+    peup3 = Histogram(get_shared_data("peup3.his"))
+    peup4 = Histogram(get_shared_data("peup4.his"))
+    peup5 = Histogram(get_shared_data("peup5.his"))
+    peup6 = Histogram(get_shared_data("peup6.his"))
 
-    peup1 = Histogram(get_shared_data( "peup1.his"))
-    peup2 = Histogram(get_shared_data( "peup2.his"))
-    peup3 = Histogram(get_shared_data( "peup3.his"))
-    peup4 = Histogram(get_shared_data( "peup4.his"))
-    peup5 = Histogram(get_shared_data( "peup5.his"))
-    peup6 = Histogram(get_shared_data( "peup6.his"))
-
-    _mixt10 = Estimate(peup2, "MIXTURE", "B", "NB", "NB", "NB",
-                       NbComponent="Estimated")
+    _mixt10 = Estimate(peup2, "MIXTURE", "B", "NB", "NB", "NB", NbComponent="Estimated")
 
     peup = Merge(peup1, peup2, peup3, peup4, peup5, peup6)
 
@@ -133,11 +135,8 @@ def test():
     Display(histo4, Detail=2)
     Plot(histo4)
 
-
-    _mixt11 = Estimate(peup, "MIXTURE", "B", "NB", "NB", "NB",
-                       NbComponent="Estimated")
+    _mixt11 = Estimate(peup, "MIXTURE", "B", "NB", "NB", "NB", NbComponent="Estimated")
     _mixt11 = Estimate(peup, "MIXTURE", "B", "NB")
-
 
 
 if __name__ == "__main__":

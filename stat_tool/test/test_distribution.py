@@ -1,33 +1,35 @@
 # -*- coding: utf-8 -*-
 """Distribution tests"""
+
 __version__ = "$Id$"
 
 
-from openalea.stat_tool.distribution import Distribution, Uniform, Binomial
-from openalea.stat_tool.distribution import NegativeBinomial, Poisson
-from openalea.stat_tool.distribution import Multinomial
-from openalea.stat_tool.distribution import ToHistogram, ToDistribution
-from openalea.stat_tool.distribution import set_seed
-
-from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool import Estimate
-
 from openalea.stat_tool._stat_tool import _DiscreteParametricModel
 
-from tools import interface
-from tools import runTestClass
+from openalea.stat_tool import Estimate
+from openalea.stat_tool.distribution import (
+    Binomial,
+    Distribution,
+    Multinomial,
+    NegativeBinomial,
+    Poisson,
+    ToDistribution,
+    ToHistogram,
+    Uniform,
+    set_seed,
+)
+from openalea.stat_tool.histogram import Histogram
+
+from .tools import interface, runTestClass
 
 
 class Test(interface):
-    """a simple unittest class
+    """a simple unittest class"""
 
-
-    """
     def __init__(self):
-        interface.__init__(self,
-                           self.build_data(),
-                           "data/distribution1.dist",
-                           Distribution)
+        interface.__init__(
+            self, self.build_data(), "data/distribution1.dist", Distribution
+        )
 
     def build_data(self):
         d1 = Binomial(0, 10, 0.5)
@@ -49,7 +51,7 @@ class Test(interface):
         dist = Distribution(h)
         assert dist
 
-        #from parametric model
+        # from parametric model
         pm = _DiscreteParametricModel(h)
         dist = Distribution(pm)
         assert dist
@@ -112,18 +114,19 @@ class Test(interface):
         s = self.data
         _res = s.truncate(4)
 
-class TestDistribution():
+
+class TestDistribution:
     """Test the distribution (Uniform, Binomial, ...)
 
     test the sup_bound, inf_bound, probability, parameter,ident
 
     test the ToDistribution and ToHistogram
     """
+
     def __init__(self):
         pass
 
     def test_to_histogram(self):
-
         d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
         h = d.simulate(1000)
         d2 = ToDistribution(h)
@@ -134,30 +137,29 @@ class TestDistribution():
         assert h == h2
 
     def test_uniform(self):
-
         d = Distribution("UNIFORM", 0, 10)
         s = d.simulate(1000)
         assert list(s)
         import numpy as np
-        assert(np.sum(s) == 1000)
-        assert(d.get_sup_bound == 10)
-        assert(d.get_inf_bound == 0)
-        assert(d.get_probability == -1)
-        assert(d.get_parameter == -1)
+
+        assert np.sum(s) == 1000
+        assert d.get_sup_bound == 10
+        assert d.get_inf_bound == 0
+        assert d.get_probability == -1
+        assert d.get_parameter == -1
         from openalea.stat_tool.enums import distribution_identifier_type as dist_type
 
-        assert(dist_type['UNIFORM'] == d.get_ident())
+        assert dist_type["UNIFORM"] == d.get_ident()
 
         d = Uniform(0, 10)
         s = d.simulate(1000)
         assert list(s)
-        assert(np.sum(s) == 1000)
+        assert np.sum(s) == 1000
 
         m = d.simulate(1000).extract_model()
         assert isinstance(m, _DiscreteParametricModel)
 
     def test_binomial(self):
-
         d = Distribution("BINOMIAL", 0, 10, 0.5)
         assert list(d.simulate(1000))
         assert d.get_sup_bound == 10
@@ -173,7 +175,6 @@ class TestDistribution():
         assert isinstance(m, _DiscreteParametricModel)
 
     def test_poisson(self):
-
         d = Distribution("POISSON", 0, 2)
         assert list(d.simulate(1000))
         assert d.get_sup_bound == -1
@@ -189,7 +190,6 @@ class TestDistribution():
         assert isinstance(m, _DiscreteParametricModel)
 
     def test_neg_binomial(self):
-
         d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
         assert list(d.simulate(1000))
         assert d.get_sup_bound == -1
@@ -216,18 +216,19 @@ class TestDistribution():
         except:
             assert True
 
-
     def test_simulation(self):
         """simulate a vector of realizations"""
         d = Uniform(0, 1)
         try:
             import numpy
+
             l = numpy.zeros(100000)
             for i in range(len(l)):
                 l[i] = d.simulation()
-            assert((0 < sum(l)) & (sum(l) < len(l)))
+            assert (0 < sum(l)) & (sum(l) < len(l))
         except:
             pass
+
     def test_getters(self):
         dist = Distribution(Histogram([1, 1, 1, 2, 2, 2, 3, 3, 3]))
         assert dist.get_mean == 2
@@ -235,13 +236,12 @@ class TestDistribution():
         assert dist.get_mean == 2
         assert 0.6666 < dist.get_variance < 0.6667
 
-
     def test_set_seed(self):
-        """"Setting simulation seed"""
+        """ "Setting simulation seed"""
 
         d = Distribution("POISSON", 0, 2.5)
         set_seed(0)
-         # Simulate and get histograms        
+        # Simulate and get histograms
         s1 = str(list(d.simulate(200)))
         s2 = str(list(d.simulate(200)))
         assert s1 != s2
@@ -249,7 +249,6 @@ class TestDistribution():
         s3 = str(list(d.simulate(200)))
         assert s1 == s3
         return s1, s2, s3
-
 
 
 if __name__ == "__main__":

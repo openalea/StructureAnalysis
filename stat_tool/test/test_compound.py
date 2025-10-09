@@ -3,16 +3,15 @@
 :Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
+
 __version__ = "$Id$"
 
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.data_transform import ExtractDistribution
-from openalea.stat_tool.distribution import Binomial, NegativeBinomial
+from openalea.stat_tool.distribution import Binomial, NegativeBinomial, set_seed
 from openalea.stat_tool.estimate import Estimate
-from openalea.stat_tool.distribution import set_seed
 
-from tools import interface
-from tools import runTestClass
+from .tools import interface, runTestClass
 
 
 class Test(interface):
@@ -22,10 +21,7 @@ class Test(interface):
     """
 
     def __init__(self):
-        interface.__init__(self,
-            self.build_data(),
-            "data/compound1.cd",
-            Compound)
+        interface.__init__(self, self.build_data(), "data/compound1.cd", Compound)
         set_seed(0)
 
     def build_data(self):
@@ -42,16 +38,16 @@ class Test(interface):
 
     def test_constructor_from_compound(self):
         # to be removed
-        #compound1 = self.data
-        #compound2 = Compound(compound1)
-        #assert str(compound1) == str(compound2)
+        # compound1 = self.data
+        # compound2 = Compound(compound1)
+        # assert str(compound1) == str(compound2)
         pass
 
     def test_constructor_from_dists_and_threshold(self):
         compound1 = self.data
-        compound2 = Compound(Binomial(2, 5, 0.5),
-                             NegativeBinomial(0, 2, 0.5),
-                             Threshold=0.99999)
+        compound2 = Compound(
+            Binomial(2, 5, 0.5), NegativeBinomial(0, 2, 0.5), Threshold=0.99999
+        )
         assert str(compound1) == str(compound2)
 
     def test_print(self):
@@ -93,14 +89,14 @@ class Test(interface):
         assert m.extract_sum() == ExtractDistribution(m, "Sum")
         l1 = str(m.extract_elementary())
         l2 = str(NegativeBinomial(0, 2, 0.5))
-        assert str(l1.split("\n")[0:3]) == str(l2.split("\n")[0:3])  
+        assert str(l1.split("\n")[0:3]) == str(l2.split("\n")[0:3])
         assert m.extract_elementary() == ExtractDistribution(m, "Elementary")
 
     def test_extract_data(self):
         """todo : check if this test makes sense"""
 
         s = self.simulate()
-        #e = Estimate(s, "Compound",  Binomial(2, 5, 0.5), "Sum")
+        # e = Estimate(s, "Compound",  Binomial(2, 5, 0.5), "Sum")
         d = s.extract_sum()
         assert d
         _eprime = Estimate(s, "COMPOUND", Binomial(0, 10, 0.5), "Sum")

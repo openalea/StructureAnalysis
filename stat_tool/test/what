@@ -1,0 +1,26 @@
+contingency table
+
+        1    2    3    4
+1995    1   41    3    1   46
+1996   38    7    1    0   46
+1997   18   27    1    0   46
+       57   75    5    1  138
+
+deviation table
+
+              1          2          3          4
+1995        -18         16    1.33333   0.666667
+1996         19        -18  -0.666667  -0.333333
+1997         -1          2  -0.666667  -0.333333
+
+chi-square contribution table
+
+                1            2            3            4
+1995     0.270397     0.162371    0.0169137    0.0211421
+1996     0.301275     0.205501   0.00422842   0.00528553
+1997  0.000834557   0.00253705   0.00422842   0.00528553
+
+chi-square test (6 degrees of freedom)
+chi-square value: 63.0653   critical probability: 1.07046e-11
+reference chi-square value: 12.5916   reference critical probability: 0.05
+reference chi-square value: 16.8119   reference critical probability: 0.01

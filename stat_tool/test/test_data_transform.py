@@ -4,28 +4,41 @@
 
 .. todo:: to be clean
 """
+
 __version__ = "$Id$"
 
-from openalea.stat_tool.vectors import Vectors
-from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.distribution import (
-    Distribution, Uniform, Binomial, 
-    NegativeBinomial
-    )
-from openalea.stat_tool.mixture import Mixture
-from openalea.stat_tool.convolution import Convolution
-from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool.compound import Compound
-from openalea.stat_tool.output import Plot
+from openalea.stat_tool.convolution import Convolution
 from openalea.stat_tool.data_transform import (
-    Shift, Merge, Fit, ValueSelect, 
-    SelectVariable, SelectIndividual, MergeVariable, ExtractDistribution, 
-    ExtractHistogram, ExtractData, SelectStep
-    )
+    ExtractData,
+    ExtractDistribution,
+    ExtractHistogram,
+    Fit,
+    Merge,
+    MergeVariable,
+    SelectIndividual,
+    SelectStep,
+    SelectVariable,
+    Shift,
+    ValueSelect,
+)
+from openalea.stat_tool.distribution import (
+    Binomial,
+    Distribution,
+    NegativeBinomial,
+    Uniform,
+)
+from openalea.stat_tool.histogram import Histogram
+from openalea.stat_tool.mixture import Mixture
+from openalea.stat_tool.output import Plot
+from openalea.stat_tool.simulate import Simulate
+from openalea.stat_tool.vectors import Vectors
 
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import robust_path as get_shared_data
+from .tools import runTestClass
 
-class data():
+
+class data:
     """Create some common data sets for the classes
     shift, fit, merge, ...
     """
@@ -55,21 +68,26 @@ class data():
         return mixt_data
 
     def hist_data(self):
-        h = Histogram(get_shared_data( "meri2.his"))
+        h = Histogram(get_shared_data("meri2.his"))
         return h
 
     def int_vector_data(self):
-        a = [[1, 3, 4],
-             [4, 12, 2],
-             [8, 7, 3],]
+        a = [
+            [1, 3, 4],
+            [4, 12, 2],
+            [8, 7, 3],
+        ]
         v = Vectors(a)
         return v
 
     def float_vector_data(self):
-        v = Vectors([[0.1, 0.3, 4.2],
-                     [0.5, 2.3, 1.2],
-                     [4.5, 6.3, 3.2],
-                     ])
+        v = Vectors(
+            [
+                [0.1, 0.3, 4.2],
+                [0.5, 2.3, 1.2],
+                [4.5, 6.3, 3.2],
+            ]
+        )
         return v
 
     def mixt(self):
@@ -91,22 +109,21 @@ class data():
         m = Convolution(d1, d2)
         return m
 
-class TestSelectStep(data):
 
+class TestSelectStep(data):
     def __init__(self):
         data.__init__(self)
 
     def test_select_step_vectors(self):
         data = self.int_vector_data
         try:
-            SelectStep(data,1, 100)
+            SelectStep(data, 1, 100)
             assert False
         except:
             assert True
 
 
 class TestShift(data):
-
     def __init__(self):
         data.__init__(self)
 
@@ -129,68 +146,67 @@ class TestShift(data):
         assert Shift(h, 2) == h.shift(2)
 
     def test_shift_vector(self):
-        vn = Vectors([[0.2, 1., 2, 3],
-                      [4.2, 5, 6, 7]])
-        v1 = Vectors([[1.]])
+        vn = Vectors([[0.2, 1.0, 2, 3], [4.2, 5, 6, 7]])
+        v1 = Vectors([[1.0]])
         assert Shift(v1, 2)
         assert Shift(vn, 1, 2)
         assert str(Shift(vn, 1, 2)) == str(vn.shift(1, 2))
 
 
 class TestFit:
-
     def __init__(self):
         pass
 
     def test_fit_histogram(self):
-        meri5 = Histogram(get_shared_data( "meri5.his"))
+        meri5 = Histogram(get_shared_data("meri5.his"))
         dist1 = Fit(meri5, Distribution("B", 0, 10, 0.437879))
         dist2 = meri5.fit(Distribution("B", 0, 10, 0.437879))
-        assert str(dist1)==str(dist2)
+        assert str(dist1) == str(dist2)
 
 
 class TestSelectHist:
-
     def __init__(self):
         pass
+
     def test_value_select_float(self):
         meri1 = Histogram(get_shared_data("meri1.his"))
         # note keep=False is equivalent to Mode=keep,is this correct ?
-        assert str(ValueSelect(meri1, 0, 10, Mode="Keep"))==\
-            str(meri1.value_select( min=0, max=10, keep=True))
+        assert str(ValueSelect(meri1, 0, 10, Mode="Keep")) == str(
+            meri1.value_select(min=0, max=10, keep=True)
+        )
 
 
 class TestValueSelect(data):
-
     def __init__(self):
         data.__init__(self)
 
     def test_value_select_float(self):
-
         v = self.float_vector_data()
 
         v1b = ValueSelect(v, 1, 0.2, 2.0, Mode="Keep")
-        v2 =  ValueSelect(v, 2, 1.0, 6.0, Mode="Keep")
-        v3 =  ValueSelect(v, 3, 1.0, 2.0, Mode="Keep")
+        v2 = ValueSelect(v, 2, 1.0, 6.0, Mode="Keep")
+        v3 = ValueSelect(v, 3, 1.0, 2.0, Mode="Keep")
 
         assert v and v1b and v2 and v3
         assert len(v1b) == 1
 
-        assert str(ValueSelect(v, 1, 0.2, 2, Mode="Keep")) == \
-                str(v.value_select(1, 0.2, 2, keep=True))
-        assert str(ValueSelect(v, 2, 1.0, 6.0, Mode="Keep")) == \
-                str(v.value_select(2, 1.0, 6.0, keep=True))
-        assert str(ValueSelect(v, 3, 1.0, 2.0, Mode="Keep")) == \
-                str(v.value_select(3, 1.0, 2., keep=True))
+        assert str(ValueSelect(v, 1, 0.2, 2, Mode="Keep")) == str(
+            v.value_select(1, 0.2, 2, keep=True)
+        )
+        assert str(ValueSelect(v, 2, 1.0, 6.0, Mode="Keep")) == str(
+            v.value_select(2, 1.0, 6.0, keep=True)
+        )
+        assert str(ValueSelect(v, 3, 1.0, 2.0, Mode="Keep")) == str(
+            v.value_select(3, 1.0, 2.0, keep=True)
+        )
 
     def test_value_select_int(self):
-
         v = self.int_vector_data()
-        v1b =  ValueSelect(v, 1, 2, 8, Mode="Reject")
+        v1b = ValueSelect(v, 1, 2, 8, Mode="Reject")
         assert v1b
 
         try:
-            _v1 =  ValueSelect(v, 1, 2, 3, Mode="Keep")
+            _v1 = ValueSelect(v, 1, 2, 3, Mode="Keep")
             assert False
         except Exception:
             # Empty sample
@@ -212,60 +228,58 @@ class TestValueSelect(data):
         hist_data = self.hist_data()
         assert hist_data.value_select(1, 20, True)
 
-class TestSelectVariable(data):
 
+class TestSelectVariable(data):
     def __init__(self):
         data.__init__(self)
 
     def test_vector(self):
-
         v = self.int_vector_data()
 
         for i in range(3):
-            v1 =  SelectVariable(v, i+1, Mode="Keep")
+            v1 = SelectVariable(v, i + 1, Mode="Keep")
             assert v1
             assert len(v1) == 3
             assert len(v1[0]) == 1
-            assert str(v.select_variable([i+1], keep=True)) == \
-                str(SelectVariable(v, i+1, Mode="Keep"))
+            assert str(v.select_variable([i + 1], keep=True)) == str(
+                SelectVariable(v, i + 1, Mode="Keep")
+            )
             for j in range(3):
                 assert v1[j][0] == v[j][i]
 
 
 class TestSelectIndividual(data):
-
     def __init__(self):
         data.__init__(self)
 
     def test_vector_integer(self):
-
         v = self.int_vector_data()
 
         selection = SelectIndividual(v, [1, 2], Mode="Keep")
         selection2 = v.select_individual([1, 2], keep=True)
 
-        assert str(selection)==str(selection2)
+        assert str(selection) == str(selection2)
 
         assert len(selection) == 2
 
     def test_distance_matrix(self):
-        """not implemented - distance matrix """
+        """not implemented - distance matrix"""
         pass
 
 
-class TestExtract():
+class TestExtract:
     """
     Extract("Compound") see test_compound
     Extract("Convolution") see test_convolution
     Extract("Mixture") see test_mixture
     Sum, elementary, component, weight see test_compound, and so on.
     """
+
     def __init__(self):
         pass
 
 
-
-class TestExtractData():
+class TestExtractData:
     """
     See other test file.
     """
@@ -274,7 +288,6 @@ class TestExtractData():
         pass
 
     def test_histo_extract_data(self):
-
         h = Histogram(get_shared_data("meri2.his"))
         mixt = h.estimate_DiscreteMixture(["B", "NB"])
         assert ExtractData(mixt)
@@ -282,7 +295,6 @@ class TestExtractData():
 
 
 class TestExtractDistribution(data):
-
     def __init__(self):
         data.__init__(self)
 
@@ -292,64 +304,54 @@ class TestExtractDistribution(data):
         assert ExtractDistribution(mixt, "Weight")
         assert ExtractDistribution(mixt, "Weight") == mixt.extract_weight()
         assert ExtractDistribution(mixt, "Mixture") == mixt.extract_mixture()
-        assert ExtractDistribution(mixt, "Component", 1) == \
-            mixt.extract_component(1)
-        assert ExtractDistribution(mixt, "Component", 2) == \
-            mixt.extract_component(2)
-        assert ExtractDistribution(mixt, "Component", 3) == \
-            mixt.extract_component(3)
+        assert ExtractDistribution(mixt, "Component", 1) == mixt.extract_component(1)
+        assert ExtractDistribution(mixt, "Component", 2) == mixt.extract_component(2)
+        assert ExtractDistribution(mixt, "Component", 3) == mixt.extract_component(3)
 
         try:
             ExtractDistribution(mixt, "Component", 0)
             assert False
-        except: # Bas distrubition index
+        except:  # Bas distrubition index
             assert True
 
     def test_convolution(self):
         convol = self.conv()
 
-        assert ExtractDistribution(convol, "Convolution") == \
-            convol.extract_convolution()
-        assert ExtractDistribution(convol, "Elementary", 1) == \
-            convol.extract_elementary(1)
-        assert ExtractDistribution(convol, "Elementary", 2) == \
-            convol.extract_elementary(2)
+        assert (
+            ExtractDistribution(convol, "Convolution") == convol.extract_convolution()
+        )
+        assert ExtractDistribution(
+            convol, "Elementary", 1
+        ) == convol.extract_elementary(1)
+        assert ExtractDistribution(
+            convol, "Elementary", 2
+        ) == convol.extract_elementary(2)
 
     def test_compound(self):
         comp = self.comp()
 
-        assert ExtractDistribution(comp, "Compound") == \
-            comp.extract_compound()
-        assert ExtractDistribution(comp, "Elementary") == \
-            comp.extract_elementary()
-        assert ExtractDistribution(comp, "Sum") == \
-            comp.extract_sum()
-
+        assert ExtractDistribution(comp, "Compound") == comp.extract_compound()
+        assert ExtractDistribution(comp, "Elementary") == comp.extract_elementary()
+        assert ExtractDistribution(comp, "Sum") == comp.extract_sum()
 
 
 class TestExtractHistogram:
-
     def __init__(self):
         pass
 
     def test_mixture(self):
-
         h = Histogram(get_shared_data("meri2.his"))
         mixt = h.estimate_DiscreteMixture(["B", "NB"])
 
-        assert ExtractHistogram(mixt, "Weight") == \
-            mixt.extract_weight()
-        assert ExtractHistogram(mixt, "Mixture") == \
-            mixt.extract_mixture()
-        assert ExtractHistogram(mixt, "Component", 1) == \
-            mixt.extract_component(1)
-        assert ExtractHistogram(mixt, "Component", 2) == \
-            mixt.extract_component(2)
+        assert ExtractHistogram(mixt, "Weight") == mixt.extract_weight()
+        assert ExtractHistogram(mixt, "Mixture") == mixt.extract_mixture()
+        assert ExtractHistogram(mixt, "Component", 1) == mixt.extract_component(1)
+        assert ExtractHistogram(mixt, "Component", 2) == mixt.extract_component(2)
 
         try:
             ExtractHistogram(mixt, "Component", 3)
             assert False
-        except: # Bas distrubition index
+        except:  # Bas distrubition index
             assert True
 
     def test_convolution(self):
@@ -359,7 +361,7 @@ class TestExtractHistogram:
         _histo = ExtractHistogram(convol_histo, "Convolution")
 
     def test_compound(self):
-        comp  = Compound("data/compound1.cd")
+        comp = Compound("data/compound1.cd")
         comp_histo = Simulate(comp, 200)
         _histo = ExtractHistogram(comp_histo, "Sum")
         _histo = ExtractHistogram(comp_histo, "Elementary")
@@ -372,14 +374,13 @@ class TestExtractHistogram:
 
 
 class TestMerge(data):
-
     def __init__(self):
         data.__init__(self)
 
     def test_merge(self):
-
-        mixt1 = Mixture(0.6, Distribution("B", 2, 18, 0.5),
-                        0.4, Distribution("NB", 10, 10, 0.5))
+        mixt1 = Mixture(
+            0.6, Distribution("B", 2, 18, 0.5), 0.4, Distribution("NB", 10, 10, 0.5)
+        )
 
         mixt_histo1 = Simulate(mixt1, 200)
 
@@ -392,26 +393,26 @@ class TestMerge(data):
         Plot(histo12)
 
     def test_merge_histo(self):
-        meri1 = Histogram(get_shared_data( "meri1.his"))
-        meri2 = Histogram(get_shared_data( "meri2.his"))
-        meri3 = Histogram(get_shared_data( "meri3.his"))
-        meri4 = Histogram(get_shared_data( "meri4.his"))
-        meri5 = Histogram(get_shared_data( "meri5.his"))
-       
+        meri1 = Histogram(get_shared_data("meri1.his"))
+        meri2 = Histogram(get_shared_data("meri2.his"))
+        meri3 = Histogram(get_shared_data("meri3.his"))
+        meri4 = Histogram(get_shared_data("meri4.his"))
+        meri5 = Histogram(get_shared_data("meri5.his"))
 
         meri = Merge(meri1, meri2, meri3, meri4, meri5)
         assert meri
         meri_bis = meri1.merge([meri2, meri3, meri4, meri5])
         assert meri_bis
-        assert str(meri)==str(meri_bis)
+        assert str(meri) == str(meri_bis)
         Plot(meri)
 
     def test_merge_vectors(self):
-
         v1 = self.int_vector_data()
-        b = [[2, 78, 45],
-             [6, 2, 122],
-             [3, 4, 31],]
+        b = [
+            [2, 78, 45],
+            [6, 2, 122],
+            [3, 4, 31],
+        ]
         v2 = Vectors(b)
 
         v = Merge(v1, v2)
@@ -419,23 +420,22 @@ class TestMerge(data):
 
         a = v1.merge([v2])
         b = v2.merge([v1])
-        assert str(a)==str(b)
+        assert str(a) == str(b)
 
-        assert str(a)==str(v)
+        assert str(a) == str(v)
         Plot(v)
 
 
 class TestMergeVariable(data):
-
     def __init__(self):
         data.__init__(self)
 
     def test_vector(self):
         v = self.int_vector_data()
 
-        v1 =  SelectVariable(v, 1, Mode="keep")
-        v2 =  SelectVariable(v, 2, Mode="Keep")
-        v3 =  SelectVariable(v, 3, Mode="Keep")
+        v1 = SelectVariable(v, 1, Mode="keep")
+        v2 = SelectVariable(v, 2, Mode="Keep")
+        v3 = SelectVariable(v, 3, Mode="Keep")
 
         merged = MergeVariable(v1, v2, v3)
         merged2 = v1.merge_variable([v2, v3], 1)
@@ -444,7 +444,6 @@ class TestMergeVariable(data):
                 assert merged[i][j] == v[i][j]
 
         assert str(merged) == str(merged2)
-
 
 
 if __name__ == "__main__":

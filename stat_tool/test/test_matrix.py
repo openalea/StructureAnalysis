@@ -1,22 +1,23 @@
 """vectors tests"""
+
 __version__ = "$Id$"
 
-from openalea.stat_tool.vectors import Vectors, VectorDistance
-from openalea.stat_tool.data_transform import SelectVariable
 from openalea.stat_tool.comparison import Compare
+from openalea.stat_tool.data_transform import SelectVariable
+from openalea.stat_tool.vectors import VectorDistance, Vectors
 
-from tools import interface
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import interface, runTestClass
+from .tools import robust_path as get_shared_data
+
 
 class Test(interface):
     """a simple unittest class for distance matrix"""
+
     def __init__(self):
-        interface.__init__(self,
-                           self.build_data(),
-                           None,
-                           Vectors)
+        interface.__init__(self, self.build_data(), None, Vectors)
         # init expect the 4th argument to be provided.
         # vectors is therefore passed as dummy structure
+
     def build_data(self):
         vec10 = Vectors(get_shared_data("chene_sessile.vec"))
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
@@ -54,7 +55,7 @@ class Test(interface):
 
     def _test_save(self):
         pass
-        #self.save()
+        # self.save()
 
     def test_plot_write(self):
         self.plot_write()
@@ -78,6 +79,5 @@ class Test(interface):
         pass
 
 
- 
 if __name__ == "__main__":
-    runTestClass(Test())  
+    runTestClass(Test())

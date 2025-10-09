@@ -17,11 +17,9 @@
  *
  *-----------------------------------------------------------------------------*/
 
-
-
-#include <stdio.h>
-#include "wrapper_util.h"
 #include "export_base.h"
+#include "wrapper_util.h"
+#include <stdio.h>
 
 #include "stat_tool/markovian.h"
 
@@ -33,77 +31,66 @@
 using namespace boost::python;
 using namespace stat_tool;
 
+class ChainWrap {};
 
+void class_chain() {
+  class_<Chain>("_Chain", "Chain")
+      .def(init<process_type, int, bool>())
+      .def(init<process_type, int, int, bool>())
+      .def(init<optional<process_type, int, bool>>())
 
-class ChainWrap
-{
+      .def(self_ns::str(self)) //__str__
 
+      .add_property("type", &Chain::type, "returns type")
+      .add_property("nb_state", &Chain::nb_state, "returns nb_state")
+      .add_property("nb_row", &Chain::nb_row, "returns nb_row")
+      .add_property("nb_component", &Chain::nb_component,
+                    "returns nb_component")
 
-};
+      /*
+       *     .def("get_component_nb_state", &Chain::component_nb_state,
+       "component nb state") .def("get_state_type", &Chain::get_state_type, "get
+       state type") .def("get_initial", &Chain::get_initial, "get initial")
+      */
+      //    .def()    ;
+      ;
 
+  /*
+      void init(bool left_right , double self_transition);
 
-void class_chain()
-{
-    class_< Chain >("_Chain", "Chain")
-    .def(init<process_type, int , bool>())
-    .def(init<process_type, int, int , bool>())
-    .def(init< optional<process_type, int, bool> >())
+      double likelihood_computation(const Chain_data &chain_data , bool
+     initial_flag = true) const; void chi2_fit(const Chain_data &chain_data ,
+     Test &test) const;
 
-    .def(self_ns::str(self)) //__str__
+      bool **accessibility;   // matrice d'accessibilite des etats
+      int *component_nb_state;  // nombre d'etats par classe
+      int **component;        // classes
+      char *state_type;       // types des etats ('r' : recurrent,
+                              // 't' : transitoire, 'a' : absorbant)
+      double *initial;        // probabilites initiales
+      double *cumul_initial;  // fonction de repartition correspondant
+                              // au probabilites initiales
+      double **transition;    // matrice des probabilites de transition
+      double **cumul_transition;  // fonctions de repartition correspondant aux
+     lignes
+                                  // de la matrice des probabilites de
+     transition
 
-    .add_property("type", &Chain::type, "returns type")
-    .add_property("nb_state", &Chain::nb_state, "returns nb_state")
-    .add_property("nb_row", &Chain::nb_row, "returns nb_row")
-    .add_property("nb_component", &Chain::nb_component, "returns nb_component")
+       std::ostream& ascii_print(std::ostream &os , bool file_flag = false)
+     const; std::ostream& spreadsheet_print(std::ostream &os) const; void
+     create_cumul(); void cumul_computation(); void remove_cumul(); void
+     log_computation();
 
-/*
- *     .def("get_component_nb_state", &Chain::component_nb_state, "component nb state")
-    .def("get_state_type", &Chain::get_state_type, "get state type")
-    .def("get_initial", &Chain::get_initial, "get initial")
-*/
-//    .def()    ;
-    ;
+      bool** logic_transition_computation() const;
+      bool connex_component_research(StatError &error , bool **ilogic_transition
+     = 0) const; void graph_accessibility_computation(bool **ilogic_transition);
+      void probability_accessibility_computation();
+      void component_computation(bool **ilogic_transition = 0);
 
-/*
-    void init(bool left_right , double self_transition);
+      void thresholding(double min_probability, bool semi_markov);
 
-    double likelihood_computation(const Chain_data &chain_data , bool initial_flag = true) const;
-    void chi2_fit(const Chain_data &chain_data , Test &test) const;
+      int nb_parameter_computation(double min_probability = 0.) const;
+      double chi2_value_computation(const Chain_data &chain_data) const;
 
-    bool **accessibility;   // matrice d'accessibilite des etats
-    int *component_nb_state;  // nombre d'etats par classe
-    int **component;        // classes
-    char *state_type;       // types des etats ('r' : recurrent,
-                            // 't' : transitoire, 'a' : absorbant)
-    double *initial;        // probabilites initiales
-    double *cumul_initial;  // fonction de repartition correspondant
-                            // au probabilites initiales
-    double **transition;    // matrice des probabilites de transition
-    double **cumul_transition;  // fonctions de repartition correspondant aux lignes
-                                // de la matrice des probabilites de transition
-
-     std::ostream& ascii_print(std::ostream &os , bool file_flag = false) const;
-    std::ostream& spreadsheet_print(std::ostream &os) const;
-    void create_cumul();
-    void cumul_computation();
-    void remove_cumul();
-    void log_computation();
-
-    bool** logic_transition_computation() const;
-    bool connex_component_research(StatError &error , bool **ilogic_transition = 0) const;
-    void graph_accessibility_computation(bool **ilogic_transition);
-    void probability_accessibility_computation();
-    void component_computation(bool **ilogic_transition = 0);
-
-    void thresholding(double min_probability, bool semi_markov);
-
-    int nb_parameter_computation(double min_probability = 0.) const;
-    double chi2_value_computation(const Chain_data &chain_data) const;
-
-*/
-
-
-
+  */
 }
-
-

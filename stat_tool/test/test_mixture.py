@@ -1,24 +1,23 @@
 """mixture tests"""
+
 __version__ = "$Id$"
 
 
-from openalea.stat_tool.mixture import Mixture
 from openalea.stat_tool.data_transform import ExtractDistribution
-from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.distribution import Binomial
 from openalea.stat_tool.estimate import Estimate
+from openalea.stat_tool.histogram import Histogram
+from openalea.stat_tool.mixture import Mixture
 
-from tools import interface
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import interface, runTestClass
+from .tools import robust_path as get_shared_data
+
 
 class Test(interface):
     """a simple unittest class"""
 
     def __init__(self):
-        interface.__init__(self,
-                           self.build_data(),
-                           "data/mixture1.mixt",
-                           Mixture)
+        interface.__init__(self, self.build_data(), "data/mixture1.mixt", Mixture)
 
     def build_data(self):
         d1 = Binomial(0, 12, 0.1)
@@ -81,7 +80,6 @@ class Test(interface):
         est = Estimate(sim, "Mixture", "B", "B", "B")
         est.plot()
 
-
     def test_extract(self):
         """run and test the extract methods"""
 
@@ -101,7 +99,7 @@ class Test(interface):
     def test_extract_data(self):
         """run and test the extract_data methods"""
 
-        h = Histogram(str(get_shared_data( "meri2.his")))
+        h = Histogram(str(get_shared_data("meri2.his")))
         m = h.estimate_DiscreteMixture("B", "NB")
 
         d = m.extract_data()
@@ -112,7 +110,5 @@ class Test(interface):
         _res = s.truncate(4)
 
 
-
 if __name__ == "__main__":
     runTestClass(Test())
-
