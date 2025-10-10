@@ -17,7 +17,6 @@ develop-eggs
 lib
 lib64
 MANIFEST
-CMakeFiles
 **/__pycache__
 **/vpstat_tool
 

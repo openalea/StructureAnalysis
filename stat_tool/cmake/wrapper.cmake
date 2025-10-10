@@ -14,13 +14,6 @@ function(wrapper_link_boost libwrapname)
     target_compile_definitions(${libwrapname} PRIVATE BOOST_ALL_NO_LIB)
     target_link_libraries(${libwrapname} ${Boost_LIBRARIES})
 endfunction()
-## function(wrapper_link_boost libwrapname)
-##     # Disable Boost Auto-Link
-##     target_compile_definitions(${libwrapname} PRIVATE BOOST_ALL_NO_LIB)
-## 
-##     target_link_libraries(${libwrapname} Boost::${boost_python} Boost::dynamic_linking Boost::disable_autolinking)
-## 
-## endfunction()
 
 function(wrapper_install libwrapname)
     set_target_properties(${libwrapname} PROPERTIES PREFIX "")
