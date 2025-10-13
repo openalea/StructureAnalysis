@@ -33,11 +33,11 @@ class _AddAbsorbingRun():
         sequence_length = -1
         run_length = 6
         
-        boost = seq.add_absorbing_run(sequence_length, run_length)
+        boost = seq.add_absorbing_run(sequence_length, seq.max_length+run_length)
         module1 = AddAbsorbingRun(seq, 
                                   SequenceLength=sequence_length,
-                                  RunLength=run_length)
-        module2 = AddAbsorbingRun(seq, RunLength=run_length)
+                                  RunLength=seq.max_length+run_length)
+        module2 = AddAbsorbingRun(seq, RunLength=seq.max_length+run_length)
 
         assert str(module1)==str(boost)
         assert str(module2)==str(boost)

@@ -6,7 +6,7 @@ import os
 from openalea.stat_tool import Simulate
 from openalea.stat_tool.plot import DISABLE_PLOT
 from openalea.stat_tool.output import Display, Save
-DISABLE_PLOT=True
+DISABLE_PLOT=True # Suggestion: set DISABLE_PLOT to True only if matplotlib neither gnuplot are available.
 
 from pathlib import Path
 from openalea.sequence_analysis import get_shared_data, get_shared_data_path

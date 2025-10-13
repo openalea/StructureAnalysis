@@ -36,8 +36,9 @@
 __version__ = "$Id$"
 
 
-from openalea.stat_tool.plot import DISABLE_PLOT
-DISABLE_PLOT = False
+from tools import DISABLE_PLOT
+# DISABLE_PLOT = False 
+# Commented for continuous integration
 
 from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.stat_tool.histogram import Histogram
