@@ -1,7 +1,6 @@
 [build-system]
 requires = [
     "scikit-build-core",
-    "setuptools",
     "setuptools_scm",
 ]
 build-backend = "scikit_build_core.build"
