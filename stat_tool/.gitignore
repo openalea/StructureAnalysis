@@ -19,6 +19,7 @@ lib64
 MANIFEST
 **/__pycache__
 **/vpstat_tool
+CMakeFiles
 
 # Installer logs
 pip-log.txt
