@@ -14,7 +14,7 @@ include-package-data = false # force explicit declaration of data (disable autom
 # enable dynamic version based on git tags
 [tool.setuptools_scm]
 root = ".."
-relative_to: "__file__"
+relative_to = "__file__"
 
 [tool.scikit-build]
 build-dir = "./build/"
