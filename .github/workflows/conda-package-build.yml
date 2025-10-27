@@ -22,5 +22,4 @@ jobs:
     with:
       conda-directory: "./stat_tool/conda"
     secrets:
-      conda-directory: "./stat_tool/conda"
       anaconda_token: ${{ secrets.ANACONDA_TOKEN }}
