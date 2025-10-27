@@ -20,9 +20,17 @@ from .plot import *
 from .regression import *
 from .simulate import *
 from .vectors import *
+from importlib.metadata import version, PackageNotFoundError
+
+try:
+    __version__ = version("openalea.stat_tool")
+except PackageNotFoundError:
+    # package is not installed
+    pass
 
 if sys.platform.startswith("win"):
     os.add_dll_directory(str(Path(__file__).parent.parent / "lib"))
+
 
 def get_shared_data(file):
     import openalea.stat_tool

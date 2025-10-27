@@ -5,11 +5,6 @@ requires = [
 ]
 build-backend = "scikit_build_core.build"
 
-# where your source lies if you followed src layout
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["openalea.*"]
-
 [tool.setuptools]
 include-package-data = false # force explicit declaration of data (disable automatic inclusion)
 
@@ -18,7 +13,7 @@ include-package-data = false # force explicit declaration of data (disable autom
 
 # enable dynamic version based on git tags
 [tool.setuptools_scm]
-root = ".."
+##root = ".."
 
 [tool.scikit-build]
 build-dir = "./build/"
@@ -27,10 +22,8 @@ logging.level = "WARNING"
 build.verbose = true
 editable.rebuild = true
 experimental = true
-## install.components = ["python", "headers", "library"]
 
 [tool.scikit-build.cmake]
-##args = ["-DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX", "-DCMAKE_INSTALL_INCLUDEDIR=include", "-DCMAKE_INSTALL_LIBDIR=lib"]
 build-type = "Release"
 source-dir = "."
 
