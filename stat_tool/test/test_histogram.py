@@ -1,24 +1,26 @@
 """histogram tests"""
+
 __version__ = "$Id$"
 
-from openalea.stat_tool.distribution import ToHistogram, Binomial
-from openalea.stat_tool.distribution import ToDistribution
+from openalea.stat_tool.distribution import (
+    Binomial,
+    Distribution,
+    ToDistribution,
+    ToHistogram,
+)
 from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.distribution import Distribution
 
-from tools import interface
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import interface, runTestClass
+from .tools import robust_path as get_shared_data
 
 
 class Test(interface):
-    """a simple unittest class
+    """a simple unittest class"""
 
-    """
     def __init__(self):
-        interface.__init__(self,
-                           self.build_data(),
-                           str(get_shared_data("peup1.his")),
-                           Histogram)
+        interface.__init__(
+            self, self.build_data(), str(get_shared_data("peup1.his")), Histogram
+        )
 
     def build_data(self):
         v = Histogram([0, 1, 2, 3])
@@ -93,12 +95,12 @@ class Test(interface):
         assert e
 
     def test_survival_ascii_write(self):
-        """ test display"""
+        """test display"""
         h = self.data
         h.survival_ascii_write()
 
     def test_container(self):
-        """ container / iterator"""
+        """container / iterator"""
         h = Histogram(str(get_shared_data("meri1.his")))
 
         assert h[0] == 0
@@ -124,6 +126,7 @@ class Test(interface):
 def test_extract_vec():
     """Extract histogram from Vectors"""
     import openalea.stat_tool as stat_tool
+
     vs = stat_tool.Vectors("data/cvectors.vec")
     h = vs.extract(4)
     assert h
@@ -134,4 +137,4 @@ if __name__ == "__main__":
     runTestClass(Test())
     # test_extract_vec()
 
-#test_extract_vec()
+# test_extract_vec()

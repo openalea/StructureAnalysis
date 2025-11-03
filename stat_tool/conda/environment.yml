@@ -1,0 +1,12 @@
+name: stat_tool_dev
+channels:
+  - conda-forge
+  - openalea3
+dependencies:
+  - python
+  - pip
+  - boost
+  - matplotlib-base
+  - pip:
+      - -e '..[test,dev,doc]'
+

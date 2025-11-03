@@ -3,32 +3,32 @@
 :Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
+
 __version__ = "$Id$"
 
 
 from openalea.stat_tool.vectors import VectorDistance
 
-from tools import interface
-from tools import runTestClass
+from .tools import interface, runTestClass
 
 
 class Test(interface):
     """a simple unittest class"""
 
     def __init__(self):
-        interface.__init__(self,
-                           self.build_data(),
-                           "data/vector_distance.vd",
-                           VectorDistance)
+        interface.__init__(
+            self, self.build_data(), "data/vector_distance.vd", VectorDistance
+        )
+
     def build_data(self):
-        v = VectorDistance('N', 'O', 'S')
+        v = VectorDistance("N", "O", "S")
         assert v.get_distance_type() == 0
         assert v
         return v
 
     def test_empty(self):
         """skip test_empty
-        because there is an empty constructor in VectorDistance; """
+        because there is an empty constructor in VectorDistance;"""
         pass
 
     def test_constructor_from_file(self):
@@ -60,14 +60,14 @@ class Test(interface):
         try:
             self.file_ascii_write()
         except Exception as error:
-            pass 
+            pass
             print(error)
 
     def test_spreadsheet_write(self):
-        try:        
+        try:
             self.spreadsheet_write()
         except Exception as error:
-            pass 
+            pass
             print(error)
 
     def test_simulate(self):
@@ -80,32 +80,32 @@ class Test(interface):
         pass
 
     def test_vector_distance(self):
-        """ test vector distance constructors"""
-        v = VectorDistance('NUMERIC', 'ORDINAL', 'SYMBOLIC')
+        """test vector distance constructors"""
+        v = VectorDistance("NUMERIC", "ORDINAL", "SYMBOLIC")
         assert v and len(v) == 3
 
-        v = VectorDistance(2.3, 'N', 4, 'O', 6, 'S')
+        v = VectorDistance(2.3, "N", 4, "O", 6, "S")
         assert v and len(v) == 3
 
         # wrapper should work. needs python interface ?
-        #v = VectorDistance( (2.3, 'N'),  (4, 'O'), (6, 'S'))
-        #assert v and len(v) == 3
+        # v = VectorDistance( (2.3, 'N'),  (4, 'O'), (6, 'S'))
+        # assert v and len(v) == 3
 
-        v = VectorDistance(2.3, 'N', 4, 'O', 6, 'S', Distance="QUADRATIC")
+        v = VectorDistance(2.3, "N", 4, "O", 6, "S", Distance="QUADRATIC")
         assert v and len(v) == 3
 
-        v = VectorDistance('NUMERIC', 'ORDINAL', 'SYMBOLIC',
-                           Distance="QUADRATIC")
+        v = VectorDistance("NUMERIC", "ORDINAL", "SYMBOLIC", Distance="QUADRATIC")
         assert v and len(v) == 3
 
-        assert str(VectorDistance('N', 'O', 'S'))
+        assert str(VectorDistance("N", "O", "S"))
 
     def test_constructor_failure(self):
         try:
-            v = VectorDistance('N', 'DUMMY')
+            v = VectorDistance("N", "DUMMY")
             assert False
         except:
             assert True
+
 
 if __name__ == "__main__":
     runTestClass(Test())

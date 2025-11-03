@@ -3,52 +3,51 @@
 :Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
+
 __version__ = "$Id$"
 
 
-from openalea.stat_tool import distribution
-from openalea.stat_tool.distribution import Binomial
-from openalea.stat_tool.data_transform import Shift, ExtractDistribution
-from openalea.stat_tool.histogram import Histogram
-
-from openalea.stat_tool.compound import Compound
-from openalea.stat_tool.simulate import Simulate
-from openalea.stat_tool import  _stat_tool
-from openalea.stat_tool.enums import distribution_identifier_type, compound_type
-
-from openalea.stat_tool.estimate import Estimate, likelihood_penalty_type
-
-from tools import runTestClass, robust_path as get_shared_data
 from openalea.stat_tool._stat_tool import CUMUL_THRESHOLD
 
+from openalea.stat_tool import _stat_tool, distribution
+from openalea.stat_tool.compound import Compound
+from openalea.stat_tool.data_transform import ExtractDistribution, Shift
+from openalea.stat_tool.distribution import Binomial
+from openalea.stat_tool.enums import compound_type, distribution_identifier_type
+from openalea.stat_tool.estimate import Estimate, likelihood_penalty_type
+from openalea.stat_tool.histogram import Histogram
+from openalea.stat_tool.simulate import Simulate
 
-class Test():
+from .tools import robust_path as get_shared_data
+from .tools import runTestClass
 
+
+class Test:
     def __init__(self):
         pass
 
     def test_nonparametric(self):
-        epsilon = 1. - CUMUL_THRESHOLD
+        epsilon = 1.0 - CUMUL_THRESHOLD
         h = Histogram(get_shared_data("meri1.his"))
-        e =  h.estimate_nonparametric()
+        e = h.estimate_nonparametric()
         # find likelihood value
         strh = str(h)
         word = "information:"
         i = strh.find(word)
-        j = strh.find("(",i)
-        val = float(strh[i+len(word):j])
+        j = strh.find("(", i)
+        val = float(strh[i + len(word) : j])
         assert e
         assert abs(e.likelihood() - val) < epsilon
 
     def test_nb(self):
         """negativebinomial"""
         h = Histogram(get_shared_data("peup2.his"))
-        assert h.estimate_parametric('NB')
+        assert h.estimate_parametric("NB")
 
     def test_binomial(self):
         """binomial distribution"""
         h = Histogram(get_shared_data("meri5.his"))
-        assert h.estimate_parametric('B')
+        assert h.estimate_parametric("B")
 
     def test_poisson(self):
         """poisson distribution
@@ -58,56 +57,60 @@ class Test():
         p = distribution.Poisson(0, 10)
         h = p.simulate(1000)
 
-        assert h.estimate_parametric('P')
+        assert h.estimate_parametric("P")
 
     def test_binomial_estimation(self):
         """estimate binomial distribution"""
         from openalea.stat_tool.enums import distribution_identifier_type as dist_type
+
         p = distribution.Binomial(2, 12, 0.7)
         h = p.simulate(1000)
-        d1 = h.estimate_parametric('B')
-        d2 = h.default_parametric_estimation(dist_type['B'])
+        d1 = h.estimate_parametric("B")
+        d2 = h.default_parametric_estimation(dist_type["B"])
         assert d1
         assert d2
-        return(d1, d2)
+        return (d1, d2)
 
     def test_uniform_estimation(self):
         """Estimate Uniform distribution"""
         from openalea.stat_tool.enums import distribution_identifier_type as dist_type
+
         p = distribution.Uniform(2, 12)
         h = p.simulate(1000)
-        d1 = h.estimate_parametric('U')
-        d2 = h.default_parametric_estimation(dist_type['U'])
+        d1 = h.estimate_parametric("U")
+        d2 = h.default_parametric_estimation(dist_type["U"])
         assert d1
         assert d2
-        return(d1, d2)
+        return (d1, d2)
 
     def test_Poisson_estimation(self):
         """Estimate Binomial distribution"""
         from openalea.stat_tool.enums import distribution_identifier_type as dist_type
+
         p = distribution.Poisson(0, 10)
         h = p.simulate(1000)
-        d1 = h.estimate_parametric('P')
-        d2 = h.default_parametric_estimation(dist_type['P'])
+        d1 = h.estimate_parametric("P")
+        d2 = h.default_parametric_estimation(dist_type["P"])
         assert d1
         assert d2
-        return(d1, d2)
+        return (d1, d2)
 
     def test_negative_binomial_estimation(self):
         """Estimate Negative Binomial distribution"""
         from openalea.stat_tool.enums import distribution_identifier_type as dist_type
+
         p = distribution.NegativeBinomial(2, 4.5, 0.6)
         h = p.simulate(1000)
-        d1 = h.estimate_parametric('NB')
-        d2 = h.default_parametric_estimation(dist_type['NB'])
+        d1 = h.estimate_parametric("NB")
+        d2 = h.default_parametric_estimation(dist_type["NB"])
         assert d1
         assert d2
-        return(d1, d2)
+        return (d1, d2)
 
     def test_mixture_1(self):
         distributions = ["B", "NB", "NB", "NB"]
-        h = Histogram(get_shared_data( "peup2.his"))
-        m1 =  h.estimate_DiscreteMixture(distributions, NbComponent="Estimated")
+        h = Histogram(get_shared_data("peup2.his"))
+        m1 = h.estimate_DiscreteMixture(distributions, NbComponent="Estimated")
         assert m1
 
         types = []
@@ -115,33 +118,37 @@ class Test():
             temp = distribution_identifier_type[d]
             types.append(temp)
 
-        c = h.discrete_mixture_estimation2(types, 0, True, True,
-                                           likelihood_penalty_type['AIC'])
+        c = h.discrete_mixture_estimation2(
+            types, 0, True, True, likelihood_penalty_type["AIC"]
+        )
 
         # slight variations in quantiles
-        assert str(c)[0:1336]==str(m1)[0:1336]
+        assert str(c)[0:1336] == str(m1)[0:1336]
 
     def test_mixture_2(self):
-        h = Histogram(get_shared_data( "peup2.his"))
+        h = Histogram(get_shared_data("peup2.his"))
         m2 = h.estimate_DiscreteMixture([Binomial(0, 10, 0.5), "NB"])
         assert m2
 
     def test_convolution(self):
-
         elementary = Histogram("data/nothofagus_antarctica_bud_2.his")
         total = Histogram("data/nothofagus_antarctica_shoot_2.his")
 
-        convol1 = Estimate(Shift(total, 1), "CONVOLUTION",
-                           Estimate(elementary, "NP"),
-                           NbIteration=100,
-                           Estimator="PenalizedLikelihood",
-                           Weight=0.5)
+        convol1 = Estimate(
+            Shift(total, 1),
+            "CONVOLUTION",
+            Estimate(elementary, "NP"),
+            NbIteration=100,
+            Estimator="PenalizedLikelihood",
+            Weight=0.5,
+        )
 
         convol2 = total.shift(1).estimate_convolution(
-                                    elementary.estimate_nonparametric(),
-                                    NbIteration=100,
-                                    Estimator="PenalizedLikelihood",
-                                    Weight=0.5)
+            elementary.estimate_nonparametric(),
+            NbIteration=100,
+            Estimator="PenalizedLikelihood",
+            Weight=0.5,
+        )
 
         assert convol1 and convol2
         assert convol1 == convol2
@@ -151,11 +158,13 @@ class Test():
         cdist1 = Compound("data/compound1.cd")
         chisto1 = Simulate(cdist1, 200)
 
-        cdist2 = Estimate(chisto1, "COMPOUND",
-                      ExtractDistribution(cdist1, "Sum"),
-                      "Sum",
-                      InitialDistribution=\
-                        ExtractDistribution(cdist1, "Elementary"))
+        cdist2 = Estimate(
+            chisto1,
+            "COMPOUND",
+            ExtractDistribution(cdist1, "Sum"),
+            "Sum",
+            InitialDistribution=ExtractDistribution(cdist1, "Elementary"),
+        )
 
         # If we call the method directly, we need to provide
         # the default values and perform a conversion.
@@ -165,16 +174,17 @@ class Test():
         # must be reversed.
 
         cdist3 = chisto1.compound_estimation1(
-                    ExtractDistribution(cdist1, "Elementary"),
-                    ExtractDistribution(cdist1, "Sum"),
-                    compound_type['Sum'], _stat_tool.LIKELIHOOD, -1, -1.,
-                    _stat_tool.SECOND_DIFFERENCE,
-                    _stat_tool.ZERO)
+            ExtractDistribution(cdist1, "Elementary"),
+            ExtractDistribution(cdist1, "Sum"),
+            compound_type["Sum"],
+            _stat_tool.LIKELIHOOD,
+            -1,
+            -1.0,
+            _stat_tool.SECOND_DIFFERENCE,
+            _stat_tool.ZERO,
+        )
         assert str(cdist2) == str(cdist3)
-
-
 
 
 if __name__ == "__main__":
     runTestClass(Test())
-

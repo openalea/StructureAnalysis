@@ -1,0 +1,22 @@
+value	1995	1996	1997
+sample size	46	46	46
+mean	2.08696	1.19565	1.63043
+variance	0.170048	0.205314	0.282609
+standard deviation	0.412369	0.453116	0.53161
+mean absolute deviation	0.202268	0.323251	0.493384
+coefficient of concentration	0.0584239	0.137945	0.15913
+coefficient of skewness	2.64171	2.3056	-0.08945
+coefficient of kurtosis	9.96979	4.16166	-1.08981
+
+	frequency distribution 1995	frequency distribution 1996	frequency distribution 1997	cumulative distribution 1995 function	cumulative distribution 1996 function	cumulative distribution 1997 function
+0	0	0	0	0	0	0
+1	1	38	18	0.0217391	0.826087	0.391304
+2	41	7	27	0.913043	0.978261	0.978261
+3	3	1	1	0.978261	1	1
+4	1			1		
+
+Kruskal-Wallis test
+chi-square test	2	degrees of freedom
+chi-square value	58.1932		critical probability	2.30942e-13
+reference chi-square value	5.99146		reference critical probability	0.05
+reference chi-square value	9.21034		reference critical probability	0.01

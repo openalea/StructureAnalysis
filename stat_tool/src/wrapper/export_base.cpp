@@ -322,7 +322,7 @@ void class_constant()
 
   scope().attr("MIN_PROBABILITY") = MIN_PROBABILITY;
   scope().attr("ORDER") = ORDER;
-  
+
   // Vectors
 
   enum_<stat_tool::wrap_util::UniqueInt<2, 18> >("moving_average_method")
@@ -331,7 +331,7 @@ void class_constant()
   .export_values()
   ;
 
-  
+
   enum_<stat_tool::wrap_util::UniqueInt<4, 19> >("OutputFormat")
   .value("ASCII", ASCII)
   .value("SPREADSHEET", SPREADSHEET)
@@ -339,7 +339,7 @@ void class_constant()
   .value("PLOT", PLOT)
   .export_values()
   ;
-  
+
   // compound
   enum_<stat_tool::wrap_util::UniqueInt<2, 20> >("CompoundType")
   .value("ELEMENTARY", ELEMENTARY)
