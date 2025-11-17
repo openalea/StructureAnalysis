@@ -1,15 +1,18 @@
 """vectors tests"""
+
 __version__ = "$Id$"
 
-from openalea.stat_tool.vectors import Vectors
-from openalea.stat_tool.vectors import VarianceAnalysis
-from openalea.stat_tool.vectors import ContingencyTable
-from openalea.stat_tool.vectors import ComputeRankCorrelation
-from openalea.stat_tool.vectors import OutputFormat
 from openalea.stat_tool.enums import variance_type
+from openalea.stat_tool.vectors import (
+    ComputeRankCorrelation,
+    ContingencyTable,
+    OutputFormat,
+    VarianceAnalysis,
+    Vectors,
+)
 
-from tools import interface
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import interface, runTestClass
+from .tools import robust_path as get_shared_data
 
 
 class Test(interface):
@@ -22,10 +25,7 @@ class Test(interface):
     """
 
     def __init__(self):
-        interface.__init__(self,
-                           self.build_data(),
-                           "data/vectors.vec",
-                           Vectors)
+        interface.__init__(self, self.build_data(), "data/vectors.vec", Vectors)
 
         self.vec10 = self.build_data_2()
 
@@ -45,16 +45,14 @@ class Test(interface):
         data_file = "data/cluster_vectors.vec"
         v1 = Vectors(data_file)
         v2 = _Vectors(data_file)
-        assert(str(v1)==str(v2))
-    
+        assert str(v1) == str(v2)
+
     def test_identifiers(self):
         v = Vectors([[1, 2, 3], [4, 5, 6], [7, 8, 9]], Identifiers=[1, 2, 4])
         assert v.get_identifiers() == [1, 2, 4]
 
     def test_types(self):
-
-        v2 = Vectors([[1,2.,3.],[1,5.,1.]], Identifiers=[1,2])
-
+        v2 = Vectors([[1, 2.0, 3.0], [1, 5.0, 1.0]], Identifiers=[1, 2])
 
     def test_constructor_from_file(self):
         self.constructor_from_file()
@@ -63,14 +61,13 @@ class Test(interface):
         self.constructor_from_file_failure()
 
     def test_constructor_one_variable(self):
-
-        v = Vectors([1,2,3])
+        v = Vectors([1, 2, 3])
         assert v.nb_variable == 3
 
     def test_constructor_identifiers_failure(self):
         try:
             # should be Vectors([[1,2,3], Identifiers=[1])
-            v = Vectors([1,2,3], Identifiers=[1,2])
+            v = Vectors([1, 2, 3], Identifiers=[1, 2])
             assert False
         except ValueError:
             assert True
@@ -105,8 +102,6 @@ class Test(interface):
             assert False
         except:
             assert True
-
-
 
     def test_len(self):
         v = self.data
@@ -145,7 +140,7 @@ class Test(interface):
 
     def test_vectors_container(self):
         """vector container : len"""
-        v = Vectors([[0, 1, 2, 3], [4, 5, 6 , 7]])
+        v = Vectors([[0, 1, 2, 3], [4, 5, 6, 7]])
         assert len(v) == 2
 
         for i in v:
@@ -159,9 +154,10 @@ class Test(interface):
         # todo: finalise and make method variance_analysis robust.
         vec10 = self.vec10
         va = VarianceAnalysis(vec10, 1, 4, "O")
-        assert vec10.variance_analysis(1, 4, 1, "whatever", variance_type['O']) == \
-            str(va)
-    
+        assert vec10.variance_analysis(1, 4, 1, "whatever", variance_type["O"]) == str(
+            va
+        )
+
         try:
             va = VarianceAnalysis(vec10, 1, 4, "DUMMY")
             assert False
@@ -180,7 +176,8 @@ class Test(interface):
     def test_rank_computation(self):
         vec10 = self.vec10
         ComputeRankCorrelation(vec10, Type="Kendall", FileName="test")
-        #ComputeRankCorrelation(vec10, Type="Spearman", FileName="test")
+        # ComputeRankCorrelation(vec10, Type="Spearman", FileName="test")
+
 
 if __name__ == "__main__":
     test = Test()

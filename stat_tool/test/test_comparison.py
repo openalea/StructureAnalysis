@@ -7,27 +7,31 @@ vector done
 
 .. todo:: sequence and markov
 """
+
 __version__ = "$Id$"
 
 
 import os
 
-from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.vectors import Vectors, VectorDistance
-from openalea.stat_tool.data_transform import SelectVariable
 from openalea.stat_tool.comparison import Compare, ComparisonTest
+from openalea.stat_tool.data_transform import SelectVariable
+from openalea.stat_tool.histogram import Histogram
+from openalea.stat_tool.vectors import VectorDistance, Vectors
 
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import robust_path as get_shared_data
+from .tools import runTestClass
 
-#from openalea.stat_tool import get_shared_data
+# from openalea.stat_tool import get_shared_data
 
-class TestHisto():
+
+class TestHisto:
     """a simple unittest class"""
 
     def __init__(self):
         self.meri1 = Histogram(get_shared_data("meri1.his"))
         self.meri2 = Histogram(get_shared_data("meri1.his"))
         self.meri3 = Histogram(get_shared_data("meri1.his"))
+
     def test_comparisontest(self):
         meri1 = self.meri1
         meri2 = self.meri2
@@ -42,13 +46,13 @@ class TestHisto():
         meri2 = self.meri2
         meri3 = self.meri3
 
-        c1 = Compare(meri1, meri2, meri3, 'N')
-        c2 = Compare(meri1, meri2, meri3, 'O')
-        c3 = Compare(meri1, meri2, meri3, 'S')
+        c1 = Compare(meri1, meri2, meri3, "N")
+        c2 = Compare(meri1, meri2, meri3, "O")
+        c3 = Compare(meri1, meri2, meri3, "S")
 
-        c1_long = Compare(meri1, meri2, meri3, 'NUMERIC')
-        c2_long = Compare(meri1, meri2, meri3, 'ORDINAL')
-        c3_long = Compare(meri1, meri2, meri3, 'SYMBOLIC')
+        c1_long = Compare(meri1, meri2, meri3, "NUMERIC")
+        c2_long = Compare(meri1, meri2, meri3, "ORDINAL")
+        c3_long = Compare(meri1, meri2, meri3, "SYMBOLIC")
 
         assert c1 == c1_long
         assert c2 == c2_long
@@ -93,38 +97,35 @@ class TestHisto():
         meri2 = self.meri2
         meri3 = self.meri3
 
-        _c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat')
-        os.remove('result.dat')
-        _c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat', \
-                     Format='ASCII')
-        os.remove('result.dat')
-        _c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat', \
-                     Format='SpreadSheet')
-        os.remove('result.dat')
+        _c1 = Compare(meri1, meri2, meri3, "N", Filename="result.dat")
+        os.remove("result.dat")
+        _c1 = Compare(meri1, meri2, meri3, "N", Filename="result.dat", Format="ASCII")
+        os.remove("result.dat")
+        _c1 = Compare(
+            meri1, meri2, meri3, "N", Filename="result.dat", Format="SpreadSheet"
+        )
+        os.remove("result.dat")
         try:
-            _c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat', \
-                         Format='badname')
+            _c1 = Compare(
+                meri1, meri2, meri3, "N", Filename="result.dat", Format="badname"
+            )
             assert False
         except ValueError:
             assert True
 
 
-class TestVectors():
-
+class TestVectors:
     def __init__(self):
         pass
 
     def test_compare_vectors(self):
-
         vec10 = Vectors(get_shared_data("chene_sessile.vec"))
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
         assert vec15
 
         matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
         assert matrix10
-        assert str(vec15.compare(VectorDistance("N", "N", "N"),
-                                 True)) == str(matrix10)
-
+        assert str(vec15.compare(VectorDistance("N", "N", "N"), True)) == str(matrix10)
 
 
 if __name__ == "__main__":

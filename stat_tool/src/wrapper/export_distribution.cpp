@@ -243,7 +243,7 @@ class DiscreteParametricWrap
 
 public:
 
-    static int get_ident(const DiscreteParametric& Model) 
+    static int get_ident(const DiscreteParametric& Model)
     { return int(Model.ident); }
 
 };
@@ -337,17 +337,17 @@ public:
     } else
     	return boost::shared_ptr<DiscreteParametricModel>(model);
   }
-  
+
   static boost::shared_ptr<DiscreteParametricModel> parametric_model_from_ident(int iident = I_DEFAULT ,
           int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
           double iparameter = D_DEFAULT, double iprobability = D_DEFAULT, double cumul_threshold = CUMUL_THRESHOLD)
   {
     DiscreteParametricModel *model = NULL;
     discrete_parametric ident = CATEGORICAL;
-    
+
     if (iident != I_DEFAULT)
        ident = discrete_parametric(iident);
-    
+
     model = new DiscreteParametricModel(ident, iinf_bound, isup_bound,
                                         iparameter, iprobability, cumul_threshold);
 
@@ -359,7 +359,7 @@ public:
 	} else
 		return boost::shared_ptr<DiscreteParametricModel>(model);
   }
-  
+
   static boost::shared_ptr<DiscreteParametricModel> parametric_model_from_ident2(int iident = I_DEFAULT ,
           int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
           double iparameter = D_DEFAULT, double iprobability = D_DEFAULT)
@@ -370,7 +370,7 @@ public:
 
   }
 
-  
+
   // simulation method wrapping
   WRAP_METHOD1(DiscreteParametricModel, simulation, DiscreteDistributionData, int);
 

@@ -1,29 +1,27 @@
-""" Regression tests"""
+"""Regression tests"""
+
 __version__ = "$Id$"
 
 
-from openalea.stat_tool.regression import Regression
 from openalea.stat_tool._stat_tool import _RegressionKernel as RegressionKernel
-from openalea.stat_tool.vectors import Vectors
+
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.distribution import Binomial
+from openalea.stat_tool.regression import Regression
+from openalea.stat_tool.vectors import Vectors
 
-from tools import interface
-from tools import runTestClass
+from .tools import interface, runTestClass
+
 
 class TestRegression(interface):
     """a simple unittest class"""
 
     def __init__(self):
         self.vector = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
-        interface.__init__(self,
-                           self.build_data(),
-                           None,
-                           Regression)
+        interface.__init__(self, self.build_data(), None, Regression)
 
     def build_data(self):
-
-        #vector = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
+        # vector = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
 
         r1 = Regression(self.vector, "Linear", 1, 2)
 
@@ -32,8 +30,7 @@ class TestRegression(interface):
 
     def test_build_bad_algorithm_failure(self):
         try:
-            _r1 = Regression(self.vector, "Moving", 1, 2, 1,
-                        Weighting=False)
+            _r1 = Regression(self.vector, "Moving", 1, 2, 1, Weighting=False)
             assert False
         except:
             assert True
@@ -76,10 +73,9 @@ class TestRegression(interface):
         pass
 
     def test_linear_regression(self):
-
         r1 = self.data
 
-        #compare with the direct usage of linear regression
+        # compare with the direct usage of linear regression
         r = self.vector.linear_regression(1, 2)
 
         assert r
@@ -87,20 +83,41 @@ class TestRegression(interface):
         assert str(r) == str(r1)
 
     def test_moving_average(self):
-
-        r1 = Regression(self.vector, "MovingAverage" , 1, 2, [1, ])
+        r1 = Regression(
+            self.vector,
+            "MovingAverage",
+            1,
+            2,
+            [
+                1,
+            ],
+        )
         from openalea.stat_tool.enums import algo_map
-        r = self.vector.moving_average_regression_values(1, 2, [1, ], algo_map['Averaging'])
+
+        r = self.vector.moving_average_regression_values(
+            1,
+            2,
+            [
+                1,
+            ],
+            algo_map["Averaging"],
+        )
         assert r
         assert r1
-        assert str(r)==str(r1)
+        assert str(r) == str(r1)
 
     def test_moving_average_failure(self):
-
         try:
-            Regression(self.vector, "MovingAverage", 1, 2,  [1, ],
-                       Algorithm="badAlgorithmName"
-                       )
+            Regression(
+                self.vector,
+                "MovingAverage",
+                1,
+                2,
+                [
+                    1,
+                ],
+                Algorithm="badAlgorithmName",
+            )
             assert False
         except:
             assert True
@@ -111,24 +128,29 @@ class TestRegression(interface):
         Regression(self.vector, "MovingAverage", 1, 2, compound)
 
     def test_nearest_neighbours(self):
-
-        r1 = Regression(self.vector, "NearestNeighbors", 1, 2, 1,
-                        Weighting=False)
-        r = self.vector.nearest_neighbours_regression(1, 2, 1., False)
+        r1 = Regression(self.vector, "NearestNeighbors", 1, 2, 1, Weighting=False)
+        r = self.vector.nearest_neighbours_regression(1, 2, 1.0, False)
         assert r
         assert r1
         assert str(r) == str(r1)
 
     def test_badtype(self):
         try:
-            Regression(self.vector, "N", 1, 2, [1, ])
+            Regression(
+                self.vector,
+                "N",
+                1,
+                2,
+                [
+                    1,
+                ],
+            )
             assert False
         except TypeError:
             assert True
 
 
-class _TestRegressionKernel():
-
+class _TestRegressionKernel:
     def __init__(self):
         self.data = RegressionKernel(4, 0, 10)
 
@@ -142,15 +164,14 @@ class _TestRegressionKernel():
         assert self.data.ident == 4
 
     def others_to_be_done(self):
-        #there are other methods that need to be tested with an
-        #appropriate examples:
-        #get_point
-        #get_regression_df
-        #get_residual_df
-        #get_nb_parameter
-        #get_parameter
+        # there are other methods that need to be tested with an
+        # appropriate examples:
+        # get_point
+        # get_regression_df
+        # get_residual_df
+        # get_nb_parameter
+        # get_parameter
         pass
-
 
 
 if __name__ == "__main__":

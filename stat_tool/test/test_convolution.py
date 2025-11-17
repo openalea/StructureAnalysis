@@ -3,15 +3,14 @@
 :Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
+
 __version__ = "$Id$"
 
-from openalea.stat_tool import Convolution
-from openalea.stat_tool.distribution import Binomial, NegativeBinomial
+from openalea.stat_tool import Convolution, Estimate
 from openalea.stat_tool.data_transform import ExtractDistribution
-from openalea.stat_tool import Estimate
+from openalea.stat_tool.distribution import Binomial, NegativeBinomial
 
-from tools import interface
-from tools import runTestClass
+from .tools import interface, runTestClass
 
 
 class Test(interface):
@@ -21,10 +20,9 @@ class Test(interface):
     """
 
     def __init__(self):
-        interface.__init__(self,
-            self.build_data(),
-            "data/convolution1.conv",
-            Convolution)
+        interface.__init__(
+            self, self.build_data(), "data/convolution1.conv", Convolution
+        )
 
     def build_data(self):
         d1 = Binomial(0, 10, 0.5)
@@ -56,7 +54,6 @@ class Test(interface):
         d = self.data
         d.plot()
 
-
     def test_save(self):
         self.save()
 
@@ -80,8 +77,7 @@ class Test(interface):
         assert m.extract(1) == Binomial(0, 10, 0.5)
         assert m.extract(2) == NegativeBinomial(0, 1, 0.1)
         assert ExtractDistribution(m, "Elementary", 1) == Binomial(0, 10, 0.5)
-        assert ExtractDistribution(m, "Elementary", 2) == \
-            NegativeBinomial(0, 1, 0.1)
+        assert ExtractDistribution(m, "Elementary", 2) == NegativeBinomial(0, 1, 0.1)
 
     def test_extract_data(self):
         """run and test the extract_data methods"""
@@ -101,7 +97,5 @@ class Test(interface):
         _res = s.truncate(4)
 
 
-
 if __name__ == "__main__":
     runTestClass(Test())
-

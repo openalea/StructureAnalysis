@@ -1,34 +1,35 @@
-""" distance matrix tests
+"""distance matrix tests
 
 
 :Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
+
 __version__ = "$Id$"
 
 
-from openalea.stat_tool.vectors import Vectors, VectorDistance
+from openalea.stat_tool.cluster import Clustering, ToDistanceMatrix
 from openalea.stat_tool.comparison import Compare
 from openalea.stat_tool.data_transform import SelectVariable
-from openalea.stat_tool.cluster import Clustering, ToDistanceMatrix
+from openalea.stat_tool.vectors import VectorDistance, Vectors
 
-from tools import interface
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import interface, runTestClass
+from .tools import robust_path as get_shared_data
+
 
 class Test(interface):
-
     def __init__(self):
-        interface.__init__(self,
-                           self.build_data(),
-                           "data/distribution1.dist",
-                           ToDistanceMatrix)
+        interface.__init__(
+            self, self.build_data(), "data/distribution1.dist", ToDistanceMatrix
+        )
 
     def build_data(self):
         vec10 = Vectors(get_shared_data("chene_sessile.vec"))
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
         matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
-        c1 = Clustering(matrix10, "Partition", 3, Prototypes=[1, 3, 12],
-                        Algorithm="Divisive")
+        c1 = Clustering(
+            matrix10, "Partition", 3, Prototypes=[1, 3, 12], Algorithm="Divisive"
+        )
         return ToDistanceMatrix(c1)
 
     def test_len(self):
@@ -36,15 +37,15 @@ class Test(interface):
 
     def test_empty(self):
         pass
-        #self.empty()
+        # self.empty()
 
     def test_constructor_from_file(self):
         pass
-        #self.constructor_from_file()
+        # self.constructor_from_file()
 
     def test_constructor_from_file_failure(self):
         pass
-        #self.constructor_from_file_failure()
+        # self.constructor_from_file_failure()
 
     def test_print(self):
         self.print_data()
@@ -59,7 +60,7 @@ class Test(interface):
 
     def test_save(self):
         pass
-        #self.save()
+        # self.save()
 
     def test_extract(self):
         pass
@@ -96,26 +97,23 @@ class Test(interface):
 
     def test_get_substitution(self):
         data = self.data
-        # no substituion computed for vectors 
+        # no substituion computed for vectors
         assert data.get_substitution_distance(0, 0) == -1
 
     def test_get_insertion(self):
         data = self.data
-        # no insertion computed for vectors 
+        # no insertion computed for vectors
         assert data.get_insertion_distance(0, 0) == -1
 
     def test_get_transposition(self):
         data = self.data
-        # no transposition computed for vectors 
+        # no transposition computed for vectors
         assert data.get_transposition_distance(0, 0) == -1
 
     def test_get_deletion(self):
         data = self.data
-        # no deletion computed for vectors 
+        # no deletion computed for vectors
         assert data.get_deletion_distance(0, 0) == -1
-
-
-
 
     def test_get_length_outside_range(self):
         data = self.data
@@ -126,7 +124,5 @@ class Test(interface):
             assert True
 
 
-
 if __name__ == "__main__":
     runTestClass(Test())
-

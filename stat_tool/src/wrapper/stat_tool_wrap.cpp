@@ -20,25 +20,23 @@
  *
  *-----------------------------------------------------------------------------*/
 
-
-
 /* WRAPPER Boost.python for stat_tool class */
 #include "export_plotable.h"
 
 #include "export_base.h"
-#include "export_curves.h"
-#include "export_distribution.h"
-#include "export_frequency_distribution.h"
-#include "export_vectors.h"
-#include "export_mixture.h"
-#include "export_convolution.h"
-#include "export_compound.h"
-#include "export_distance_matrix.h"
-#include "export_markovian.h"
-#include "export_regression.h"
 #include "export_categorical_process.h"
 #include "export_chain.h"
 #include "export_chain_reestimation.h"
+#include "export_compound.h"
+#include "export_convolution.h"
+#include "export_curves.h"
+#include "export_distance_matrix.h"
+#include "export_distribution.h"
+#include "export_frequency_distribution.h"
+#include "export_markovian.h"
+#include "export_mixture.h"
+#include "export_regression.h"
+#include "export_vectors.h"
 
 #include "wrapper_util.h"
 
@@ -51,18 +49,16 @@
 using namespace boost::python;
 using namespace stat_tool::wrap_util;
 
-
-
 // Define python module "_stat_tool"
-BOOST_PYTHON_MODULE(_stat_tool)
-{
-  //show_user_defined : true
-  //show_signatures : false
+BOOST_PYTHON_MODULE(_stat_tool) {
+  // show_user_defined : true
+  // show_signatures : false
 #if BOOST_VERSION >= 103400
   docstring_options doc_options(true, false);
 #endif
 
-  StatErrorClass = object(handle<>(PyErr_NewException("_stat_tool.StatError",NULL,NULL)));
+  StatErrorClass =
+      object(handle<>(PyErr_NewException("_stat_tool.StatError", NULL, NULL)));
   scope().attr("StatError") = StatErrorClass;
 
   class_constant();
@@ -97,7 +93,6 @@ BOOST_PYTHON_MODULE(_stat_tool)
   class_multivariate_mixture();
   class_multivariate_mixture_data();
 
-
   class_convolution();
   class_convolution_data();
 
@@ -114,4 +109,3 @@ BOOST_PYTHON_MODULE(_stat_tool)
   class_chain();
   class_chain_reestimation();
 }
-
