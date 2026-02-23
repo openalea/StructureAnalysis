@@ -36,6 +36,11 @@
 using namespace boost::python;
 using namespace stat_tool;
 
+/* namespace boost { namespace python {
+     bool hasattr(object o, const char* name) {
+         return PyObject_HasAttrString(o.ptr(), name);
+     }
+ } } */
 
 // DistanceMatrix
 
@@ -90,79 +95,99 @@ public:
   {
     Clusters *ret;
     StatError error;
+    bool status = true;
 
     ostringstream os;
 
     int nb_cluster = len(clusters);
-    int* cluster_nb_pattern;
-    int** cluster_pattern;
+    int* cluster_nb_pattern = NULL;
+    int** cluster_pattern = NULL;
+
+    boost::python::list l;
 
     cluster_nb_pattern = new int[nb_cluster];
     cluster_pattern = new int*[nb_cluster];
 
-    // Build dynamic 2D array
-    try
-      {
-        for (int i = 0; i < nb_cluster; i++)
-          {
-            boost::python::list* l =
-                extract<boost::python::list*> (clusters[i]);
-            int nb_item = len(*l);
-            cluster_nb_pattern[i] = nb_item;
+    if (nb_cluster > 1) {
+      // Build dynamic 2D array
+      try
+        {
+          for (int i = 0; i < nb_cluster; i++)
+            {
+  #ifdef DEBUG
+              cout << "Processing cluster " << i << endl;
+  #endif            
+              extract<boost::python::list> x(clusters[i]);
+              
+              if (x.check()) {
+                l = x;
+                int nb_item = len(l);
 
-            cluster_pattern[i] = new int[nb_item];
+                cluster_nb_pattern[i] = nb_item;
 
-            for (int j = 0; j < cluster_nb_pattern[i]; j++)
-              {
-                cluster_pattern[i][j] = extract<int> ((*l)[j]);
-              }
+                cluster_pattern[i] = new int[nb_item];
+
+                for (int j = 0; j < cluster_nb_pattern[i]; j++)
+                  {
+                    cluster_pattern[i][j] = extract<int> ((l)[j]);
+                  }
+            } else {
+              status = false;
+            }
           }
-      }
-    catch (...)
-      {
+        }
+      catch (...)
+        {
+          // Free memory
+          for (int i = 0; i < nb_cluster; i++)
+            delete[] cluster_pattern[i];
+
+          delete[] cluster_nb_pattern;
+          delete[] cluster_pattern;
+        }
+
+      if (status) {
+        ret = dm.partitioning(error, &os, nb_cluster, cluster_nb_pattern,
+            cluster_pattern);
+
         // Free memory
         for (int i = 0; i < nb_cluster; i++)
           delete[] cluster_pattern[i];
 
         delete[] cluster_nb_pattern;
         delete[] cluster_pattern;
-      }
+      }} else {
+        ret = dm.partitioning(error, &os, nb_cluster, cluster_nb_pattern,
+            cluster_pattern);
+            delete[] cluster_nb_pattern;
+          delete[] cluster_pattern;
+        }
 
-    ret = dm.partitioning(error, &os, nb_cluster, cluster_nb_pattern,
-        cluster_pattern);
+      if (!ret)
+        stat_tool::wrap_util::throw_error(error);
 
-    // Free memory
-    for (int i = 0; i < nb_cluster; i++)
-      delete[] cluster_pattern[i];
+      return ret;
+    }
 
-    delete[] cluster_nb_pattern;
-    delete[] cluster_pattern;
+    static std::string
+    hierarchical_clustering(const DistanceMatrix& dm, int ialgorithm,
+        int icriterion, const std::string path, int iformat)
+    {
+      StatError error;
+      ostringstream os;
+      hierarchical_strategy algorithm = hierarchical_strategy(ialgorithm);
+      linkage criterion = linkage(icriterion);
+      output_format format = output_format(iformat);
 
-    if (!ret)
-      stat_tool::wrap_util::throw_error(error);
+      bool ret;
 
-    return ret;
-  }
+      ret = dm.hierarchical_clustering(error, &os, algorithm, criterion,
+                                      path, format);
 
-  static std::string
-  hierarchical_clustering(const DistanceMatrix& dm, int ialgorithm,
-       int icriterion, const std::string path, int iformat)
-  {
-    StatError error;
-    ostringstream os;
-    hierarchical_strategy algorithm = hierarchical_strategy(ialgorithm);
-    linkage criterion = linkage(icriterion);
-    output_format format = output_format(iformat);
+      if (!ret)
+        stat_tool::wrap_util::throw_error(error);
 
-    bool ret;
-
-    ret = dm.hierarchical_clustering(error, &os, algorithm, criterion,
-                                     path, format);
-
-    if (!ret)
-      stat_tool::wrap_util::throw_error(error);
-
-    return string(os.str());
+      return string(os.str());
 
   }
 
@@ -514,7 +539,6 @@ public:
   }
 
 
-
 };
 
 #define WRAP DistanceMatrixWrap
@@ -596,6 +620,31 @@ class_distance_matrix()
 #undef WRAP
 #undef CLASS
 
+class ClustersWrap
+{
+
+public:
+
+  static int
+  // Return cluster of an (individual ="pattern")
+  // Indices are between 1 and nb_pattern for individuals
+  // between 1 and nb_cluster for clusters
+  get_assignment(const Clusters &cluster, int pattern)
+  {
+    StatError error;
+
+    if ((0 < pattern) & (pattern <= cluster.get_nb_pattern()))
+      return cluster.get_assignment(pattern-1)+1;
+    else {
+      error.update(STAT_error[STATR_SAMPLE_INDEX]);
+      stat_tool::wrap_util::throw_error(error);   
+    }
+  }
+};
+
+#define WRAP ClustersWrap
+#define CLASS Clusters
+
 void
 class_cluster()
 {
@@ -604,8 +653,11 @@ class_cluster()
 
   .def(self_ns::str(self)) // __str__
 
-  ;
+  .def("get_nb_cluster", &CLASS::get_nb_cluster, "Return number of clusters")
+  .def("get_assignment", WRAP::get_assignment,
+      args("pattern"),"Get cluster of a vector (index between 0 and nb_pattern)")
 
+  ;
   /*
   Clusters();
      Clusters(const DistanceMatrix &dist_matrix , int inb_cluster ,
@@ -640,7 +692,12 @@ class_cluster()
      int get_pattern_length(int pattern , int cluster) const
      { return pattern_length[pattern][cluster]; }
      */
+
 }
+
+
+#undef WRAP
+#undef CLASS
 
 void
 class_dendrogram()

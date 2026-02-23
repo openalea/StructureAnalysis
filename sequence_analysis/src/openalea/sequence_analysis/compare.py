@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 
 .. topic:: compare.py summary
@@ -12,6 +12,7 @@
 
     :Revision: $Id$
 """
+
 __version__ = "$Id$"
 
 
@@ -19,22 +20,29 @@ from openalea.stat_tool.comparison import compare_histo, compare_vectors
 from openalea.stat_tool._stat_tool import I_DEFAULT
 from openalea.stat_tool._stat_tool import _VectorDistance, _Vectors
 from openalea.sequence_analysis._sequence_analysis import (
-    _SemiMarkov, 
-    _HiddenSemiMarkov, 
-    _VariableOrderMarkov, 
-    _HiddenVariableOrderMarkov
+    _SemiMarkov,
+    _HiddenSemiMarkov,
+    _VariableOrderMarkov,
+    _HiddenVariableOrderMarkov,
 )
 
 from openalea.stat_tool.enums import (
-    histogram_types, bool_type, 
-    format_type, algorithm_type
+    histogram_types,
+    bool_type,
+    format_type,
+    algorithm_type,
 )
 
 from .enums_seq import (
-    begin_aligned_map, sequence_alignment_first_arg, output_sequence, 
-    markov_model_comparison_first_arg, indel_cost_map, ms_vomd_smd_nhmd,
-    markov_model_for_sequences_first_arg, markovian_algorithms, 
-    markov_model_for_sequences_second_arg
+    begin_aligned_map,
+    sequence_alignment_first_arg,
+    output_sequence,
+    markov_model_comparison_first_arg,
+    indel_cost_map,
+    ms_vomd_smd_nhmd,
+    markov_model_for_sequences_first_arg,
+    markovian_algorithms,
+    markov_model_for_sequences_second_arg,
 )
 
 from openalea.stat_tool import error
@@ -46,7 +54,7 @@ def _compare_markovian_sequences(obj, *args, **kargs):
 
     .. doctest::
         :options: +SKIP
-        
+
         >>> Compare(mc1, length_histo1, mc2, length_histo2,...,  FileName="result")
         >>> Compare(mc1, mc2,..., nb_seq, length, FileName="result")
         >>> Compare(mc1, seqm1, mc2, seqm2,..., nb_seq, FileName="result")
@@ -70,12 +78,12 @@ def _compare_markovian_sequences(obj, *args, **kargs):
 
     filename = kargs.get("Filename", None)
 
-    from .enums import ms_vomd_smd_list
+    from .enums_seq import ms_vomd_smd_list
+
     # Type of arg0 is same as type of obj., so we have the following case
     # >>> Compare(hsmc1, hsmc2, ,..., nb_seq,  FileName="result")
     if type(args[0]) == type(obj):
-
-        #first_list.append(obj)
+        # first_list.append(obj)
         for arg in args:
             if (isinstance(arg, int)) and nb_seq is None:
                 nb_seq = arg
@@ -84,11 +92,10 @@ def _compare_markovian_sequences(obj, *args, **kargs):
             else:
                 first_list.append(arg)
 
-        return obj.divergence_computation_length(first_list, nb_seq,
-                                                 length, filename)
+        return obj.divergence_computation_length(first_list, nb_seq, length, filename)
     # Case where second arguments is Markovian and alternates with obj's type
     elif type(args[0]) in ms_vomd_smd_list:
-        #first_list.append(obj)
+        # first_list.append(obj)
 
         for arg in args:
             if (isinstance(arg, int)) and nb_seq is None:
@@ -97,34 +104,35 @@ def _compare_markovian_sequences(obj, *args, **kargs):
                 first_list.append(arg)
             else:
                 second_list.append(arg)
-        return obj.divergence_computation_sequences(first_list, second_list,
-                                                     nb_seq, filename)
+        return obj.divergence_computation_sequences(
+            first_list, second_list, nb_seq, filename
+        )
 
     # Case where second arguments is histogram and then
     # alternates with obj's type
-    elif (isinstance(arg[0], histogram_types)):
+    elif isinstance(arg[0], histogram_types):
         hlength = []
         for arg in args:
             if type(arg) == type(obj):
                 first_list.append(arg)
             else:
                 hlength.append(arg)
-        return obj.divergence_computation_histogram(first_list, hlength,
-                                                     filename)
+        return obj.divergence_computation_histogram(first_list, hlength, filename)
 
     else:
         raise Exception("case not handled. ")
 
 
-
-
 def _compare_sequences(seq, *args, **kargs):
     """compare function related to sequences"""
-    #int indel_cost = ADAPTATIVE , algorithm = AGGLOMERATIVE;
-    #double indel_factor , transposition_factor = TRANSPOSITION_FACTOR;
+    # int indel_cost = ADAPTATIVE , algorithm = AGGLOMERATIVE;
+    # double indel_factor , transposition_factor = TRANSPOSITION_FACTOR;
 
-    from openalea.sequence_analysis._sequence_analysis import \
-        INDEL_FACTOR_1, INDEL_FACTOR_N, TRANSPOSITION_FACTOR
+    from openalea.sequence_analysis._sequence_analysis import (
+        INDEL_FACTOR_1,
+        INDEL_FACTOR_N,
+        TRANSPOSITION_FACTOR,
+    )
 
     error.CheckType([seq], [sequence_alignment_first_arg])
 
@@ -133,56 +141,67 @@ def _compare_sequences(seq, *args, **kargs):
     Begin = error.ParseKargs(kargs, "Begin", "Aligned", begin_aligned_map)
     End = error.ParseKargs(kargs, "End", "Aligned", begin_aligned_map)
     FileName = kargs.get("FileName", None)
-    Format = error.ParseKargs(kargs, "Format", 'ASCII', format_type)
-    AlignmentFormat = error.ParseKargs(kargs, "AlignmentFormat", 'ASCII',
-                                       format_type)
+    Format = error.ParseKargs(kargs, "Format", "ASCII", format_type)
+    AlignmentFormat = error.ParseKargs(kargs, "AlignmentFormat", "ASCII", format_type)
     AlignmentFileName = kargs.get("AlignmentFileName", None)
-    IndelCost = error.ParseKargs(kargs, "IndelCost", "Adaptative",
-                                 indel_cost_map)
+    IndelCost = error.ParseKargs(kargs, "IndelCost", "Adaptative", indel_cost_map)
     IndelFactor = kargs.get("IndelFactor", INDEL_FACTOR_1)
     Transposition = error.ParseKargs(kargs, "Transposition", False, bool_type)
-    TranspositionFactor = error.ParseKargs(kargs, "TranspositionFactor",
-                                           TRANSPOSITION_FACTOR)
-    Algorithm = error.ParseKargs(kargs, "Algorithm", "Agglomerative",
-                                 algorithm_type)
+    TranspositionFactor = error.ParseKargs(
+        kargs, "TranspositionFactor", TRANSPOSITION_FACTOR
+    )
+    Algorithm = error.ParseKargs(kargs, "Algorithm", "Agglomerative", algorithm_type)
     # check all int and float cases
-    error.CheckType([ref_identifier, test_identifier, IndelFactor,
-                     TranspositionFactor, TranspositionFactor],
-                     [int, int, [int, float], [int, float], [int, float]])
-
-
+    error.CheckType(
+        [
+            ref_identifier,
+            test_identifier,
+            IndelFactor,
+            TranspositionFactor,
+            TranspositionFactor,
+        ],
+        [int, int, [int, float], [int, float], [int, float]],
+    )
 
     # case 2 of AML
     if len(args) == 1:
-
         if isinstance(args[0], _VectorDistance):
+            Output = error.ParseKargs(
+                kargs, "Output", "DistanceMatrix", output_sequence
+            )
 
-            Output = error.ParseKargs(kargs, "Output", "DistanceMatrix",
-                                      output_sequence)
-
-            if Output == 'm':
+            if Output == "m":
                 if not error.ParseKargs(kargs, IndelFactor):
                     IndelFactor = INDEL_FACTOR_1
 
-
                 if kargs.get("Algorithm", None):
                     raise ValueError("Algorithm cannot be used in this context")
-                #todo: othet error case ?
-                #if ((!transposition_option) && (transposition_factor_option)
-                #if ((!file_name_option) && (format_option))
-                #if ((!alignment_file_name_option) && (alignment_format_option)
+                # todo: othet error case ?
+                # if ((!transposition_option) && (transposition_factor_option)
+                # if ((!file_name_option) && (format_option))
+                # if ((!alignment_file_name_option) && (alignment_format_option)
 
-                dist_matrix = seq.alignment_vector_distance(args[0],
-                                    ref_identifier, test_identifier, Begin, End,
-                                    IndelCost, IndelFactor, Transposition,
-                                    TranspositionFactor, FileName, Format,
-                                    AlignmentFileName, AlignmentFormat)
+                dist_matrix = seq.alignment_vector_distance(
+                    args[0],
+                    ref_identifier,
+                    test_identifier,
+                    Begin,
+                    End,
+                    IndelCost,
+                    IndelFactor,
+                    Transposition,
+                    TranspositionFactor,
+                    FileName,
+                    Format,
+                    AlignmentFileName,
+                    AlignmentFormat,
+                )
                 return dist_matrix
 
-            elif Output == 's':
-                #check errors
+            elif Output == "s":
+                # check errors
                 # if (ref_sequence_option):
-                #if (test_sequence_option):
+                # if (test_sequence_option):
                 # if (transposition_option)
                 # if (transposition_factor_option)
                 # if (format_option)
@@ -193,20 +212,26 @@ def _compare_sequences(seq, *args, **kargs):
                 if not error.ParseKargs(kargs, IndelFactor):
                     IndelFactor = INDEL_FACTOR_N
 
+                sequence = seq.multiple_alignment(
+                    args[0], Begin, End, IndelCost, IndelFactor, Algorithm, FileName
+                )
 
-                sequence = seq.multiple_alignment(args[0], Begin, End,
-                                    IndelCost, IndelFactor, Algorithm,
-                                     FileName)
-
-                if hasattr(seq, 'markovian_sequences'):
+                if hasattr(seq, "markovian_sequences"):
                     return sequence.markovian_sequences()
                 else:
                     return sequence
 
-    else: #case 1 of AML
-        dist_matrix = seq.alignment(ref_identifier, test_identifier, Begin ,
-                                  End , FileName , Format , AlignmentFileName,
-                                  AlignmentFormat)
+    else:  # case 1 of AML
+        dist_matrix = seq.alignment(
+            ref_identifier,
+            test_identifier,
+            Begin,
+            End,
+            FileName,
+            Format,
+            AlignmentFileName,
+            AlignmentFormat,
+        )
         return dist_matrix
 
 
@@ -219,8 +244,7 @@ def _compare_markovian_models_for_sequences(obj, *args, **kargs):
     error.CheckType([obj], [ms_vomd_smd_nhmd])
 
     Filename = kargs.get("Filename", None)
-    Algorithm = error.ParseKargs(kargs, "Algorithm", 'Forward',
-                                 markovian_algorithms)
+    Algorithm = error.ParseKargs(kargs, "Algorithm", "Forward", markovian_algorithms)
     markov_list = []
 
     for arg in args:
@@ -228,11 +252,11 @@ def _compare_markovian_models_for_sequences(obj, *args, **kargs):
             markov_list.append(arg)
 
     if isinstance(args[0], _HiddenVariableOrderMarkov):
-        return obj.comparison_hidden_variable_order_markov(markov_list,
-                                                            Algorithm, Filename)
+        return obj.comparison_hidden_variable_order_markov(
+            markov_list, Algorithm, Filename
+        )
     if isinstance(args[0], _HiddenSemiMarkov):
-        return obj.comparison_hidden_semi_markov(markov_list,
-                                                  Algorithm, Filename)
+        return obj.comparison_hidden_semi_markov(markov_list, Algorithm, Filename)
     elif isinstance(args[0], _VariableOrderMarkov):
         return obj.comparison_variable_order_markov(markov_list, Filename)
     # obj should be a sequence
@@ -253,7 +277,7 @@ def Compare(arg1, *args, **kargs):
 
     .. doctest::
         :options: +SKIP
-    
+
         >>> Compare(histo1, histo2,..., type, FileName="result", Format="ASCII")
 
         >>> Compare(vec, vector_distance)
@@ -441,30 +465,30 @@ def Compare(arg1, *args, **kargs):
 
     p1 = arg1
 
-
     # COMPARE 1
     if type(p1) in histogram_types:
         return compare_histo(arg1, *args, **kargs)
     # COMPARE 2
     elif isinstance(p1, _Vectors):
         return compare_vectors(arg1, *args, **kargs)
-    #COMPARE 3
-    elif type(p1) in sequence_alignment_first_arg and len(args)==0:
+    # COMPARE 3
+    elif type(p1) in sequence_alignment_first_arg and len(args) == 0:
         return _compare_sequences(arg1, *args, **kargs)
-    #COMPARE3 bis
-    elif type(p1) in sequence_alignment_first_arg and \
-            isinstance(args[0], _VectorDistance):
+    # COMPARE3 bis
+    elif type(p1) in sequence_alignment_first_arg and isinstance(
+        args[0], _VectorDistance
+    ):
         return _compare_sequences(arg1, *args, **kargs)
-    #Compare 4
-    elif type(p1) in markov_model_for_sequences_first_arg and \
-            type(args[0]) in markov_model_for_sequences_second_arg:
+    # Compare 4
+    elif (
+        type(p1) in markov_model_for_sequences_first_arg
+        and type(args[0]) in markov_model_for_sequences_second_arg
+    ):
         return _compare_markovian_models_for_sequences(arg1, *args, **kargs)
-    #COMPARE 5
+    # COMPARE 5
     elif type(p1) in markov_model_comparison_first_arg:
         return _compare_markovian_sequences(arg1, *args, **kargs)
 
-
-    raise Exception("Error in Compare. No case corresponding to your command."
-                    "Check your arguments.")
-
-
+    raise Exception(
+        "Error in Compare. No case corresponding to your command.Check your arguments."
+    )

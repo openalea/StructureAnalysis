@@ -28,8 +28,8 @@ except PackageNotFoundError:
     # package is not installed
     pass
 
-if sys.platform.startswith("win"):
-    os.add_dll_directory(str(Path(__file__).parent.parent / "lib"))
+#if sys.platform.startswith("win"):
+#    os.add_dll_directory(str(Path(__file__).parent.parent / "lib"))
 
 
 def get_shared_data(file):

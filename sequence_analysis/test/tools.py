@@ -6,7 +6,8 @@ import os
 from openalea.stat_tool import Simulate
 from openalea.stat_tool.plot import DISABLE_PLOT
 from openalea.stat_tool.output import Display, Save
-DISABLE_PLOT=True # Suggestion: set DISABLE_PLOT to True only if matplotlib neither gnuplot are available.
+
+DISABLE_PLOT = True
 
 from pathlib import Path
 from openalea.sequence_analysis import get_shared_data, get_shared_data_path
@@ -23,12 +24,14 @@ from openalea.stat_tool.distribution import set_seed
 
 __revision__ = "$Id$"
 
+
 def runTestClass(myclass):
-    functions = [x for x in dir(myclass) if x.startswith('test')]
+    functions = [x for x in dir(myclass) if x.startswith("test")]
     for function in functions:
         getattr(myclass, function)()
 
-class interface():
+
+class interface:
     """Interface to be used by test file that perform tests on the following
     data structure: compound, convolution, mixture, histogram, vector
 
@@ -39,7 +42,7 @@ class interface():
     :Usage:
     In you test file, add ::
 
-        >>> from tools import interface
+        >>> from .tools import interface
 
     Then, if we consider the Compound class case, create a class as follows::
 
@@ -59,11 +62,12 @@ class interface():
                 self.empty()
 
     """
-    def __init__(self, data=None, filename=None, Structure=None):
-        self.data = data
-        self.filename = filename
-        self.structure = Structure
-        set_seed(0)
+
+    #    def __init__(self, data=None, filename=None, Structure=None):
+    #    self.data = data
+    #    self.filename = filename
+    #    self.structure = Structure
+    #    set_seed(0)
 
     def build_data(self):
         raise NotImplementedError()
@@ -102,7 +106,7 @@ class interface():
         data = self.data
         data.display()
         Display(data)
-        assert data.display()==Display(data)
+        assert data.display() == Display(data)
 
     def display_versus_ascii_write(self):
         """check that display is equivalent to ascii_write"""
@@ -115,7 +119,7 @@ class interface():
         assert Display(data) == s
 
     def plot(self):
-        """run plotting routines """
+        """run plotting routines"""
         if DISABLE_PLOT == False:
             self.data.plot()
 
@@ -126,57 +130,56 @@ class interface():
 
         .. todo:: This is surely a bug. to be checked"""
 
-
         c1 = self.data
 
         try:
-            os.remove('test1.dat')
+            os.remove("test1.dat")
         except:
             pass
         try:
-            os.remove('test2.dat')
+            os.remove("test2.dat")
         except:
             pass
 
         if Format is None:
-            c1.save('test1.dat')
-            Save(c1, 'test2.dat')
+            c1.save("test1.dat")
+            Save(c1, "test2.dat")
         else:
-            c1.save('test1.dat', Format="Data")
-            Save(c1, 'test2.dat', Format="Data")
+            c1.save("test1.dat", Format="Data")
+            Save(c1, "test2.dat", Format="Data")
 
         if skip_reading:
             pass
         else:
-            c1_read = self.structure('test1.dat')
-            c2_read = self.structure('test2.dat')
+            c1_read = self.structure("test1.dat")
+            c2_read = self.structure("test2.dat")
 
             print(c1_read)
 
             assert c1 and c1_read and c2_read
             assert str(c1_read) == str(c2_read)
 
-        #os.remove('test1.dat')
-        #os.remove('test2.dat')
+        # os.remove('test1.dat')
+        # os.remove('test2.dat')
 
     def plot_write(self):
         h = self.data
-        h.plot_write('test', 'title')
+        h.plot_write("test", "title")
 
     def file_ascii_write(self):
         h = self.data
-        h.file_ascii_write('test.dat', True)
-        os.remove('test.dat')
+        h.file_ascii_write("test.dat", True)
+        os.remove("test.dat")
 
     def file_ascii_data_write(self):
         h = self.data
-        h.file_ascii_data_write('test.dat', True)
-        os.remove('test.dat')
+        h.file_ascii_data_write("test.dat", True)
+        os.remove("test.dat")
 
     def spreadsheet_write(self):
         h = self.data
-        h.spreadsheet_write('test.dat')
-        os.remove('test.dat')
+        h.spreadsheet_write("test.dat")
+        os.remove("test.dat")
 
     def survival_ascii_write(self):
         d = self.data
@@ -184,7 +187,7 @@ class interface():
 
     def survival_plot_write(self):
         d = self.data
-        d.survival_plot_write('test','test')
+        d.survival_plot_write("test", "test")
 
     def survival_file_ascii_write(self):
         d = self.data
@@ -192,8 +195,8 @@ class interface():
 
     def survival_spreadsheet_write(self):
         d = self.data
-        d.survival_spreadsheet_write('test.xsl')
-        os.remove('test.xsl')
+        d.survival_spreadsheet_write("test.xsl")
+        os.remove("test.xsl")
 
     def simulate(self):
         """Test the simulate method"""
@@ -217,14 +220,5 @@ class interface():
 
 
 def robust_path(filename):
-    p = get_shared_data_path(sa)
-    if p is not None:
-        # module in develop mode?
-        return get_shared_data(filename)
-    
-    p = Path(sa.__path__[0])
-    if 'src' in str(p):
-        root_pkg = p/'../../..'
-        data = get_shared_data_path(root_pkg)
-        return os.path.join(data,filename)
-
+    p = get_shared_data(filename)
+    return p

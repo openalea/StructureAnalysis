@@ -1,4 +1,4 @@
-vplants.stat_tool
+openalea.sequence_analysis
 -----------------
 
 Description
@@ -31,5 +31,4 @@ qt >= 4.2 (on windows)
 Dependencies
 ---------------------
 
-vplants.tool
-vplants.stat_tool
+openalea.stat_tool

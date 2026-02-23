@@ -1,5 +1,5 @@
 from openalea.sequence_analysis import *
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import runTestClass, robust_path as get_shared_data
 
 def test1():
     seq6 = Sequences(str(get_shared_data("pin_laricio_6.seq")))

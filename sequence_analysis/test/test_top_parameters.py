@@ -17,8 +17,8 @@ from openalea.sequence_analysis import get_shared_data
 
 
 
-from tools import interface
-from tools import runTestClass
+from .tools import interface
+from .tools import runTestClass
 
 
 def TopParametersData():

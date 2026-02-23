@@ -106,10 +106,7 @@ namespace stat_tool {
     
   public:
 
-    SinglePlot() {
-    	legend = "";
-    	style = "";
-    };
+    SinglePlot();
     SinglePlot(const SinglePlot& plot);
 
     void add_point(float x, float y);
@@ -120,10 +117,8 @@ namespace stat_tool {
     float get_x(int);
     float get_y(int);
     std::string get_label(int);
-    int get_size() { return data_and_text.size(); }
- 
-    int size()
-    { return data_and_text.size(); };   
+    int get_size(); 
+    int size();
 
     // Points::const_iterator begin()
     // { return data_and_text.begin(); };
@@ -156,29 +151,16 @@ namespace stat_tool {
 
     int group; // Window id (default is 0)
 
-    MultiPlot(int size = 1)
-    :plots(size), xtics(0), ytics(0), 
-    xrange(0, 0), yrange(0, 0), 
-    grid(false), group(0)
-    {};
-
+    MultiPlot(int size = 1);
     MultiPlot(const MultiPlot& multiplot);
     MultiPlot(const MultiPlot *multiplot);
 
-    SinglePlot& operator[](int index)
-    { return plots[index]; };
+    SinglePlot& operator[](int index);
 
-    void resize(int newsize)
-    { plots.resize(newsize); };
-
-    int size()
-    { return plots.size(); };
-
-    std::vector<SinglePlot>::const_iterator begin()
-    { return plots.begin(); };
-
-    std::vector<SinglePlot>::const_iterator end()
-    { return plots.end(); };
+    void resize(int newsize);
+    int size();
+    std::vector<SinglePlot>::const_iterator begin();
+    std::vector<SinglePlot>::const_iterator end();
   };
 
 

@@ -9,7 +9,7 @@ __revision__ = "$Id$"
 from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.sequence_analysis import *
 
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import runTestClass, robust_path as get_shared_data
 
 
 def test_hidden_semi_markov():

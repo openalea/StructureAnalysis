@@ -1,23 +1,24 @@
 # Additional resources for stat_tool
 
+```{contents} Table of Contents
+:depth: 1
+:backlinks:
+```
+
 ```{include} ../CONTRIBUTING.md
-   :start-after: <!-- CONTRIBUTING-START -->
-   :end-before
+
 ```
 
 ```{include} ../AUTHORS.md
-   :start-after: <!-- AUTHORS-START -->
-   :end-before
+
 ```
 
 ## License
 
 ```{include} ../LICENSE
-   :start-after: <!-- LICENSE-START -->
-   :end-before
+
 ```
 
 ```{include} ../CHANGELOG.md
-   :start-after: <!-- CHANGELOG-START -->
-   :end-before
+
 ```

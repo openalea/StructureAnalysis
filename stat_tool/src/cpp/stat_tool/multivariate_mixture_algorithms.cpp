@@ -35,9 +35,9 @@
  *  ----------------------------------------------------------------------------
  */
 
+#define _USE_MATH_DEFINES // for C++ win to get M_PI in cmath
+#include <cmath>
 
-
-#include <math.h>
 #include <sstream>
 #include <iomanip>
 #include <assert.h>

@@ -1,17 +1,18 @@
-""" Test tops data structure
+"""Test tops data structure
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 .. todo:: to be done
 """
+
 __revision__ = "$Id$"
 
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis import *
 
-from tools import interface
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import interface
+from .tools import runTestClass, robust_path as get_shared_data
 
 
 def TopsData():
@@ -22,19 +23,15 @@ def TopsData():
 
 
 class Test(interface):
-    """a simple unittest class
+    """a simple unittest class"""
 
-
-    """
     def __init__(self):
-        interface.__init__(self,
-                           self.build_data(),
-                           str(get_shared_data("test_tops1.dat")),
-                           Tops)
+        interface.__init__(
+            self, self.build_data(), str(get_shared_data("test_tops1.dat")), Tops
+        )
 
     def build_data(self):
-
-        return Tops(str(get_shared_data('test_tops1.dat')))
+        return Tops(str(get_shared_data("test_tops1.dat")))
 
     def _test_empty(self):
         self.empty()
@@ -52,15 +49,15 @@ class Test(interface):
         pass
 
     def _test_constructor_array1(self):
-        #print '--------------'
-        #top = Tops([1,2,3,4,5], Identifiers=[1])
-        print('------------')
-        #print type(top)
-        print('---------')
+        # print '--------------'
+        # top = Tops([1,2,3,4,5], Identifiers=[1])
+        print("------------")
+        # print type(top)
+        print("---------")
         print(top)
-        #print self.data
-        #top = Tops('data/tops1.dat')
-        #print top
+        # print self.data
+        # top = Tops('data/tops1.dat')
+        # print top
 
     def test_print(self):
         self.print_data()

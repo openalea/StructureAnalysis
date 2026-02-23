@@ -2,98 +2,83 @@
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 """
+
 __revision__ = "$Id$"
 
+import pytest
 
-from openalea.stat_tool import _stat_tool
-from openalea.sequence_analysis import _sequence_analysis
-from openalea.sequence_analysis import *
-
-from openalea.stat_tool.data_transform import *
-from openalea.stat_tool.cluster import Cluster
-from openalea.stat_tool.cluster import Transcode, Cluster
-
-from tools import interface
-from tools import runTestClass, robust_path as get_shared_data
+from openalea.sequence_analysis import SemiMarkov, Simulate
 
 
-def SemiMarkovData():
-    sm =  SemiMarkov(str(get_shared_data('test_semi_markov.dat')))
-    ret = Simulate(sm, 1, 1000, True)
-    return sm
+from .tools import interface
+from .tools import robust_path as get_shared_data
 
 
-class Test(interface):
-    """a simple unittest class
+@pytest.fixture
+def interface_instance():
+    filename = str(get_shared_data("test_semi_markov.dat"))
+    return interface(
+        data=SemiMarkov(filename),
+        filename=filename,
+        Structure=SemiMarkov,
+    )
 
-    """
-    def __init__(self):
-        interface.__init__(self,
-                           self.build_data(),
-                           str(get_shared_data("test_semi_markov.dat")),
-                           SemiMarkov)
+
+class TestSemiMarkov:
+    """a simple unittest class"""
+
+    def test_constructor_from_file(self, interface_instance):
+        interface_instance.constructor_from_file()
 
     def build_data(self):
-        """todo: check identifier output. should be a list """
+        """todo: check identifier output. should be a list"""
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        sm =  SemiMarkov(str(get_shared_data('test_semi_markov.dat')))
+        return SemiMarkov(str(get_shared_data("test_semi_markov.dat")))
 
-
-        return sm
-
-    def _test_empty(self):
-        self.empty()
-
-    def test_constructor_from_file(self):
-        self.constructor_from_file()
-
-    def test_constructor_from_file_failure(self):
-        self.constructor_from_file_failure()
-
-    def test_print(self):
-        self.print_data()
-
-    def test_display(self):
-        self.display()
-        self.display_versus_ascii_write()
-        self.display_versus_str()
-
-    def test_len(self):
-        seq = self.data
+    def test_simulate(self, interface_instance):
+        Simulate(interface_instance.data, 1, 1000, True)
         pass
 
-    def test_plot(self):
-        self.plot()
+    def test_empty(self, interface_instance):
+        interface_instance.empty()
 
-    def test_save(self):
-        self.save(skip_reading=True)
+    def test_constructor_from_file_failure(self, interface_instance):
+        interface_instance.constructor_from_file_failure()
 
-    def test_plot_write(self):
-        self.plot_write()
+    def test_print(self, interface_instance):
+        interface_instance.print_data()
 
-    def test_file_ascii_write(self):
-        self.file_ascii_write()
+    def test_display(self, interface_instance):
+        interface_instance.display()
+        interface_instance.display_versus_ascii_write()
+        interface_instance.display_versus_str()
 
-    def test_spreadsheet_write(self):
-        self.spreadsheet_write()
-
-    def test_simulate(self):
-        sm = self.data
-        sm.simulation_nb_elements(1, 10000, True)
-        Simulate(sm,1, 10000, True)
+    def test_len(self, interface_instance):
+        seq = interface_instance.data
         pass
 
-    def test_thresholding(self):
-        self.data.thresholding(1)
+    def test_plot(self, interface_instance):
+        interface_instance.plot()
 
-    def test_extract(self):
+    def test_save(self, interface_instance):
+        interface_instance.save(skip_reading=True)
+
+    def test_plot_write(self, interface_instance):
+        interface_instance.plot_write()
+
+    def test_file_ascii_write(self, interface_instance):
+        interface_instance.file_ascii_write()
+
+    def test_spreadsheet_write(self, interface_instance):
+        interface_instance.spreadsheet_write()
+
+    def test_thresholding(self, interface_instance):
+        interface_instance.data.thresholding(1)
+
+    def test_extract(self, interface_instance):
         pass
-        #self.data.extract(0,1,1)
+        # interface_instance.data.extract(0,1,1)
 
-    def test_extract_data(self):
-        self.data.extract_data()
-
-
-if __name__ == "__main__":
-    runTestClass(Test())
+    def test_extract_data(self, interface_instance):
+        interface_instance.data.extract_data()

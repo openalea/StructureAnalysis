@@ -7,7 +7,7 @@ __revision__ = "$Id$"
 
 
 from openalea.sequence_analysis import *
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import runTestClass, robust_path as get_shared_data
 
 
 seq0 = Sequences(str(get_shared_data("chene_sessile_15pa.seq")))

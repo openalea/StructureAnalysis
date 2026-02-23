@@ -9,6 +9,14 @@ import os
 
 import numpy as np
 
+try:
+    from .tools import interface
+    from .tools import robust_path as get_shared_data
+except ImportError:
+    from tools import interface
+    from tools import robust_path as get_shared_data
+
+
 from openalea.stat_tool import Compound, Histogram, Distribution
 
 from openalea.stat_tool import (
@@ -40,7 +48,7 @@ def test():
     # histo32 = ToHistogram(ExtractDistribution(cdist2, "Sum"))
     # Plot(histo31, histo32)
 
-    peup1 = Histogram("data/peup1.his")
+    peup1 = Histogram(get_shared_data("peup1.his"))
     mixt4 = Estimate(peup1, "MIXTURE", "B", "NB")
     histo33 = ToHistogram(ExtractDistribution(mixt4, "Component", 2))
     histo33array = np.array(histo33)

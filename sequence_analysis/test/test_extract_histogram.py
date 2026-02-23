@@ -10,7 +10,7 @@ __revision__ = "$Id$"
 from openalea.stat_tool.data_transform import ValueSelect, ExtractHistogram
 from openalea.sequence_analysis import *
 
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import runTestClass, robust_path as get_shared_data
 
 seq = Sequences(str(get_shared_data("pin_laricio_7x.seq")))
 seq_cluster = Cluster(seq, "Step", 1, 10)

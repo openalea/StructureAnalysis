@@ -41,13 +41,13 @@ be sufficient to allow you to declare and manipulate other objects such as
 :func:`~openalea.stat_tool.vectors.VectorDistance`.
 
 
-.. include:: histogram.rst
-.. include:: convolution.rst
-.. include:: vectors.rst
+.. .. include:: histogram.rst
+.. .. include:: convolution.rst
+.. .. include:: vectors.rst
 
 
 .. just to prevent annoying warnings
-.. htmlonly::
+.. .. only:: html
 
     .. toctree::
         :hidden:

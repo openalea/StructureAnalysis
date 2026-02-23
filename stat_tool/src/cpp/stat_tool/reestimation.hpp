@@ -40,12 +40,16 @@
 #define REESTIMATION_HPP
 
 
-
+#define _USE_MATH_DEFINES // for C++ win to get M_PI in cmath
 #include <cmath>
 
 #include <boost/math/special_functions/digamma.hpp>
 
 #include "stat_label.h"
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 using namespace std;
 using namespace boost::math;
@@ -2219,9 +2223,14 @@ void Reestimation<Type>::inverse_gaussian_estimation(ContinuousParametric *dist)
   }
 }
 
+template class stat_tool::Reestimation<int>;
+template class stat_tool::Reestimation<double>;
 
 };  // namespace stat_tool
 
+
+//template class stat_tool::Reestimation<int>;
+//template class stat_tool::Reestimation<double>;
 
 
 #endif

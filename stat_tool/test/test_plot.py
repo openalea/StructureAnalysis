@@ -2,27 +2,28 @@
 
 __version__ = "$Id$"
 
+try:
+    from .tools import robust_path as get_shared_data
+except ImportError:
+    from tools import robust_path as get_shared_data
+
+import openalea
 from openalea.stat_tool import _stat_tool
 from openalea.stat_tool.plot import DISABLE_PLOT, get_plotter, gnuplot
 
-DISABLE_PLOT = True
 from openalea.stat_tool.plot import get_plotter, gnuplot 
 from openalea.stat_tool.plot import DISABLE_PLOT
-#DISABLE_PLOT = True
 
-from .tools import runTestClass
+
 
 
 class Test:
-    def __init__(self):
-        pass
 
     def test_plotable(self):
         p = _stat_tool.SinglePlot()
         p.add_point(_stat_tool.PlotPoint(1.0, 1.2))
         p.add_point(_stat_tool.PlotPoint(2.0, 3.2))
 
-        import openalea
 
         assert isinstance(p, openalea.stat_tool._stat_tool.SinglePlot)
 
@@ -137,13 +138,15 @@ class Test:
             plotter.plot(a, "test_plot")
 
     def test_gnuplot(self):
-        if DISABLE_PLOT:
-            return
-        a = self.get_plotable()
-        plotter = gnuplot()
-        if DISABLE_PLOT == False:
-            plotter.plot(a, "test_plot")
+        try:
+            import Gnuplot
+        except ModuleNotFoundError:
+            pass
+        else:
+            if DISABLE_PLOT:
+                return
+            a = self.get_plotable()
+            plotter = gnuplot()
+            if DISABLE_PLOT == False:
+                plotter.plot(a, "test_plot")
 
-
-if __name__ == "__main__":
-    runTestClass(Test())

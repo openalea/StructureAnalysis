@@ -45,10 +45,19 @@ from openalea.stat_tool import (
 )
 from openalea.stat_tool.cluster import Cluster, Clustering
 
-from .tools import robust_path as get_shared_data
+from openalea.stat_tool.output import plot
+plot.DISABLE_PLOT = False
+
+from importlib.resources import files, as_file
+from pathlib import Path
+
+parent_path = Path(__file__).parent
+
+
+data_path = files('openalea.stat_tool.data')
 
 dist0 = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.3)
-dist0 = Distribution("data/distribution1.dist")
+dist0 = Distribution(str((parent_path / "data" / "distribution1.dist")))
 
 dist1 = Distribution("B", 0, 10, 0.3)
 dist1 = Distribution("NB", 0, 3.5, 0.3)
@@ -71,7 +80,7 @@ Plot(histo1, ViewPoint="Survival")
 
 dist2 = Estimate(histo1, "NEGATIVE_BINOMIAL", MinInfBound=0, InfBoundStatus="Fixed")
 
-fagus = Histogram("data//fagus1.his")
+fagus = Histogram(str((parent_path / "data" / "fagus1.his")))
 
 # transformation of histograms, extraction/filter
 
@@ -88,11 +97,11 @@ histo8 = ValueSelect(fagus, 2, 8)
 dist3 = Estimate(fagus, "B")
 
 # comparison of histograms
-meri1 = Histogram(str(get_shared_data("meri1.his")))
-meri2 = Histogram(str(get_shared_data("meri2.his")))
-meri3 = Histogram(str(get_shared_data("meri3.his")))
-meri4 = Histogram(str(get_shared_data("meri4.his")))
-meri5 = Histogram(str(get_shared_data("meri5.his")))
+meri1 = Histogram(str((parent_path / "data" / "meri1.his")))
+meri2 = Histogram(str((parent_path / "data" / "meri2.his")))
+meri3 = Histogram(str((parent_path / "data" / "meri3.his")))
+meri4 = Histogram(str((parent_path / "data" / "meri4.his")))
+meri5 = Histogram(str((parent_path / "data" / "meri5.his")))
 
 
 # Compare(meri1, meri2, meri3, meri4, meri5, "N", FileName="ASCII/meri.cmp")
@@ -115,7 +124,7 @@ Plot(dist5)
 #
 #########################################################################
 
-mixt1 = Mixture("data//mixture1.mixt")
+mixt1 = Mixture(str((parent_path / "data" / "mixture1.mixt")))
 mixt1 = Mixture(
     0.6, Distribution("B", 2, 18, 0.5), 0.4, Distribution("NB", 10, 10, 0.5)
 )
@@ -171,7 +180,7 @@ Plot(dist_mixt)
 #########################################################################
 
 convol1 = Convolution(Distribution("B", 0, 10, 0.5), Distribution("NB", 0, 10, 0.5))
-convol1 = Convolution("data//convolution1.conv")
+convol1 = Convolution(str((parent_path / "data" / "convolution1.conv")))
 
 convol_histo1 = Simulate(convol1, 200)
 
@@ -185,8 +194,8 @@ convol2 = Estimate(
 histo21 = ExtractHistogram(ExtractData(convol2), 1)
 histo22 = ToHistogram(ExtractDistribution(convol2, 1))
 
-histo_b2 = Histogram("data//nothofagus_antarctica_bud_2.his")
-histo_s2 = Histogram("data//nothofagus_antarctica_shoot_2.his")
+histo_b2 = Histogram(str((parent_path / "data" / "nothofagus_antarctica_bud_2.his")))
+histo_s2 = Histogram(str((parent_path / "data" / "nothofagus_antarctica_shoot_2.his")))
 
 # Estimator="Likelihood" (default) / "PenalizedLikelihood" / "Parametric"
 # Si Estimator="PenalizedLikelihood", options supplementaires possibles
@@ -221,7 +230,7 @@ Plot(ExtractDistribution(convol31, "Convolution"))
 #
 #########################################################################
 
-cdist1 = Compound("data//compound1.cd")
+cdist1 = Compound(str((parent_path / "data" / "compound1.cd")))
 
 chisto1 = Simulate(cdist1, 200)
 
@@ -234,7 +243,7 @@ cdist2 = Estimate(
 histo31 = ExtractHistogram(ExtractData(cdist2), "Sum")
 histo32 = ToHistogram(ExtractDistribution(cdist2, "Sum"))
 
-peup1 = Histogram(str(get_shared_data("peup1.his")))
+peup1 = Histogram(str((parent_path / "data" / "peup1.his")))
 mixt4 = Estimate(peup1, "MIXTURE", "B", "NB")
 histo33 = ToHistogram(ExtractDistribution(mixt4, "Component", 2))
 histo34 = Shift(histo33, -11)
@@ -266,7 +275,7 @@ try:
 except:
     pass
 else:
-    seq0 = Sequences("data/chene_sessile_15pa.seq")
+    seq0 = Sequences(str((parent_path / "data" / "chene_sessile_15pa.seq")))
     # Plot(seq0, ViewPoint="Data")
 
     # change of unit for the variable diameter of the annual shoot

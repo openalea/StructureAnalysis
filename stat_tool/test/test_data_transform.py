@@ -7,6 +7,8 @@
 
 __version__ = "$Id$"
 
+from .tools import robust_path as get_shared_data
+
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.convolution import Convolution
 from openalea.stat_tool.data_transform import (
@@ -34,8 +36,7 @@ from openalea.stat_tool.output import Plot
 from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool.vectors import Vectors
 
-from .tools import robust_path as get_shared_data
-from .tools import runTestClass
+
 
 
 class data:
@@ -43,8 +44,7 @@ class data:
     shift, fit, merge, ...
     """
 
-    def __init__(self):
-        self.N = 1000
+    N = 1000
 
     def comp_data(self):
         d1 = Binomial(0, 10, 0.5)
@@ -111,8 +111,6 @@ class data:
 
 
 class TestSelectStep(data):
-    def __init__(self):
-        data.__init__(self)
 
     def test_select_step_vectors(self):
         data = self.int_vector_data
@@ -124,8 +122,6 @@ class TestSelectStep(data):
 
 
 class TestShift(data):
-    def __init__(self):
-        data.__init__(self)
 
     def test_shift_compound_data(self):
         comp_data = self.comp_data()
@@ -154,8 +150,6 @@ class TestShift(data):
 
 
 class TestFit:
-    def __init__(self):
-        pass
 
     def test_fit_histogram(self):
         meri5 = Histogram(get_shared_data("meri5.his"))
@@ -165,8 +159,6 @@ class TestFit:
 
 
 class TestSelectHist:
-    def __init__(self):
-        pass
 
     def test_value_select_float(self):
         meri1 = Histogram(get_shared_data("meri1.his"))
@@ -177,8 +169,6 @@ class TestSelectHist:
 
 
 class TestValueSelect(data):
-    def __init__(self):
-        data.__init__(self)
 
     def test_value_select_float(self):
         v = self.float_vector_data()
@@ -230,8 +220,6 @@ class TestValueSelect(data):
 
 
 class TestSelectVariable(data):
-    def __init__(self):
-        data.__init__(self)
 
     def test_vector(self):
         v = self.int_vector_data()
@@ -249,8 +237,6 @@ class TestSelectVariable(data):
 
 
 class TestSelectIndividual(data):
-    def __init__(self):
-        data.__init__(self)
 
     def test_vector_integer(self):
         v = self.int_vector_data()
@@ -267,25 +253,10 @@ class TestSelectIndividual(data):
         pass
 
 
-class TestExtract:
-    """
-    Extract("Compound") see test_compound
-    Extract("Convolution") see test_convolution
-    Extract("Mixture") see test_mixture
-    Sum, elementary, component, weight see test_compound, and so on.
-    """
-
-    def __init__(self):
-        pass
-
-
 class TestExtractData:
     """
     See other test file.
     """
-
-    def __init__(self):
-        pass
 
     def test_histo_extract_data(self):
         h = Histogram(get_shared_data("meri2.his"))
@@ -295,8 +266,6 @@ class TestExtractData:
 
 
 class TestExtractDistribution(data):
-    def __init__(self):
-        data.__init__(self)
 
     def test_mixture(self):
         mixt = self.mixt()
@@ -336,8 +305,6 @@ class TestExtractDistribution(data):
 
 
 class TestExtractHistogram:
-    def __init__(self):
-        pass
 
     def test_mixture(self):
         h = Histogram(get_shared_data("meri2.his"))
@@ -374,8 +341,6 @@ class TestExtractHistogram:
 
 
 class TestMerge(data):
-    def __init__(self):
-        data.__init__(self)
 
     def test_merge(self):
         mixt1 = Mixture(
@@ -427,8 +392,6 @@ class TestMerge(data):
 
 
 class TestMergeVariable(data):
-    def __init__(self):
-        data.__init__(self)
 
     def test_vector(self):
         v = self.int_vector_data()
@@ -445,17 +408,3 @@ class TestMergeVariable(data):
 
         assert str(merged) == str(merged2)
 
-
-if __name__ == "__main__":
-    runTestClass(TestSelectHist())
-    runTestClass(TestFit())
-    runTestClass(TestShift())
-    runTestClass(TestExtractHistogram())
-    runTestClass(TestMerge())
-    runTestClass(TestMergeVariable())
-    runTestClass(TestValueSelect())
-    runTestClass(TestSelectVariable())
-    runTestClass(TestSelectIndividual())
-    runTestClass(TestExtract())
-    runTestClass(TestExtractData())
-    runTestClass(TestExtractDistribution())

@@ -55,26 +55,37 @@ namespace stat_tool {
  *  Constants
  */
 
+/// maximum number of variables
+const int VECTOR_NB_VARIABLE = 60;     
+/// maximum number of vectors for the computation of a matrix of pairwise distances
+const int DISTANCE_NB_VECTOR = 2000;   
 
-  const int VECTOR_NB_VARIABLE = 60;     // maximum number of variables
-  const int DISTANCE_NB_VECTOR = 2000;   // maximum number of vectors for the computation
-                                         // of a matrix of pairwise distances
-  const int SUP_NORM_DISTANCE_NB_VECTOR = 10;   // minimum number of vectors for the computation
-                                                // of the sup norm distance
-  const int CONTINGENCY_NB_VALUE = 100;  // maximum number of categories for the computation
-                                         // of a contingency table
-  const int DISPLAY_CONTINGENCY_NB_VALUE = 20;  // maximum number of categories for the display of
-                                                // a contingency table
-  const int VARIANCE_ANALYSIS_NB_VALUE = 100;  // maximum number of levels for the analysis of variance
-  const int DISPLAY_CONDITIONAL_NB_VALUE = 100;  // maximum number of values of the display of
-                                                 // the conditional distributions
-  const int PLOT_NB_VALUE = 30;          // threshold for the writing of frequencies (Gnuplot output)
+/// minimum number of vectors for the computation of the sup norm distance
+const int SUP_NORM_DISTANCE_NB_VECTOR = 10;   
+                                                
+/// maximum number of categories for the computation of a contingency table
+const int CONTINGENCY_NB_VALUE = 100;  
+                                      
+/// maximum number of categories for the display of a contingency table
+const int DISPLAY_CONTINGENCY_NB_VALUE = 20;  
+                                              
+/// maximum number of levels for the analysis of variance
+const int VARIANCE_ANALYSIS_NB_VALUE = 100;  
+/// maximum number of values of the display of the conditional distributions
+const int DISPLAY_CONDITIONAL_NB_VALUE = 100;  
+     
+/// threshold for the writing of frequencies (Gnuplot output)
+const int PLOT_NB_VALUE = 30;          
 
-  const int NB_CATEGORY = 50;            // maximum number of categories
+/// maximum number of categories
+const int NB_CATEGORY = 50;            
 
-  const int MIN_NB_ASSIGNMENT = 1;   // minimum number of assignments of individuals (1st iteration of the MCEM algorithm)
-  const int MAX_NB_ASSIGNMENT = 10;  // maximum number of assignments of individuals (MCEM algorithm)
-  const double NB_ASSIGNMENT_PARAMETER = 1.;  // parameter for the number of assignments of individuals (MCEM algorithm)
+/// minimum number of assignments of individuals (1st iteration of the MCEM algorithm)
+const int MIN_NB_ASSIGNMENT = 1;   
+/// maximum number of assignments of individuals (MCEM algorithm)
+const int MAX_NB_ASSIGNMENT = 10;  
+/// parameter for the number of assignments of individuals (MCEM algorithm)
+const double NB_ASSIGNMENT_PARAMETER = 1.;  
 
   enum vector_transformation {
     VECTOR_COPY ,

@@ -1,5 +1,4 @@
 """simulate tests"""
-__version__ = "$Id$"
 
 from openalea.stat_tool.mixture import Mixture
 from openalea.stat_tool.convolution import Convolution
@@ -39,9 +38,3 @@ def test_simulation_sequences():
         Simulate(seq, 100)
     except:
         assert True
-
-if __name__ == "__main__":
-    test_simulate_mixture()
-    test_simulate_distribution()
-    test_simulate_convolution()
-    test_simulate_compound()

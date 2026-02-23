@@ -5,7 +5,7 @@ Current Developments
 
 .. topic:: This page is not part of the documentation
 
-    This is a wokrsheet to gather various information about current of future development.
+    This is a worksheet to gather various information about current of future development.
 
 .. contents::
 

@@ -1,10 +1,6 @@
 from openalea.stat_tool.error import *
 
 
-
-
-
-
 def test_CheckArgumentsLength():
     args = ('a', 'b', 'c')
     CheckArgumentsLength(args, 1, 3)

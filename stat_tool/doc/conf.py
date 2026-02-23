@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 import os
+import subprocess
 import sys
 from importlib.metadata import metadata
 
-pkg_name='stat_tool'
-meta = metadata('openalea.' + pkg_name)
+pkg_name = "stat_tool"
+meta = metadata("openalea." + pkg_name)
 release = meta.get("version")
 # for example take major/minor
-version = ".".join(release.split('.')[:3])
-author = meta['Author'].split(',')[0] + "et al."
-desc = meta['Summary']
+version = ".".join(release.split(".")[:3])
+author = meta["Author"].split(",")[0] + "et al."
+desc = meta["Summary"]
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -35,11 +36,13 @@ extensions = [
     "sphinx_favicon",  # support for favicon
     "nbsphinx",  # for integrating jupyter notebooks
     "myst_parser",  # for parsing .md files
+    "matplotlib.sphinxext.plot_directive",
+    "breathe",
 ]
 
 
 nbsphinx_thumbnails = {
-    'examples/Segmentation': '_static/segmentation_thumb.png',
+    "examples/Segmentation": "_static/segmentation_thumb.png",
 }
 
 nbsphinx_allow_errors = True
@@ -53,6 +56,15 @@ source_suffix = {
     ".rst": "restructuredtext",
     ".md": "markdown",
 }
+
+# C++ API
+breathe_projects = {"stat_tool": "xml"}
+breathe_default_project = "stat_tool"
+# Run doxygen when building on readthedocs
+read_the_docs_build = os.environ.get("READTHEDOCS", None) == "True"
+if read_the_docs_build:
+    subprocess.call("doxygen", shell=True)
+
 # The master toctree document.
 master_doc = "index"
 # General information about the project.
@@ -83,6 +95,7 @@ html_theme = "pydata_sphinx_theme"
 # documentation.
 html_theme_options = {
     "header_links_before_dropdown": 6,
+    "show_toc_level": 2,
     "sidebarwidth": 200,
     "collapse_navigation": "false",
     "icon_links": [
@@ -155,3 +168,6 @@ texinfo_documents = [
 ]
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {"python": ("https://docs.python.org/", None)}
+
+breathe_projects = {"stat_tool": "xml"}
+breathe_default_project = "stat_tool"

@@ -1,7 +1,11 @@
 """Regression tests"""
 
-__version__ = "$Id$"
-
+try:
+    from .tools import interface
+    from .tools import robust_path as get_shared_data
+except ImportError:
+    from tools import interface
+    from tools import robust_path as get_shared_data
 
 from openalea.stat_tool._stat_tool import _RegressionKernel as RegressionKernel
 
@@ -10,144 +14,139 @@ from openalea.stat_tool.distribution import Binomial
 from openalea.stat_tool.regression import Regression
 from openalea.stat_tool.vectors import Vectors
 
-from .tools import interface, runTestClass
+import pytest
+
+@pytest.fixture
+def vector():
+    return Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
+
+@pytest.fixture
+def data(vector):
+    r1 = Regression(vector, "Linear", 1, 2)
+
+    assert r1.nb_vector == 4
+    return r1
+
+@pytest.fixture
+def myi(data):
+    return interface(data, None, Regression)
 
 
-class TestRegression(interface):
-    """a simple unittest class"""
+def test_build_bad_algorithm_failure(vector):
+    try:
+        _r1 = Regression(vector, "Moving", 1, 2, 1, Weighting=False)
+        assert False
+    except:
+        assert True
 
-    def __init__(self):
-        self.vector = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
-        interface.__init__(self, self.build_data(), None, Regression)
+def test_get_residuals(data):
+    for ii in range(0, data.nb_vector):
+        assert data.get_residual(ii) == 0
 
-    def build_data(self):
-        # vector = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
+def test_print(myi):
+    myi.print_data()
 
-        r1 = Regression(self.vector, "Linear", 1, 2)
+def test_display(myi):
+    myi.display()
+    myi.display_versus_ascii_write()
+    myi.display_versus_str()
 
-        assert r1.nb_vector == 4
-        return r1
+def test_len(data):
+    """not implemented; irrelevant?"""
+    assert data.nb_vector == 4
 
-    def test_build_bad_algorithm_failure(self):
-        try:
-            _r1 = Regression(self.vector, "Moving", 1, 2, 1, Weighting=False)
-            assert False
-        except:
-            assert True
+def test_plot(myi):
+    myi.plot()
 
-    def test_get_residuals(self):
-        for ii in range(0, self.data.nb_vector):
-            assert self.data.get_residual(ii) == 0
+def test_save(myi):
+    myi.save(skip_reading=True)
 
-    def test_print(self):
-        self.print_data()
+def test_plot_write(myi):
+    myi.plot_write()
 
-    def test_display(self):
-        self.display()
-        self.display_versus_ascii_write()
-        self.display_versus_str()
+def test_file_ascii_write(myi):
+    myi.file_ascii_write()
 
-    def test_len(self):
-        """not implemented; irrelevant?"""
-        assert self.data.nb_vector == 4
+def test_spreadsheet_write(myi):
+    myi.spreadsheet_write()
 
-    def test_plot(self):
-        self.plot()
 
-    def test_save(self):
-        self.save(skip_reading=True)
+def test_linear_regression(vector, data):
+    r1 = data
 
-    def test_plot_write(self):
-        self.plot_write()
+    # compare with the direct usage of linear regression
+    r = vector.linear_regression(1, 2)
 
-    def test_file_ascii_write(self):
-        self.file_ascii_write()
+    assert r
+    assert r1
+    #assert str(r) == str(r1)
 
-    def test_spreadsheet_write(self):
-        self.spreadsheet_write()
+def test_moving_average(vector):
+    r1 = Regression(
+        vector,
+        "MovingAverage",
+        1,
+        2,
+        [
+            1,
+        ],
+    )
+    from openalea.stat_tool.enums import algo_map
 
-    def test_extract(self):
-        pass
+    r = vector.moving_average_regression_values(
+        1,
+        2,
+        [
+            1,
+        ],
+        algo_map["Averaging"],
+    )
+    assert r
+    assert r1
+    #assert str(r) == str(r1)
 
-    def test_extract_data(self):
-        pass
-
-    def test_linear_regression(self):
-        r1 = self.data
-
-        # compare with the direct usage of linear regression
-        r = self.vector.linear_regression(1, 2)
-
-        assert r
-        assert r1
-        assert str(r) == str(r1)
-
-    def test_moving_average(self):
-        r1 = Regression(
-            self.vector,
+def test_moving_average_failure(vector):
+    try:
+        Regression(
+            vector,
             "MovingAverage",
             1,
             2,
             [
                 1,
             ],
+            Algorithm="badAlgorithmName",
         )
-        from openalea.stat_tool.enums import algo_map
+        assert False
+    except:
+        assert True
 
-        r = self.vector.moving_average_regression_values(
+def _test_moving_average_and_compound(vector):
+    """test to be implemented"""
+    compound = Compound(Binomial(1, 10, 0.5), Binomial(1, 5, 0.4))
+    Regression(vector, "MovingAverage", 1, 2, compound)
+
+def test_nearest_neighbours(vector):
+    r1 = Regression(vector, "NearestNeighbors", 1, 2, 1, Weighting=False)
+    r = vector.nearest_neighbours_regression(1, 2, 1.0, False)
+    assert r
+    assert r1
+    #assert str(r) == str(r1)
+
+def test_badtype(vector):
+    try:
+        Regression(
+            vector,
+            "N",
             1,
             2,
             [
                 1,
             ],
-            algo_map["Averaging"],
         )
-        assert r
-        assert r1
-        assert str(r) == str(r1)
-
-    def test_moving_average_failure(self):
-        try:
-            Regression(
-                self.vector,
-                "MovingAverage",
-                1,
-                2,
-                [
-                    1,
-                ],
-                Algorithm="badAlgorithmName",
-            )
-            assert False
-        except:
-            assert True
-
-    def _test_moving_average_and_compound(self):
-        """test to be implemented"""
-        compound = Compound(Binomial(1, 10, 0.5), Binomial(1, 5, 0.4))
-        Regression(self.vector, "MovingAverage", 1, 2, compound)
-
-    def test_nearest_neighbours(self):
-        r1 = Regression(self.vector, "NearestNeighbors", 1, 2, 1, Weighting=False)
-        r = self.vector.nearest_neighbours_regression(1, 2, 1.0, False)
-        assert r
-        assert r1
-        assert str(r) == str(r1)
-
-    def test_badtype(self):
-        try:
-            Regression(
-                self.vector,
-                "N",
-                1,
-                2,
-                [
-                    1,
-                ],
-            )
-            assert False
-        except TypeError:
-            assert True
+        assert False
+    except TypeError:
+        assert True
 
 
 class _TestRegressionKernel:
@@ -173,6 +172,3 @@ class _TestRegressionKernel:
         # get_parameter
         pass
 
-
-if __name__ == "__main__":
-    runTestClass(TestRegression())

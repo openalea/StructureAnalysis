@@ -1,12 +1,13 @@
 name: stat_tool_dev
 channels:
-  - conda-forge
   - openalea3
+  - conda-forge
 dependencies:
-  - python
-  - pip
+  - scikit-build-core
+  - setuptools_scm
+  - cmake
   - boost
   - matplotlib-base
+  - pip
   - pip:
       - -e '..[test,dev,doc]'
-

@@ -10,7 +10,11 @@ import os
 
 from openalea.stat_tool import Simulate
 from openalea.stat_tool.output import Display, Save
-DISABLE_PLOT=True # Suggestion: set DISABLE_PLOT to True only if matplotlib neither gnuplot are available.
+import openalea.stat_tool.plot
+from openalea.stat_tool.distribution import set_seed
+
+
+DISABLE_PLOT = openalea.stat_tool.plot.DISABLE_PLOT = True
 
 from pathlib import Path
 
@@ -117,8 +121,8 @@ class interface:
 
     def plot(self):
         """run plotting routines"""
-        if DISABLE_PLOT == False:
-            self.data.plot()
+        # if DISABLE_PLOT == False:
+        self.data.plot()
 
     def save(self, Format=None, skip_reading=False):
         """In the Vector case, Format should be set to Data.
@@ -191,6 +195,7 @@ class interface:
 
     def simulate(self, N=-1):
         """Test the simulate method"""
+        set_seed(0)
         if N == -1:
             N = self.N
         m = self.data

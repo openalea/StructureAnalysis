@@ -2,6 +2,7 @@
 """tests on mv_mixture"""
 __version__ = "$Id$"
 
+import openalea.sequence_analysis as sa
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis.hidden_semi_markov import HiddenSemiMarkov
@@ -12,6 +13,7 @@ from openalea.sequence_analysis.sequences import Sequences, IndexParameterType
 from openalea.stat_tool.data_transform import *
 from openalea.stat_tool.cluster import Cluster
 from openalea.stat_tool.cluster import Transcode, Cluster
+from pathlib import Path
 
 import openalea.stat_tool.plot #import DISABLE_PLOT
 # openalea.stat_tool.plot.DISABLE_PLOT = True
@@ -29,16 +31,13 @@ from openalea.stat_tool.distribution import set_seed
 
 def test1():
     
-    from pathlib import Path
-    from openalea.sequence_analysis import _MarkovianSequences
+    _MarkovianSequences = sa._MarkovianSequences
     
-    data_path = Path(openalea.sequence_analysis.__path__[0])
-    data_path = str(Path.joinpath(data_path.parent.parent.parent.absolute(), "share","data"))   
-    model_file = "switching_lmm_irred.hsc"
+    model_file = sa.get_shared_data("switching_lmm_irred.hsc")
     
-    hsm = HiddenSemiMarkov(data_path + os.sep + model_file)
+    hsm = HiddenSemiMarkov(str(model_file))
     print(hsm.display())
-    from openalea.sequence_analysis import Simulate
+    Simulate = sa.Simulate
     nb_seq = 30
     seq_length = 100
     set_seed(0)
@@ -51,8 +50,7 @@ def test1():
     from openalea.sequence_analysis import Estimate
     hsmd = hsm.simulation_nb_sequences(nb_seq, seq_length, True)
     seq_estim = hsmd.select_variable([2], True)
-    from openalea.stat_tool import NegativeBinomial
-    d = NegativeBinomial(1, 10, 0.5)
+    d = sa.NegativeBinomial(1, 10, 0.5)
     index = []
     for u in range(nb_seq):
         indexut = []

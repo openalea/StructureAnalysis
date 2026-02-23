@@ -3,6 +3,7 @@
 
 __version__ = "$Id$"
 
+from .tools import interface
 
 from openalea.stat_tool._stat_tool import _DiscreteParametricModel
 
@@ -20,99 +21,90 @@ from openalea.stat_tool.distribution import (
 )
 from openalea.stat_tool.histogram import Histogram
 
-from .tools import interface, runTestClass
+import pytest
+
+@pytest.fixture
+def data():
+    d1 = Binomial(0, 10, 0.5)
+    d2 = Distribution("BINOMIAL", 0, 10, 0.5)
+    assert d1 == d2
+    return d1
+
+@pytest.fixture
+def myi(data):
+    return interface(data, "data/distribution1.dist", Distribution)
 
 
-class Test(interface):
-    """a simple unittest class"""
 
-    def __init__(self):
-        interface.__init__(
-            self, self.build_data(), "data/distribution1.dist", Distribution
-        )
+def test_constructor_from_file(myi):
+    myi.constructor_from_file()
 
-    def build_data(self):
-        d1 = Binomial(0, 10, 0.5)
-        d2 = Distribution("BINOMIAL", 0, 10, 0.5)
-        assert d1 == d2
-        return d1
+def test_constructor_from_file_failure(myi):
+    myi.constructor_from_file_failure()
 
-    def test_constructor_from_file(self):
-        self.constructor_from_file()
+def test_constructors():
+    h = Histogram([1, 2, 3, 4, 5, 6, 1, 2, 3])
+    assert h
 
-    def test_constructor_from_file_failure(self):
-        self.constructor_from_file_failure()
+    # from histogram
+    dist = Distribution(h)
+    assert dist
 
-    def test_constructors(self):
-        h = Histogram([1, 2, 3, 4, 5, 6, 1, 2, 3])
-        assert h
+    # from parametric model
+    pm = _DiscreteParametricModel(h)
+    dist = Distribution(pm)
+    assert dist
 
-        # from histogram
-        dist = Distribution(h)
-        assert dist
+def test_constructor_failure():
+    try:
+        _h = Distribution("Whatever", 1, 1)
+        assert False
+    except KeyError:
+        assert True
 
-        # from parametric model
-        pm = _DiscreteParametricModel(h)
-        dist = Distribution(pm)
-        assert dist
+def test_print(myi):
+    myi.print_data()
 
-    def test_constructor_failure(self):
-        try:
-            _h = Distribution("Whatever", 1, 1)
-            assert False
-        except KeyError:
-            assert True
+def test_display(myi):
+    myi.display()
+    myi.display_versus_ascii_write()
+    myi.display_versus_str()
 
-    def test_print(self):
-        self.print_data()
+def test_plot(myi):
+    myi.plot()
 
-    def test_display(self):
-        self.display()
-        self.display_versus_ascii_write()
-        self.display_versus_str()
+def test_save(myi):
+    myi.save()
 
-    def test_len(self):
-        """not implemented; irrelevant?"""
-        pass
+def test_plot_write(myi):
+    myi.plot_write()
 
-    def test_plot(self):
-        self.plot()
+def test_file_ascii_write(myi):
+    myi.file_ascii_write()
 
-    def test_save(self):
-        self.save()
+def test_spreadsheet_write(myi):
+    myi.spreadsheet_write()
 
-    def test_plot_write(self):
-        self.plot_write()
+def test_simulate(myi):
+    myi.simulate()
 
-    def test_file_ascii_write(self):
-        self.file_ascii_write()
+def test_survival_ascii_write(myi):
+    myi.survival_ascii_write()
 
-    def test_spreadsheet_write(self):
-        self.spreadsheet_write()
+def test_survival_spreadsheet_write(myi):
+    myi.survival_spreadsheet_write()
 
-    def test_simulate(self):
-        self.simulate()
+def test_extract_data(myi):
+    s = myi.simulate()
+    e = s.estimate_parametric("B")
+    d = e.extract_data()
+    assert d
+    _eprime = Estimate(s, "Binomial")
 
-    def test_survival_ascii_write(self):
-        self.survival_ascii_write()
-
-    def test_survival_spreadsheet_write(self):
-        self.survival_spreadsheet_write()
-
-    def test_extract(self):
-        pass
-
-    def test_extract_data(self):
-        s = self.simulate()
-        e = s.estimate_parametric("B")
-        d = e.extract_data()
-        assert d
-        _eprime = Estimate(s, "Binomial")
-
-    def test_truncate(self):
-        # todo:find a test
-        s = self.data
-        _res = s.truncate(4)
+def test_truncate(data):
+    # todo:find a test
+    s = data
+    _res = s.truncate(4)
 
 
 class TestDistribution:
@@ -122,11 +114,8 @@ class TestDistribution:
 
     test the ToDistribution and ToHistogram
     """
-
-    def __init__(self):
-        pass
-
     def test_to_histogram(self):
+        set_seed(0)
         d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
         h = d.simulate(1000)
         d2 = ToDistribution(h)
@@ -137,6 +126,7 @@ class TestDistribution:
         assert h == h2
 
     def test_uniform(self):
+        set_seed(0)
         d = Distribution("UNIFORM", 0, 10)
         s = d.simulate(1000)
         assert list(s)
@@ -160,6 +150,7 @@ class TestDistribution:
         assert isinstance(m, _DiscreteParametricModel)
 
     def test_binomial(self):
+        set_seed(0)
         d = Distribution("BINOMIAL", 0, 10, 0.5)
         assert list(d.simulate(1000))
         assert d.get_sup_bound == 10
@@ -175,6 +166,7 @@ class TestDistribution:
         assert isinstance(m, _DiscreteParametricModel)
 
     def test_poisson(self):
+        set_seed(0)
         d = Distribution("POISSON", 0, 2)
         assert list(d.simulate(1000))
         assert d.get_sup_bound == -1
@@ -190,6 +182,7 @@ class TestDistribution:
         assert isinstance(m, _DiscreteParametricModel)
 
     def test_neg_binomial(self):
+        set_seed(0)
         d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
         assert list(d.simulate(1000))
         assert d.get_sup_bound == -1
@@ -217,6 +210,7 @@ class TestDistribution:
             assert True
 
     def test_simulation(self):
+        set_seed(0)
         """simulate a vector of realizations"""
         d = Uniform(0, 1)
         try:
@@ -248,9 +242,5 @@ class TestDistribution:
         set_seed(0)
         s3 = str(list(d.simulate(200)))
         assert s1 == s3
-        return s1, s2, s3
+        #return s1, s2, s3
 
-
-if __name__ == "__main__":
-    runTestClass(Test())
-    runTestClass(TestDistribution())

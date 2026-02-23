@@ -2,40 +2,45 @@
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 """
+
 __revision__ = "$Id: test_semi_markov.py 8204 2010-02-19 10:27:45Z cokelaer $"
 
+import pytest
 
-#from openalea.stat_tool import _stat_tool
-#from openalea.sequence_analysis import _sequence_analysis
+# from openalea.stat_tool import _stat_tool
+# from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis.nonhomogeneous_markov import NonhomogeneousMarkov
-from openalea.sequence_analysis import get_shared_data
-#from openalea.sequence_analysis.simulate import Simulate
-#from openalea.sequence_analysis.sequences import Sequences
-#from openalea.stat_tool.data_transform import *
-#from openalea.stat_tool.cluster import Cluster
-#from openalea.stat_tool.cluster import Transcode, Cluster
 
-from tools import interface
-from tools import runTestClass, robust_path as get_shared_data
+# from openalea.sequence_analysis.simulate import Simulate
+# from openalea.sequence_analysis.sequences import Sequences
+# from openalea.stat_tool.data_transform import *
+# from openalea.stat_tool.cluster import Cluster
+# from openalea.stat_tool.cluster import Transcode, Cluster
+
+from .tools import interface
+from .tools import robust_path as get_shared_data
 
 
+@pytest.fixture
 def NonhomogeneousMarkovData():
-    seq =  Sequences(str(get_shared_data('vanille_m.seq')))
+    seq = Sequences(str(get_shared_data("vanille_m.seq")))
     mc_m = Estimate(seq_m, "NONHOMOGENEOUS_MARKOV", "MONOMOLECULAR", "VOID")
     return mc_m
 
-class Test(interface):
-    """a simple unittest class for nonhomogeneous data
 
-    """
+class Test(interface):
+    """a simple unittest class for nonhomogeneous data"""
+
     def __init__(self):
-        interface.__init__(self,
-                           self.build_data(),
-                           str(get_shared_data("test_nonhomogeneous.dat")),
-                           NonhomogeneousMarkov)
+        interface.__init__(
+            self,
+            self.build_data(),
+            str(get_shared_data("test_nonhomogeneous.dat")),
+            NonhomogeneousMarkov,
+        )
 
     def build_data(self):
-        sm =  NonhomogeneousMarkov(str(get_shared_data('test_nonhomogeneous.dat')))
+        sm = NonhomogeneousMarkov(str(get_shared_data("test_nonhomogeneous.dat")))
         return sm
 
     def test_empty(self):
@@ -78,7 +83,7 @@ class Test(interface):
 
     def test_extract(self):
         pass
-        #self.data.extract(0,1)
+        # self.data.extract(0,1)
 
     def test_extract_data(self):
         pass

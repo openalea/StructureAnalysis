@@ -1669,7 +1669,6 @@ class_sequences()
  Sequences(const Sequences &seq , char transform = 'c' , int param = DEFAULT);
  Sequences(const FrequencyDistribution &ilength_distribution , int inb_variable , bool init_flag = false);
 
- Tops* tops(StatError &error) const;
  bool check(StatError &error , const char *pattern_label);
 
  std::ostream& line_write(std::ostream &os) const;

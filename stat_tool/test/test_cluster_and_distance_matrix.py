@@ -7,6 +7,7 @@
 #########################################################################
 
 """
+from .tools import robust_path as get_shared_data
 
 from openalea.stat_tool import (
     Clustering,
@@ -20,12 +21,11 @@ from openalea.stat_tool import (
     VectorDistance,
     Vectors,
 )
-
-# from openalea.stat_tool import get_shared_data
-from .tools import robust_path as get_shared_data
+import sys
 
 
 def test():
+    print(sys.argv)
     vec10 = Vectors(get_shared_data("chene_sessile.vec"))
     vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
     vec9596 = ValueSelect(vec10, 1, 1995, 1996)

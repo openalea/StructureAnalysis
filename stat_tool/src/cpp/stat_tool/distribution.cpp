@@ -35,7 +35,7 @@
  */
 
 
-
+#define _USE_MATH_DEFINES // for C++ win to get M_PI in cmath
 #include <cmath>
 
 #include <sstream>
@@ -52,8 +52,8 @@ using namespace std;
 
 namespace stat_tool {
 
-std::mt19937 mt(0);
-std::uniform_real_distribution<double> rand_unif(0.0, 1.0);
+STAT_TOOL_API std::mt19937 mt(0);
+STAT_TOOL_API std::uniform_real_distribution<double> rand_unif(0.0, 1.0);
 
 /*--------------------------------------------------------------*/
 /**
@@ -594,6 +594,11 @@ void set_seed(int seed, std::mt19937 &generator)
 
 {
 	generator.seed(seed);
+}
+
+STAT_TOOL_API void set_seed(int seed)
+{
+  set_seed(seed, mt);
 }
 
 /*--------------------------------------------------------------*/

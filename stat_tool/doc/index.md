@@ -8,11 +8,12 @@
 
 Home <self>
 Install <installation>
-Getting started <getting_started>
+User guide <user/index.rst>
 Usage <usage>
-API Reference <api>
+API Reference <api/index.rst>
 More <extra>
 ```
 
 ```{include} ../README.md
+
 ```

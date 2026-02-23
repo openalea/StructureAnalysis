@@ -1,11 +1,13 @@
-""" Test renewal data structure
+"""Test renewal data structure
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 .. todo:: to be done
 """
+
 __revision__ = "$Id$"
 
+import pytest
 
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
@@ -16,69 +18,102 @@ from openalea.stat_tool.data_transform import *
 from openalea.sequence_analysis.data_transform import TimeScaling
 from openalea.sequence_analysis import get_shared_data
 from openalea.stat_tool.cluster import Cluster
-from openalea.stat_tool.cluster import Transcode, Cluster
 
-from tools import interface
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import interface
+from .tools import runTestClass, robust_path as get_shared_data
 
+
+@pytest.fixture
+def build_data_renewal():
+    """todo: check identifier output. should be a list"""
+    # build a list of 2 sequences with a variable that should be identical
+    # to sequences1.seq
+    return TimeEvents(str(get_shared_data("test_time_events.dat")))
 
 
 class Test(interface):
-    """to be done
+    """to be done"""
 
-    """
     def __init__(self):
-        interface.__init__(self,
-                           self.build_data(),
-                           str(get_shared_data("test_time_events.dat")),
-                           Renewal)
+        interface.__init__(
+            self,
+            self.build_data(),
+            str(get_shared_data("test_time_events.dat")),
+            Renewal,
+        )
 
     def build_data(self):
-        """todo: check identifier output. should be a list """
+        """todo: check identifier output. should be a list"""
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        return TimeEvents(str(get_shared_data('test_time_events.dat')))
+        return TimeEvents(str(get_shared_data("test_time_events.dat")))
 
     def test_constructor_negative_binomial(self):
         proba = 0.5
         inf_bound = 0
-        param = 1.
-        Renewal("NEGATIVE_BINOMIAL", inf_bound, param,
-               proba, Type="Equilibrium",
-               ObservationTime=40)
+        param = 1.0
+        Renewal(
+            "NEGATIVE_BINOMIAL",
+            inf_bound,
+            param,
+            proba,
+            Type="Equilibrium",
+            ObservationTime=40,
+        )
 
     def test_constructor_binomial(self):
         inf_bound = 0
         sup_bound = 10
-        probability = 1.
-        Renewal("BINOMIAL", inf_bound, sup_bound,
-               probability, Type="Equilibrium",
-               ObservationTime=40)
+        probability = 1.0
+        Renewal(
+            "BINOMIAL",
+            inf_bound,
+            sup_bound,
+            probability,
+            Type="Equilibrium",
+            ObservationTime=40,
+        )
 
     def test_constructor_poisson(self):
         inf_bound = 0
         probability = 0.5
-        param = 1.
-        Renewal("POISSON", inf_bound, param,
-               probability, Type="Equilibrium",
-               ObservationTime=40)
+        param = 1.0
+        Renewal(
+            "POISSON",
+            inf_bound,
+            param,
+            probability,
+            Type="Equilibrium",
+            ObservationTime=40,
+        )
 
     def test_constructor_scale(self):
         inf_bound = 0
         probability = 0.5
-        param = 1.
-        Renewal("POISSON", inf_bound, param,
-               probability, Type="Equilibrium",
-               ObservationTime=40, Scale=0.5)
+        param = 1.0
+        Renewal(
+            "POISSON",
+            inf_bound,
+            param,
+            probability,
+            Type="Equilibrium",
+            ObservationTime=40,
+            Scale=0.5,
+        )
 
     def test_constructor_not_implemented(self):
         try:
             inf_bound = 0
             probability = 0.5
-            param = 1.
-            Renewal("NOT_IMPLEMENTED", inf_bound, param,
-               probability, Type="Equilibrium",
-               ObservationTime=40)
+            param = 1.0
+            Renewal(
+                "NOT_IMPLEMENTED",
+                inf_bound,
+                param,
+                probability,
+                Type="Equilibrium",
+                ObservationTime=40,
+            )
 
             assert False
         except:
@@ -89,22 +124,31 @@ class Test(interface):
         from openalea.stat_tool.mixture import Mixture
         from openalea.stat_tool.convolution import Convolution
         from openalea.stat_tool.distribution import Binomial
-        Renewal(Compound(Binomial(0,10,0.5), Binomial(0,10,0.3)),
-                Type="Equilibrium", ObservationTime=20)
-        Renewal(Mixture(0.1, Binomial(0,10,0.5), 0.9, Binomial(0,10,0.3)),
-                Type="Equilibrium", ObservationTime=20)
-        Renewal(Compound(Binomial(0,10,0.5), Binomial(0,10,0.3)),
-                Type="Equilibrium", ObservationTime=20)
+
+        Renewal(
+            Compound(Binomial(0, 10, 0.5), Binomial(0, 10, 0.3)),
+            Type="Equilibrium",
+            ObservationTime=20,
+        )
+        Renewal(
+            Mixture(0.1, Binomial(0, 10, 0.5), 0.9, Binomial(0, 10, 0.3)),
+            Type="Equilibrium",
+            ObservationTime=20,
+        )
+        Renewal(
+            Compound(Binomial(0, 10, 0.5), Binomial(0, 10, 0.3)),
+            Type="Equilibrium",
+            ObservationTime=20,
+        )
 
     def test_constructor_not_implemented2(self):
         try:
             Renewal(2, 1)
-            print('here')
+            print("here")
 
             assert False
         except:
             assert True
-
 
     def _test_empty(self):
         self.empty()
@@ -121,7 +165,7 @@ class Test(interface):
     def test_display(self):
         self.display()
         self.display_versus_ascii_write()
-        #self.display_versus_str()
+        # self.display_versus_str()
 
     def test_len(self):
         seq = self.data
@@ -146,7 +190,7 @@ class Test(interface):
         self.spreadsheet_write()
 
     def _test_simulate(self):
-        #self.simulate()
+        # self.simulate()
         pass
 
     def test_extract(self):
@@ -160,7 +204,6 @@ class Test(interface):
     def test_get_htime(self):
         data = self.data
         histo = data.get_htime()
-
 
     def test_get_hnb_event(self):
         data = self.data
@@ -184,17 +227,15 @@ class Test(interface):
         mod = TimeScaling(self.data, 2)
         assert str(aml) == str(mod)
 
-
     def test_merge(self):
         time1 = self.data
         time2 = self.data
-        assert str(Merge(time1,time2)) == str(time1.merge([time2]))
+        assert str(Merge(time1, time2)) == str(time1.merge([time2]))
 
     def test_time_select(self):
-        #max value must be greater than the offset.
-        data= self.data
-        data.time_select(3,35)
-
+        # max value must be greater than the offset.
+        data = self.data
+        data.time_select(3, 35)
 
 
 if __name__ == "__main__":

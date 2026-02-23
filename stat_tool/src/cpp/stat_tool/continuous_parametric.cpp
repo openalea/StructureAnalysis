@@ -35,7 +35,7 @@
  */
 
 
-
+#define _USE_MATH_DEFINES // for C++ win to get M_PI in cmath
 #include <cmath>
 
 #include <sstream>
@@ -2993,6 +2993,10 @@ double ContinuousParametric::sup_norm_distance_computation(ContinuousParametric 
   double min , max , step , value , buff , distance , max_absolute_diff , cumul1[2] , cumul2[2];
 
 # ifdef MESSAGE
+  double overlap;
+# endif
+
+# ifdef DEBUG
   double overlap;
 # endif
 

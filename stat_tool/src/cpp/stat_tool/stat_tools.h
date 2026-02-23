@@ -67,7 +67,7 @@ namespace stat_tool {
 
 /****************************************************************
  *
- *  Constants
+ *  Enums
  */
 
 
@@ -220,105 +220,168 @@ namespace stat_tool {
     AUXILIARY                            // auxiliary variable (smoothing/piecewise linear function)
   };
 
-  // Discrete parametric distributions
 
-  const int MAX_INF_BOUND = 10000;       // maximum lower bound
-  const int MAX_DIFF_BOUND = 10000;      // maximum difference between lower and upper bounds
-  const double MAX_MEAN = 10000.;        // maximum mean
-  const int MAX_SEQUENCE_LENGTH = 10000; // maximum sequence length for computing prior segment length distributions
+/****************************************************************
+ *
+ *  Constants
+ */
 
-  const double B_PROBABILITY = 0.8;      // threshold for using the backward computation of the binomial probability mass function
-  const double B_THRESHOLD = 1000.;      // threshold for using the computation in log of the binomial probability mass function
-  const double P_THRESHOLD = 90.;        // threshold for using the computation in log of the Poisson probability mass function
-  const double NB_THRESHOLD = 500.;      // threshold for using the computation in log of the negative binomial probability mass function
 
-  const double SAMPLE_NB_VALUE_COEFF = 5.;  // factor for deducing the number of possible values of a distribution
-                                            // from the number of possible values of a frequency distribution
-  const int INF_BOUND_MARGIN = 5;        // range of values for the lower bound
-  const int SUP_BOUND_MARGIN = 3;        // range of values for the upper bound
-  const double POISSON_RATIO = 0.7;      // minimum mean/variance ratio for estimating a Poisson distribution
-  const double POISSON_RANGE = 0.1;      // range for selecting a Poisson distribution by time scaling of
-                                         // another discrete distribution
-  const double NB_VALUE_COEFF = 2.;      // factor for deducing the number of values of a distribution from
-                                         // the number of values of an initial distribution
+// Constants for Discrete parametric distributions
 
-  const int MIN_RANGE = 10;              // minimum interval of values for applying the rejection sampling method
-  const double MAX_SURFACE = 3.;         // maximum surface for applying the rejection sampling method
-  const int DIST_NB_ELEMENT = 1000000;   // maximum sample size for simulation
+/// maximum lower bound
+const int MAX_INF_BOUND = 10000;  
+/// maximum difference between lower and upper bounds     
+const int MAX_DIFF_BOUND = 10000;      
+/// maximum mean
+const double MAX_MEAN = 10000.;        
+/// maximum sequence length for computing prior segment length distributions
+const int MAX_SEQUENCE_LENGTH = 10000; 
+/// threshold for using the backward computation of the binomial probability mass function
+const double B_PROBABILITY = 0.8;      
+// threshold for using the computation in log of the binomial probability mass function
+const double B_THRESHOLD = 1000.;      
+/// threshold for using the computation in log of the Poisson probability mass function
+const double P_THRESHOLD = 90.;        
+/// threshold for using the computation in log of the negative binomial probability mass function
+const double NB_THRESHOLD = 500.;      
 
-  // Renewal process estimated on the basis of time interval data
+/// factor for deducing the number of possible values of a distribution from the number of possible values of a frequency distribution
+const double SAMPLE_NB_VALUE_COEFF = 5.;  
+         
+/// range of values for the lower bound
+const int INF_BOUND_MARGIN = 5;        
+/// range of values for the upper bound
+const int SUP_BOUND_MARGIN = 3;        
+/// minimum mean/variance ratio for estimating a Poisson distribution
+const double POISSON_RATIO = 0.7;      
+/// range for selecting a Poisson distribution by time scaling of another discrete distribution
+const double POISSON_RANGE = 0.1;      
 
-  const int NB_COMPLETE_INTERVAL = 3;    // minimum number of complete time intervals
-  const double RENEWAL_LIKELIHOOD_DIFF = 1.e-5;  // threshold for stopping the EM iterations
-  const int RENEWAL_NB_ITER = 10000;     // maximum number of EM iterations
-  const double RENEWAL_DIFFERENCE_WEIGHT = 0.5;  // default penalty weight (1st- or 2nd-order difference cases)
-  const double RENEWAL_ENTROPY_WEIGHT = 0.05;  // default penalty weight (entropy case)
-  const double MAX_VALUE_COEFF = 10.;    // coefficient for deducing the maximum value of an inter-event distribution
+/// factor for deducing the number of values of a distribution from the number of values of an initial distribution
+const double NB_VALUE_COEFF = 2.;      
 
-  // Continuous parametric distributions
+/// minimum interval of values for applying the rejection sampling method
+const int MIN_RANGE = 10;              
+/// maximum surface for applying the rejection sampling method
+const double MAX_SURFACE = 3.;         
+/// maximum sample size for simulation
+const int DIST_NB_ELEMENT = 1000000;   
 
-  const double CONTINUOUS_POSITIVE_INF_BOUND = 1.e-12; // inf bound of positive continuous distribution support (bug boost C++)
+// Renewal process estimated on the basis of time interval data
+/// minimum number of complete time intervals
+const int NB_COMPLETE_INTERVAL = 3;    
+/// threshold for stopping the EM iterations
+const double RENEWAL_LIKELIHOOD_DIFF = 1.e-5;  
+/// maximum number of EM iterations
+const int RENEWAL_NB_ITER = 10000;    
+/// default penalty weight (1st- or 2nd-order difference cases) 
+const double RENEWAL_DIFFERENCE_WEIGHT = 0.5;  
+/// default penalty weight (entropy case)
+const double RENEWAL_ENTROPY_WEIGHT = 0.05;  
+/// coefficient for deducing the maximum value of an inter-event distribution
+const double MAX_VALUE_COEFF = 10.;    
 
-  const double GAMMA_TAIL = 1.e-3;       // gamma distribution tail
-  const int GAMMA_NB_STEP = 1000;        // number of steps for computing a discretized gamma distribution
-  const int GAMMA_NB_SUB_STEP = 10;      // number of sub-steps for computing a discretized gamma distribution
-//  const int GAMMA_MIN_MEAN = 0.1;        // minimum mean of the gamma distribution
-  const double GAMMA_INVERSE_SAMPLE_SIZE_FACTOR = 5.;  // factor for the gamma distribution corrected moment estimator
-  const double GAMMA_MIN_SHAPE_PARAMETER = 0.1;  // minimum shape parameter (gamma distribution)
-  const double GAMMA_DEFAULT_SCALE_PARAMETER = 1;  // default scale parameter (gamma distribution)
-  const double GAMMA_ZERO_FREQUENCY_THRESHOLD = 0.999;  // threshold on the zero relative frequency (gamma distribution estimation)
-  const double GAMMA_SHAPE_PARAMETER_THRESHOLD = 3.;  // threshold on the shape parameter (gamma distribution estimation)
-  const double GAMMA_FREQUENCY_THRESHOLD = 100.;  // threshold on the frequency (gamma distribution estimation)
-  const double GAMMA_ITERATION_FACTOR = 0.5;  // factor (gamma distribution estimation)
-  const int GAMMA_MAX_NB_ITERATION = 5;  // maximum number of iterations (gamma distribution estimation)
-//  const double GAMMA_VARIATION_COEFF_THRESHOLD = 1.e-2;  threshold on le coefficient de variation (gamma distribution estimation)
+// Continuous parametric distributions
 
-  const double INVERSE_GAUSSIAN_TAIL = 1.e-3;   // inverse Gaussian distribution tail
-  const int INVERSE_GAUSSIAN_NB_STEP = 1000;    // number of steps for computing a discretized inverse Gaussian distribution
-  const int INVERSE_GAUSSIAN_NB_SUB_STEP = 10;  // number of steps for computing a discretized inverse Gaussian distribution
+/// inf bound of positive continuous distribution support (bug boost C++)
+const double CONTINUOUS_POSITIVE_INF_BOUND = 1.e-12; 
 
-  const double GAUSSIAN_TAIL = 5.e-4;    // Gaussian distribution tail
-  const int GAUSSIAN_NB_STEP = 1000;     // number of steps for computing a discretized Gaussian distribution
-  const int GAUSSIAN_NB_SUB_STEP = 10;   // number of steps for computing a discretized Gaussian distribution
-  const double GAUSSIAN_MIN_VARIATION_COEFF = 1.e-3;  // minimum coefficient of variation (Gaussian distribution estimation)
+ /// gamma distribution tail
+const double GAMMA_TAIL = 1.e-3;      
+/// number of steps for computing a discretized gamma distribution
+const int GAMMA_NB_STEP = 1000;        
+/// number of sub-steps for computing a discretized gamma distribution
+const int GAMMA_NB_SUB_STEP = 10;      
+/// factor for the gamma distribution corrected moment estimator
+const double GAMMA_INVERSE_SAMPLE_SIZE_FACTOR = 5.;  
+/// minimum shape parameter (gamma distribution)
+const double GAMMA_MIN_SHAPE_PARAMETER = 0.1;  
+/// default scale parameter (gamma distribution)
+const double GAMMA_DEFAULT_SCALE_PARAMETER = 1;  
+/// threshold on the zero relative frequency (gamma distribution estimation)
+const double GAMMA_ZERO_FREQUENCY_THRESHOLD = 0.999;  
+/// threshold on the shape parameter (gamma distribution estimation)
+const double GAMMA_SHAPE_PARAMETER_THRESHOLD = 3.;  
+/// threshold on the frequency (gamma distribution estimation)
+const double GAMMA_FREQUENCY_THRESHOLD = 100.;  
+/// factor (gamma distribution estimation)
+const double GAMMA_ITERATION_FACTOR = 0.5; 
+/// maximum number of iterations (gamma distribution estimation)
+const int GAMMA_MAX_NB_ITERATION = 5;  
 
-  const int VON_MISES_NB_STEP = 3600;    // number of steps for computing a discretized von Mises distribution
-  const int VON_MISES_NB_SUB_STEP = 10;  // number of steps for computing a discretized von Mises distribution
-//  const double VON_MISES_CONCENTRATION_THRESHOLD = 10.;  threshold on the concentration parameter for applying
-//                                                         the Gaussian approximation for computing a von Mises distribution
+/// inverse Gaussian distribution tail
+const double INVERSE_GAUSSIAN_TAIL = 1.e-3;   
+/// number of steps for computing a discretized inverse Gaussian distribution
+const int INVERSE_GAUSSIAN_NB_STEP = 1000;   
+/// number of steps for computing a discretized inverse Gaussian distribution
+const int INVERSE_GAUSSIAN_NB_SUB_STEP = 10;  
 
-  const int CHI2_FREQUENCY = 2;          // minimum theoretical sample size for a Chi2 goodness of fit test
+/// Gaussian distribution tail
+const double GAUSSIAN_TAIL = 5.e-4;    
+/// number of steps for computing a discretized Gaussian distribution
+const int GAUSSIAN_NB_STEP = 1000;     
+/// number of steps for computing a discretized Gaussian distribution
+const int GAUSSIAN_NB_SUB_STEP = 10; 
+/// minimum coefficient of variation (Gaussian distribution estimation)  
+const double GAUSSIAN_MIN_VARIATION_COEFF = 1.e-3;  
 
-  const int MARGINAL_DISTRIBUTION_MAX_VALUE = 25000;  // maximum value for the building of a marginal frequency distribution
-  const int HISTOGRAM_FREQUENCY = 10;    // average frequency for defining the bin width of an histogram
-  const double SKEWNESS_ROUNDNESS = 1.e-2;  // rounding on the coefficient of skewness
+/// number of steps for computing a discretized von Mises distribution
+const int VON_MISES_NB_STEP = 3600;   
+/// number of steps for computing a discretized von Mises distribution 
+const int VON_MISES_NB_SUB_STEP = 10;  
 
-  const int NB_ERROR = 10;               // maximum number of recorded errors
+/// minimum theoretical sample size for a Chi2 goodness of fit test
+const int CHI2_FREQUENCY = 2;         
 
-  const int LINE_NB_CHARACTER = 100;     // number of characters per line for sequences
+/// maximum value for the building of a marginal frequency distribution
+const int MARGINAL_DISTRIBUTION_MAX_VALUE = 25000;  
+/// average frequency for defining the bin width of an histogram
+const int HISTOGRAM_FREQUENCY = 10;    
+/// rounding on the coefficient of skewness
+const double SKEWNESS_ROUNDNESS = 1.e-2; 
 
-  const int ASCII_NB_VALUE = 15;         // maximum number of values (ASCII display)
-  const int ASCII_SPACE = 2;             // number of empty spaces between 2 columns (ASCII display)
-  const double ASCII_ROUNDNESS = 1.e-5;  // rounding on the cumulative distribution function
-                                         // for bounding a distribution (ASCII display)
-  const double SPREADSHEET_ROUNDNESS = 1.e-7;  // rounding on the cumulative distribution function
-                                               // for bounding a distribution (spreadsheet output)
-  const int DISPLAY_NB_INDIVIDUAL = 50;  // maximum number of displayed individuals
+/// maximum number of recorded errors
+const int NB_ERROR = 10;               
 
-  const int PLOT_NB_DISTRIBUTION = 15;   // maximum number of plotted distributions
-  const int PLOT_NB_HISTOGRAM = 15;      // maximum number of plotted histograms
-  const double PLOT_ROUNDNESS = 1.e-5;   // rounding on the cumulative distribution function
-                                         // for bounding a plotted distribution
-  const double PLOT_SHIFT = 0.2;         // shift between 2 plotted frequency distributions
-  const double PLOT_MAX_SHIFT = 0.5;     // maximum shift between the first and last plotted frequency distributions
-  const int TIC_THRESHOLD = 10;          // minimum number of plotted graduations
-  const double PLOT_MASS_THRESHOLD = 1.e-3;  // minimum value for plotting a zero mass after the last possible value
-  const double YSCALE = 1.1;             // scale factor for y axis in plots
-  const double PLOT_RANGE_RATIO = 4.;    // threshold for plotting from 0
+/// number of characters per line for sequences
+const int LINE_NB_CHARACTER = 100;     
 
-  // random generator
-  //STAT_TOOL_API std::mt19937 mt;
-  //STAT_TOOL_API std::uniform_real_distribution<double> rand_unif;
+/// maximum number of values (ASCII display)
+const int ASCII_NB_VALUE = 15;    
+/// number of empty spaces between 2 columns (ASCII display)     
+const int ASCII_SPACE = 2;      
+/// rounding on the cumulative distribution function for bounding a distribution (ASCII display)    
+const double ASCII_ROUNDNESS = 1.e-5;  
+                                        
+/// rounding on the cumulative distribution function for bounding a distribution (spreadsheet output)
+const double SPREADSHEET_ROUNDNESS = 1.e-7;  
+                                              
+
+/// maximum number of displayed individuals
+const int DISPLAY_NB_INDIVIDUAL = 50;  
+
+/// maximum number of plotted distributions
+const int PLOT_NB_DISTRIBUTION = 15;  
+/// maximum number of plotted histograms 
+const int PLOT_NB_HISTOGRAM = 15;     
+/// rounding on the cumulative distribution function for bounding a plotted distribution
+const double PLOT_ROUNDNESS = 1.e-5;   
+                          
+/// shift between 2 plotted frequency distributions
+const double PLOT_SHIFT = 0.2;     
+/// maximum shift between the first and last plotted frequency distributions    
+const double PLOT_MAX_SHIFT = 0.5; 
+/// minimum number of plotted graduations    
+const int TIC_THRESHOLD = 10;   
+/// minimum value for plotting a zero mass after the last possible value      
+const double PLOT_MASS_THRESHOLD = 1.e-3;  
+/// scale factor for y axis in plots
+const double YSCALE = 1.1;           
+/// threshold for plotting from 0  
+const double PLOT_RANGE_RATIO = 4.;    
+
+
 /****************************************************************
  *
  *  Class definition
@@ -1033,11 +1096,18 @@ namespace stat_tool {
     double* cumul_computation() const;
   };
 
-  /// @brief make visible these global variables
+  /// Random number generator
   STAT_TOOL_API extern std::mt19937 mt;
+  /// Uniform random number generator
   STAT_TOOL_API extern std::uniform_real_distribution<double> rand_unif;
 
-  STAT_TOOL_API void set_seed(int seed, std::mt19937 &generator=mt);
+  /// @brief Set seed of random generator 
+  /// @param seed value of seed
+  /// @param generator generator to initialize
+  STAT_TOOL_API void set_seed(int seed, std::mt19937 &generator);
+  /// @brief Set seed of random generator 
+  /// @param seed value of seed
+  STAT_TOOL_API void set_seed(int seed);
 
   STAT_TOOL_API int column_width(int);
   STAT_TOOL_API int column_width(int min_value , int max_value);

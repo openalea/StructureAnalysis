@@ -18,7 +18,7 @@ lib
 lib64
 MANIFEST
 **/__pycache__
-**/vpstat_tool
+**/vpsequence_analysis
 CMakeFiles
 
 # Installer logs
@@ -89,4 +89,4 @@ site/
 out
 
 # Sphinx
-_static
+#_static

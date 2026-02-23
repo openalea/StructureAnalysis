@@ -16,7 +16,7 @@ Data structures
     :undoc-members:
     :inherited-members:
     :show-inheritance:
-    :synopsis: hidden Semi Markov
+    :synopsis: hidden semi-Markov
 
 
 .. currentmodule:: openalea.sequence_analysis.hidden_variable_order_markov

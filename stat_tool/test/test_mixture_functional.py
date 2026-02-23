@@ -1,8 +1,12 @@
 """
 Mixture functional test from exploratory.aml and stat_tool_test.aml files
 """
-
-__version__ = "$Id$"
+try:
+    from .tools import interface
+    from .tools import robust_path as get_shared_data
+except ImportError:
+    from tools import interface
+    from tools import robust_path as get_shared_data
 
 from openalea.stat_tool.cluster import Cluster
 from openalea.stat_tool.comparison import Compare, ComparisonTest
@@ -18,10 +22,8 @@ from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.mixture import Mixture
 from openalea.stat_tool.output import Display, Plot, plot
-from openalea.stat_tool.plot import DISABLE_PLOT
 from openalea.stat_tool.simulate import Simulate
 
-from .tools import robust_path as get_shared_data
 
 
 def test():
@@ -61,7 +63,6 @@ def test():
     """
     set_seed(0)
 
-    plot.DISABLE_PLOT = DISABLE_PLOT
     meri1 = Histogram(get_shared_data("meri1.his"))
     meri2 = Histogram(get_shared_data("meri2.his"))
     meri3 = Histogram(get_shared_data("meri3.his"))
@@ -193,7 +194,3 @@ def test2():
     dist_mixt = ExtractDistribution(mixt2, "Mixture")
     Plot(dist_mixt)
 
-
-if __name__ == "__main__":
-    test()
-    test2()

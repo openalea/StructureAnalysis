@@ -21,113 +21,97 @@ from openalea.stat_tool.vectors import VectorDistance, Vectors
 from .tools import robust_path as get_shared_data
 from .tools import runTestClass
 
-# from openalea.stat_tool import get_shared_data
+import pytest
+
+@pytest.fixture
+def meri1():
+    return Histogram(get_shared_data("meri1.his"))
+
+@pytest.fixture
+def meri2():
+    return Histogram(get_shared_data("meri2.his"))
+
+@pytest.fixture
+def meri3():
+    return Histogram(get_shared_data("meri3.his"))
 
 
-class TestHisto:
-    """a simple unittest class"""
+def test_comparisontest(meri1, meri2):
 
-    def __init__(self):
-        self.meri1 = Histogram(get_shared_data("meri1.his"))
-        self.meri2 = Histogram(get_shared_data("meri1.his"))
-        self.meri3 = Histogram(get_shared_data("meri1.his"))
+    assert ComparisonTest("F", meri1, meri2) == meri1.f_comparison(meri2)
+    assert ComparisonTest("T", meri1, meri2) == meri1.t_comparison(meri2)
+    assert ComparisonTest("W", meri1, meri2) == meri1.wmw_comparison(meri2)
 
-    def test_comparisontest(self):
-        meri1 = self.meri1
-        meri2 = self.meri2
+def test_comparison_histo(meri1, meri2, meri3):
+    # check both the long and short argument (O, S, N)
 
-        assert ComparisonTest("F", meri1, meri2) == meri1.f_comparison(meri2)
-        assert ComparisonTest("T", meri1, meri2) == meri1.t_comparison(meri2)
-        assert ComparisonTest("W", meri1, meri2) == meri1.wmw_comparison(meri2)
+    c1 = Compare(meri1, meri2, meri3, "N")
+    c2 = Compare(meri1, meri2, meri3, "O")
+    c3 = Compare(meri1, meri2, meri3, "S")
 
-    def test_comparison_histo(self):
-        # check both the long and short argument (O, S, N)
-        meri1 = self.meri1
-        meri2 = self.meri2
-        meri3 = self.meri3
+    c1_long = Compare(meri1, meri2, meri3, "NUMERIC")
+    c2_long = Compare(meri1, meri2, meri3, "ORDINAL")
+    c3_long = Compare(meri1, meri2, meri3, "SYMBOLIC")
 
-        c1 = Compare(meri1, meri2, meri3, "N")
-        c2 = Compare(meri1, meri2, meri3, "O")
-        c3 = Compare(meri1, meri2, meri3, "S")
+    assert c1 == c1_long
+    assert c2 == c2_long
+    assert c3 == c3_long
 
-        c1_long = Compare(meri1, meri2, meri3, "NUMERIC")
-        c2_long = Compare(meri1, meri2, meri3, "ORDINAL")
-        c3_long = Compare(meri1, meri2, meri3, "SYMBOLIC")
+    assert meri1.compare_histo(meri2, meri3, "N") == c1
+    assert meri1.compare_histo(meri2, meri3, "S") == c3
+    assert meri1.compare_histo(meri2, meri3, "O") == c2
 
-        assert c1 == c1_long
-        assert c2 == c2_long
-        assert c3 == c3_long
+    assert meri1.compare_histo(meri2, meri3, "N") == c1_long
+    assert meri1.compare_histo(meri2, meri3, "S") == c3_long
+    assert meri1.compare_histo(meri2, meri3, "O") == c2_long
 
-        assert meri1.compare_histo(meri2, meri3, "N") == c1
-        assert meri1.compare_histo(meri2, meri3, "S") == c3
-        assert meri1.compare_histo(meri2, meri3, "O") == c2
+def test_comparison_wrong_argument_1(meri1):
+    try:
+        Compare("N")
+        assert False
+    except NotImplementedError:
+        assert True
 
-        assert meri1.compare_histo(meri2, meri3, "N") == c1_long
-        assert meri1.compare_histo(meri2, meri3, "S") == c3_long
-        assert meri1.compare_histo(meri2, meri3, "O") == c2_long
+def test_comparison_wrong_argument_2(meri1, meri2):
+    try:
+        meri1.compare_histo(meri1, meri2, "F")
+        assert False
+    except KeyError:
+        assert True
 
-    def test_comparison_wrong_argument_1(self):
-        meri1 = self.meri1
-        try:
-            Compare("N")
-            assert False
-        except NotImplementedError:
-            assert True
+def test_comparisontest_wrong_argument(meri1, meri2):
+    try:
+        ComparisonTest("N", meri1, meri2)
+        assert False
+    except TypeError:
+        assert True
 
-    def test_comparison_wrong_argument_2(self):
-        meri1 = self.meri1
-        meri2 = self.meri2
-        try:
-            meri1.compare_histo(meri1, meri2, "F")
-            assert False
-        except KeyError:
-            assert True
+def test_comparison_histo_filename(meri1, meri2, meri3):
 
-    def test_comparisontest_wrong_argument(self):
-        meri1 = self.meri1
-        meri2 = self.meri2
-        try:
-            ComparisonTest("N", meri1, meri2)
-            assert False
-        except TypeError:
-            assert True
-
-    def test_comparison_histo_filename(self):
-        meri1 = self.meri1
-        meri2 = self.meri2
-        meri3 = self.meri3
-
-        _c1 = Compare(meri1, meri2, meri3, "N", Filename="result.dat")
-        os.remove("result.dat")
-        _c1 = Compare(meri1, meri2, meri3, "N", Filename="result.dat", Format="ASCII")
-        os.remove("result.dat")
+    _c1 = Compare(meri1, meri2, meri3, "N", Filename="result.dat")
+    os.remove("result.dat")
+    _c1 = Compare(meri1, meri2, meri3, "N", Filename="result.dat", Format="ASCII")
+    os.remove("result.dat")
+    _c1 = Compare(
+        meri1, meri2, meri3, "N", Filename="result.dat", Format="SpreadSheet"
+    )
+    os.remove("result.dat")
+    try:
         _c1 = Compare(
-            meri1, meri2, meri3, "N", Filename="result.dat", Format="SpreadSheet"
+            meri1, meri2, meri3, "N", Filename="result.dat", Format="badname"
         )
-        os.remove("result.dat")
-        try:
-            _c1 = Compare(
-                meri1, meri2, meri3, "N", Filename="result.dat", Format="badname"
-            )
-            assert False
-        except ValueError:
-            assert True
+        assert False
+    except ValueError:
+        assert True
 
 
-class TestVectors:
-    def __init__(self):
-        pass
+# TestVectors
+def test_compare_vectors():
+    vec10 = Vectors(get_shared_data("chene_sessile.vec"))
+    vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
+    assert vec15
 
-    def test_compare_vectors(self):
-        vec10 = Vectors(get_shared_data("chene_sessile.vec"))
-        vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
-        assert vec15
+    matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
+    assert matrix10
+    assert str(vec15.compare(VectorDistance("N", "N", "N"), True)) == str(matrix10)
 
-        matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
-        assert matrix10
-        assert str(vec15.compare(VectorDistance("N", "N", "N"), True)) == str(matrix10)
-
-
-if __name__ == "__main__":
-    runTestClass(TestHisto())
-    runTestClass(TestVectors())

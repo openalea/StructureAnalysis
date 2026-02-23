@@ -1,9 +1,10 @@
-""" Tests on ComputeAutoCorrelation, ComputeParialAutoCorrelation,
+"""Tests on ComputeAutoCorrelation, ComputeParialAutoCorrelation,
 ComputewhiteNoiseCorrelation
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
+
 __revision__ = "$Id$"
 
 
@@ -15,45 +16,47 @@ from openalea.sequence_analysis.correlation import ComputeWhiteNoiseCorrelation
 from openalea.sequence_analysis.correlation import ComputePartialAutoCorrelation
 
 from openalea.stat_tool.distribution import Distribution
-from tools import runTestClass
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import runTestClass
+from .tools import runTestClass, robust_path as get_shared_data
 
-class Data():
 
+class Data:
     def __init__(self):
-
         self.sequence = self.create_sequence_data()
         self.type_map = type_dict
 
     def create_sequence_data(self):
-
-        seq66 = Sequences(str(get_shared_data( "laricio_date66.seq")))
-        seq69 = MovingAverage(VariableScaling(seq66, 3, 100),
-                          Distribution("B", 0, 6, 0.5), BeginEnd=True,
-                          Output="Residual")
+        seq66 = Sequences(str(get_shared_data("laricio_date66.seq")))
+        seq69 = MovingAverage(
+            VariableScaling(seq66, 3, 100),
+            Distribution("B", 0, 6, 0.5),
+            BeginEnd=True,
+            Output="Residual",
+        )
         return seq69
+
 
 def CorrelationData(index=1):
     """Returns a correlation
 
     index from 1 to 3"""
-    seq66 = Sequences(str(get_shared_data( "laricio_date66.seq")))
+    seq66 = Sequences(str(get_shared_data("laricio_date66.seq")))
     ret = ComputeCorrelation(seq66, index)
     return ret
 
 
-
-
 class TestComputeCorrelation(Data):
-
     def __init__(self):
         Data.__init__(self)
         self.variable = 2
-    def compute_correlation_type(self, variable, type, MaxLag=10,
-                                 Normalization="Exact"):
+
+    def compute_correlation_type(
+        self, variable, type, MaxLag=10, Normalization="Exact"
+    ):
         seq = self.sequence
-        cf = ComputeCorrelation(seq, variable,
-                               Type=type, MaxLag=MaxLag, Normalization=Normalization)
+        cf = ComputeCorrelation(
+            seq, variable, Type=type, MaxLag=MaxLag, Normalization=Normalization
+        )
         assert cf.type == self.type_map[type]
         return cf
 
@@ -62,9 +65,9 @@ class TestComputeCorrelation(Data):
         cf = ComputeCorrelation(seq, self.variable)
 
     def test_spearman(self):
-        seq = Sequences(str(get_shared_data( "laricio_date66.seq")))
+        seq = Sequences(str(get_shared_data("laricio_date66.seq")))
         ComputeCorrelation(seq, 1, Type="Spearman")
-        ComputeCorrelation(seq, 1, 2,Type="Spearman")
+        ComputeCorrelation(seq, 1, 2, Type="Spearman")
         try:
             dummy = 3
             ComputeCorrelation(seq, 1, 2, dummy, Type="Spearman")
@@ -89,9 +92,7 @@ class TestComputeCorrelation(Data):
             assert True
 
 
-
 class TestComputeWhiteNoiseCorrelation(TestComputeCorrelation):
-
     def __init__(self):
         TestComputeCorrelation.__init__(self)
         self.correlation = self.test_pearson()
@@ -106,10 +107,10 @@ class TestComputeWhiteNoiseCorrelation(TestComputeCorrelation):
 
     def test_distribution(self):
         data = self.correlation
-        ComputeWhiteNoiseCorrelation(data , Distribution("BINOMIAL", 0,4,0.5))
+        ComputeWhiteNoiseCorrelation(data, Distribution("BINOMIAL", 0, 4, 0.5))
+
 
 class TestComputePartialAutoCorrelation(Data):
-
     def __init__(self):
         Data.__init__(self)
 

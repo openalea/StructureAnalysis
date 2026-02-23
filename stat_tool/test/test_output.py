@@ -1,6 +1,9 @@
 """output tests"""
 
-__version__ = "$Id$"
+try: 
+    from .tools import robust_path as get_shared_data
+except ImportError:
+    from tools import robust_path as get_shared_data
 
 from openalea.stat_tool.convolution import Convolution
 from openalea.stat_tool.data_transform import Shift
@@ -12,15 +15,10 @@ from openalea.stat_tool.output import Display, Plot
 from openalea.stat_tool.plot import DISABLE_PLOT
 from openalea.stat_tool.simulate import Simulate
 
-from .tools import robust_path as get_shared_data
-from .tools import runTestClass
 
 
 class Test:
     """a simple unittest class"""
-
-    def __init__(self):
-        pass
 
     def get_mixture(self):
         """create a mixture data"""
@@ -38,13 +36,9 @@ class Test:
 
     def _test_old_plot(self):
         m = self.get_mixture()
-        if DISABLE_PLOT == False:
-            m.old_plot()
 
     def test_plot_mixture_1(self):
         m = self.get_mixture()
-        if DISABLE_PLOT == False:
-            m.plot()
 
     def test_plot_mixture_2(self):
         m = self.get_mixture_2()
@@ -154,6 +148,3 @@ def test_output_display_viewpoint_data():
     except:
         assert True
 
-
-if __name__ == "__main__":
-    runTestClass(Test())

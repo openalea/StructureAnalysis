@@ -1,6 +1,15 @@
 # Usage
 
+```{toctree}
+:maxdepth: 1
+:caption: Basic usage examples
+
+Convolution <user/convolution.rst>
+Histogram <user/histogram.rst>
+Plotting <user/plotting.rst>
+Vectors <user/vectors.rst>
+```
+
 ```{nbgallery}
-examples/example1.ipynb
-examples/example2.ipynb
+examples/clustering.ipynb
 ```

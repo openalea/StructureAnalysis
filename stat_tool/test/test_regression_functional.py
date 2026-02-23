@@ -99,6 +99,3 @@ def test():
     matrix1 = Compare(Transcode(vec1, 3, [1, 0, 1, 0, 0, 0]),
                       VectorDistance("S", "O", "S", "N", "N"))
 
-
-if __name__ == "__main__":
-    test()

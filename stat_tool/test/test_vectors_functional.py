@@ -16,8 +16,7 @@
 #
 #######################################################################
 """
-
-__version__ = "$Id$"
+from .tools import robust_path as get_shared_data
 
 from openalea.stat_tool.comparison import Compare
 from openalea.stat_tool.data_transform import (
@@ -31,7 +30,6 @@ from openalea.stat_tool.output import Display, Plot
 from openalea.stat_tool.regression import Regression
 from openalea.stat_tool.vectors import ContingencyTable, VarianceAnalysis, Vectors
 
-from .tools import robust_path as get_shared_data
 
 
 def test():
@@ -147,5 +145,3 @@ def test():
     _vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
 
 
-if __name__ == "__main__":
-    test()

@@ -2,30 +2,17 @@
 file(GLOB HEADERS "*.h" "*.hpp")
 file(GLOB SOURCES "*.cpp")
 
-add_library(vpstat_tool SHARED ${SOURCES})
 
-target_compile_definitions(vpstat_tool PRIVATE MESSAGE)
+target_include_directories(oastat_tool PUBLIC .)
 
-# Optionally add efence
-if(WITH_EFENCE)
-  target_compile_definitions(vpstat_tool PRIVATE DEBUG)
-  target_link_libraries(vpstat_tool PRIVATE efence)
-endif()
-
-target_include_directories(vpstat_tool PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<INSTALL_INTERFACE:include>
+target_sources(
+  oastat_tool
+  PRIVATE
+    ${SOURCES}
 )
 
-set(STAT_TOOL_LIBDIR "${SKBUILD_PLATLIB_DIR}/openalea/stat_tool")
-
-message(STATUS "Installing vpstat_tool to ${STAT_TOOL_LIBDIR}")
-install(TARGETS vpstat_tool
-  LIBRARY DESTINATION "${STAT_TOOL_LIBDIR}"
-)
-
-message(STATUS "Installing headers: ${HEADERS}")
-message(STATUS "Installing headers to ${SKBUILD_HEADERS_DIR}/stat_tool")
-install(FILES ${HEADERS}
-  DESTINATION "${SKBUILD_HEADERS_DIR}/stat_tool"
+# Add the headers to be installed with the library
+install(
+  FILES ${HEADERS}
+  DESTINATION "${CONDA_ENV}include/stat_tool"
 )

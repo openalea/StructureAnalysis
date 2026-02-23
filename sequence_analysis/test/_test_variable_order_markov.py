@@ -19,8 +19,8 @@ from openalea.stat_tool.cluster import Transcode, Cluster
 import openalea.stat_tool.plot #import DISABLE_PLOT
 openalea.stat_tool.plot.DISABLE_PLOT = True
 
-from tools import interface
-from tools import runTestClass
+from .tools import interface
+from .tools import runTestClass
 
 from openalea.sequence_analysis import get_shared_data
 

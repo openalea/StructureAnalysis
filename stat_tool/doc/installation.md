@@ -32,14 +32,24 @@ cd stat_tool/test; pytest
 
 ```bash
 # Install dependency with conda
-mamba env create -n phm -f conda/environment.yml
+mamba env create -n stat -f conda/environment.yml
 mamba activate stat_tool
 
 # Clone stat_tool and install
 git clone https://github.com/openalea/stat_tool.git
 cd stat_tool
-pip install .
-
+pip install --no-build-isolation -e .
 # (Optional) Test your installation
 cd test; pytest
+```
+
+Compilation options for developers such as WITH_TEST, WITH_EFENCE are defined in pyproject.toml. They can be used with
+
+```bash
+pip install --no-build-isolation --config-settings=cmake.define.WITH_TEST=TRUE -e .
+pip install --no-build-isolation --config-settings=cmake.build-type="Debug" -e .
+```
+and also combined:
+```bash
+pip install --no-build-isolation --config-settings=cmake.define.WITH_TEST=TRUE --config-settings=cmake.define.WITH_EFENCE=TRUE --config-settings=cmake.build-type="Debug" -e .
 ```

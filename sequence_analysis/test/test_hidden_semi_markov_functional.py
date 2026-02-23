@@ -2,7 +2,7 @@
 """tests on mv_mixture"""
 __version__ = "$Id$"
 
-from openalea.stat_tool import _stat_tool
+# from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis.hidden_semi_markov import HiddenSemiMarkov
 from openalea.sequence_analysis.simulate import Simulate
@@ -18,8 +18,8 @@ from openalea.stat_tool.plot import DISABLE_PLOT
 DISABLE_PLOT = False
 # DISABLE_PLOT = True
 
-from tools import interface
-from tools import runTestClass, robust_path as get_shared_data
+from .tools import interface
+from .tools import runTestClass, robust_path as get_shared_data
 
 import os
 
@@ -36,8 +36,8 @@ def test1():
     set_seed(0)
 
     hsm = HiddenSemiMarkov(str(get_shared_data('test_hidden_semi_markov.dat')))
-    
-    hsm.plot("Intensity", 1)  
+
+    hsm.plot("Intensity", 1)
     hsm.plot("Observation", 1)
     hsm.plot("Counting", 1)
     hsm.plot("Recurrence", 1)
@@ -53,7 +53,7 @@ def test1():
     except:
         pass
     else:
-        raise RuntimeError("Failed to raise error")            
+        raise RuntimeError("Failed to raise error")
     hsm.plot("FirstOccurrence", 1)
     hsm.plot()
 
@@ -74,11 +74,11 @@ def test1():
     from openalea.sequence_analysis import Estimate
     nb_states = 8
 
-    hsmc_est = Estimate(obs, "HIDDEN_SEMI-MARKOV", "Ordinary", nb_states, "LeftRight", Nbiteration=300)   
+    hsmc_est = Estimate(obs, "HIDDEN_SEMI-MARKOV", "Ordinary", nb_states, "LeftRight", NbIteration=300)
     print(hsmc_est.display())
 
     # TODO: find adequate error message in 
-    # hsmc_est = Estimate(seq, "HIDDEN_SEMI-MARKOV", "Ordinary", nb_states, "LeftRight", Nbiteration=300)
+    # hsmc_est = Estimate(seq, "HIDDEN_SEMI-MARKOV", "Ordinary", nb_states, "LeftRight", NbIteration=300)
     plotter = mplotlib()
 
     hsmc_est.plot("Intensity", 1)

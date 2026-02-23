@@ -35,7 +35,7 @@
  */
 
 
-
+#define _USE_MATH_DEFINES // for C++ win to get M_PI in cmath
 #include <climits>
 #include <cmath>
 

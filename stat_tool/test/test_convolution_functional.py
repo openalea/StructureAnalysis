@@ -1,7 +1,7 @@
 """Convolution functional test extracted from original version of
 stat_tool_test.aml"""
-__version__ = "$Id$"
 
+from .tools import robust_path as get_shared_data
 
 from openalea.stat_tool import Convolution, Histogram, Distribution
 from openalea.stat_tool import Simulate, ExtractHistogram, ToHistogram

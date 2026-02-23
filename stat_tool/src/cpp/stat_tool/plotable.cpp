@@ -49,6 +49,12 @@ namespace stat_tool {
 
 //////////////////////// SinglePlot /////////////////////////////////////////////
 
+SinglePlot::SinglePlot()
+{
+  legend = "";
+  style = "";
+}
+
 SinglePlot::SinglePlot(const SinglePlot& plot)
 {
     data = plot.data;
@@ -118,7 +124,25 @@ std::string SinglePlot::get_label(int i)
   return pt.second;
 }
 
+int SinglePlot::get_size() { return data_and_text.size(); }
+ 
+int SinglePlot::size()
+{ 
+  return data_and_text.size(); 
+}   
+
 //////////////////////// MultiPlot /////////////////////////////////////////////
+MultiPlot::MultiPlot(int size)
+{
+  plots = std::vector<SinglePlot>(size);
+  xtics = 0.;
+  ytics = 0.;
+  xrange = Range(0., 0.);
+  yrange = Range(0., 0.);
+  grid = false;
+  group = 0;
+}
+
 MultiPlot::MultiPlot(const MultiPlot& multiplot)
 {
 	plots = multiplot.plots;
@@ -141,6 +165,34 @@ MultiPlot::MultiPlot(const MultiPlot& multiplot)
 MultiPlot::MultiPlot(const MultiPlot *multiplot)
 :MultiPlot(*multiplot)
 {}
+
+SinglePlot& MultiPlot::operator[](int index)
+  { return plots[index]; };
+
+// Resize the vector
+void MultiPlot::resize(int newsize)
+{
+    plots.resize(newsize);
+}
+
+// Return the number of plots
+int MultiPlot::size()
+{
+    return static_cast<int>(plots.size());
+}
+
+// Begin iterator
+std::vector<SinglePlot>::const_iterator MultiPlot::begin()
+{
+    return plots.begin();
+}
+
+// End iterator
+std::vector<SinglePlot>::const_iterator MultiPlot::end()
+{
+    return plots.end();
+}
+
 //////////////////////// MultiPlotSet /////////////////////////////////////////////
 
 /*
