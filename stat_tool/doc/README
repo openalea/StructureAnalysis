@@ -1,6 +1,0 @@
-To generate Doxygen documentation (C++)
-
-    type "doxgen Doxyfile" for stat_tool/doc/
-    The documentation is generated in stat_tool/doc/html
-
-

@@ -1,3 +1,0 @@
-VPlants.Stat_Tool is a package containing basic statistic functions and
-classes.
-
